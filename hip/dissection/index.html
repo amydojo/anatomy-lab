@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>HIP / EXPOSED — Interactive Right Hip Anatomy</title>
+<style>
+:root{color-scheme:dark;--bg:#10100f;--panel:#171715;--paper:#eae6da;--muted:#a39d8f;--dim:#66655f;--copper:#e0a17d;--nerve:#f5d66e;--line:#393632}
+*{box-sizing:border-box}html,body{margin:0;background:#0f100f;color:var(--paper);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}button,input{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:2px solid var(--nerve);outline-offset:3px}
+.lab{width:100%;max-width:1300px;margin:0 auto;padding:clamp(16px,3vw,34px);background:radial-gradient(ellipse at 37% 17%,#24201e 0%,#121311 50%,#10110f 86%);border:1px solid #34312d; border-radius:20px;overflow:hidden;min-height:760px}
+.top{display:flex;align-items:start;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding-bottom:21px}.eyebrow,.mini{font:600 10px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.17em;color:#ceae8b;text-transform:uppercase}.top h1{font-family:Georgia,'Times New Roman',serif;font-size:clamp(35px,5.4vw,65px);font-weight:400;line-height:1.01;letter-spacing:-.042em;margin:5px 0 9px}.top p{margin:0;color:#a9a397;font-size:13px;line-height:1.55;max-width:490px}.topright{white-space:nowrap;border:1px solid #65513f;border-radius:100px;color:#dfbd90;padding:8px 12px;font:600 10px ui-monospace,SFMono-Regular,monospace;letter-spacing:.08em;align-self:center}
+.layout{display:grid;grid-template-columns:minmax(0,1.42fr) minmax(265px,.78fr);gap:20px;padding-top:19px}.scene{position:relative;border:1px solid #36322e;border-radius:13px;overflow:hidden;background:radial-gradient(ellipse at 48% 39%,#292522 0%,#1b1a19 45%,#111312 87%);min-height:550px}.scene svg{width:100%;display:block;height:min(67vw,660px);min-height:520px;max-height:660px}.cornerlabel{position:absolute;top:17px;left:17px;color:#a9a194;letter-spacing:.12em;font:600 10px ui-monospace,monospace}.frontbadge{position:absolute;right:14px;top:14px;background:#24211e;border:1px solid #5a4435;padding:7px 10px;border-radius:7px;color:#d9ad88;font:600 10px ui-monospace,monospace;letter-spacing:.1em}.scale{position:absolute;left:17px;bottom:17px;display:flex;align-items:center;gap:9px;font:10px ui-monospace,monospace;color:#9b958a}.scale span{width:35px;border-top:2px solid #b5aca0;display:block}.scene-tip{position:absolute;right:13px;bottom:13px;border-radius:7px;background:#151714c7;color:#d5c5ac;border:1px solid #38342e;padding:7px 10px;font-size:10px}
+.side{display:flex;flex-direction:column;gap:13px}.story{border-radius:13px;border:1px solid #393630;background:linear-gradient(154deg,#24201c,#171715 65%);padding:22px 21px;min-height:310px}.stage-count{color:var(--copper);font:600 11px ui-monospace,monospace;letter-spacing:.13em}.story h2{font:400 clamp(27px,3vw,39px)/1.02 Georgia,'Times New Roman',serif;letter-spacing:-.03em;margin:18px 0 13px}.story p{color:#c6bdaf;line-height:1.62;font-size:13px;margin:0}.fact{margin-top:19px;border-top:1px solid #403830;padding-top:15px;display:flex;gap:11px;align-items:start;color:#e8c38d;font-size:12px;line-height:1.55}.fact .spark{font-size:16px;line-height:1}
+.structures{border:1px solid #393630;border-radius:13px;padding:17px 16px;background:#151614}.structures .mini{margin-bottom:13px}.chiprow{display:flex;flex-wrap:wrap;gap:7px}.chip{background:#222220;color:#bdb7ac;border:1px solid #413d37;border-radius:100px;padding:8px 10px;font-size:11px;display:flex;gap:7px;align-items:center;transition:.2s}.chip:hover,.chip.active{border-color:#d3a47f;color:#f1d9c4;background:#312721}.dot{width:7px;height:7px;border-radius:50%;background:var(--color)}.focusline{padding-top:10px;min-height:54px;color:#a7a094;font-size:11px;line-height:1.5}
+.controls{border-top:1px solid #403d37;margin-top:17px;padding-top:19px;display:grid;grid-template-columns:1fr auto;gap:13px;align-items:center}.ctrl-labels{display:flex;justify-content:space-between;color:#cfc4b2;font-size:11px;margin:0 0 10px}.ctrl-labels strong{color:#f0c89c}.range{width:100%;height:8px;accent-color:#dbab7f;cursor:ew-resize;display:block}.steps{display:flex;justify-content:space-between;color:#6f6d66;font:10px ui-monospace,monospace;margin-top:7px}.nav{display:flex;gap:7px}.nav button{background:#232320;border:1px solid #575045;color:#ddd4c6;border-radius:9px;padding:12px 13px;min-width:45px}.nav button#next{color:#25201a;background:#eac5a0;border-color:#eac5a0;font-weight:700}.nav button:disabled{opacity:.33;cursor:not-allowed}.bottom{margin-top:13px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:11px;color:#a5a091}.bottom label{display:flex;align-items:center;gap:8px;cursor:pointer}.bottom input{accent-color:#efcc9d}.note{margin-top:18px;color:#8b857b;font-size:10px;line-height:1.5;max-width:960px}
+svg .gridline{stroke:#61574c;stroke-width:.6;opacity:.25}svg .max,svg .med,svg .min,svg .pir,svg .shortrot,svg .nerve,svg .boney{transform-box:fill-box;transform-origin:center;transition:transform 1.04s cubic-bezier(.16,.75,.2,1),opacity .7s ease,filter .5s}svg .boney{opacity:.6}svg .nerve{opacity:.8}svg .pir{opacity:.82}svg .shortrot{opacity:.72}svg .min{opacity:1}svg .med{opacity:1}svg .max{opacity:1}
+.lab[data-stage="1"] .max,.lab[data-stage="2"] .max,.lab[data-stage="3"] .max,.lab[data-stage="4"] .max{transform:translate(235px,-50px) rotate(-17deg);opacity:.15}
+.lab[data-stage="2"] .med,.lab[data-stage="3"] .med,.lab[data-stage="4"] .med{transform:translate(130px,-55px) rotate(-9deg);opacity:.2}
+.lab[data-stage="3"] .min,.lab[data-stage="4"] .min{transform:translate(135px,-25px) rotate(-11deg);opacity:.15}
+.lab[data-stage="4"] .pir{transform:translate(42px,-24px) rotate(-6deg);opacity:.22}
+.lab[data-stage="4"] .shortrot{opacity:.3}.lab[data-stage="4"] .nerve{opacity:1;filter:drop-shadow(0 0 5px #e3b943)}.lab[data-stage="4"] .boney{opacity:.82}
+.lab.xray .max,.lab.xray .med,.lab.xray .min,.lab.xray .pir{opacity:.12!important}.lab.xray .boney{opacity:1}.lab.xray .nerve{opacity:1;filter:drop-shadow(0 0 5px #f6db76)}
+#muscle-pulses{opacity:0;transition:opacity .4s}.lab[data-stage="4"] #muscle-pulses,.lab.xray #muscle-pulses{opacity:1}#pulsepath{stroke-dasharray:11 39;animation:nerveflow 2s linear infinite}@keyframes nerveflow{to{stroke-dashoffset:-100}}@media(prefers-reduced-motion:reduce){svg .max,svg .med,svg .min,svg .pir,svg .shortrot,svg .nerve,svg .boney{transition:none}#pulsepath{animation:none}}
+svg .call{opacity:0;transition:opacity .4s;pointer-events:none}.lab[data-stage="0"] .cmax,.lab[data-stage="1"] .cmed,.lab[data-stage="2"] .cmin,.lab[data-stage="3"] .cpir,.lab[data-stage="4"] .cnerve{opacity:1}
+@media(max-width:740px){.lab{border-radius:13px;padding:15px;min-height:0}.top{padding-bottom:15px}.topright{font-size:9px;padding:7px}.layout{grid-template-columns:1fr;gap:12px;padding-top:13px}.scene{min-height:0}.scene svg{height:auto;min-height:0;max-height:530px;aspect-ratio:730/690}.story{min-height:0;padding:19px}.story h2{margin:11px 0 11px}.side{gap:10px}.controls{margin-top:14px}.scene-tip{font-size:9px}}
+</style><style id="body-live-navigation">.body-live-nav{position:relative;z-index:1000;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px clamp(14px,3vw,32px);background:#15120fee;color:#f0e4d5;font:12px/1.4 system-ui,sans-serif;border-bottom:1px solid #493a30;flex-wrap:wrap}.body-live-nav>a{color:#f3dfcc;text-decoration:none;font-weight:800;letter-spacing:.15em}.body-live-nav ul{display:flex;list-style:none;gap:6px;flex-wrap:wrap;padding:0;margin:0}.body-live-nav li{margin:0;padding:0}.body-live-nav ul a{display:inline-block;padding:7px 10px;text-decoration:none;color:#afa096;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.02em}.body-live-nav ul a[aria-current="page"]{background:#84533f;color:#fff0e0}.body-live-nav ul a:hover{background:#3e312a;color:#fff} @media(max-width:600px){.body-live-nav{position:relative;align-items:flex-start;gap:4px}.body-live-nav ul{width:100%;overflow-x:auto;flex-wrap:nowrap}.body-live-nav ul a{white-space:nowrap}}</style></head>
+<body><nav class="body-live-nav" aria-label="Anatomy labs"><a href="/">BODY <span style="color:#e9b194">/</span> LIVE</a><ul><li><a href="/">Atlas</a></li><li><a href="/hip/">Hip</a></li><li><a href="/knee/">Knee</a></li><li><a href="/shoulder/">Shoulder</a></li><li><a href="/hip/dissection/" aria-current="page">Deep dissection</a></li></ul></nav>
+<div class="lab" id="lab" data-stage="0">
+<header class="top"><div><div class="eyebrow">THE ANATOMY LAB <span style="opacity:.5">/</span> VOL. 01</div><h1>HIP <em style="color:#d6a17e;font-weight:400">/</em> EXPOSED</h1><p>A virtual dissection of the right posterior hip. Peel the muscle layers to reveal the structures hiding underneath.</p></div><span class="topright">RIGHT HIP · POSTERIOR</span></header>
+<main class="layout">
+<section class="scene" aria-label="Illustrated posterior right hip anatomy with successive muscle layers removed">
+<div class="cornerlabel">01 — DISSECTION FIELD</div><div class="frontbadge">INTERACTIVE ATLAS</div>
+<svg viewBox="0 0 730 690" role="img" aria-labelledby="anatTitle anatDesc" xmlns="http://www.w3.org/2000/svg">
+<title id="anatTitle">Five-depth virtual dissection of the posterior right hip</title><desc id="anatDesc">Schematic layers of the gluteus maximus, gluteus medius, gluteus minimus, piriformis, deep rotators, pelvis, femur, and sciatic nerve. Use the controls below to remove layers.</desc>
+<defs>
+<radialGradient id="aura"><stop stop-color="#494037" stop-opacity=".7"/><stop offset=".64" stop-color="#2d2824" stop-opacity=".23"/><stop offset="1" stop-color="#171816" stop-opacity="0"/></radialGradient>
+<linearGradient id="bone" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e7d5b5"/><stop offset=".33" stop-color="#b7a084"/><stop offset=".55" stop-color="#e1cfad"/><stop offset="1" stop-color="#766755"/></linearGradient>
+<linearGradient id="maxgrad" x1="0" y1="0" x2=".88" y2="1"><stop stop-color="#b96855"/><stop offset=".24" stop-color="#d99576"/><stop offset=".48" stop-color="#ab5b50"/><stop offset=".75" stop-color="#8a433e"/><stop offset="1" stop-color="#e0a18a"/></linearGradient>
+<linearGradient id="medgrad" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#dfa080"/><stop offset=".4" stop-color="#b95e58"/><stop offset=".75" stop-color="#763d42"/><stop offset="1" stop-color="#d58675"/></linearGradient>
+<linearGradient id="mingrad" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#edb3a0"/><stop offset=".47" stop-color="#bb776c"/><stop offset=".8" stop-color="#7c4444"/><stop offset="1" stop-color="#d59d86"/></linearGradient>
+<linearGradient id="pirgrad" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f4b29c"/><stop offset=".45" stop-color="#b45d58"/><stop offset="1" stop-color="#7e373e"/></linearGradient>
+<linearGradient id="nervegrad" x1="0" y1="0" x2="1" y2=".5"><stop stop-color="#fae9ab"/><stop offset=".48" stop-color="#efc958"/><stop offset=".85" stop-color="#ae8035"/><stop offset="1" stop-color="#fff0b0"/></linearGradient>
+<filter id="softglow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter>
+<filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="5" dy="8" stdDeviation="9" flood-color="#050505" flood-opacity=".67"/></filter>
+<path id="maxshape" d="M238 179 C300 151 366 154 427 184 C486 212 533 272 521 342 C508 423 461 493 406 510 C350 534 276 502 233 451 C198 412 194 361 210 285 C218 232 216 204 238 179Z"/>
+<path id="medshape" d="M273 174 C329 140 421 137 464 177 C480 207 483 263 476 310 L473 348 C444 333 392 268 337 230 C308 210 290 185 273 174Z"/>
+<path id="minshape" d="M301 215 C362 180 439 200 460 239 C468 273 471 315 475 345 C434 323 397 277 301 215Z"/>
+<path id="pirshape" d="M256 302 C325 293 395 316 488 340 C496 345 496 352 481 364 C393 353 312 343 255 329 C249 319 249 310 256 302Z"/>
+<clipPath id="clipmax"><use href="#maxshape"/></clipPath><clipPath id="clipmed"><use href="#medshape"/></clipPath><clipPath id="clipmin"><use href="#minshape"/></clipPath><clipPath id="clippir"><use href="#pirshape"/></clipPath>
+</defs>
+<g opacity=".26">
+<path class="gridline" d="M0 120H730 M0 240H730 M0 360H730 M0 480H730 M0 600H730 M100 0V690 M230 0V690 M360 0V690 M490 0V690 M620 0V690"/>
+<circle cx="376" cy="329" r="290" fill="none" stroke="#a69585" stroke-dasharray="2 13" stroke-width=".6"/>
+</g>
+<ellipse cx="377" cy="330" rx="275" ry="318" fill="url(#aura)"/>
+<!-- Ghost silhouette provides orientation -->
+<path d="M250 87 Q331 49 421 94 Q503 117 536 200 Q563 283 529 383 L508 471 L510 618 Q497 661 468 652 L447 612 L424 531 Q348 552 288 517 Q201 488 175 421 Q145 358 172 274 L197 174Z" fill="#54413a" fill-opacity=".12" stroke="#8b6655" stroke-opacity=".22" stroke-width="1.5"/>
+<!-- Deep bones: iliac wing, sacrum and femur. Simplified posterior orientation -->
+<g class="boney" filter="url(#shadow)">
+<path d="M263 155 C311 98 417 99 479 168 Q513 194 506 246 Q497 291 468 299 L464 349 Q439 368 424 350 L392 290 Q338 271 307 240 L275 221Z" fill="url(#bone)" stroke="#f2ddb6" stroke-width="2"/>
+<path d="M257 198 Q283 213 317 229 Q372 238 419 272" fill="none" stroke="#6e5f4d" stroke-width="13" opacity=".46"/>
+<path d="M221 186 Q260 174 274 216 L283 290 L270 338 Q262 354 253 340 L217 297 Q203 274 205 237Z" fill="url(#bone)" stroke="#f0daba" stroke-width="2"/>
+<path d="M230 215 L258 309 M243 202 L267 287" stroke="#75604b" stroke-width="2" opacity=".6"/>
+<path d="M316 366 C356 351 390 370 402 402 L369 454 Q356 474 334 469 L298 435Z" fill="url(#bone)" stroke="#efddbb" stroke-width="2"/>
+<circle cx="470" cy="359" r="30" fill="url(#bone)" stroke="#efdfbc" stroke-width="3"/>
+<path d="M475 364 C487 354 503 364 506 388 L493 543 L490 630 Q489 657 472 655 Q459 641 460 629 L448 527 L448 401 Q447 374 475 364Z" fill="url(#bone)" stroke="#f2dfbd" stroke-width="2"/>
+<path d="M462 411 L470 618" stroke="#84705b" stroke-width="8" opacity=".38" fill="none"/>
+</g>
+<!-- Smaller posterior rotators under sciatic nerve -->
+<g class="shortrot" filter="url(#shadow)">
+<path d="M271 369 Q338 359 471 376 L484 393 Q381 404 279 394Z" fill="#8e514b" stroke="#d99f80" stroke-width="2"/>
+<path d="M270 408 Q377 400 479 411 L480 428 Q369 436 288 433Z" fill="#b26d5c" stroke="#e2a78e" stroke-width="2"/>
+<path d="M284 451 Q380 432 465 440 L457 466 Q346 477 300 482Z" fill="#985750" stroke="#d59077" stroke-width="2"/>
+<path d="M300 378 L469 384 M298 418 L469 419 M313 462 L447 453" stroke="#f1bd9e" stroke-opacity=".42" stroke-width="1.8" fill="none"/>
+</g>
+<!-- Nerve, over lower rotators but under piriformis -->
+<g class="nerve">
+<path d="M253 256 Q286 272 314 311 L337 353 Q358 377 370 423 C385 476 409 509 417 572 L432 665" stroke="#302813" stroke-width="20" stroke-linecap="round" fill="none" opacity=".8"/>
+<path d="M253 256 Q286 272 314 311 L337 353 Q358 377 370 423 C385 476 409 509 417 572 L432 665" stroke="url(#nervegrad)" stroke-width="11" stroke-linecap="round" fill="none"/>
+<path d="M259 257 Q294 283 330 346 Q362 392 372 441 Q410 517 422 588" stroke="#fff1bb" stroke-opacity=".56" stroke-width="2" fill="none"/>
+<path d="M257 258 Q243 240 225 227 M267 271 Q253 247 251 224 M277 284 Q266 265 275 238" fill="none" stroke="#f2d884" stroke-width="4" stroke-linecap="round"/>
+<path d="M425 610 L416 664 M426 605 L442 665" fill="none" stroke="#e0bc53" stroke-width="3" stroke-linecap="round"/>
+</g>
+<g id="muscle-pulses"><path id="pulsepath" d="M253 256 Q286 272 314 311 L337 353 Q358 377 370 423 C385 476 409 509 417 572 L432 665" fill="none" stroke="#fff4b9" stroke-width="4" stroke-linecap="round"/></g>
+<!-- Piriformis covers the nerve at emergence -->
+<g class="pir" filter="url(#shadow)">
+<use href="#pirshape" fill="url(#pirgrad)" stroke="#e8ac9a" stroke-width="2"/>
+<g clip-path="url(#clippir)" opacity=".65" stroke="#f3bd9d" fill="none" stroke-width="1.4">
+<path d="M244 308 Q353 327 495 352 M240 314 Q357 338 492 359 M241 320 Q348 341 489 364 M243 302 Q340 315 492 346"/>
+</g>
+</g>
+<!-- Glute minimus fan -->
+<g class="min" filter="url(#shadow)">
+<use href="#minshape" fill="url(#mingrad)" stroke="#dfac9a" stroke-width="2.4"/>
+<g clip-path="url(#clipmin)" stroke="#f5bdae" opacity=".46" fill="none" stroke-width="1.3">
+<path d="M295 217 Q383 238 483 357 M303 207 Q396 227 481 359 M310 199 Q416 231 481 359 M327 190 Q450 231 480 355 M295 229 Q363 268 483 358 M303 244 Q358 289 483 358"/>
+</g>
+</g>
+<!-- Glute medius fan; sits superficial to minimus -->
+<g class="med" filter="url(#shadow)">
+<use href="#medshape" fill="url(#medgrad)" stroke="#d99580" stroke-width="2.2"/>
+<g clip-path="url(#clipmed)" stroke="#edaa93" opacity=".52" fill="none" stroke-width="1.5">
+<path d="M278 172 Q375 218 480 353 M289 158 Q397 191 480 353 M304 151 Q417 185 480 351 M322 144 Q437 180 480 351 M343 135 Q452 180 479 351 M371 137 Q468 190 481 349 M396 145 Q474 210 481 350 M268 189 Q345 250 479 352 M281 207 Q351 279 478 351"/>
+</g>
+</g>
+<!-- Glute max surface curtain -->
+<g class="max" filter="url(#shadow)">
+<use href="#maxshape" fill="url(#maxgrad)" stroke="#e6a38b" stroke-width="2.7"/>
+<g clip-path="url(#clipmax)" stroke="#f5c1a0" opacity=".35" stroke-width="2" fill="none">
+<path d="M185 202 Q369 243 530 372 M188 225 Q360 257 522 388 M188 247 Q359 275 509 407 M185 275 Q363 304 498 420 M181 305 Q343 329 486 435 M178 333 Q344 362 480 454 M176 359 Q321 385 468 467 M180 389 Q322 409 453 486 M194 418 Q313 440 431 496 M205 195 Q376 208 542 331 M211 177 Q389 200 540 320 M209 295 Q357 336 501 456 M211 315 Q320 377 488 475 M216 339 Q333 408 456 494 M216 371 Q312 431 427 514"/>
+</g>
+<path d="M241 181 Q218 262 209 329" stroke="#fff0d6" stroke-width="4" opacity=".21" fill="none"/>
+</g>
+<!-- Labels selectively appear to avoid a crowded image -->
+<g font-family="ui-monospace,Menlo,monospace" font-size="13" font-weight="600" letter-spacing=".5">
+<g class="call cmax"><circle cx="403" cy="320" r="5" fill="#f3c8b1"/><path d="M403 320 L565 258 H680" fill="none" stroke="#dfb4a0" stroke-width="1.6"/><text x="566" y="248" fill="#f1d6c3">GLUTEUS MAXIMUS</text></g>
+<g class="call cmed"><circle cx="425" cy="248" r="5" fill="#f6bd9c"/><path d="M425 248 L537 186 H681" fill="none" stroke="#e5a98a" stroke-width="1.6"/><text x="538" y="176" fill="#eac1a6">GLUTEUS MEDIUS</text><circle cx="352" cy="378" r="5" fill="#f5d66e"/><path d="M352 378 L505 419 H657" stroke="#e7c76a" fill="none"/><text x="506" y="410" fill="#f1d478">SCIATIC NERVE</text></g>
+<g class="call cmin"><circle cx="410" cy="266" r="5" fill="#f3c7ae"/><path d="M410 266 L545 198 H681" fill="none" stroke="#dfaf9c" stroke-width="1.5"/><text x="546" y="188" fill="#f1d7c5">GLUTEUS MINIMUS</text></g>
+<g class="call cpir"><circle cx="388" cy="334" r="5" fill="#f9b2a0"/><path d="M388 334 L525 304 H680" fill="none" stroke="#eea591" stroke-width="1.5"/><text x="526" y="293" fill="#f2bba5">PIRIFORMIS</text><circle cx="393" cy="476" r="5" fill="#f6d66e"/><path d="M393 476 L510 521 H657" fill="none" stroke="#e7c76a"/><text x="511" y="511" fill="#f1d478">SCIATIC NERVE</text></g>
+<g class="call cnerve"><circle cx="390" cy="473" r="5" fill="#f6d66e"/><path d="M390 473 L506 429 H676" fill="none" stroke="#e7c76a" stroke-width="2"/><text x="508" y="418" fill="#f6de95">SCIATIC NERVE</text><circle cx="296" cy="304" r="4" fill="#f6d66e"/><path d="M296 304 L172 258 H78" fill="none" stroke="#e7c76a" stroke-width="1.5"/><text x="86" y="248" fill="#f1d478">SACRAL PLEXUS</text></g>
+</g>
+<g fill="#aaa094" font-family="ui-monospace,Menlo,monospace" font-size="10" letter-spacing="1.5" opacity=".7"><text x="42" y="648">MEDIAL ←</text><text x="589" y="648">→ LATERAL</text><text x="42" y="52">SUPERIOR ↑</text></g>
+</svg>
+<div class="scale"><span></span> NOT TO SCALE</div><div class="scene-tip">DRAG DEPTH SLIDER ↓</div>
+</section>
+<aside class="side">
+<section class="story" aria-live="polite"><div class="stage-count" id="stageCount">LAYER 01 / 05 · SURFACE</div><h2 id="stageTitle">The protective curtain.</h2><p id="stageDesc">This is the gluteus maximus—your largest glute muscle. It powers hip extension, helping you stand up, climb, and accelerate. Most deeper structures are hidden beneath it.</p><div class="fact"><span class="spark">✧</span><span id="stageFact">Anatomy surprise: the gluteus medius peeks out above the maximus. They aren't simply five perfectly stacked sheets.</span></div></section>
+<section class="structures"><div class="mini">STRUCTURE SPOTLIGHT · TAP TO FIND</div><div class="chiprow">
+<button class="chip active" data-structure="max" style="--color:#e9a389"><span class="dot"></span>Maximus</button><button class="chip" data-structure="med" style="--color:#c97f74"><span class="dot"></span>Medius</button><button class="chip" data-structure="min" style="--color:#f0b29d"><span class="dot"></span>Minimus</button><button class="chip" data-structure="pir" style="--color:#eaa493"><span class="dot"></span>Piriformis</button><button class="chip" data-structure="nerve" style="--color:#f3d270"><span class="dot"></span>Sciatic nerve</button></div><div class="focusline" id="focusline">Large superficial muscle: hip extension and powerful movement.</div></section>
+</aside>
+</main>
+<section class="controls" aria-label="Dissection controls"><div><div class="ctrl-labels"><span>PEEL DEPTH</span><strong id="depthLabel">00% · Surface</strong></div><input class="range" id="depth" type="range" min="0" max="4" step="1" value="0" aria-label="Remove muscle layers, 0 surface through 4 sciatic nerve"/><div class="steps"><span>SURFACE</span><span>DEEP</span><span>NERVE</span></div></div><nav class="nav" aria-label="Previous and next dissection steps"><button type="button" id="prev" aria-label="Previous layer" disabled>←</button><button type="button" id="next" aria-label="Next layer">PEEL →</button></nav></section>
+<div class="bottom"><label><input id="xray" type="checkbox"/> <span><strong style="color:#e8d0b0">X-RAY VIEW</strong> · ghost the muscles to expose deeper structures</span></label><span>Use ← → keys to peel</span></div>
+<div class="note">Anatomically informed illustration, not a scan or literal surgical dissection. Muscle shapes, depth, and sciatic course are simplified for learning; nerves and anatomy vary. Your buttock pain and foot numbness cannot be localized by this model.</div>
+</div>
+<script>
+(()=>{
+ const lab=document.getElementById('lab'),depth=document.getElementById('depth'),prev=document.getElementById('prev'),next=document.getElementById('next'),xray=document.getElementById('xray');
+ const info=[
+ {tag:'LAYER 01 / 05 · SURFACE',title:'The protective curtain.',desc:'Meet gluteus maximus, the largest glute muscle. It powers hip extension for standing up, climbing stairs, and sprinting. Most of the deeper anatomy is hidden under this thick muscle.',fact:'See the narrow muscle strip above it? Gluteus medius is partly uncovered even at the surface.',label:'00% · Surface'},
+ {tag:'LAYER 02 / 05 · MAXIMUS REFLECTED',title:'A hidden landscape.',desc:'With maximus reflected aside, you can now see gluteus medius high on the pelvic wing. Beneath it sits minimus; lower down you can already glimpse the piriformis and the sciatic nerve.',fact:'Like opening a theater curtain: moving one broad muscle reveals several structures that aren’t all stacked directly on top of one another.',label:'25% · Maximus reflected'},
+ {tag:'LAYER 03 / 05 · MEDIUS REFLECTED',title:'The balancing engine.',desc:'Medius is reflected to reveal gluteus minimus. Both muscles help stabilize your pelvis when you stand on one leg and walk. Their tendons attach near the greater trochanter of the femur.',fact:'When you lift one foot, these side-hip muscles on your standing leg keep your pelvis from dipping.',label:'50% · Minimus revealed'},
+ {tag:'LAYER 04 / 05 · DEEP ROTATORS',title:'A corridor of tiny muscles.',desc:'Removing minimus from view exposes the deep gluteal area more clearly. Piriformis runs from the sacrum toward the greater trochanter, above a cluster of short rotator muscles.',fact:'The sciatic nerve usually leaves the pelvis below piriformis—not through it. Individual variations exist.',label:'75% · Deep muscles'},
+ {tag:'LAYER 05 / 05 · NEURAL PATHWAY',title:'Follow the golden cable.',desc:'The sciatic nerve begins from the sacral plexus, normally passes beneath piriformis, then runs down the posterior thigh. Here the piriformis is ghosted so you can see the path.',fact:'Numbness can occur far away from the place a nerve is irritated. But a symptom map alone can’t reveal which structure is responsible.',label:'100% · Nerve trace'}
+ ];
+ const structures={max:{stage:0,desc:'Maximus · powerful hip extensor and the thick, superficial buttock layer.'},med:{stage:1,desc:'Medius · fan-shaped side-hip stabilizer attached to the greater trochanter.'},min:{stage:2,desc:'Minimus · deeper than medius; assists abduction and pelvic stability.'},pir:{stage:3,desc:'Piriformis · short hip rotator; sciatic nerve usually passes inferior to it.'},nerve:{stage:4,desc:'Sciatic nerve · carries signals between lumbosacral roots and the leg.'}};
+ let stage=0;
+ function setStage(n,spot){stage=Math.min(4,Math.max(0,Math.round(n)));const s=info[stage];lab.dataset.stage=String(stage);depth.value=stage;document.getElementById('stageCount').textContent=s.tag;document.getElementById('stageTitle').textContent=s.title;document.getElementById('stageDesc').textContent=s.desc;document.getElementById('stageFact').textContent=s.fact;document.getElementById('depthLabel').textContent=s.label;prev.disabled=stage===0;next.disabled=stage===4;next.textContent=stage===4?'EXPOSED ✓':'PEEL →';const sel=spot||['max','med','min','pir','nerve'][stage];document.querySelectorAll('.chip').forEach(chip=>chip.classList.toggle('active',chip.dataset.structure===sel));document.getElementById('focusline').textContent=structures[sel].desc}
+ depth.addEventListener('input',e=>setStage(Number(e.target.value)));
+ prev.addEventListener('click',()=>setStage(stage-1));next.addEventListener('click',()=>setStage(stage+1));xray.addEventListener('change',e=>lab.classList.toggle('xray',e.target.checked));
+ document.querySelectorAll('.chip').forEach(ch=>ch.addEventListener('click',()=>setStage(structures[ch.dataset.structure].stage,ch.dataset.structure)));
+ lab.addEventListener('keydown',e=>{if(['INPUT','BUTTON'].includes(document.activeElement.tagName)&&document.activeElement.id==='depth')return;if(e.key==='ArrowRight'){e.preventDefault();setStage(stage+1)}else if(e.key==='ArrowLeft'){e.preventDefault();setStage(stage-1)}});
+ setStage(0)
+})();
+</script>
+</body></html>
