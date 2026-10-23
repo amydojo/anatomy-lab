@@ -48,3 +48,9 @@ These are simplified, illustrative 2D models and educational activities. They ar
 ## Provenance
 
 Organized from the original BODY / LIVE Hip, Hip / Exposed, Knee and Shoulder labs created during October 2026. The original interactive lab code is preserved, with navigational links normalized for the hub.
+
+## Knee V2 pilot (October 2026)
+
+The Knee lab uses `/assets/knee-v2.css` and `/assets/knee-v2.js` as progressive enhancements of the original simulator. They add a responsive inspector and bottom sheet, a depth scrubber, structure search, direct movement controls, pinch zoom, nerve focus, and guided experiments. The model remains a simplified educational illustration, not a diagnostic tool or clinically precise simulation.
+
+Chromium rendering checks were performed at iPhone and desktop viewport sizes, with tests of mode switching, inspector expansion, movement input, nerve selection, and quiz feedback. Next: validate and extend this shared pattern to Shoulder and Hip.
