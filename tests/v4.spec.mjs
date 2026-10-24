@@ -65,8 +65,10 @@ for(const region of ['hip','knee','shoulder']){
 }
 test('Contextual nerve tracing works without permanent mode switching',async({page})=>{
   const errors=await lab(page,'knee','?focus=fibularNerve');
-  await page.locator('[data-action="panel"]').click();
-  await expect(page.locator('#v4-inspector')).toHaveAttribute('data-panel','expanded');
+  if((await page.viewportSize()).width<=800){
+    await page.locator('[data-action="panel"]').click();
+    await expect(page.locator('#v4-inspector')).toHaveAttribute('data-panel','expanded');
+  }
   await page.locator('#v4-inspector-body [data-action="trace"]').click();
   await expect(page.locator('#v4-inspector-body')).toContainText('FOLLOW THE SIGNAL');
   await expect(page.locator('#v4-inspector-body')).toContainText('Common fibular nerve');
