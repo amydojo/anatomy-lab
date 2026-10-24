@@ -135,5 +135,5 @@ body.v4-ready>main.page,body.v4-ready>div.lab,body.v4-ready>nav.body-live-nav{di
 .v4-inspector[data-panel=expanded]{height:min(30dvh,180px)}
 .v4-header{height:47px}.v4-control-band{min-height:50px}
 }
-@media(min-width:801px){.v4-inspector[data-panel=compact]{max-width:355px}.v4-inspector[data-panel=expanded]{max-width:355px}}
+@media(min-width:801px){.v4-grab{display:none}.v4-inspector[data-panel=compact]{max-width:355px}.v4-inspector[data-panel=expanded]{max-width:355px}}
 @media(prefers-reduced-motion:reduce){#v4-root *,#v4-root *:before,#v4-root *:after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}

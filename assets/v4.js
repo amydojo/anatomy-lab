@@ -167,7 +167,7 @@
     const learning=lessons.find(l=>l.key===item.key) || lessons[0];
     body.innerHTML='<div class="v4-eyebrow">'+html(item.system)+' / '+html(data.name)+'</div>'+
       '<h2>'+html(item.name)+'</h2><p>'+html(intro)+'</p>'+
-      '<div class="v4-insight"><span>WHY IT MATTERS</span><p>'+html(item.fact)+'</p></div>'+
+      '<div class="v4-insight"><span>'+ (intro===item.fact?'THE CONNECTION':'WHY IT MATTERS') +'</span><p>'+html(intro===item.fact ? ((item.related||[]).length ? 'Explore how this structure relates to '+(item.related||[]).map(key=>structure(key)?.name).filter(Boolean).join(' and ')+'.' : 'Peel through the layers to see the neighboring structures.') : item.fact)+'</p></div>'+
       '<div class="v4-context-actions">'+
         (item.nerve?'<button data-action="trace">⌁ Trace nerve</button>':'<button data-action="control-move">↝ See it move</button>')+
         '<button data-action="lesson" data-lesson="'+html(learning.id)+'">✧ Why?</button>'+
