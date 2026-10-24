@@ -96,7 +96,7 @@ body.v3-ready{overflow:hidden}
 .v3-stage{flex:1;min-height:190px}
 .v3-inspector{flex:none;width:100%;height:166px;border-left:0;border-top:1px solid #5e4538;border-radius:20px 20px 0 0;z-index:11;transition:height .27s cubic-bezier(.24,.8,.26,1);min-height:0}
 .v3-inspector[data-sheet=collapsed]{height:64px}
-.v3-inspector[data-sheet=expanded]{height:min(52dvh,470px)}
+.v3-inspector[data-sheet=expanded]{height:min(44dvh,max(120px,calc(100dvh - 398px)))}
 .v3-grab{display:flex;width:100%;flex-shrink:0;align-items:center;justify-content:space-between;gap:15px;border:0!important;background:#251c17;padding:8px 17px;min-height:44px;text-align:left}
 .v3-grab:before{content:"";position:absolute;top:5px;left:calc(50% - 20px);height:3px;width:40px;background:#8e6b57;border-radius:4px}
 .v3-grab .v3-small{font-size:10px}
@@ -111,5 +111,7 @@ body.v3-ready{overflow:hidden}
 .v3-search{padding:15px 10px}.v3-search-panel{max-height:88dvh}
 }
 @media(max-width:800px){.v3-stage-top .v3-pill:first-child{max-width:51%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v3-education{display:none}}\n@media(max-width:365px){.v3-brand{letter-spacing:.08em}.v3-header{gap:6px}.v3-header-actions{gap:5px}.v3-region{font-size:18px}.v3-mode{min-width:62px}.v3-inspector[data-sheet=expanded]{height:50dvh}}
-@media(max-height:650px) and (max-width:900px){.v3-header{min-height:47px}.v3-dock{min-height:55px}.v3-mode{min-height:42px}.v3-inspector{height:104px}.v3-inspector[data-sheet=expanded]{height:43dvh}}
+@media(max-height:650px) and (max-width:900px){.v3-header{min-height:42px}.v3-dock{min-height:45px}.v3-mode{min-height:40px}.v3-toolbar{min-height:43px}.v3-stage{min-height:100px}.v3-inspector{height:85px}.v3-inspector[data-sheet=expanded]{height:min(28dvh,150px)}}
 @media(prefers-reduced-motion:reduce){#v3-root *,#v3-root *:before,#v3-root *:after{transition:none!important;scroll-behavior:auto!important;animation:none!important}}
+
+#v3-root .v3-toolbar{position:relative;z-index:22}#v3-root .v3-dock{position:relative;z-index:23}
