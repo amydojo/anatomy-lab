@@ -159,7 +159,7 @@
   let contents='';
   if(current.mode==='move')contents=movementControls();
   else if(current.mode==='trace')contents='<span class="v3-tool-label">TRACE · '+safe(cfg.name)+'</span><button class="v3-chip" data-v3-action="trace-focus" aria-pressed="true">'+safe(cfg.traces[0]?.name)+'</button><button class="v3-chip" data-v3-action="territories" aria-pressed="'+current.territories+'">Sensory territory</button>';
-  else contents='<span class="v3-tool-label">'+(current.mode==='learn'?'PEEL / MOVE':'PEEL BACK')+'</span><input class="v3-range" data-v3-layer-range type="range" min="0" max="'+(count-1)+'" step="1" value="'+current.depth+'" aria-label="Anatomical layer depth"><span class="v3-tool-label">'+safe(cfg.layers[current.depth])+'</span><div class="v3-toolgroup">'+
+  else contents='<span class="v3-tool-label">'+(current.mode==='learn'?'PEEL / MOVE':'PEEL BACK')+'</span><input class="v3-range" data-v3-layer-range type="range" min="0" max="'+(count-1)+'" step="1" value="'+current.depth+'" aria-label="Anatomical layer depth"><span class="v3-tool-label" data-v3-layer-text>'+safe(cfg.layers[current.depth])+'</span><div class="v3-toolgroup">'+
   (current.mode==='learn'?'<button class="v3-chip" data-v3-action="lesson-move">Move joint</button>':'<button class="v3-chip" data-v3-action="search">Find structure</button>')+'</div>';
   qs('#v3-toolbar').innerHTML=contents;
  }
@@ -213,7 +213,7 @@
   }else if(current.phase==='action'){
    body+='<div class="v3-experiment"><strong>Now test it · '+safe(l.task)+'</strong>'+safe(l.instruction)+'</div>'+
     '<div class="v3-inline-actions">'+(l.target.type==='select'?'<button class="v3-insp-cta" data-v3-action="search">Find '+safe(structure(l.target.key)?.name||'structure')+'</button>':'')+
-    (l.target.type==='angle'?'<button class="v3-insp-cta" data-v3-action="lesson-move">Show movement slider</button>':'')+
+    (l.target.type==='angle'?'<span class="v3-insp-note">Use Move joint in the control strip.</span>':'')+
     (l.target.type==='trace'?'<button class="v3-insp-cta" data-v3-action="trace-focus">Trace nerve</button>':'')+
     (l.target.type==='depth'?'<button class="v3-insp-cta" data-v3-depth="'+l.target.min+'">Reveal target layer</button>':'')+'</div>'+
     '<p class="v3-insp-note">The answer unlocks after the specified anatomy interaction. You can use the controls without leaving Learn mode.</p>';

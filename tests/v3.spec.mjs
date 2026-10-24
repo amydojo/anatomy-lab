@@ -46,6 +46,7 @@ for(const region of ['hip','knee','shoulder']){
  });
 }
 test('Mobile controls do not introduce horizontal document overflow',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
  await openLab(page,'knee');
  const result=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,width:document.documentElement.clientWidth}));
  expect(result.scroll).toBeLessThanOrEqual(result.width+2);
