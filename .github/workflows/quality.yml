@@ -1,7 +1,7 @@
 name: BODY LIVE quality
 on:
   push:
-    branches: [main, feat/body-live-v3]
+    branches: [main, 'feat/body-live-*']
   pull_request:
 concurrency:
   group: body-live-quality-${{ github.head_ref || github.ref_name }}
