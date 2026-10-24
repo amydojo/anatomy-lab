@@ -393,7 +393,7 @@
     points.set(e.pointerId,{x:e.clientX,y:e.clientY});
     if(points.size===1)gesture={x:e.clientX,y:e.clientY,panX:state.panX,panY:state.panY};
     else if(points.size===2)gesture={distance:gap(),zoom:state.zoom};
-    try{scene.setPointerCapture(e.pointerId);}catch{}
+    if(points.size===2 || state.zoom>1){try{scene.setPointerCapture(e.pointerId);}catch{}}
   });
   scene.addEventListener('pointermove',e=>{
     if(!points.has(e.pointerId))return;

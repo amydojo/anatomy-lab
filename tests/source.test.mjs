@@ -25,3 +25,32 @@ test('V4 has contextual controls, simple depth interface, and explicit safety bo
  assert.ok(!s.includes('data-v3-mode'));
  assert.ok(read('references/index.html').includes('OpenStax'));
 });
+
+test('Anatomy graph and lesson targets have valid references', async()=>{
+ const {runInNewContext}=await import('node:vm');
+ const globals={window:{}};
+ runInNewContext(read('assets/v3-data.js'),globals);
+ const d=globals.window.BODYLIVE_DATA;
+ const allIds=new Set();
+ for(const [region,r] of Object.entries(d.regions)){
+   const structures=new Set(r.structures.map(x=>x.key));
+   assert.equal(structures.size,r.structures.length,'unique structure keys in '+region);
+   assert.ok(r.layers.length>=4);
+   for(const entry of r.structures){
+      for(const key of entry.related||[])assert.ok(structures.has(key),'missing related '+key+' in '+region);
+      assert.ok(entry.fact?.length>15);
+   }
+   for(const lesson of d.lessons[region]){
+     assert.ok(!allIds.has(lesson.id),'duplicate lesson '+lesson.id);
+     allIds.add(lesson.id);
+     assert.ok(structures.has(lesson.key),lesson.id+' references missing '+lesson.key);
+     assert.ok(lesson.options.length>=2);
+     assert.ok(lesson.correct>=0&&lesson.correct<lesson.options.length);
+     if(lesson.target.type==='select'||lesson.target.type==='trace')assert.ok(structures.has(lesson.target.key),'missing lesson target '+lesson.target.key);
+     if(lesson.target.type==='depth')assert.ok(lesson.target.min<r.layers.length);
+     if(lesson.target.type==='angle')assert.ok(lesson.target.min<=r.max);
+   }
+   for(const route of r.traces)assert.ok(structures.has(route.key),'unresolved nerve route '+route.key);
+ }
+ assert.equal(allIds.size,12);
+});
