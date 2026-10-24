@@ -10,7 +10,7 @@ window.BODYLIVE_DATA = Object.freeze({
  ],
  regions:{
   knee:{
-   name:"Knee",number:"02",caption:"The constrained hinge",axis:"Flexion · illustrative sagittal view",max:125,
+   name:"Knee",number:"02",caption:"The constrained hinge",axis:"Right knee · schematic view",max:125,
    intro:"A joint that rolls, glides, and finds stability through soft-tissue restraints. Discover the machinery behind every step.",
    layers:["Surface","Muscles","Ligaments","Menisci","Nerves"],
    motion:"Flexion / extension",motionNote:"This sagittal-inspired demonstration does not model true six-degree-of-freedom joint kinematics.",
@@ -28,7 +28,7 @@ window.BODYLIVE_DATA = Object.freeze({
    feel:"Sitting comfortably, place a hand over your upper thigh and gently tighten your quadriceps without forcing your knee. The muscle under your hand may become firmer. Stop if symptoms increase."
   },
   shoulder:{
-   name:"Shoulder",number:"03",caption:"A suspended socket",axis:"Arm elevation · illustrative posterior-oblique view",max:150,
+   name:"Shoulder",number:"03",caption:"A suspended socket",axis:"Shoulder · posterior-oblique",max:150,
    intro:"A mobile ball-and-socket joint made stable by coordinated muscles, tendons, and moving shoulder blades.",
    layers:["Surface","Deltoid","Rotator cuff","Joint","Nerves"],
    motion:"Elevation",motionNote:"Scapular rotation is an educational approximation; actual coordination varies. Axial rotation is not animated in this view.",
@@ -47,7 +47,7 @@ window.BODYLIVE_DATA = Object.freeze({
    feel:"Rest your hand over the outside of your shoulder. Gently raise your arm only within a comfortable range; you may feel the deltoid firm. Skip if it provokes discomfort."
   },
   hip:{
-   name:"Hip",number:"01",caption:"The body's main motors",axis:"Abduction · posterior schematic view",max:35,
+   name:"Hip",number:"01",caption:"The body's main motors",axis:"Right hip · posterior view",max:35,
    intro:"Peel through the gluteal layers, expose deep hip rotators, and discover the sciatic nerve's remarkable pathway.",
    layers:["Gluteus maximus","Side stabilizers","Deep rotators","Sciatic nerve"],
    motion:"Hip abduction",motionNote:"Only posterior-view abduction is animated in this original model. Flexion, extension, and rotation are described but not simulated.",

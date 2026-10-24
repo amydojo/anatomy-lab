@@ -110,6 +110,6 @@ body.v3-ready{overflow:hidden}
 .v3-education{font-size:9px;bottom:10px;left:10px}
 .v3-search{padding:15px 10px}.v3-search-panel{max-height:88dvh}
 }
-@media(max-width:365px){.v3-brand{letter-spacing:.08em}.v3-header{gap:6px}.v3-header-actions{gap:5px}.v3-region{font-size:18px}.v3-mode{min-width:62px}.v3-inspector[data-sheet=expanded]{height:50dvh}}
+@media(max-width:800px){.v3-stage-top .v3-pill:first-child{max-width:51%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v3-education{display:none}}\n@media(max-width:365px){.v3-brand{letter-spacing:.08em}.v3-header{gap:6px}.v3-header-actions{gap:5px}.v3-region{font-size:18px}.v3-mode{min-width:62px}.v3-inspector[data-sheet=expanded]{height:50dvh}}
 @media(max-height:650px) and (max-width:900px){.v3-header{min-height:47px}.v3-dock{min-height:55px}.v3-mode{min-height:42px}.v3-inspector{height:104px}.v3-inspector[data-sheet=expanded]{height:43dvh}}
 @media(prefers-reduced-motion:reduce){#v3-root *,#v3-root *:before,#v3-root *:after{transition:none!important;scroll-behavior:auto!important;animation:none!important}}
