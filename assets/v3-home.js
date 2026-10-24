@@ -26,7 +26,7 @@
   backShapes.style.display=isBack?'':'none';$('bodydesc').textContent='Diagram of a human body seen from '+(isBack?'behind':'the front')+'. Select an available hip, knee, or shoulder hotspot to visit its interactive laboratory.';
  }
  fore.addEventListener('click',()=>orient(false));back.addEventListener('click',()=>orient(true));
- let progress={};try{progress=JSON.parse(localStorage.getItem('bodylive-v3-lessons')||'{}')}catch{}
+ let progress={};try{progress=JSON.parse(localStorage.getItem('bodylive-v4-progress')||localStorage.getItem('bodylive-v3-lessons')||'{}')}catch{}
  const num=Object.values(progress).filter(Boolean).length;
  if(num){
   $('completed-count').textContent=num+' of 12 experiments completed';

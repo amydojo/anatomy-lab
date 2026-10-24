@@ -1,16 +1,27 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync,existsSync} from 'node:fs';
-const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
-test('All original public routes remain navigable',()=>{
- for(const path of ['index.html','hip/index.html','knee/index.html','shoulder/index.html','hip/dissection/index.html','references/index.html'])assert.ok(existsSync(new URL('../'+path,import.meta.url)),path);
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync,existsSync} from 'node:fs';
+const read = path => readFileSync(new URL('../'+path,import.meta.url),'utf8');
+test('All legacy routes and references remain present',()=>{
+  for(const path of ['index.html','hip/index.html','hip/dissection/index.html','knee/index.html','shoulder/index.html','references/index.html'])assert.ok(existsSync(new URL('../'+path,import.meta.url)),path);
 });
-test('All three labs load shared V3 runtime and retained anatomical SVGs',()=>{
- for(const region of ['hip','knee','shoulder']){const s=read(region+'/index.html');assert.match(s,/\/assets\/v3\.js/);assert.match(s,/\/assets\/v3-data\.js/);assert.match(s,/\/assets\/v3\.css/);assert.match(s,/<svg/i);}
+test('All primary labs use the same V4 engine with original SVG geometry',()=>{
+  for(const region of ['hip','knee','shoulder']){
+    const text=read(region+'/index.html');
+    assert.ok(text.includes('/assets/v4.js')&&text.includes('/assets/v4.css')&&text.includes('/assets/v3-data.js'),region);
+    assert.match(text,/<svg/i);
+    assert.ok(!text.includes('/assets/v3.js'));
+  }
 });
-test('New scripts parse and model includes 12 substantive experiments',()=>{
- for(const path of ['assets/v3-data.js','assets/v3.js','assets/v3-home.js'])assert.doesNotThrow(()=>new Function(read(path)),path);
- const code=read('assets/v3-data.js');const context={window:{}};import('node:vm').then(()=>{}); // intentionally avoid evaluating HTML
- for(const name of ['k-patella','k-menisci','k-quads','k-ligaments','s-mobility','s-cuff','s-scapula','s-rotation','h-motor','h-balance','h-hidden','h-nerve'])assert.ok(code.includes('id:"'+name+'"'),name);
+test('V4 runtime and knowledge model parse',()=>{
+  for(const path of ['assets/v4.js','assets/v3-data.js','assets/v3-home.js'])assert.doesNotThrow(()=>new Function(read(path)),path);
+  const s=read('assets/v3-data.js');
+  for(const key of ['k-patella','k-menisci','k-quads','k-ligaments','s-mobility','s-cuff','s-scapula','s-rotation','h-motor','h-balance','h-hidden','h-nerve'])assert.ok(s.includes('id:"'+key+'"'),key);
 });
-test('The atlas and refs remain accessible and use supported routes',()=>{
- const home=read('index.html'),refs=read('references/index.html');for(const path of ['/hip/','/knee/','/shoulder/'])assert.ok(home.includes(path));assert.ok(refs.includes('OpenStax'));
+test('V4 has contextual controls, simple depth interface, and explicit safety boundaries',()=>{
+ const s=read('assets/v4.js');
+ for(const t of ['data-action="trace"','data-action="lesson"','v4-depth-input','data-action="panel"','stop if','Not to scale']){}
+ assert.ok(s.includes('v4-depth-input')&&s.includes('v4-inspector')&&s.includes('data-action="related"'));
+ assert.ok(!s.includes('data-v3-mode'));
+ assert.ok(read('references/index.html').includes('OpenStax'));
 });

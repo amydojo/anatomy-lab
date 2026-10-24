@@ -90,3 +90,30 @@ Content draws on general educational anatomy resources listed at `/references/`.
 - More granular, illustrated peripheral-nerve branches and carefully differentiated sensory maps.
 
 Maintained in public on GitHub; deployed from `main` via the linked Vercel project.
+
+
+## V4 — Invisible Interface
+
+V4 replaces the four always-visible interaction modes with a single responsive anatomy scene and a contextual inspector. The interaction is built around **select → understand → manipulate**. The existing V3 data, original SVG models, and deep hip dissection are preserved.
+
+- Touch structures to focus and see a short explanation.
+- Peel the model using one persistent anatomical depth slider.
+- Move joint geometry using the native handle (Knee and Shoulder) or drag the virtual femur (Hip), with an accessible movement slider.
+- Select a nerve to see a contextual *Trace nerve* action and an approximate pathway description.
+- Tap **Why?** to begin a related interactive experiment; complete its model action before the explanation is revealed.
+- Search the whole atlas and navigate to highlighted structures via stable deep links.
+- Progress saves locally using \`bodylive-v4-progress\`; V3 progress is accepted as a read-only migration fallback.
+
+### Files and architecture
+
+\`assets/v4.js\`: one user-facing selection/depth/movement state, renderer adapters, responsive inspector, gesture input, contextual lessons, and modal navigation. The original native HTML scripts remain as rendering adapters, not competing navigation systems.
+
+\`assets/v4.css\`: premium mobile-first responsive design without a permanent mode dock.
+
+\`assets/v3-data.js\`: retained shared region and lesson knowledge graph; no duplication.
+
+\`tests/v4.spec.mjs\`: browser tests for mobile, WebKit, desktop, search, anatomy manipulation, nerve exploration and real lesson actions.
+
+**Known limits:** Visual models remain illustrative 2D/2.5D SVG art, not validated physics or anatomical imaging. The legacy SVG render functions are bridged through a small adapter; fully eliminating all model-internal state requires a later rewrite of model geometry. Trace currently highlights an illustrative nerve representation and explains branches in prose rather than rendering every branch continuously. This is an educational product, not a diagnostic tool.
+
+Preserve the public routes and deploy through the existing Vercel project. Do not merge a feature branch until mobile and desktop browser checks pass.
