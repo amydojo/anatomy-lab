@@ -53,3 +53,9 @@ test('Mobile controls do not introduce horizontal document overflow',async({page
  await page.locator('.v3-grab').click();await expect(page.locator('#v3-inspector')).toHaveAttribute('data-sheet','expanded');
  await page.screenshot({path:'artifacts/mobile-inspector.png'});
 });
+
+test('Direct Learn links activate the guided experiments',async({page})=>{
+ await page.goto('/knee/?mode=learn');
+ await expect(page.locator('[data-v3-mode="learn"]')).toHaveAttribute('aria-selected','true');
+ await expect(page.locator('#v3-inspector-scroll')).toContainText('The anatomy experiments');
+});

@@ -332,14 +332,14 @@
  // Preserve query-driven cross-region focus and deep linking.
  const query=new URLSearchParams(location.search);
  current.selected=cfg.structures[0].key;
- if(query.get('mode')==='trace')current.mode='trace';
+ if(['trace','learn','move'].includes(query.get('mode')))current.mode=query.get('mode');
  const focus=query.get('focus');
  if(focus&&structure(focus))current.selected=focus;
  nativeDepth(0);
  nativeAngle(0);
  renderToolbar();
  renderInspector();
- if(current.mode==='trace')setMode('trace');else select(current.selected);
+ if(current.mode!=='explore'){const requested=current.mode;select(current.selected);setMode(requested);}else select(current.selected);
  qsa('[data-v3-mode]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.v3Mode===current.mode)));
  updateFocusTag();
 })();

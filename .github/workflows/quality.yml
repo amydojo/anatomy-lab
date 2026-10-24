@@ -3,9 +3,13 @@ on:
   push:
     branches: [main, feat/body-live-v3]
   pull_request:
+concurrency:
+  group: body-live-quality-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
