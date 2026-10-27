@@ -199,3 +199,14 @@ The KNEE / SPATIAL inspector now differentiates **sourced BodyParts3D bone geome
 - **Imaging audit**: Pennsieve 692 micro-CT has short excised nerve segments; no patient imaging is falsely registered to this pelvis. See docs/V54_NERVE_SOURCE_AUDIT.md.
 - **Test gates**: geometry graph/unit audit, source integrity and mobile Chromium/WebKit/desktop testing. Anatomist and legal review pending; no medical-grade claim.
 
+
+## V5.5 — NERVE / FOLLOW (preview only)
+
+V5.4 quality gate cleared on the exact source commit: 162 full-app Playwright tests passed on workflow attempt 2 of run 40554497441. V5.5 branches from V5.4 without merging either Hip PR into production.
+
+- `hip/spatial/nerve-follow.js`: topology audit of source triangular surfaces, named parent→child relationships, separate quantified branch-junction gaps (never portrayed as continuous sourced geometry), piecewise linear source-derived centreline with arc-length sampling
+- `assets/hip-knee-bridge.js`: deterministic translation/scale conversion between source-matched Hip and Knee BodyParts3D 4.0 coordinate frames; vertex-by-vertex correspondence of all 480 femoral vertices within source rounding. This validates the **bone reference frame only**, not the nerve location
+- In-place viewport Follow control, mobile camera target (shared `assets/spatial-core.js` optional `camera.target`), position slider and branch dropdown; anatomy context dims rather than disappearing; reduce-motion respected
+- Explicit dual evidence modes: `Registered composite` (hip and registered nerve) versus `Atlas nerve alone` (source nerve in its unregistered frame, hip hidden). Switching does NOT claim both models were imaged from one donor
+- Evidence inspector shows source license, femur-registration residuals, measured unverified branch gaps, and link to existing Knee skeletal viewport (nerve is NOT reconstructed there).
+- Tests: source graph connectivity and arc-length invariants, Hip–Knee inverse transforms, mobile 320/390/430 interaction, WebKit/Chromium regression; qualified anatomical and license review still required.
