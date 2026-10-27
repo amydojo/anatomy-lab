@@ -16,7 +16,7 @@ test('Atlas loads original pinned skeleton and a functioning semantic region lis
  const st=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
  expect(st.pins).toBe(4);
  expect(st.renderer.partCount===78 || st.renderer.webgl===false).toBe(true);
- await expect(page.locator('button[data-region="hip"]')).toBeVisible();
+ await expect(page.locator('#region-list button[data-region="hip"]')).toBeVisible();
  await expect(page.locator('a[href="/atlas/sources/"]')).toHaveCount(1);
  expect(errors).toEqual([]);
  await page.screenshot({path:'artifacts/v6-atlas-overview.png'});
@@ -69,7 +69,7 @@ for(const width of [320,375,390,430]){
   expect(a.scroll).toBeLessThanOrEqual(a.w+2);expect(a.h).toBeGreaterThan(350);
   await page.locator('#sidebar-toggle').click();
   await expect(page.locator('#sidebar-toggle')).toHaveAttribute('aria-expanded','true');
-  await page.locator('button[data-region="hip"]').click();
+  await page.locator('#region-list button[data-region="hip"]').click();
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:10000}).toBe('detail');
   await page.locator('#back-body').click();
   await expect(page.locator('#portal')).toBeHidden();
@@ -82,7 +82,7 @@ test('short mobile layout keeps evidence and navigation reachable',async({page})
  await page.locator('#evidence-toggle').click();await expect(page.locator('#evidence-sheet')).toBeVisible();
  await expect(page.locator('#evidence-records')).toContainText('BodyParts3D 4.0');
  await page.locator('#evidence-close').click();await page.locator('#sidebar-toggle').click();
- await page.locator('button[data-region="knee"]').click();
+ await page.locator('#region-list button[data-region="knee"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view)).toBe('detail');
  expect(errs).toEqual([]);await page.screenshot({path:'artifacts/v6-mobile-short.png'});
 });
