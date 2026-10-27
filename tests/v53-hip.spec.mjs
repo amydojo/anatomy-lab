@@ -51,13 +51,14 @@ test('3 axes update the femur without distorting rigid geometry',async({page})=>
  expect(errors).toEqual([]);
  await page.screenshot({path:'artifacts/v53-hip-motion.png'});
 });
-test('sciatic nerve is conspicuously labeled schematic and traced',async({page})=>{
+test('sciatic nerve is conspicuously labeled sourced composite and traced',async({page})=>{
  const errors=await start(page);
  await openSheet(page);
  await page.locator('[data-part="sciatic"]').click();
  await expect(page.locator('#depth-output')).toHaveText('SCIATIC PATH');
- await expect(page.locator('#nerve-info')).toContainText('SCHEMATIC NERVE PATH');
- await expect(page.locator('#structure-type')).toContainText('SCHEMATIC');
+ await expect.poll(()=>page.evaluate(()=>window.__HIP_SPATIAL__.getState().nerveSourceLoaded),{timeout:10000}).toBe(true);
+ await expect(page.locator('#nerve-info')).toContainText('SOURCE-DERIVED SURFACE');
+ await expect(page.locator('#structure-type')).toContainText('REGISTERED COMPOSITE');
  expect((await page.evaluate(()=>window.__HIP_SPATIAL__.getState())).trace).toBe(true);
  expect(errors).toEqual([]);
  await page.screenshot({path:'artifacts/v53-hip-nerve.png'});

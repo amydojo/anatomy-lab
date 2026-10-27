@@ -50,3 +50,17 @@
 
 /* V5.3 mobile QA — protect anatomy stage and return to structure explanation. */
 @media(max-width:850px){.inspector[data-expanded=true]{height:min(37dvh,305px)}}
+
+/* V5.4 nerve provenance, confidence, mobile trace. */
+.nerve-evidence[hidden]{display:none!important}
+.nerve-evidence{border:1px solid #a88750}
+.nerve-evidence h2{font:400 24px/1.16 Georgia,serif;margin:8px 0;color:#ffe2b3}
+.nerve-evidence p{font-size:11px;line-height:1.65;color:#d4bfaa}
+.nerve-evidence a{color:#f1c887;font-size:11px}
+.nerve-actions{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
+.nerve-actions button{background:#6a4827;color:#fff0c9;border:1px solid #cfa469;border-radius:9px;padding:10px 12px;min-height:44px;font-size:11px}
+.nerve-measures{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:15px 0}
+.nerve-measures>div{border:1px solid #927351;border-radius:9px;padding:9px}
+.nerve-measures strong{font:400 23px Georgia,serif;color:#f9dfa6;display:block}
+.nerve-measures small{font-size:10px;line-height:1.5;color:#cbbca0;display:block}
+@media(max-width:370px){.nerve-actions button{flex:1;min-width:42%}}

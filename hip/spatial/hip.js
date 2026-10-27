@@ -28,19 +28,22 @@ const DATA={
  gemellusSuperior:{name:'Superior gemellus',class:'Sourced muscle',summary:'A small deep muscle adjacent to obturator internus and associated with hip external rotation.',fact:'Its compact location is easier to understand when the more superficial gluteals are peeled away.'},
  gemellusInferior:{name:'Inferior gemellus',class:'Sourced muscle',summary:'A small deep rotator below obturator internus.',fact:'Together these closely placed muscles help control the hip in multiple positions.'},
  quadratus:{name:'Quadratus femoris',class:'Sourced muscle',summary:'A deep, flat muscle between the ischial region and upper femur.',fact:'Its short orientation gives an intuitive picture of a deep hip rotator.'},
- sciatic:{name:'Sciatic nerve path',class:'Illustrative nerve guide',summary:'An approximate line through the deep gluteal region into the posterior thigh. The nerve typically passes inferior to piriformis.',fact:'Sciatic nerve anatomy varies. The pathway here cannot identify the source of pain or numbness.'}
+ sciatic:{name:'Sciatic nerve',class:'Atlas nerve surface',summary:'Source-derived right sciatic nerve registered to a separately sourced pelvis. Mixed-reference composite, NOT patient imaging.',fact:'The atlas-derived sciatic surface continues into named tibial and common fibular branches; the registration is unreviewed.'},
+ tibial:{name:'Tibial nerve',class:'Atlas branch',summary:'Source-derived right tibial continuation. Position is a registered mixed-source composite.',fact:'Anatomical branch paths vary between individuals.'},
+ commonFibular:{name:'Common fibular nerve',class:'Atlas branch',summary:'Source-derived right common fibular continuation, not patient imaging.',fact:'The atlas depicts typical anatomy, not validated placement against this pelvis.'}
 };
 const BONES=['hipBone','femur','sacrum'];
 const DEEP=['piriformis','obturator','gemellusSuperior','gemellusInferior','quadratus'];
-const SYSTEMS=[...BONES,'maximus','medius','minimus',...DEEP,'sciatic'];
+const NERVES=['sciatic','tibial','commonFibular'];
+const SYSTEMS=[...BONES,'maximus','medius','minimus',...DEEP,...NERVES];
 const COLOR={hipBone:'#dbccb2',femur:'#e6d9bd',sacrum:'#c7b598',maximus:'#ae635c',medius:'#d18b78',
  minimus:'#c98779',piriformis:'#ed9b7e',obturator:'#ba8274',gemellusSuperior:'#c18d78',
- gemellusInferior:'#c88d76',quadratus:'#b67f6d',sciatic:'#f0d68d'};
+ gemellusInferior:'#c88d76',quadratus:'#b67f6d',sciatic:'#f0d68d',tibial:'#dbbb75',commonFibular:'#f4ce95'};
 const state={yaw:Math.PI+.28,pitch:-.11,zoom:1.08,frameSpan:4.5,width:0,height:0,dpr:1,depth:0,focus:'joint',
  axis:'flexion',pose:{flexion:0,abduction:0,rotation:0},selected:null,isolate:false,trace:false,
  expanded:false,playing:false,frame:0,prev:0,dir:1,sourceLoaded:false,sourceLabel:'LOADING'};
 const lesson={phase:'idle',guess:null,oldDepth:0,oldAxis:'flexion'};
-let meshes=null,rendering=false,hits=[];
+let meshes=null,nerveMeshes=[],nerveTruth=null,nerveAssetError='',nerveEvidenceOpen=false,rendering=false,hits=[];
 function toLocal(x,y,z){const o=[-.057,.895,-.045],s=10;return V((x-o[0])*s,(y-o[1])*s,(z-o[2])*s);}
 const routeSource=[[-.039,.949,-.088],[-.066,.918,-.091],[-.082,.891,-.099],[-.098,.843,-.104],[-.108,.792,-.097],[-.114,.733,-.084]];
 const nervePoints=routeSource.map(p=>toLocal(...p));
@@ -99,19 +102,21 @@ function alphaFor(id){
    gemellusSuperior:layer>=2&&layer<=3,
    gemellusInferior:layer>=2&&layer<=3,
    quadratus:layer>=2&&layer<=3,
-   sciatic:layer===3
+   sciatic:layer===3||state.trace,
+   tibial:layer===3||state.trace,
+   commonFibular:layer===3||state.trace
  };
  if(!visible[id])return 0;
- let opacity=BONES.includes(id)?(layer===4?.95:.4):id==='sciatic'?1:.92;
+ let opacity=BONES.includes(id)?(layer===4?.95:.4):NERVES.includes(id)?1:.92;
  if(id==='maximus'&&layer===0)opacity=.75;
  if(id==='medius'&&layer===1)opacity=.9;
  if(layer===2&&id==='minimus')opacity=.24;
  // Reference-pose muscle geometry is NOT deformed with femur motion.
  const moving=Object.values(state.pose).some(x=>Math.abs(x)>2);
- if(moving&&!BONES.includes(id)&&id!=='sciatic')opacity*=.4;
+ if(moving&&!BONES.includes(id)&&!NERVES.includes(id))opacity*=.4;
  if(state.selected&&state.selected!==id)opacity*=state.isolate?.12:.45;
  if(state.selected===id)opacity=Math.min(1,opacity+.07);
- if(state.trace&&id==='sciatic')opacity=1;
+ if(state.trace&&NERVES.includes(id))opacity=1;
  return opacity;
 }
 function shade(hex,b){const rgb=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));return 'rgb('+rgb.map(v=>Math.round(clamp(v*b,0,255))).join(',')+')';}
@@ -132,9 +137,9 @@ function draw(){
  const w=state.width,h=state.height;if(!w||!h)return;
  ctx.clearRect(0,0,w,h);
  const candidates=[];
- const source=meshes||fallback();
+ const source=(meshes||fallback()).concat(nerveMeshes);
  for(const m of source){
-  if(m.id==='sciatic')continue;
+  if(m.id==='sciatic'&&!nerveTruth)continue;
   const a=alphaFor(m.id);if(a<=0)continue;
   const verts=m.id==='femur'?m.verts.map(transformFemur):m.verts;
   const pp=verts.map(v=>core.project(v,state));
@@ -146,7 +151,7 @@ function draw(){
    candidates.push({id:m.id,pts:v,opacity:a,depth:(v[0].z+v[1].z+v[2].z)/3,color:shade(COLOR[m.id],light)});
   }
  }
- if(state.depth===3 || state.trace){
+ if((state.depth===3 || state.trace)&&!nerveTruth){
   const g=getGuide();
   const pts=g.verts.map(v=>core.project(v,state));
   for(const f of g.faces){const v=[pts[f[0]],pts[f[1]],pts[f[2]]];
@@ -164,7 +169,9 @@ function draw(){
  ctx.globalAlpha=1;hits=selections;
  if(state.trace){
   ctx.lineWidth=2.5;ctx.strokeStyle='#f0d283';ctx.globalAlpha=.95;
-  ctx.beginPath();nervePoints.map(p=>core.project(p,state)).forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();
+  const sourceTrace=nerveTruth?.segments?.[state.selected]||nerveTruth?.segments?.sciatic;
+  const pts=nerveTruth?sourceTrace.tracePoints_derived_not_measured.map(p=>V(...p)):nervePoints;
+  ctx.beginPath();pts.map(p=>core.project(p,state)).forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();
   ctx.globalAlpha=1;
  }
  }finally{rendering=false;}
@@ -175,26 +182,83 @@ function setExpanded(v){
  $('inspector-toggle').querySelector('.grab-icon').textContent=v?'⌄':'⌃';
  requestAnimationFrame(resize);
 }
+
+function renderNerveEvidence(){
+ const panel=$('nerve-evidence'),btn=$('nerve-evidence-toggle');
+ if(!panel||!btn)return;
+ btn.hidden=!nerveTruth&&!NERVES.includes(state.selected);
+ btn.setAttribute('aria-expanded',String(nerveEvidenceOpen));
+ if(!nerveEvidenceOpen){panel.hidden=true;panel.replaceChildren();return;}
+ panel.hidden=false;
+ const f=nerveTruth?.registration?.fit;
+ const metrics=f
+  ?'<div class="nerve-measures"><div><strong>'+(f.median_scene_units*100).toFixed(1)+' mm</strong><small>Femur fit · median</small></div><div><strong>'+(f.p95_scene_units*100).toFixed(1)+' mm</strong><small>Femur fit · 95th percentile</small></div></div>'
+  :'<p>Source unavailable. Schematic fallback active.</p>';
+ panel.innerHTML='<div class="eyebrow">PROVENANCE / UNCERTAINTY</div><h2>Registered composite, not patient imaging.</h2>'+
+  '<p>Atlas nerve: Z-Anatomy (CC BY-SA 4.0). Surrounding hip: BodyParts3D 4.0 (CC BY 4.0). Source releases or donors are not established as identical.</p>'+
+  metrics+
+  '<p>These geometric discrepancies are from the <strong>femur surface</strong> alignment; they are NOT errors measured against a verified nerve, nor accuracy guarantees.</p>'+
+  '<p>Medical imaging and 2026 sciatic micro-CT microstructure are not included. Expert registration and anatomical placement review remain pending.</p>'+
+  '<a href="/hip/spatial/sources/">Detailed source audit ↗</a> · <a href="/hip/spatial/assets/sciatic-provenance.json">Machine-readable registration evidence ↗</a>';
+}
+async function loadNerveTruth(){
+ try{
+  const res=await fetch('/hip/spatial/assets/sciatic-source.json',{cache:'force-cache'});
+  if(!res.ok)throw Error('Nerve source unavailable ('+res.status+')');
+  const d=await res.json();
+  if(d.schema!=='body-live/nerve-truth-atlas-v1'||d.geometry_license!=='CC BY-SA 4.0'||d.clinical_reviewed!==false||d.not_patient_specific!==true)
+   throw Error('Unexpected source schema, license or review flag');
+  if(!NERVES.every(id=>d.segments?.[id]))throw Error('Missing sciatic nerve segment');
+  const next=[];
+  for(const id of NERVES){
+   const m=d.segments[id];
+   if(m.vertices.length<100||m.faces.length<40)throw Error('Incomplete nerve mesh '+id);
+   const verts=m.vertices.map(p=>V(p[0],p[1],p[2]));
+   if(verts.some(p=>![p.x,p.y,p.z].every(Number.isFinite)))throw Error('Nonfinite vertices');
+   if(m.faces.some(f=>f.length!==3||f.some(i=>!Number.isInteger(i)||i<0||i>=verts.length)))throw Error('Invalid faces');
+   next.push({id,verts,faces:m.faces});
+  }
+  nerveMeshes=next;nerveTruth=d;
+  $('asset-status').textContent='SOURCED BONES + MUSCLES · REGISTERED NERVE COMPOSITE';
+  document.querySelectorAll('[data-part]').forEach(b=>{
+   if(NERVES.includes(b.dataset.part))b.querySelector('.structure-status').textContent='Z-ATLAS';
+  });
+  inspector();draw();
+ }catch(e){
+  nerveMeshes=[];nerveTruth=null;nerveAssetError=e.message;
+  document.querySelectorAll('[data-part]').forEach(b=>{
+   if(NERVES.includes(b.dataset.part))b.querySelector('.structure-status').textContent='SCHEMATIC';
+  });
+  inspector();draw();
+  console.warn('HIP / NERVE TRUTH:',e.message);
+ }
+}
+
 function inspector(){
  const obj=state.selected?DATA[state.selected]:null;
  $('selected-short').textContent=obj?obj.name:'Inside the right hip';
  $('inspector-title').textContent=obj?obj.name:'A ball-and-socket laboratory.';
  $('structure-intro').textContent=obj?obj.summary:'Peel the gluteal layers to see how the pelvis, femur, and deep rotators occupy the same space. Move the femur in three axes.';
- $('structure-type').textContent=obj?(state.sourceLoaded&&state.selected!=='sciatic'?'BODYPARTS3D 4.0 · REFERENCE POSE':'SCHEMATIC · NOT SOURCED'):'SOURCED STRUCTURES · SIMPLIFIED MOTION';
+ $('structure-type').textContent=obj?(NERVES.includes(state.selected)
+ ?(nerveTruth?'Z-ANATOMY SOURCE SURFACE · REGISTERED COMPOSITE':'SCHEMATIC NERVE · SOURCE UNAVAILABLE')
+ :(state.sourceLoaded?'BODYPARTS3D 4.0 · REFERENCE POSE':'SCHEMATIC · NOT SOURCED')):'SOURCED STRUCTURES · SIMPLIFIED MOTION';
  $('anatomy-fact').querySelector('p').textContent=obj?obj.fact:'The femoral head moves within the acetabulum. This educational model uses a fixed estimated pivot, not personalized joint mechanics.';
  $('isolate').disabled=!obj;$('isolate').setAttribute('aria-pressed',String(state.isolate));
- $('nerve-follow').hidden=state.selected!=='sciatic'&&state.depth!==3;
+ $('nerve-follow').hidden=!NERVES.includes(state.selected)&&state.depth!==3;
  $('nerve-follow').setAttribute('aria-pressed',String(state.trace));
- $('nerve-follow').textContent=state.trace?'Hide nerve pathway':'Follow sciatic path';
+ $('nerve-follow').textContent=state.trace?'Hide trace':'Trace nerve';
  $('nerve-info').hidden=!state.trace;
- if(state.trace)$('nerve-info').innerHTML='<div class="eyebrow">SCHEMATIC NERVE PATH</div><p>This gold guide approximates the deep-gluteal sciatic route. It is not an imported nerve mesh, a precise sensory map, or a diagnosis. Anatomy varies between individuals.</p><p>Peel back to Deep Rotators to locate piriformis, then return to Sciatic Path to follow the illustrative nerve through the posterior thigh.</p>';
+ if(state.trace)$('nerve-info').innerHTML=nerveTruth
+ ?'<div class="eyebrow">Z-ANATOMY · SOURCE-DERIVED SURFACE</div><p>The imported nerve is a separate atlas source. The gold line is estimated from surface slices, NOT an MRI centreline.</p><div class="nerve-actions"><button data-nerve="sciatic">Sciatic trunk</button><button data-nerve="tibial">Tibial</button><button data-nerve="commonFibular">Common fibular</button></div><p>Mixed-reference alignment is unreviewed. A source surface is not a verified patient reconstruction.</p>'
+ :'<div class="eyebrow">SCHEMATIC NERVE PATH</div><p>Source geometry could not load; a manually authored approximate guide is shown. No imaging or clinical accuracy is implied.</p>';
+ renderNerveEvidence();
  document.querySelectorAll('[data-part]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.part===state.selected)));
 }
 function select(id){
  if(!DATA[id])return;
  if(state.selected!==id)state.isolate=false;
  state.selected=id;
- if(id==='sciatic'){state.depth=3;state.trace=true;syncDepth();}
+ if(NERVES.includes(id)){state.depth=3;state.trace=true;syncDepth();}
  inspector();draw();if(window.innerWidth<=850)setExpanded(true);
  $('inspector-scroll').scrollTop=0;
 }
@@ -289,7 +353,7 @@ async function load(){
   if(!result.ok)throw Error('Sourced hip meshes unavailable ('+result.status+')');
   const d=await result.json();
   if(d.schema!=='body-live/hip-sourced-v1'||d.license!=='CC BY 4.0')throw Error('Unexpected source provenance');
-  const expected=SYSTEMS.filter(x=>x!=='sciatic');
+  const expected=SYSTEMS.filter(x=>!NERVES.includes(x));
   const obj={};
   for(const id of expected){
    const part=d.parts?.[id];
@@ -302,19 +366,19 @@ async function load(){
   meshes=Object.values(obj);state.sourceLoaded=true;state.sourceLabel='BODYPARTS3D 4.0 · CC BY 4.0';
   $('asset-status').textContent='SOURCED BONES + MUSCLES';
   $('asset-status').title='BodyParts3D 4.0 reference-pose geometry; illustrative movement';
-  document.querySelectorAll('[data-part]').forEach(b=>{const tag=b.querySelector('.structure-status');if(tag&&b.dataset.part!=='sciatic')tag.textContent='SOURCE';});
+  document.querySelectorAll('[data-part]').forEach(b=>{const tag=b.querySelector('.structure-status');if(tag&&!NERVES.includes(b.dataset.part))tag.textContent='SOURCE';});
   inspector();draw();
  }catch(e){
   meshes=null;state.sourceLoaded=false;state.sourceLabel='SCHEMATIC FALLBACK';
   $('asset-status').textContent='SCHEMATIC FALLBACK';
-  document.querySelectorAll('[data-part]').forEach(b=>{const tag=b.querySelector('.structure-status');if(tag)tag.textContent='ILLUSTRATIVE';});
+  document.querySelectorAll('[data-part]').forEach(b=>{const tag=b.querySelector('.structure-status');if(tag)tag.textContent=NERVES.includes(b.dataset.part)?'SCHEMATIC':'ILLUSTRATIVE';});
   console.warn('HIP / SPATIAL:',e.message);inspector();draw();
  }
 }
 for(const id of SYSTEMS){
  const b=document.createElement('button');b.type='button';b.dataset.part=id;b.textContent=DATA[id].name;
  const tag=document.createElement('span');tag.className='structure-status'+(id==='sciatic'?' guide':'');
- tag.textContent=id==='sciatic'?'SCHEMATIC':'SOURCE';b.appendChild(tag);
+ tag.textContent=NERVES.includes(id)?'LOADING':'SOURCE';b.appendChild(tag);
  b.addEventListener('click',()=>select(id));$('structure-list').appendChild(b);
 }
 $('depth').addEventListener('input',e=>depth(e.target.value));
@@ -328,6 +392,8 @@ $('reset').addEventListener('click',reset);
 $('inspector-toggle').addEventListener('click',()=>setExpanded(!state.expanded));
 $('isolate').addEventListener('click',()=>{if(!state.selected)return;state.isolate=!state.isolate;inspector();draw();});
 $('show-all').addEventListener('click',()=>{state.selected=null;state.isolate=false;state.trace=false;state.depth=0;syncDepth();inspector();draw();});
+$('nerve-evidence-toggle').addEventListener('click',()=>{nerveEvidenceOpen=!nerveEvidenceOpen;renderNerveEvidence();});
+$('nerve-info').addEventListener('click',e=>{const b=e.target.closest('[data-nerve]');if(b)select(b.dataset.nerve);});
 $('nerve-follow').addEventListener('click',()=>{state.trace=!state.trace;if(state.trace){state.depth=3;syncDepth();}inspector();draw();});
 $('lesson-start').addEventListener('click',()=>lesson.phase==='idle'?beginLesson():endLesson());
 $('lesson-panel').addEventListener('click',e=>{
@@ -348,9 +414,9 @@ window.addEventListener('resize',resize,{passive:true});
 if('ResizeObserver' in window)new ResizeObserver(resize).observe(document.querySelector('.stage'));
 window.__HIP_SPATIAL__={
  getState:()=>({depth:state.depth,pose:{...state.pose},axis:state.axis,selected:state.selected,trace:state.trace,
-  sourceLoaded:state.sourceLoaded,sourceLabel:state.sourceLabel,sourceCount:meshes?.length||0,lesson:lesson.phase,
+  sourceLoaded:state.sourceLoaded,sourceLabel:state.sourceLabel,sourceCount:meshes?.length||0,nerveSourceLoaded:!!nerveTruth,nerveSegments:nerveMeshes.length,nerveEvidenceOpen,compositeFitMedian:nerveTruth?.registration?.fit?.median_scene_units||null,lesson:lesson.phase,
   yaw:state.yaw,pitch:state.pitch,zoom:state.zoom,viewport:{w:state.width,h:state.height},hitCount:hits.length}),
  transformFemur,select,depth,pose,axis,reset
 };
-syncDepth();inspector();resize();load();
+syncDepth();inspector();resize();load().then(loadNerveTruth);
 })();

@@ -156,7 +156,7 @@ test('V5.3 hip route is real, reuses the spatial core, and preserves the origina
  assert.equal(scene.license,'CC BY 4.0');
  assert.equal(proof.anatomist_reviewed,false);
  assert.equal(proof.biomechanics_validated,false);
- assert.ok(read('hip/spatial/sources/index.html').toLowerCase().includes('sciatic nerve guide'));
+ assert.ok(read('hip/spatial/sources/index.html').toLowerCase().includes('z-anatomy'));
 });
 test('V5.3 hip motion models are intentionally schematic, not clinical simulations',()=>{
  const s=read('hip/spatial/hip.js');
@@ -164,4 +164,18 @@ test('V5.3 hip motion models are intentionally schematic, not clinical simulatio
   assert.ok(s.toLowerCase().includes(v.toLowerCase()),v);
  assert.ok(s.includes('NOT validated joint kinematics'));
  assert.ok(s.includes("data.parts")||s.includes("d.parts"));
+});
+
+test('V5.4 sciatic geometry imported separately from medical imaging',()=>{
+ const asset=JSON.parse(read('hip/spatial/assets/sciatic-source.json'));
+ const proof=JSON.parse(read('hip/spatial/assets/sciatic-provenance.json'));
+ assert.equal(asset.geometry_license,'CC BY-SA 4.0');
+ assert.equal(asset.not_patient_specific,true);
+ assert.equal(asset.clinical_reviewed,false);
+ assert.deepEqual(Object.keys(asset.segments).sort(),['commonFibular','sciatic','tibial']);
+ assert.equal(proof.status.imaging_derived,false);
+ assert.equal(proof.micro_ct_2026.imported,false);
+ assert.ok(read('hip/spatial/hip.js').includes('loadNerveTruth'));
+ assert.ok(read('hip/spatial/index.html').includes('id="nerve-evidence"'));
+ assert.ok(read('hip/spatial/sources/index.html').includes('Mixed-source registration'));
 });
