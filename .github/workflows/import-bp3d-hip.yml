@@ -1,0 +1,50 @@
+name: Import licensed Hip anatomy
+on:
+  push:
+    branches: ['feat/v5-3-hip-spatial']
+    paths:
+      - 'scripts/import_bp3d_hip.py'
+      - '.github/workflows/import-bp3d-hip.yml'
+permissions:
+  contents: write
+concurrency:
+  group: hip-geometry-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download hash-verified BodyParts3D geometry
+        run: python3 scripts/import_bp3d_hip.py
+      - name: Validate imported data and attribution
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          base=Path('hip/spatial/assets')
+          data=json.loads((base/'hip-source.json').read_text())
+          proof=json.loads((base/'provenance.json').read_text())
+          expected={'hipBone','femur','sacrum','maximus','medius','minimus','piriformis','obturator','gemellusSuperior','gemellusInferior','quadratus'}
+          assert set(data['parts'])==expected
+          assert len(proof['inputs'])==4
+          assert all(len(x['vertices'])>250 for x in data['parts'].values())
+          assert proof['anatomist_reviewed'] is False and proof['biomechanics_validated'] is False
+          assert data['license']=='CC BY 4.0'
+          print('Imported',len(data['parts']),'aligned structures')
+          PY
+      - name: Commit geometry on HIP feature branch only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add hip/spatial/assets/hip-source.json hip/spatial/assets/provenance.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Add source-verified BodyParts3D hip and gluteal meshes [skip ci]"
+            git push origin HEAD:feat/v5-3-hip-spatial
+          fi
