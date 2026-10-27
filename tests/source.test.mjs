@@ -73,3 +73,20 @@ test('Spatial core is separate from knee geometry and usable without a framework
  assert.ok(core.includes('attachOrbit')&&core.includes('project'));
  assert.ok(read('knee/spatial/index.html').includes('/assets/spatial-core.js'));
 });
+
+test('spatial core preserves pairwise length during rigid knee rotations',()=>{
+ const host={};
+ new Function('window',read('assets/spatial-core.js'))(host);
+ const rotate=host.BodySpatialCore.rotateAboutX;
+ const pivot={x:0,y:0.08,z:0};
+ const first={x:0.15,y:-0.11,z:0.05};
+ const second={x:-0.17,y:-0.41,z:-0.13};
+ const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z);
+ for(const degrees of [0,30,65,90,110]){
+   const theta=degrees*Math.PI/180;
+   const a=rotate(first,pivot,theta),b=rotate(second,pivot,theta);
+   assert.ok(Math.abs(dist(a,b)-dist(first,second))<1e-10,'rigid distance '+degrees);
+   const inverse=rotate(a,pivot,-theta);
+   assert.ok(dist(inverse,first)<1e-10,'rotation reversibility '+degrees);
+ }
+});

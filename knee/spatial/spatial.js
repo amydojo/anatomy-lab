@@ -23,6 +23,7 @@ const DISPLAY_ORDER=['femur','tibia','fibula','patella','menisci','acl','pcl','c
 const PALETTES={femur:DATA.femur.color,tibia:DATA.tibia.color,fibula:DATA.fibula.color,patella:DATA.patella.color,menisci:DATA.menisci.color,acl:DATA.acl.color,pcl:DATA.pcl.color,collateral:DATA.collateral.color,tendon:DATA.tendon.color};
 let sourcedMeshes=null;
 let sourceStatus='Schematic geometry · source loading';
+const study={stage:'idle',guess:null,originalDepth:0};
 const state={focus:'joint',frameSpan:6.65,yaw:0.47,pitch:-0.11,zoom:1,flex:0,depth:0,selected:null,isolate:false,playing:false,frame:0,prev:0,dir:1,expanded:false,width:0,height:0,dpr:1,hits:[],gestures:new Map(),touchStart:null};
 const V=(x=0,y=0,z=0)=>({x,y,z});
 const add=(a,b)=>V(a.x+b.x,a.y+b.y,a.z+b.z);
@@ -34,8 +35,7 @@ const unit=a=>mul(a,1/(Math.hypot(a.x,a.y,a.z)||1));
 const mix=(a,b,t)=>add(mul(a,1-t),mul(b,t));
 function clamp(n,a,b){return Math.min(b,Math.max(a,n));}
 function rotateLower(p){
- const theta=state.flex*Math.PI/180,c=Math.cos(theta),s=Math.sin(theta),pivot=V(0,0.08,0);
- const d=sub(p,pivot);return add(pivot,V(d.x,d.y*c-d.z*s,d.y*s+d.z*c));
+ return window.BodySpatialCore.rotateAboutX(p,V(0,0.08,0),state.flex*Math.PI/180);
 }
 function makeMesh(id,verts,faces,{lower=false,color=PALETTES[id]}={}){
  return {id,verts:lower?verts.map(rotateLower):verts,faces,color};
@@ -205,9 +205,18 @@ function render(){
  ctx.globalAlpha=1;
  state.hits=hits;
 }
+function updateStatusBadges(){
+ document.querySelectorAll('#structure-list [data-structure]').forEach(btn=>{
+  const bone=['femur','tibia','fibula','patella'].includes(btn.dataset.structure);
+  const badge=btn.querySelector('.structure-status');
+  if(badge)badge.textContent=bone?(sourcedMeshes?'SOURCE':'BONE'):'ILLUSTRATIVE';
+ });
+}
 function updateInspector(){
  const d=state.selected?DATA[state.selected]:null;
- $('structure-type').textContent=d?d.kind.toUpperCase():'THE JOINT · REVEALED';
+ $('structure-type').textContent=d
+ ?((sourcedMeshes&&['femur','tibia','fibula','patella'].includes(state.selected))?'SOURCE GEOMETRY · BODYPARTS3D 4.0':(state.selected&&['femur','tibia','fibula','patella'].includes(state.selected))?'FALLBACK GEOMETRY · ILLUSTRATIVE':'SOFT TISSUE · SCHEMATIC')
+ :'THE JOINT · REVEALED';
  $('inspector-title').textContent=d?d.name:'A moving machine.';
  $('selected-short').textContent=d?d.name:'Explore the knee';
  $('structure-intro').textContent=d?d.description:'A spatial study of the knee’s skeletal frame and selected soft-tissue relationships. Rotate the specimen and peel through the layers to uncover how it works.';
@@ -231,6 +240,9 @@ function setFlex(value){
  state.flex=clamp(Number(value),0,110);
  $('flexion').value=Math.round(state.flex);
  $('angle-output').textContent=Math.round(state.flex)+'°';
+ if(study.stage==='operate'&&state.flex>=65){
+   study.stage='reveal';stop();renderExperiment();
+ }
  render();
 }
 
@@ -258,6 +270,7 @@ async function loadSourceGeometry(){
      decoded[bone]={verts,faces};
    }
    sourcedMeshes=decoded;
+   updateStatusBadges();
    state.focus='joint';
    state.frameSpan=2.65;
    state.zoom=1.13;
@@ -321,12 +334,51 @@ function toggleFocus(){
  state.zoom=state.focus==='joint'?1.13:1;
  updateFocusButton();render();
 }
+
+function renderExperiment(){
+ const panel=$('experiment-panel');if(!panel)return;
+ panel.hidden=study.stage==='idle';
+ $('experiment-start').setAttribute('aria-expanded',String(study.stage!=='idle'));
+ if(study.stage==='predict'){
+   panel.innerHTML='<div class="eyebrow">01 / PREDICT</div><h2>What moves when the knee bends?</h2>'+
+     '<p>Choose what you expect to move relative to the femur.</p>'+
+     '<div class="experiment-choices">'+
+     '<button data-guess="lower">Tibia and fibula</button>'+
+     '<button data-guess="upper">Femur only</button>'+
+     '<button data-guess="nothing">Everything stays fixed</button></div>'+
+     '<button class="experiment-dismiss" data-experiment="exit">Close experiment</button>';
+ }else if(study.stage==='operate'){
+   panel.innerHTML='<div class="eyebrow">02 / TEST IT</div><h2>Bend the joint.</h2>'+
+     '<p>Use the <strong>FLEXION</strong> slider below or Play to bend the model beyond 65°.</p>'+
+     '<p class="experiment-hint">The white bone surfaces are sourced; the single-axis movement is a teaching approximation.</p>'+
+     '<button class="experiment-dismiss" data-experiment="exit">Close experiment</button>';
+ }else if(study.stage==='reveal'){
+   panel.innerHTML='<div class="eyebrow">03 / REVEAL</div><h2>A moving relationship.</h2>'+
+     '<p>In this model the tibia and fibula move together relative to the fixed femur. The patella follows an <em>approximate</em> path.</p>'+
+     '<p class="experiment-hint">A real knee also rolls, glides and rotates. This is not a mechanically validated simulation.'+
+     (study.guess==='lower'?' Your prediction matched the model.':' The visible result may differ from your prediction.')+'</p>'+
+     '<div class="experiment-choices"><button data-experiment="replay">↺ Try again</button>'+
+     '<button data-experiment="exit">Return to exploring</button></div>';
+ }
+}
+function beginExperiment(){
+ stop();study.stage='predict';study.guess=null;study.originalDepth=state.depth;
+ setFlex(0);setDepth(3);setExpanded(true);renderExperiment();
+}
+function endExperiment(){
+ study.stage='idle';study.guess=null;setDepth(study.originalDepth);renderExperiment();
+}
+
 function reset(){
+ if(study.stage!=='idle')endExperiment();
  stop();state.yaw=.47;state.pitch=-.11;state.focus='joint';state.zoom=sourcedMeshes?1.13:1;state.frameSpan=sourcedMeshes?2.65:6.65;updateFocusButton();state.selected=null;state.isolate=false;setFlex(0);setDepth(0);updateInspector();render();
 }
 const choices=$('structure-list');
 for(const id of DISPLAY_ORDER){
  const b=document.createElement('button');b.type='button';b.dataset.structure=id;b.textContent=DATA[id].name;
+ const tag=document.createElement('span');tag.className='structure-status';
+ tag.textContent=['femur','tibia','fibula','patella'].includes(id)?'BONE':'ILLUSTRATIVE';
+ b.appendChild(tag);
  b.addEventListener('click',()=>{select(id);if(window.innerWidth<=850)setExpanded(true);});
  choices.appendChild(b);
 }
@@ -340,6 +392,16 @@ $('reset').addEventListener('click',reset);
 $('show-all').addEventListener('click',()=>{state.selected=null;state.isolate=false;setDepth(0);updateInspector();render()});
 $('isolate').addEventListener('click',()=>{if(!state.selected)return;state.isolate=!state.isolate;updateInspector();render()});
 $('inspector-toggle').addEventListener('click',()=>setExpanded(!state.expanded));
+$('experiment-start').addEventListener('click',()=>study.stage==='idle'?beginExperiment():endExperiment());
+$('experiment-panel').addEventListener('click',e=>{
+ const guess=e.target.closest('[data-guess]');
+ if(guess&&study.stage==='predict'){
+   study.guess=guess.dataset.guess;study.stage='operate';renderExperiment();return;
+ }
+ const cmd=e.target.closest('[data-experiment]');if(!cmd)return;
+ if(cmd.dataset.experiment==='replay')beginExperiment();
+ if(cmd.dataset.experiment==='exit')endExperiment();
+});
 window.BodySpatialCore.attachOrbit(canvas,{state,render,pick(x,y){
  for(let i=state.hits.length-1;i>=0;i--){
   const p=state.hits[i];if(p.opacity<.23)continue;
@@ -356,5 +418,5 @@ window.addEventListener('resize',resize,{passive:true});
 if(typeof ResizeObserver==='function')new ResizeObserver(resize).observe(document.querySelector('.stage'));
 updateInspector();setDepth(0);resize();
 loadSourceGeometry();
-window.__BODY_SPATIAL__={getState:()=>({...state,sourceStatus,sourcedBoneCount:sourcedMeshes?Object.keys(sourcedMeshes).length:0,gestures:undefined,hits:undefined,frame:undefined}),select,setFlex,setDepth,reset};
+window.__BODY_SPATIAL__={getState:()=>({...state,studyStage:study.stage,studyGuess:study.guess,sourceStatus,sourcedBoneCount:sourcedMeshes?Object.keys(sourcedMeshes).length:0,gestures:undefined,hits:undefined,frame:undefined}),select,setFlex,setDepth,reset};
 })();

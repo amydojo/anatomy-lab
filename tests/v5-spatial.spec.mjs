@@ -119,3 +119,41 @@ test('joint focus is default; whole-bone context is a reversible camera choice',
  expect(await page.evaluate(()=>window.__BODY_SPATIAL__.getState().focus)).toBe('joint');
  await page.screenshot({path:'artifacts/v5-knee-joint-focus.png'});
 });
+
+test('guided experiment uses actual joint manipulation to reveal explanation',async({page})=>{
+ const errors=await start(page);
+ await page.locator('#experiment-start').click();
+ await expect(page.locator('#experiment-panel')).toContainText('What moves when the knee bends?');
+ await expect(page.locator('#depth')).toHaveValue('3');
+ await page.locator('#experiment-panel [data-guess="upper"]').click();
+ await expect(page.locator('#experiment-panel')).toContainText('Bend the joint.');
+ await page.locator('#flexion').evaluate(el=>{el.value='72';el.dispatchEvent(new Event('input',{bubbles:true}));});
+ await expect(page.locator('#experiment-panel')).toContainText('A moving relationship.');
+ await expect(page.locator('#experiment-panel')).toContainText('real knee also rolls');
+ await page.locator('#experiment-panel [data-experiment="replay"]').click();
+ await expect(page.locator('#angle-output')).toHaveText('0°');
+ await page.locator('#experiment-panel [data-experiment="exit"]').click();
+ await expect(page.locator('#experiment-panel')).toBeHidden();
+ await expect(page.locator('#depth')).toHaveValue('0');
+ expect(errors).toEqual([]);
+ await page.screenshot({path:'artifacts/v5-mechanics-lesson.png'});
+});
+test('source identity is distinguished from schematic tissue on mobile',async({page})=>{
+ await page.setViewportSize({width:390,height:780});
+ const errors=await start(page);
+ await page.locator('#inspector-toggle').click();
+ await page.locator('[data-structure="femur"]').click();
+ await expect(page.locator('#structure-type')).toContainText('SOURCE GEOMETRY');
+ await expect(page.locator('[data-structure="femur"] .structure-status')).toHaveText('SOURCE');
+ await page.locator('[data-structure="acl"]').click();
+ await expect(page.locator('#structure-type')).toContainText('SOFT TISSUE · SCHEMATIC');
+ await expect(page.locator('[data-structure="acl"] .structure-status')).toHaveText('ILLUSTRATIVE');
+ await page.locator('#experiment-start').click();
+ await page.locator('#experiment-panel [data-guess="lower"]').click();
+ await page.locator('#flexion').evaluate(el=>{el.value='69';el.dispatchEvent(new Event('input',{bubbles:true}));});
+ await expect(page.locator('#experiment-panel')).toContainText('Your prediction matched');
+ const metrics=await page.evaluate(()=>({width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+ expect(metrics.scroll).toBeLessThanOrEqual(metrics.width+2);
+ expect(errors).toEqual([]);
+ await page.screenshot({path:'artifacts/v5-mechanics-mobile.png'});
+});

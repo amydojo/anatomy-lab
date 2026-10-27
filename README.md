@@ -161,3 +161,11 @@ Spatial camera orbit, pinch and projection now live in the joint-independent `as
 - **Static checks**: `scripts/tests/test_sourced_knee.py`. Interaction QA: `tests/v5-spatial.spec.mjs` tests sourced loading in Chromium/WebKit and at multiple mobile sizes.
 
 The actual data originates from BodyParts3D 4.0, © The Database Center for Life Science, available under CC Attribution 4.0 International (https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html). The intermediate distribution `ashemag/human-atlas` converted the official OBJ into metres/Y-up and packed/simplified the geometry. Source coordinates were shifted and scaled uniformly for this specimen viewer, without separate bone-by-bone repositioning. **No specialist anatomical review of this rendered interactive reconstruction has been performed**, and simulated flexion/patellar travel/soft-tissue attachments remain illustrative.
+
+### V5.1 — Learn through movement (preview)
+
+The KNEE / SPATIAL inspector now differentiates **sourced BodyParts3D bone geometry** from **schematic soft-tissue overlays** at the individual structure level. A short **“Why does it move?”** experiment asks for a prediction, isolates the source bones, requires actual flexion interaction beyond 65°, and reveals the qualitative femur–tibia–fibula relationship. It identifies the patellar path and single-axis hinge as approximations and has a full replay/reset flow. The experience is deliberately contextual, not a new permanent navigation mode.
+
+`assets/spatial-core.js` now owns the rigid X-axis transform, with source integrity tests checking pairwise distance invariance and reversibility across multiple angles; these verify the mathematical transform, not clinical kinematics. Cross-browser tests cover the educational flow and source/schematic classification on a 390px phone.
+
+**Still pending:** Independent qualified review of the geometry and moving specimen's relationship to human anatomy, including potential artifact intersections and patellar kinematics. Production remains V4 until signed off.

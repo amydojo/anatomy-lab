@@ -5,6 +5,12 @@
 (function(){
  'use strict';
  const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+ // All moving bones use a distance-preserving rigid transform. The choice of
+ // hinge axis / origin is a teaching approximation, not measured biomechanics.
+ function rotateAboutX(point, pivot, radians){
+   const dy=point.y-pivot.y,dz=point.z-pivot.z,c=Math.cos(radians),s=Math.sin(radians);
+   return {x:point.x,y:pivot.y+dy*c-dz*s,z:pivot.z+dy*s+dz*c};
+ }
  function project(point,camera){
    const yaw=camera.yaw||0,pitch=camera.pitch||0;
    const yc=Math.cos(yaw),ys=Math.sin(yaw),xc=Math.cos(pitch),xs=Math.sin(pitch);
@@ -75,5 +81,5 @@
      canvas.removeEventListener('wheel',wheel);
    };
  }
- window.BodySpatialCore=Object.freeze({version:'0.1',project,attachOrbit,clamp});
+ window.BodySpatialCore=Object.freeze({version:'0.2',project,attachOrbit,rotateAboutX,clamp});
 })();

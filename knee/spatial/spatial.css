@@ -8,3 +8,21 @@
 @media(max-width:390px){.brand{letter-spacing:.08em;font-size:10px}.topbar{gap:6px;padding:0 10px}.name strong{font-size:17px}.prefix{font-size:8px}.back{padding:8px}.control-unit{flex:1}.control-unit output{max-width:100px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.controls{gap:10px}.legend{gap:4px}.dot{margin-left:5px}}
 @media(max-height:690px) and (max-width:850px){.topbar{height:47px}.inspector{height:90px}.inspector[data-expanded=true]{height:min(34dvh,220px)}.controls{min-height:77px}.stage{min-height:90px}.helper{display:none}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
+/* V5.1 — visually separate source geometry from educational approximations */
+.structure-list button{display:inline-flex;align-items:center;flex-wrap:wrap;gap:6px}
+.structure-status{font-size:8px;letter-spacing:.1em;color:#dcb2a0;font-weight:760}
+.structure-list [data-structure="femur"] .structure-status,
+.structure-list [data-structure="tibia"] .structure-status,
+.structure-list [data-structure="fibula"] .structure-status,
+.structure-list [data-structure="patella"] .structure-status{color:#c5d8bd}
+.structure-list button[aria-pressed=true] .structure-status{color:#6f3f2a}
+.experiment-panel[hidden]{display:none!important}
+.experiment-panel{padding:17px;border:1px solid #9a6c46;border-radius:14px;background:#36271ced;margin:16px 0 24px}
+.experiment-panel h2{font:400 26px/1.12 Georgia,serif;margin:10px 0}
+.experiment-panel p{font-size:12px;line-height:1.62;color:#e6d3c5}
+.experiment-choices{display:flex;flex-direction:column;gap:8px;margin:15px 0}
+.experiment-choices button,.experiment-dismiss{border:1px solid #a57a59;border-radius:10px;background:#503527;color:#fae5d3;min-height:44px;text-align:left;padding:10px 13px;font-size:12px}
+.experiment-choices button:hover,.experiment-dismiss:hover{background:#744a31}
+.experiment-hint{font-size:11px!important;color:#c7ad95!important}
+.experiment-dismiss{margin-top:4px;background:transparent}
+@media(max-width:850px){.experiment-panel{padding:12px}.experiment-panel h2{font-size:23px}.action-row{gap:7px}}
