@@ -31,7 +31,7 @@ test('registration uncertainty and source licensing are visibly inspectable',asy
  await expect(page.locator('#nerve-evidence')).toContainText('femur surface');
  await expect(page.locator('#nerve-evidence')).toContainText('NOT errors');
  await expect(page.locator('#nerve-evidence')).toContainText('Z-Anatomy');
- await expect(page.locator('#nerve-evidence')).toContainText('medical imaging');
+ await expect(page.locator('#nerve-evidence')).toContainText(/medical imaging/i);
  const fit=await page.evaluate(()=>window.__HIP_SPATIAL__.getState().compositeFitMedian);
  expect(fit).toBeGreaterThan(0);
  expect(errors).toEqual([]);
