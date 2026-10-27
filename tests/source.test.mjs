@@ -64,3 +64,10 @@ test('KNEE / SPATIAL is self contained, labeled as schematic, and protects V4 ro
   assert.ok(dossier.includes('No BodyParts3D or Z-Anatomy mesh has been imported'));
   assert.ok(read('knee/index.html').includes('/knee/spatial/'));
 });
+
+test('Spatial core is separate from knee geometry and usable without a framework',()=>{
+ const core=read('assets/spatial-core.js');
+ assert.doesNotThrow(()=>new Function(core));
+ assert.ok(core.includes('attachOrbit')&&core.includes('project'));
+ assert.ok(read('knee/spatial/index.html').includes('/assets/spatial-core.js'));
+});

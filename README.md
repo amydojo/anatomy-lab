@@ -149,3 +149,5 @@ python3 scripts/validate_spatial_assets.py \\
 ```
 
 This produces SHA-256 hashes, size, bounding boxes, coordinate spans, an approximate alignment check, and mandatory review warnings. It does **not** validate anatomical identity, articular congruence, entheses, kinematic constraints, or specialist clinical suitability. No mesh has been downloaded or added to this V5 preview yet. Tests run with `python3 -m unittest discover -s scripts/tests` and CI.
+
+Spatial camera orbit, pinch and projection now live in the joint-independent `assets/spatial-core.js`; Knee-specific geometry and pose constraints remain in `knee/spatial/spatial.js`. The shared controller has a disposal API for later Hip and Shoulder spatial scenes.

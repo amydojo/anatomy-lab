@@ -6,7 +6,7 @@
 'use strict';
 const canvas=document.getElementById('knee-canvas');
 const ctx=canvas.getContext('2d',{alpha:true});
-if(!ctx)return;
+if(!ctx || !window.BodySpatialCore)return;
 const $=id=>document.getElementById(id);
 const DATA={
   femur:{name:'Femur',kind:'Bone · stationary frame',color:'#e0ceb2',description:'The distal thigh bone forms two rounded condyles that articulate with the tibial plateau.',insight:'The contact geometry is more complicated than a simple hinge. Actual knee movement combines rolling, gliding and rotation.'},
@@ -124,19 +124,7 @@ function worldMeshes(){
 }
 function hexRGB(hex){return [1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));}
 function rgbLit(hex,lit){return 'rgb('+hexRGB(hex).map(n=>Math.round(clamp(n*lit,0,255))).join(',')+')';}
-function rotateView(point){
- // Y-axis rotation followed by X-axis tilt.
- const c=Math.cos(state.yaw),s=Math.sin(state.yaw);
- const x=point.x*c+point.z*s,z=point.z*c-point.x*s;
- const cp=Math.cos(state.pitch),sp=Math.sin(state.pitch);
- return V(x,point.y*cp-z*sp,point.y*sp+z*cp);
-}
-function projected(point){
- const w=state.width,h=state.height;
- const camera=rotateView(point),perspective=7.4/(7.4-camera.z);
- const scale=Math.min(w/3.25,h/6.65)*state.zoom;
- return {x:w*.50+camera.x*scale*perspective,y:h*.50-(camera.y-.04)*scale*perspective,z:camera.z,world:camera};
-}
+const projected=(point)=>window.BodySpatialCore.project(point,state);
 function polygonContains(x,y,pts){
  let inside=false;
  for(let i=0,j=pts.length-1;i<pts.length;j=i++){
@@ -268,42 +256,16 @@ $('reset').addEventListener('click',reset);
 $('show-all').addEventListener('click',()=>{state.selected=null;state.isolate=false;setDepth(0);updateInspector();render()});
 $('isolate').addEventListener('click',()=>{if(!state.selected)return;state.isolate=!state.isolate;updateInspector();render()});
 $('inspector-toggle').addEventListener('click',()=>setExpanded(!state.expanded));
-const pointers=new Map();let lastGesture=null,moved=false;
-const gap=()=>{const [a,b]=[...pointers.values()];return Math.hypot(a.x-b.x,a.y-b.y);};
-canvas.addEventListener('pointerdown',e=>{
- pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
- moved=false;
- if(pointers.size===1)lastGesture={x:e.clientX,y:e.clientY,yaw:state.yaw,pitch:state.pitch};
- else if(pointers.size===2)lastGesture={distance:gap(),zoom:state.zoom};
- try{canvas.setPointerCapture(e.pointerId)}catch{}
-});
-canvas.addEventListener('pointermove',e=>{
- if(!pointers.has(e.pointerId))return;
- pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
- if(pointers.size===2&&lastGesture?.distance){
-  state.zoom=clamp(lastGesture.zoom*gap()/Math.max(1,lastGesture.distance),.7,2.5);moved=true;render();
- }else if(pointers.size===1&&lastGesture?.yaw!==undefined){
-  const dx=e.clientX-lastGesture.x,dy=e.clientY-lastGesture.y;
-  if(Math.abs(dx)+Math.abs(dy)>5)moved=true;
-  if(moved){state.yaw=lastGesture.yaw+dx*.0085;state.pitch=clamp(lastGesture.pitch+dy*.005,-.65,.65);render()}
- }
-});
-canvas.addEventListener('pointerup',e=>{
- const had=pointers.size===1;
- pointers.delete(e.pointerId);
- if(had&&!moved){
-  const rect=canvas.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top;
-  for(let i=state.hits.length-1;i>=0;i--){
-   const p=state.hits[i];if(p.opacity<.23)continue;
-   if(polygonContains(x,y,p.coords)){select(p.id);if(window.innerWidth<=850)setExpanded(true);break}
+window.BodySpatialCore.attachOrbit(canvas,{state,render,pick(x,y){
+ for(let i=state.hits.length-1;i>=0;i--){
+  const p=state.hits[i];if(p.opacity<.23)continue;
+  if(polygonContains(x,y,p.coords)){
+    select(p.id);
+    if(window.innerWidth<=850)setExpanded(true);
+    break;
   }
  }
- if(pointers.size===1){
-  const remaining=[...pointers.values()][0];lastGesture={x:remaining.x,y:remaining.y,yaw:state.yaw,pitch:state.pitch};
- }else if(pointers.size===0)lastGesture=null;
-});
-canvas.addEventListener('pointercancel',e=>{pointers.delete(e.pointerId);lastGesture=null;});
-canvas.addEventListener('wheel',e=>{if(e.ctrlKey||e.shiftKey){e.preventDefault();state.zoom=clamp(state.zoom*(e.deltaY<0?1.09:.91),.7,2.5);render()}},{passive:false});
+}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stop()});
 window.addEventListener('pagehide',stop);
 window.addEventListener('resize',resize,{passive:true});
