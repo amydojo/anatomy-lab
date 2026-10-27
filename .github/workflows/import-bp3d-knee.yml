@@ -1,0 +1,48 @@
+name: Import pinned BodyParts3D knee bones
+on:
+  push:
+    branches: ['feat/v5-knee-spatial']
+    paths:
+      - 'scripts/import_bp3d_right_knee.py'
+      - '.github/workflows/import-bp3d-knee.yml'
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch and verify pinned 4.0 source geometry
+        run: python3 scripts/import_bp3d_right_knee.py
+      - name: Verify exported anatomy asset
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('knee/spatial/assets/bp3d-right-knee-4.0.json')
+          d=json.loads(p.read_text())
+          m=d['bone_meshes']
+          assert set(m)=={'femur','tibia','fibula','patella'}
+          assert all(len(v['vertices'])>100 and len(v['faces'])>200 for v in m.values())
+          proof=json.loads(Path('knee/spatial/assets/provenance.json').read_text())
+          assert proof['anatomist_reviewed'] is False
+          assert proof['kinematically_validated'] is False
+          print({k:(len(v['vertices']),len(v['faces'])) for k,v in m.items()})
+          PY
+      - name: Commit derived, attribution-bound data to the V5 branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add knee/spatial/assets/bp3d-right-knee-4.0.json knee/spatial/assets/provenance.json
+          if git diff --cached --quiet; then
+            echo "No source geometry changes"
+          else
+            git commit -m "Add verified BodyParts3D 4.0 right knee bone meshes [skip ci]"
+            git push origin HEAD:feat/v5-knee-spatial
+          fi

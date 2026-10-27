@@ -21,7 +21,9 @@ const DATA={
 };
 const DISPLAY_ORDER=['femur','tibia','fibula','patella','menisci','acl','pcl','collateral','tendon'];
 const PALETTES={femur:DATA.femur.color,tibia:DATA.tibia.color,fibula:DATA.fibula.color,patella:DATA.patella.color,menisci:DATA.menisci.color,acl:DATA.acl.color,pcl:DATA.pcl.color,collateral:DATA.collateral.color,tendon:DATA.tendon.color};
-const state={yaw:0.47,pitch:-0.11,zoom:1,flex:0,depth:0,selected:null,isolate:false,playing:false,frame:0,prev:0,dir:1,expanded:false,width:0,height:0,dpr:1,hits:[],gestures:new Map(),touchStart:null};
+let sourcedMeshes=null;
+let sourceStatus='Schematic geometry · source loading';
+const state={frameSpan:6.65,yaw:0.47,pitch:-0.11,zoom:1,flex:0,depth:0,selected:null,isolate:false,playing:false,frame:0,prev:0,dir:1,expanded:false,width:0,height:0,dpr:1,hits:[],gestures:new Map(),touchStart:null};
 const V=(x=0,y=0,z=0)=>({x,y,z});
 const add=(a,b)=>V(a.x+b.x,a.y+b.y,a.z+b.z);
 const sub=(a,b)=>V(a.x-b.x,a.y-b.y,a.z-b.z);
@@ -92,14 +94,29 @@ const rings={
 };
 function worldMeshes(){
  const pieces=[];
- pieces.push(loft('femur',rings.femur,18));
- for(const side of [-1,1])pieces.push(ellipsoid('femur',V(side*.265,.29,.08),.28,.265,.325,12,18));
- pieces.push(loft('tibia',rings.tibia,18,true));
- pieces.push(ellipsoid('tibia',V(0,-.13,.01),.49,.12,.34,9,18,true));
- pieces.push(loft('fibula',rings.fibula,12,true));
+ if(sourcedMeshes){
+   // Sourced bone meshes use a SINGLE shared coordinate transform.
+   // Only the lower leg rotates around an illustrative hinge; this is not measured kinematics.
+   for(const bone of ['femur','tibia','fibula','patella']){
+     const reference=sourcedMeshes[bone];
+     const theta=state.flex*Math.PI/180;
+     const vertices=bone==='tibia'||bone==='fibula'
+       ? reference.verts.map(rotateLower)
+       : bone==='patella'
+         ? reference.verts.map(p=>V(p.x,p.y+.11*Math.sin(theta),p.z+.04*Math.sin(theta)))
+         : reference.verts;
+     pieces.push({id:bone,verts:vertices,faces:reference.faces,color:PALETTES[bone]});
+   }
+ }else{
+   pieces.push(loft('femur',rings.femur,18));
+   for(const side of [-1,1])pieces.push(ellipsoid('femur',V(side*.265,.29,.08),.28,.265,.325,12,18));
+   pieces.push(loft('tibia',rings.tibia,18,true));
+   pieces.push(ellipsoid('tibia',V(0,-.13,.01),.49,.12,.34,9,18,true));
+   pieces.push(loft('fibula',rings.fibula,12,true));
+ }
  const a=state.flex*Math.PI/180;
  const patella=V(0,.285+.12*Math.sin(a),.49+.025*Math.cos(a));
- pieces.push(ellipsoid('patella',patella,.23,.32,.14,10,18));
+ if(!sourcedMeshes)pieces.push(ellipsoid('patella',patella,.23,.32,.14,10,18));
  // Menisci are simplified C-shaped ribbons atop the moving tibial plateau.
  for(const side of [-1,1]){
   const path=[];
@@ -204,6 +221,44 @@ function setFlex(value){
  $('angle-output').textContent=Math.round(state.flex)+'°';
  render();
 }
+
+async function loadSourceGeometry(){
+ try{
+   const response=await fetch('/knee/spatial/assets/bp3d-right-knee-4.0.json',{cache:'force-cache'});
+   if(!response.ok)throw new Error('Sourced bone asset unavailable: '+response.status);
+   const payload=await response.json();
+   if(payload.schema!=='body-live/sourced-knee-geometry-v1')throw new Error('Unexpected anatomy asset schema');
+   if(payload.source_release!=='4.0 99%-reduced IS-A tree')throw new Error('Unreviewed anatomy release');
+   const names=['femur','tibia','fibula','patella'];
+   const decoded={};
+   for(const bone of names){
+     const source=payload.bone_meshes?.[bone];
+     if(!source || !Array.isArray(source.vertices)||!Array.isArray(source.faces))throw new Error('Missing '+bone+' mesh');
+     if(source.vertices.length<50 || source.faces.length<50)throw new Error('Incomplete '+bone+' mesh');
+     const verts=source.vertices.map(p=>{
+       if(!Array.isArray(p)||p.length!==3||p.some(v=>!Number.isFinite(v)))throw new Error('Invalid vertex');
+       return V(p[0],p[1],p[2]);
+     });
+     const faces=source.faces.map(f=>{
+       if(!Array.isArray(f)||f.length!==3||f.some(i=>!Number.isInteger(i)||i<0||i>=verts.length))throw new Error('Invalid triangle');
+       return f;
+     });
+     decoded[bone]={verts,faces};
+   }
+   sourcedMeshes=decoded;
+   state.frameSpan=7.6;
+   sourceStatus='BODYPARTS3D 4.0 · REAL BONE MESHES';
+   $('scene-status').textContent='SOURCED BONES · SCHEMATIC TISSUES';
+   document.querySelector('.disclaimer').textContent='Four aligned static right-knee bone meshes are sourced from BodyParts3D 4.0 (DBCLS, CC BY 4.0), transformed together from the same original frame. Ligaments, cartilage, patellar tracking and flexion remain illustrative and unreviewed.';
+   updateInspector();render();
+ }catch(error){
+   sourceStatus='Schematic fallback — source geometry unavailable';
+   $('scene-status').textContent='SCHEMATIC FALLBACK';
+   console.warn('BODY / LIVE:',sourceStatus,error.message);
+   render();
+ }
+}
+
 function resize(){
  const rect=canvas.getBoundingClientRect();
  state.width=Math.max(1,rect.width);state.height=Math.max(1,rect.height);
@@ -271,5 +326,6 @@ window.addEventListener('pagehide',stop);
 window.addEventListener('resize',resize,{passive:true});
 if(typeof ResizeObserver==='function')new ResizeObserver(resize).observe(document.querySelector('.stage'));
 updateInspector();setDepth(0);resize();
-window.__BODY_SPATIAL__={getState:()=>({...state,gestures:undefined,hits:undefined,frame:undefined}),select,setFlex,setDepth,reset};
+loadSourceGeometry();
+window.__BODY_SPATIAL__={getState:()=>({...state,sourceStatus,sourcedBoneCount:sourcedMeshes?Object.keys(sourcedMeshes).length:0,gestures:undefined,hits:undefined,frame:undefined}),select,setFlex,setDepth,reset};
 })();

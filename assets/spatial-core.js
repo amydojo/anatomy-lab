@@ -14,7 +14,7 @@
    const z2=point.y*xs+z*xc;
    const view={x,y:y2,z:z2};
    const perspective=7.4/(7.4-z2);
-   const scale=Math.min(camera.width/3.25,camera.height/6.65)*camera.zoom;
+   const scale=Math.min(camera.width/3.25,camera.height/(camera.frameSpan||6.65))*camera.zoom;
    return {x:camera.width*.50+x*scale*perspective,
      y:camera.height*.50-(y2-.04)*scale*perspective,z:z2,world:view};
  }
