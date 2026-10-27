@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#15110f">
+<title>KNEE / SPATIAL — BODY / LIVE V5</title><meta name="description" content="A tactile spatial knee specimen. Rotate, flex, peel, and inspect a transparent educational biomechanics model.">
+<link rel="stylesheet" href="/knee/spatial/spatial.css" />
+<script defer src="/assets/spatial-core.js"></script><script defer src="/knee/spatial/attachment-graph.js"></script><script defer src="/knee/spatial/spatial.js"></script></head>
+<body><div id="app">
+  <header class="topbar"><a class="brand" href="/">BODY <span>/</span> LIVE</a><div class="name"><span class="prefix">V5 EXPERIMENT 01</span><strong>KNEE / SPATIAL</strong></div><a class="back" href="/knee/" aria-label="Return to classic knee lab">V4 lab ↗</a></header>
+  <main class="workspace">
+    <section class="stage" aria-label="Interactive three-dimensional knee specimen">
+      <div class="stage-top"><span class="view-label" id="orientation">RIGHT KNEE · ANTEROLATERAL</span><span class="view-label detail" id="scene-status">ILLUSTRATIVE 3D</span></div>
+      <canvas id="knee-canvas" role="img" aria-label="Rotatable 3D anatomical knee model. Use controls or pointer drag to rotate, pinch to zoom, and tap to select a structure."></canvas>
+      <div class="stage-actions"><button id="front" aria-label="Front anatomical view">Front</button><button id="side" aria-label="Lateral view">Side</button><button id="focus-toggle" aria-label="Show whole bones" aria-pressed="false">Whole bones</button><button id="reset" aria-label="Reset specimen orientation, pose, and selection">Reset</button></div>
+      <div class="legend"><span class="dot bone"></span>BONE <span class="dot ligament"></span>LIGAMENT <span class="dot cartilage"></span>MENISCUS</div>
+      <div class="helper" id="gesture-hint">DRAG TO ORBIT · PINCH TO ZOOM · TAP TO ISOLATE</div>
+    </section>
+    <aside class="inspector" aria-labelledby="inspector-title">
+      <button id="inspector-toggle" class="inspector-grab" aria-expanded="false" aria-controls="inspector-scroll"><span class="handle"></span><span id="selected-short">Explore the knee</span><span class="grab-icon" aria-hidden="true">⌃</span></button>
+      <div class="inspector-scroll" id="inspector-scroll">
+        <div class="eyebrow" id="structure-type">THE JOINT · REVEALED</div>
+        <h1 id="inspector-title">A moving machine.</h1>
+        <p class="intro" id="structure-intro">A spatial study of the knee’s skeletal frame and selected soft-tissue relationships. Rotate the specimen and peel through the layers to uncover how it works.</p>
+        <div class="action-row"><button id="isolate" aria-pressed="false">Isolate selection</button><button id="show-all">Show all</button><button id="follow" aria-pressed="false" disabled hidden>◎ Follow attachments</button><button id="experiment-start" aria-expanded="false" aria-controls="experiment-panel">✧ Why does it move?</button></div>
+        <section class="attachment-info" id="attachment-info" aria-live="polite" hidden></section><section class="experiment-panel" id="experiment-panel" aria-label="Interactive knee mechanics experiment" aria-live="polite" hidden></section>
+        <div class="fact" id="anatomy-fact"><span>BEHIND THE MECHANISM</span><p>Watch the lower leg rotate around an illustrative knee axis. Real knees roll, glide, and rotate—the model deliberately simplifies this movement.</p></div>
+        <div class="section-label">EXPLORE STRUCTURES</div>
+        <div class="structure-list" id="structure-list"></div>
+        <div class="section-label">MODEL ACCURACY</div>
+        <p class="disclaimer">Spatial geometry is a handcrafted educational proxy, not a patient scan or imported BodyParts3D mesh. Attachments and flexion are illustrative, not clinically validated. No medical diagnosis or tissue-stress estimates.</p>
+        <a class="provenance" href="/knee/spatial/sources/">Read source & accuracy dossier ↗</a>
+      </div>
+    </aside>
+  </main>
+  <footer class="controls">
+    <div class="control-unit"><label for="depth"><span>01 / PEEL</span><output id="depth-output">ALL STRUCTURES</output></label><input id="depth" type="range" min="0" max="3" step="1" value="0" aria-label="Anatomical peel depth"></div>
+    <div class="control-unit"><label for="flexion"><span>02 / FLEXION</span><output id="angle-output">0°</output></label><input id="flexion" type="range" min="0" max="110" step="1" value="0" aria-label="Virtual knee flexion in degrees"></div>
+    <button id="play" class="play" aria-pressed="false">▶ <span>Play</span></button>
+  </footer>
+</div></body></html>
