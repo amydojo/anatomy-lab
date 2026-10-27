@@ -22,9 +22,10 @@ const DATA={
 const DISPLAY_ORDER=['femur','tibia','fibula','patella','menisci','acl','pcl','collateral','tendon'];
 const PALETTES={femur:DATA.femur.color,tibia:DATA.tibia.color,fibula:DATA.fibula.color,patella:DATA.patella.color,menisci:DATA.menisci.color,acl:DATA.acl.color,pcl:DATA.pcl.color,collateral:DATA.collateral.color,tendon:DATA.tendon.color};
 let sourcedMeshes=null;
+let attachmentGraph=null;
 let sourceStatus='Schematic geometry · source loading';
 const study={stage:'idle',guess:null,originalDepth:0};
-const state={focus:'joint',frameSpan:6.65,yaw:0.47,pitch:-0.11,zoom:1,flex:0,depth:0,selected:null,isolate:false,playing:false,frame:0,prev:0,dir:1,expanded:false,width:0,height:0,dpr:1,hits:[],gestures:new Map(),touchStart:null};
+const state={focus:'joint',frameSpan:6.65,yaw:0.47,pitch:-0.11,zoom:1,flex:0,depth:0,selected:null,isolate:false,follow:false,playing:false,frame:0,prev:0,dir:1,expanded:false,width:0,height:0,dpr:1,hits:[],gestures:new Map(),touchStart:null};
 const V=(x=0,y=0,z=0)=>({x,y,z});
 const add=(a,b)=>V(a.x+b.x,a.y+b.y,a.z+b.z);
 const sub=(a,b)=>V(a.x-b.x,a.y-b.y,a.z-b.z);
@@ -94,63 +95,61 @@ const rings={
 };
 function worldMeshes(){
  const pieces=[];
- if(sourcedMeshes){
-   // Sourced bone meshes use a SINGLE shared coordinate transform.
-   // Only the lower leg rotates around an illustrative hinge; this is not measured kinematics.
-   for(const bone of ['femur','tibia','fibula','patella']){
-     const reference=sourcedMeshes[bone];
-     const theta=state.flex*Math.PI/180;
-     const vertices=bone==='tibia'||bone==='fibula'
-       ? reference.verts.map(rotateLower)
-       : bone==='patella'
-         ? reference.verts.map(p=>V(p.x,p.y+.11*Math.sin(theta),p.z+.04*Math.sin(theta)))
-         : reference.verts;
-     pieces.push({id:bone,verts:vertices,faces:reference.faces,color:PALETTES[bone]});
-   }
- }else{
-   pieces.push(loft('femur',rings.femur,18));
-   for(const side of [-1,1])pieces.push(ellipsoid('femur',V(side*.265,.29,.08),.28,.265,.325,12,18));
-   pieces.push(loft('tibia',rings.tibia,18,true));
-   pieces.push(ellipsoid('tibia',V(0,-.13,.01),.49,.12,.34,9,18,true));
-   pieces.push(loft('fibula',rings.fibula,12,true));
- }
- const a=state.flex*Math.PI/180;
- const isSource=!!sourcedMeshes;
- // Source frame sets the scale; these soft-tissue paths remain illustrative.
- const patella=isSource?V(0,.065+.09*Math.sin(a),.24+.025*Math.cos(a)):V(0,.285+.12*Math.sin(a),.49+.025*Math.cos(a));
- if(!isSource)pieces.push(ellipsoid('patella',patella,.23,.32,.14,10,18));
- for(const side of [-1,1]){
-  const path=[];
-  for(let i=0;i<=15;i++){
-   const theta=(isSource?(-.73+1.46*i/15):(-.90+2.05*i/15))*Math.PI;
-   path.push(isSource
-    ? V(side*.185+Math.cos(theta)*.145,-.075,Math.sin(theta)*.135)
-    : V(side*.26+Math.cos(theta)*.19,-.096,Math.sin(theta)*.20));
+ if(sourcedMeshes&&attachmentGraph){
+  // Every bone and the insertion markers resolve through the SAME transform hierarchy.
+  for(const bone of ['femur','tibia','fibula','patella']){
+   const reference=sourcedMeshes[bone];
+   pieces.push({id:bone,
+     verts:reference.verts.map(p=>attachmentGraph.transform(bone,p,state.flex)),
+     faces:reference.faces,color:PALETTES[bone]});
   }
-  pieces.push(tube('menisci',path,isSource?.037:.072,7,true));
+  // Menisci are schematic crescent guides fixed in tibial local space.
+  // Their exact morphology, roots and contact regions have not been reviewed.
+  for(const landmark of ['meniscus.lateral','meniscus.medial']){
+   const centre=attachmentGraph.anchors[landmark].base;
+   const path=[];
+   for(let i=0;i<=16;i++){
+    const theta=(-.8+1.7*i/16)*Math.PI;
+    const local=V(centre.x+.085*Math.cos(theta),centre.y+.016,centre.z+.08*Math.sin(theta));
+    path.push(attachmentGraph.transform('tibia',local,state.flex));
+   }
+   pieces.push(tube('menisci',path,.023,7));
+  }
+  const outputs={acl:'acl',pcl:'pcl',mcl:'collateral',lcl:'collateral',quadriceps:'tendon',patellar:'tendon'};
+  for(const [edge,id] of Object.entries(outputs)){
+   const path=attachmentGraph.guide(edge,state.flex);
+   pieces.push(tube(id,path.vertices,path.radius,8));
+  }
+ }else{
+  // Offline / unavailable sourced-asset fallback remains the original schematic.
+  pieces.push(loft('femur',rings.femur,18));
+  for(const side of [-1,1])pieces.push(ellipsoid('femur',V(side*.265,.29,.08),.28,.265,.325,12,18));
+  pieces.push(loft('tibia',rings.tibia,18,true));
+  pieces.push(ellipsoid('tibia',V(0,-.13,.01),.49,.12,.34,9,18,true));
+  pieces.push(loft('fibula',rings.fibula,12,true));
+  const a=state.flex*Math.PI/180;
+  const patella=V(0,.285+.12*Math.sin(a),.49+.025*Math.cos(a));
+  pieces.push(ellipsoid('patella',patella,.23,.32,.14,10,18));
+  for(const side of [-1,1]){
+   const path=[];
+   for(let i=0;i<=15;i++){
+    const theta=(-.90+2.05*i/15)*Math.PI;
+    path.push(V(side*.26+Math.cos(theta)*.19,-.096,Math.sin(theta)*.20));
+   }
+   pieces.push(tube('menisci',path,.072,7,true));
+  }
+  const lowerACL=rotateLower(V(-.09,-.14,.12)),lowerPCL=rotateLower(V(.09,-.17,-.13));
+  pieces.push(tube('acl',[V(.19,.47,-.13),V(.04,.23,.01),lowerACL],.043,9));
+  pieces.push(tube('pcl',[V(-.20,.46,.13),V(-.04,.20,.01),lowerPCL],.055,9));
+  for(const side of [-1,1])
+   pieces.push(tube('collateral',[V(side*.43,.55,.015),V(side*.49,.10,.04),rotateLower(V(side*.47,-.40,.025))],.043,8));
+  const tuberosity=rotateLower(V(0,-.60,.245));
+  pieces.push(tube('tendon',[V(0,1.25,.34),V(0,.61,.38),patella],.080,10));
+  pieces.push(tube('tendon',[patella,mix(patella,tuberosity,.44),tuberosity],.092,10));
  }
- // Illustrative spatial relationships only, NEVER validated attachment coordinates.
- const lowerACL=rotateLower(isSource?V(-.08,-.13,.055):V(-.09,-.14,.12));
- const lowerPCL=rotateLower(isSource?V(.08,-.13,-.08):V(.09,-.17,-.13));
- pieces.push(tube('acl',isSource
-  ?[V(.12,.175,-.045),V(.015,.07,.00),lowerACL]
-  :[V(.19,.47,-.13),V(.04,.23,.01),lowerACL],isSource?.029:.043,9));
- pieces.push(tube('pcl',isSource
-  ?[V(-.12,.19,.075),V(-.02,.055,-.005),lowerPCL]
-  :[V(-.20,.46,.13),V(-.04,.20,.01),lowerPCL],isSource?.032:.055,9));
- for(const side of [-1,1]){
-  pieces.push(tube('collateral',isSource
-   ?[V(side*.38,.21,.002),V(side*.38,.02,.015),rotateLower(V(side*.34,-.32,.02))]
-   :[V(side*.43,.55,.015),V(side*.49,.10,.04),rotateLower(V(side*.47,-.40,.025))],
-   isSource?.022:.043,8));
- }
- const tuberosity=rotateLower(isSource?V(0,-.39,.185):V(0,-.60,.245));
- pieces.push(tube('tendon',isSource
-   ?[V(0,.77,.21),V(0,.42,.225),patella]
-   :[V(0,1.25,.34),V(0,.61,.38),patella],isSource?.045:.080,10));
- pieces.push(tube('tendon',[patella,mix(patella,tuberosity,.44),tuberosity],isSource?.043:.092,10));
  return pieces.filter(Boolean);
 }
+
 function hexRGB(hex){return [1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));}
 function rgbLit(hex,lit){return 'rgb('+hexRGB(hex).map(n=>Math.round(clamp(n*lit,0,255))).join(',')+')';}
 const projected=(point)=>window.BodySpatialCore.project(point,state);
@@ -204,7 +203,66 @@ function render(){
  }
  ctx.globalAlpha=1;
  state.hits=hits;
+ drawAttachments();
 }
+
+function selectedConnections(){
+ if(!attachmentGraph||!state.selected)return [];
+ const map={acl:['acl'],pcl:['pcl'],collateral:['mcl','lcl'],tendon:['quadriceps','patellar']};
+ if(map[state.selected])return map[state.selected];
+ if(['femur','tibia','fibula','patella'].includes(state.selected))
+  return attachmentGraph.attachedTo(state.selected).map(l=>l.id);
+ return [];
+}
+function drawAttachments(){
+ if(!state.follow||!attachmentGraph)return;
+ const connected=selectedConnections();
+ ctx.save();
+ ctx.lineWidth=2.3;ctx.lineCap='round';ctx.strokeStyle='#ffe0a0';
+ ctx.fillStyle='#ffe8b8';ctx.font='600 11px -apple-system, sans-serif';
+ for(const id of connected){
+  const guide=attachmentGraph.guide(id,state.flex),a=projected(guide.from),b=projected(guide.to);
+  ctx.beginPath();ctx.moveTo(a.x,a.y);
+  for(const vertex of guide.vertices.slice(1)){const pt=projected(vertex);ctx.lineTo(pt.x,pt.y);}
+  ctx.stroke();
+  for(const [pt,side] of [[a,'A'],[b,'B']]){
+   ctx.beginPath();ctx.fillStyle='#ffe3a5';ctx.arc(pt.x,pt.y,5,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='#342116';ctx.fillText(side,pt.x+9,pt.y-9);
+  }
+ }
+ ctx.restore();
+}
+function renderAttachmentInfo(){
+ const node=$('attachment-info'),btn=$('follow');
+ if(!node||!btn)return;
+ const ids=selectedConnections();
+ const available=!!attachmentGraph&&ids.length>0;
+ btn.disabled=!available;
+ btn.hidden=!available;
+ if(!available||!state.follow){
+  node.hidden=true;node.replaceChildren();
+  btn.setAttribute('aria-pressed','false');btn.textContent='◎ Follow attachments';
+  return;
+ }
+ btn.setAttribute('aria-pressed','true');btn.textContent='✕ Hide attachments';
+ const rows=ids.map(id=>{
+  const c=attachmentGraph.links[id];
+  const start=attachmentGraph.anchors[c.from],end=attachmentGraph.anchors[c.to];
+  return '<div class="attachment-row"><strong>'+c.label+'</strong><span>'+
+    start.bone+' → '+end.bone+'</span><small>'+c.description+'</small></div>';
+ }).join('');
+ node.hidden=false;
+ node.innerHTML='<div class="eyebrow">CONNECTED ANATOMY · APPROXIMATE</div>'+
+  '<p class="attachment-note">Markers are snapped to source-bone surfaces from estimated regions, not anatomist-verified insertion sites. They follow their parent bones during flexion.</p>'+
+  rows+'<a href="/knee/spatial/sources/">Landmark methodology and review status ↗</a>';
+}
+function toggleAttachments(){
+ if(!attachmentGraph||!selectedConnections().length)return;
+ state.follow=!state.follow;
+ if(state.follow)setDepth(0);
+ renderAttachmentInfo();render();
+}
+
 function updateStatusBadges(){
  document.querySelectorAll('#structure-list [data-structure]').forEach(btn=>{
   const bone=['femur','tibia','fibula','patella'].includes(btn.dataset.structure);
@@ -224,9 +282,11 @@ function updateInspector(){
  $('isolate').disabled=!d;
  $('isolate').setAttribute('aria-pressed',String(state.isolate));
  document.querySelectorAll('[data-structure]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.structure===state.selected)));
+ renderAttachmentInfo();
 }
 function select(id){
  if(!DATA[id])return;
+ if(state.selected!==id)state.follow=false;
  if(state.selected===id&&state.isolate){state.isolate=false;}else{state.selected=id;state.isolate=false;}
  updateInspector();render();
 }
@@ -269,6 +329,10 @@ async function loadSourceGeometry(){
      });
      decoded[bone]={verts,faces};
    }
+   // Surface landmarks are derived once, before movement. No per-bone recentering.
+   if(!window.KneeAttachmentGraph)throw new Error('Landmark graph unavailable');
+   const resolved=window.KneeAttachmentGraph.create(decoded);
+   attachmentGraph=resolved;
    sourcedMeshes=decoded;
    updateStatusBadges();
    state.focus='joint';
@@ -280,6 +344,7 @@ async function loadSourceGeometry(){
    document.querySelector('.disclaimer').textContent='Four aligned static right-knee bone meshes are sourced from BodyParts3D 4.0 (DBCLS, CC BY 4.0), transformed together from the same original frame. Ligaments, cartilage, patellar tracking and flexion remain illustrative and unreviewed.';
    updateInspector();render();
  }catch(error){
+   attachmentGraph=null;sourcedMeshes=null;state.follow=false;
    sourceStatus='Schematic fallback — source geometry unavailable';
    $('scene-status').textContent='SCHEMATIC FALLBACK';
    console.warn('BODY / LIVE:',sourceStatus,error.message);
@@ -372,7 +437,7 @@ function endExperiment(){
 
 function reset(){
  if(study.stage!=='idle')endExperiment();
- stop();state.yaw=.47;state.pitch=-.11;state.focus='joint';state.zoom=sourcedMeshes?1.13:1;state.frameSpan=sourcedMeshes?2.65:6.65;updateFocusButton();state.selected=null;state.isolate=false;setFlex(0);setDepth(0);updateInspector();render();
+ stop();state.follow=false;state.yaw=.47;state.pitch=-.11;state.focus='joint';state.zoom=sourcedMeshes?1.13:1;state.frameSpan=sourcedMeshes?2.65:6.65;updateFocusButton();state.selected=null;state.isolate=false;setFlex(0);setDepth(0);updateInspector();render();
 }
 const choices=$('structure-list');
 for(const id of DISPLAY_ORDER){
@@ -390,7 +455,8 @@ $('focus-toggle').addEventListener('click',toggleFocus);
 $('front').addEventListener('click',()=>{state.yaw=0;state.pitch=0;render()});
 $('side').addEventListener('click',()=>{state.yaw=1.55;state.pitch=0;render()});
 $('reset').addEventListener('click',reset);
-$('show-all').addEventListener('click',()=>{state.selected=null;state.isolate=false;setDepth(0);updateInspector();render()});
+$('show-all').addEventListener('click',()=>{state.selected=null;state.isolate=false;state.follow=false;setDepth(0);updateInspector();render()});
+$('follow').addEventListener('click',toggleAttachments);
 $('isolate').addEventListener('click',()=>{if(!state.selected)return;state.isolate=!state.isolate;updateInspector();render()});
 $('inspector-toggle').addEventListener('click',()=>setExpanded(!state.expanded));
 $('experiment-start').addEventListener('click',()=>study.stage==='idle'?beginExperiment():endExperiment());
@@ -419,5 +485,5 @@ window.addEventListener('resize',resize,{passive:true});
 if(typeof ResizeObserver==='function')new ResizeObserver(resize).observe(document.querySelector('.stage'));
 updateInspector();setDepth(0);resize();
 loadSourceGeometry();
-window.__BODY_SPATIAL__={getState:()=>({...state,studyStage:study.stage,studyGuess:study.guess,sourceStatus,sourcedBoneCount:sourcedMeshes?Object.keys(sourcedMeshes).length:0,gestures:undefined,hits:undefined,frame:undefined}),select,setFlex,setDepth,reset};
+window.__BODY_SPATIAL__={getState:()=>({...state,landmarkCount:attachmentGraph?Object.keys(attachmentGraph.anchors).length:0,attachedEdges:attachmentGraph?selectedConnections():[],studyStage:study.stage,studyGuess:study.guess,sourceStatus,sourcedBoneCount:sourcedMeshes?Object.keys(sourcedMeshes).length:0,gestures:undefined,hits:undefined,frame:undefined}),select,setFlex,setDepth,reset};
 })();

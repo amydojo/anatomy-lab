@@ -158,3 +158,52 @@ test('source identity is distinguished from schematic tissue on mobile',async({p
  expect(errors).toEqual([]);
  await page.screenshot({path:'artifacts/v5-mechanics-mobile.png'});
 });
+
+test('V5.2 ACL follow-attachments mode stays anchored during joint movement',async({page})=>{
+ const errors=await start(page);
+ if((await page.viewportSize()).width<=850)await page.locator('#inspector-toggle').click();
+ await page.locator('[data-structure="acl"]').click();
+ await expect(page.locator('#follow')).toBeEnabled();
+ await page.locator('#follow').click();
+ await expect(page.locator('#follow')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('#attachment-info')).toContainText('CONNECTED ANATOMY');
+ await expect(page.locator('#attachment-info')).toContainText('estimated');
+ await expect(page.locator('#attachment-info')).toContainText('femur → tibia');
+ await page.locator('#flexion').evaluate(el=>{el.value='90';el.dispatchEvent(new Event('input',{bubbles:true}));});
+ await expect(page.locator('#angle-output')).toHaveText('90°');
+ await expect(page.locator('#attachment-info')).toBeVisible();
+ expect((await page.evaluate(()=>window.__BODY_SPATIAL__.getState())).attachedEdges).toEqual(['acl']);
+ await page.screenshot({path:'artifacts/v52-acl-attached.png'});
+ await page.locator('#follow').click();
+ await expect(page.locator('#attachment-info')).toBeHidden();
+ expect(errors).toEqual([]);
+});
+test('V5.2 contextual connection selection follows individual parent bones',async({page})=>{
+ const errors=await start(page);
+ if((await page.viewportSize()).width<=850)await page.locator('#inspector-toggle').click();
+ await page.locator('[data-structure="fibula"]').click();
+ await expect(page.locator('#follow')).toBeEnabled();
+ await page.locator('#follow').click();
+ await expect(page.locator('#attachment-info')).toContainText('Lateral collateral ligament');
+ await page.locator('[data-structure="tendon"]').click();
+ await expect(page.locator('#follow')).toHaveAttribute('aria-pressed','false');
+ await page.locator('#follow').click();
+ await expect(page.locator('#attachment-info')).toContainText('Quadriceps tendon guide');
+ await expect(page.locator('#attachment-info')).toContainText('Patellar ligament');
+ expect(errors).toEqual([]);
+});
+for(const width of [320,390,430]){
+ test('V5.2 attachments remain usable on '+width+'px mobile',async({page})=>{
+   await page.setViewportSize({width,height:780});
+   const errors=await start(page);
+   await page.locator('#inspector-toggle').click();
+   await page.locator('[data-structure="pcl"]').click();
+   await page.locator('#follow').click();
+   await expect(page.locator('#attachment-info')).toContainText('PCL');
+   await page.locator('#flexion').evaluate(el=>{el.value='110';el.dispatchEvent(new Event('input',{bubbles:true}));});
+   const dims=await page.evaluate(()=>({document:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));
+   expect(dims.document).toBeLessThanOrEqual(dims.client+2);
+   expect(errors).toEqual([]);
+   await page.screenshot({path:'artifacts/v52-pcl-'+width+'.png'});
+ });
+}

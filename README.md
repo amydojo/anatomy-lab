@@ -169,3 +169,13 @@ The KNEE / SPATIAL inspector now differentiates **sourced BodyParts3D bone geome
 `assets/spatial-core.js` now owns the rigid X-axis transform, with source integrity tests checking pairwise distance invariance and reversibility across multiple angles; these verify the mathematical transform, not clinical kinematics. Cross-browser tests cover the educational flow and source/schematic classification on a 390px phone.
 
 **Still pending:** Independent qualified review of the geometry and moving specimen's relationship to human anatomy, including potential artifact intersections and patellar kinematics. Production remains V4 until signed off.
+
+## V5.2 — Joint Integrity (draft)
+
+- Added `knee/spatial/attachment-graph.js`: 14 landmark estimates bound to original BodyParts3D surface vertices, six named tissue-to-bone connection definitions, and a shared parent-bone transform system.
+- Sourced femur stays static; tibia and fibula share a rigid educational hinge; patella uses an explicitly approximate guide path. All attachment endpoints follow the SAME parent transforms as their bones, avoiding detached tissue endpoints.
+- Replaced independent ACL/PCL/collateral/extensor coordinate paths with connection-derived tubes. Meniscal crescents are displayed in tibial local space and inherit tibial motion, but remain clearly schematic.
+- Contextual `Follow attachments` highlights estimated endpoints, their connection and parent bones. Accuracy disclosures and source/schematic labels remain available.
+- Unit tests assert vertex correspondence, mathematical rigidity, anchored endpoints and transform consistency at 0°, 30°, 60°, 90°, 110°. Browser tests check mobile interaction, cross-region control regressions, and screenshots. Tests do **not** validate physical biomechanics or clinical accuracy.
+
+**No landmark has been approved by a qualified anatomist.** The bounding-box hints are only automated geometry correspondences, not measured insertion points or validated force vectors. Draft V5 preview only; leave V4 in production.

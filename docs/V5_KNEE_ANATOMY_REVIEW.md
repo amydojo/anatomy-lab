@@ -34,3 +34,16 @@ Approval scope: _pending_
 Remaining inaccuracies: _pending_
 
 Until this section is complete, **V5 stays a draft/preview and V4 stays the published default**.
+
+## V5.2 attachment integrity review (new technical evidence)
+
+Landmark data: `knee/spatial/attachment-graph.js`. An estimated normalized region per named bone is snapped to its nearest existing source vertex. Each anchor includes the source vertex index, distance to its estimated target, parent bone, method and explicit `estimated/unreviewed` status. `joint-graph.create(meshes)` returns the attachment graph. Bone transformations and attachment transformations share one implementation, with deterministic tests at 0°, 30°, 60°, 90° and 110°.
+
+- [ ] Check each estimated attachment marker on actual bone geometry, particularly ACL/PCL and collateral insertions
+- [ ] Confirm right-knee medial/lateral labeling based on dataset frame rather than screen orientation
+- [ ] Inspect patellar guide movement against trochlea and reject interpenetration or misleading trajectories
+- [ ] Replace simplified meniscal crescent guides with independently reviewed geometry before claiming anatomic fidelity
+- [ ] Confirm the femoral quadriceps guide is clearly not represented as quadriceps origin
+- [ ] Confirm attachment pathways at 0/30/60/90/110 degrees from anterior, lateral, medial and posterior viewpoints
+
+Automated geometric consistency tests **do not establish anatomical correctness**.

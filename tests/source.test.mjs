@@ -90,3 +90,51 @@ test('spatial core preserves pairwise length during rigid knee rotations',()=>{
    assert.ok(dist(inverse,first)<1e-10,'rotation reversibility '+degrees);
  }
 });
+
+test('V5.2 sourced landmarks snap to bone vertices and remain attached at all flexion poses',()=>{
+ const host={};
+ new Function('window',read('knee/spatial/attachment-graph.js'))(host);
+ const model=JSON.parse(read('knee/spatial/assets/bp3d-right-knee-4.0.json'));
+ const meshes=Object.fromEntries(Object.entries(model.bone_meshes).map(([bone,d])=>[
+   bone,{verts:d.vertices.map(([x,y,z])=>({x,y,z}))}
+ ]));
+ const graph=host.KneeAttachmentGraph.create(meshes);
+ assert.equal(Object.keys(graph.anchors).length,14);
+ const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z);
+ for(const anchor of Object.values(graph.anchors)){
+   const source=meshes[anchor.bone].verts[anchor.sourceIndex];
+   assert.ok(dist(anchor.base,source)<1e-12,anchor.id+' lost source correspondence');
+   assert.equal(anchor.status,'estimated/unreviewed');
+ }
+ for(const angle of [0,30,60,90,110]){
+   for(const a of Object.values(graph.anchors)){
+     const current=graph.at(a.id,angle);
+     const boneWorld=graph.transform(a.bone,meshes[a.bone].verts[a.sourceIndex],angle);
+     assert.ok(dist(current,boneWorld)<1e-10,'detached '+a.id+' at '+angle);
+   }
+   for(const [id,link] of Object.entries(graph.links)){
+     const line=graph.guide(id,angle);
+     assert.ok(dist(line.from,graph.at(link.from,angle))<1e-10,id+' start detached');
+     assert.ok(dist(line.to,graph.at(link.to,angle))<1e-10,id+' end detached');
+     assert.ok(line.vertices.every(v=>[v.x,v.y,v.z].every(Number.isFinite)));
+   }
+ }
+ const femur='acl.femur',tibia='acl.tibia';
+ assert.ok(dist(graph.at(femur,0),graph.at(femur,110))<1e-10,'static femur moved');
+ assert.ok(dist(graph.at(tibia,0),graph.at(tibia,110))>.04,'moving tibia did not move');
+ for(const bone of ['tibia','fibula','patella']){
+   const a=meshes[bone].verts[0],b=meshes[bone].verts[Math.min(55,meshes[bone].verts.length-1)];
+   const baseline=dist(a,b);
+   for(const angle of [0,45,90,110])
+     assert.ok(Math.abs(dist(graph.transform(bone,a,angle),graph.transform(bone,b,angle))-baseline)<1e-8,'bone warped '+bone);
+ }
+});
+test('V5.2 attachment graph and inspector are included in the published knee route',()=>{
+ const page=read('knee/spatial/index.html'),logic=read('knee/spatial/spatial.js');
+ assert.ok(page.includes('/knee/spatial/attachment-graph.js'));
+ assert.ok(page.includes('id="follow"'));
+ assert.ok(page.includes('id="attachment-info"'));
+ assert.ok(logic.includes('attachmentGraph.transform(bone,p,state.flex)'));
+ assert.ok(logic.includes('attachmentGraph.guide(edge,state.flex)'));
+ assert.ok(logic.includes('estimated')||read('knee/spatial/attachment-graph.js').includes('estimated/unreviewed'));
+});
