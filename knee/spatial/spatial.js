@@ -115,28 +115,40 @@ function worldMeshes(){
    pieces.push(loft('fibula',rings.fibula,12,true));
  }
  const a=state.flex*Math.PI/180;
- const patella=V(0,.285+.12*Math.sin(a),.49+.025*Math.cos(a));
- if(!sourcedMeshes)pieces.push(ellipsoid('patella',patella,.23,.32,.14,10,18));
- // Menisci are simplified C-shaped ribbons atop the moving tibial plateau.
+ const isSource=!!sourcedMeshes;
+ // Source frame sets the scale; these soft-tissue paths remain illustrative.
+ const patella=isSource?V(0,.065+.09*Math.sin(a),.24+.025*Math.cos(a)):V(0,.285+.12*Math.sin(a),.49+.025*Math.cos(a));
+ if(!isSource)pieces.push(ellipsoid('patella',patella,.23,.32,.14,10,18));
  for(const side of [-1,1]){
   const path=[];
   for(let i=0;i<=15;i++){
-   const theta=(-.90+2.05*i/15)*Math.PI;
-   path.push(V(side*.26+Math.cos(theta)*.19,-.096,Math.sin(theta)*.20));
+   const theta=(isSource?(-.73+1.46*i/15):(-.90+2.05*i/15))*Math.PI;
+   path.push(isSource
+    ? V(side*.185+Math.cos(theta)*.145,-.075,Math.sin(theta)*.135)
+    : V(side*.26+Math.cos(theta)*.19,-.096,Math.sin(theta)*.20));
   }
-  pieces.push(tube('menisci',path,.072,7,true));
+  pieces.push(tube('menisci',path,isSource?.037:.072,7,true));
  }
- // Straight anatomical axes are not asserted: these paths are illustrative attachment relationships.
- const lowerACL=rotateLower(V(-.09,-.14,.12));
- const lowerPCL=rotateLower(V(.09,-.17,-.13));
- pieces.push(tube('acl',[V(.19,.47,-.13),V(.04,.23,.01),lowerACL],.043,9));
- pieces.push(tube('pcl',[V(-.20,.46,.13),V(-.04,.20,.01),lowerPCL],.055,9));
+ // Illustrative spatial relationships only, NEVER validated attachment coordinates.
+ const lowerACL=rotateLower(isSource?V(-.08,-.13,.055):V(-.09,-.14,.12));
+ const lowerPCL=rotateLower(isSource?V(.08,-.13,-.08):V(.09,-.17,-.13));
+ pieces.push(tube('acl',isSource
+  ?[V(.12,.175,-.045),V(.015,.07,.00),lowerACL]
+  :[V(.19,.47,-.13),V(.04,.23,.01),lowerACL],isSource?.029:.043,9));
+ pieces.push(tube('pcl',isSource
+  ?[V(-.12,.19,.075),V(-.02,.055,-.005),lowerPCL]
+  :[V(-.20,.46,.13),V(-.04,.20,.01),lowerPCL],isSource?.032:.055,9));
  for(const side of [-1,1]){
-  pieces.push(tube('collateral',[V(side*.43,.55,.015),V(side*.49,.10,.04),rotateLower(V(side*.47,-.40,.025))],.043,8));
+  pieces.push(tube('collateral',isSource
+   ?[V(side*.38,.21,.002),V(side*.38,.02,.015),rotateLower(V(side*.34,-.32,.02))]
+   :[V(side*.43,.55,.015),V(side*.49,.10,.04),rotateLower(V(side*.47,-.40,.025))],
+   isSource?.022:.043,8));
  }
- const tuberosity=rotateLower(V(0,-.60,.245));
- pieces.push(tube('tendon',[V(0,1.25,.34),V(0,.61,.38),patella],.080,10));
- pieces.push(tube('tendon',[patella,mix(patella,tuberosity,.44),tuberosity],.092,10));
+ const tuberosity=rotateLower(isSource?V(0,-.39,.185):V(0,-.60,.245));
+ pieces.push(tube('tendon',isSource
+   ?[V(0,.77,.21),V(0,.42,.225),patella]
+   :[V(0,1.25,.34),V(0,.61,.38),patella],isSource?.045:.080,10));
+ pieces.push(tube('tendon',[patella,mix(patella,tuberosity,.44),tuberosity],isSource?.043:.092,10));
  return pieces.filter(Boolean);
 }
 function hexRGB(hex){return [1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));}
