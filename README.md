@@ -190,3 +190,12 @@ The KNEE / SPATIAL inspector now differentiates **sourced BodyParts3D bone geome
 - **Learning**: interactive Gluteus Medius lesson (predict → abduct → reveal), structure list/selection, isolation, accessible inspector, orbit/pinch and camera presets.
 - **Tests**: Playwright \`tests/v53-hip.spec.mjs\` across mobile Chromium, WebKit, desktop; Python topology/license validation \`scripts/tests/test_sourced_hip.py\`; full existing regression suite.
 - **Medical boundary**: no individual anatomy, nerve tracing precision, clinically validated joint centre, tissue deformation, stress or diagnostic application. Review checklist \`docs/V53_HIP_ANATOMY_REVIEW.md\`; keep this release in preview pending verification.
+
+## V5.4 — Nerve Truth Foundation (draft feature branch)
+
+- **Actual nerve source geometry**: Three isolated right Z-Anatomy derivative surfaces (sciatic, tibial, common fibular), imported with pinned hashes and per-component CC BY-SA 4.0 attribution; full mixed-license atlas deliberately excluded.
+- **Registration**: Rigid femur-surface ICP to independently sourced BodyParts3D 4.0 hip, with exact matrix, median/p95 discrepancies and source release hashes recorded in hip/spatial/assets/sciatic-provenance.json. Mixed-reference/composite anatomy, not the same confirmed donor.
+- **UI**: Hip / Spatial displays source-derived nerve surface in the nerve layer with context-specific branch Trace actions, visually sampled centreline, and Source & Uncertainty panel. Asset failure retains the prior schematic fallback.
+- **Imaging audit**: Pennsieve 692 micro-CT has short excised nerve segments; no patient imaging is falsely registered to this pelvis. See docs/V54_NERVE_SOURCE_AUDIT.md.
+- **Test gates**: geometry graph/unit audit, source integrity and mobile Chromium/WebKit/desktop testing. Anatomist and legal review pending; no medical-grade claim.
+

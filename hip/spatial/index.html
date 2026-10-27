@@ -11,7 +11,7 @@
   <canvas id="hip-canvas" role="img" aria-label="Three-dimensional interactive right hip: drag to orbit, pinch to zoom, select structures; keyboard-accessible structure list and sliders below."></canvas>
   <div class="stage-actions"><button id="posterior" type="button">Back</button><button id="lateral" type="button">Side</button><button id="focus-toggle" type="button" aria-pressed="false">Whole bones</button><button id="reset" type="button">Reset</button></div>
   <p class="helper">DRAG TO ORBIT · PINCH TO ZOOM · TAP TO INSPECT</p>
-  <div class="legend"><span class="dot bone"></span>BONES <span class="dot ligament" style="background:#d88e79"></span>MUSCLES <span class="dot cartilage" style="background:#eac782"></span>NERVE GUIDE</div>
+  <div class="legend"><span class="dot bone"></span>BONES <span class="dot ligament" style="background:#d88e79"></span>MUSCLES <span class="dot cartilage" style="background:#eac782"></span>NERVE COMPOSITE</div>
 </section>
 <aside class="inspector" id="hip-inspector" data-expanded="false">
  <button id="inspector-toggle" class="inspector-grab" aria-expanded="false" aria-controls="inspector-scroll"><span class="handle"></span><span id="selected-short">Inside the right hip</span><span class="grab-icon" aria-hidden="true">⌃</span></button>
@@ -19,15 +19,15 @@
   <div class="eyebrow" id="structure-type">SOURCED STRUCTURES · SIMPLIFIED MOTION</div>
   <h1 id="inspector-title">A ball-and-socket laboratory.</h1>
   <p class="intro" id="structure-intro">Peel the gluteal layers to see how the pelvis, femur, and deep rotators occupy the same space. Move the femur in three axes.</p>
-  <div class="action-row"><button id="isolate" type="button" aria-pressed="false" disabled>Isolate structure</button><button id="show-all" type="button">Restore scene</button><button id="nerve-follow" type="button" hidden aria-pressed="false">Follow sciatic path</button><button id="lesson-start" type="button">✧ Why does it stabilize?</button></div>
-  <section id="nerve-info" class="attachment-info" hidden aria-live="polite"></section>
+  <div class="action-row"><button id="isolate" type="button" aria-pressed="false" disabled>Isolate structure</button><button id="show-all" type="button">Restore scene</button><button id="nerve-follow" type="button" hidden aria-pressed="false">Follow sciatic path</button><button id="nerve-evidence-toggle" type="button" hidden aria-controls="nerve-evidence" aria-expanded="false">Source &amp; uncertainty</button><button id="lesson-start" type="button">✧ Why does it stabilize?</button></div>
+  <section id="nerve-info" class="attachment-info" hidden aria-live="polite"></section><section id="nerve-evidence" class="attachment-info nerve-evidence" hidden></section>
   <section id="lesson-panel" class="experiment-panel" hidden aria-label="Hip interactive experiment" aria-live="polite"></section>
   <div class="fact" id="anatomy-fact"><span>SPATIAL INSIGHT</span><p>The femoral head moves within the acetabulum. This educational model uses a fixed estimated pivot, not personalized joint mechanics.</p></div>
   <div class="section-label">DISCOVER STRUCTURES</div><div class="structure-list" id="structure-list"></div>
   <div class="section-label">OPEN ORIGINAL DISSECTION</div>
   <a class="provenance" href="/hip/dissection/">Explore Hip / Exposed — layer-by-layer SVG dissection ↗</a>
   <div class="section-label">SOURCE &amp; ACCURACY</div>
-  <p class="disclaimer">Bone and muscle meshes are licensed, static BodyParts3D 4.0 geometry when available. The sciatic line is an approximate illustration. Joint motion, pivot and gluteal actions are illustrative and unreviewed; not for diagnosis.</p>
+  <p class="disclaimer">Bone and muscle meshes are licensed, static BodyParts3D 4.0 geometry when available. A nerve surface from Z-Anatomy is automatically registered to the separately sourced hip; the reference composite is not patient imaging or clinically verified. Joint motion, pivot and gluteal actions are illustrative and unreviewed; not for diagnosis.</p>
   <a class="provenance" href="/hip/spatial/sources/">Read geometry licensing and accuracy notes ↗</a>
  </div>
 </aside>
