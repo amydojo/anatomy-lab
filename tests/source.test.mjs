@@ -54,3 +54,13 @@ test('Anatomy graph and lesson targets have valid references', async()=>{
  }
  assert.equal(allIds.size,12);
 });
+
+test('KNEE / SPATIAL is self contained, labeled as schematic, and protects V4 routing',()=>{
+  for(const path of ['knee/spatial/index.html','knee/spatial/spatial.css','knee/spatial/spatial.js','knee/spatial/sources/index.html'])assert.ok(existsSync(new URL('../'+path,import.meta.url)),path);
+  assert.doesNotThrow(()=>new Function(read('knee/spatial/spatial.js')));
+  const page=read('knee/spatial/index.html');
+  assert.ok(page.includes('Return to classic knee lab')&&page.includes('not clinically validated'));
+  const dossier=read('knee/spatial/sources/index.html');
+  assert.ok(dossier.includes('No BodyParts3D or Z-Anatomy mesh has been imported'));
+  assert.ok(read('knee/index.html').includes('/knee/spatial/'));
+});

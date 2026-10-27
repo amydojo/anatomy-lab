@@ -117,3 +117,16 @@ V4 replaces the four always-visible interaction modes with a single responsive a
 **Known limits:** Visual models remain illustrative 2D/2.5D SVG art, not validated physics or anatomical imaging. The legacy SVG render functions are bridged through a small adapter; fully eliminating all model-internal state requires a later rewrite of model geometry. Trace currently highlights an illustrative nerve representation and explains branches in prose rather than rendering every branch continuously. This is an educational product, not a diagnostic tool.
 
 Preserve the public routes and deploy through the existing Vercel project. Do not merge a feature branch until mobile and desktop browser checks pass.
+
+
+## V5 Experiment 01 — KNEE / SPATIAL (feature branch)
+
+Route: `/knee/spatial/` (kept separate from the stable `/knee/` lab).
+
+V5's first spatial prototype introduces a dependency-free **3D perspective mesh engine** with a shared camera and joint-pose state. It provides orbit, two-finger pinch zoom, selection and isolation, progressive tissue peeling, virtual flexion, animation, accessible sliders, touch-friendly anatomy information and a structured source dossier.
+
+**Accuracy: transparent milestone.** Geometry is **original schematic geometry**, generated using lofts, ellipsoids and curved tubes. It is not a licensed patient scan, BodyParts3D import, clinically verified anatomical asset or validated kinematic simulation. The fixed flexion axis, meniscus proxies, ligament routes and patellar tracking are teaching approximations. See `/knee/spatial/sources/` for the licensed asset review and import gates. Do not label it anatomical accuracy verified until official sourced geometry and qualified review are completed.
+
+The next import step is the official CC BY 4.0 BodyParts3D skeletal subset (right femur, tibia, fibula and patella) after a verifiable file hash and alignment audit. Menisci and ligaments require separately reviewed geometry, as BodyParts3D's skeletal collection does not itself supply the complete structures. Avoid mixing Z-Anatomy CC BY-SA and third-party noncommercial material without checking and satisfying licenses.
+
+Regression suite: `tests/v5-spatial.spec.mjs`, automated through the existing Playwright CI matrix, with visual screenshots and source integrity assertions. Production remains on V4 until the new experiment is reviewed and explicitly promoted.
