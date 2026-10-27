@@ -239,3 +239,18 @@ test('V5.5 mobile Follow controls and source mode do not claim patient images',(
  assert.ok(css.includes('.nerve-follow-stage'));
  assert.ok(js.includes('if(!nerveTruth)'));
 });
+
+test('V6 whole-body Atlas has evidence-safe source assets and interactive navigation',()=>{
+ for(const path of ['atlas/index.html','atlas/atlas.css','atlas/sources/index.html','atlas/assets/body-skeleton.json','atlas/assets/provenance.json','assets/atlas/atlas-state.js','assets/atlas/atlas-loader.js','assets/atlas/atlas-evidence.js','assets/atlas/atlas-renderer.js','assets/atlas/atlas-controller.js']){
+  assert.ok(existsSync(new URL('../'+path,import.meta.url)),path);
+ }
+ const asset=JSON.parse(read('atlas/assets/body-skeleton.json'));
+ const proof=JSON.parse(read('atlas/assets/provenance.json'));
+ assert.equal(asset.schema,'body-live/atlas-skeleton-v1');
+ assert.equal(asset.parts.length,78);assert.equal(proof.part_count,78);
+ assert.equal(proof.anatomist_reviewed,false);assert.equal(asset.license,'CC BY 4.0');
+ assert.ok(read('assets/atlas/atlas-controller.js').includes('not reconstructed continuously'));
+ for(const path of ['assets/atlas/atlas-state.js','assets/atlas/atlas-loader.js','assets/atlas/atlas-evidence.js','assets/atlas/atlas-renderer.js','assets/atlas/atlas-controller.js']){
+  assert.doesNotThrow(()=>new Function(read(path)));
+ }
+});

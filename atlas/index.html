@@ -1,0 +1,45 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/><meta name="theme-color" content="#14110f"/><title>ATLAS / PORTAL — BODY / LIVE V6</title><meta name="description" content="Explore source-derived human skeletal anatomy across hip, nerve and knee, with inspectable evidence."/><link rel="stylesheet" href="/atlas/atlas.css"/><script defer src="/assets/spatial-core.js"></script><script defer src="/assets/atlas/atlas-state.js"></script><script defer src="/assets/atlas/atlas-evidence.js"></script><script defer src="/assets/atlas/atlas-renderer.js"></script><script defer src="/assets/atlas/atlas-loader.js"></script><script defer src="/assets/atlas/atlas-controller.js"></script></head><body>
+<div id="atlas-app" class="app" data-mode="overview">
+<header class="topbar"><a href="/" class="brand">BODY <span>/</span> LIVE</a><div class="masthead"><span class="overline">VOL. 06 · CONNECTED ANATOMY</span><strong>ATLAS / PORTAL</strong></div><div class="topactions"><button id="back-body" class="text-btn" type="button" hidden>← Body</button><button id="evidence-toggle" class="top-pill" type="button" aria-expanded="false" aria-controls="evidence-sheet"><span class="evidence-dot"></span>Evidence</button></div></header>
+<main class="workspace" id="workspace">
+<section class="stage" id="atlas-stage" aria-label="Interactive source-derived skeletal atlas">
+ <div class="stage-meta"><span id="stage-title">ONE BODY · MANY SYSTEMS</span><span id="scene-status" role="status">LOADING REFERENCE SKELETON</span></div>
+ <canvas id="atlas-canvas" aria-label="Three-dimensional overview of source-derived human skeleton. Choose a named body region below to navigate accessibly. Drag to rotate, pinch to zoom." role="img"></canvas>
+ <div class="stage-wash"></div><div class="hotspots" id="hotspots" aria-label="Anatomical region positions"></div>
+ <div class="fallback" id="canvas-fallback" hidden><svg viewBox="0 0 240 340" width="200" aria-hidden="true"><circle cx="120" cy="38" r="22" fill="none" stroke="currentColor" stroke-width="4"/><path d="M115 60L107 160L78 185L88 225L71 315M125 60L133 160L162 185L151 225L169 315M110 80L69 86L42 160M130 80L171 86L199 160M105 113Q120 127 135 113M107 160Q120 177 133 160" stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M77 86Q120 130 163 86M84 108Q120 148 156 108" stroke="currentColor" opacity=".3" fill="none" stroke-width="3"/></svg><strong>Reference skeleton unavailable</strong><p>Region navigation still works. The fallback figure is contextual, not sourced skeletal geometry.</p></div>
+ <div class="stage-bottom"><span id="stage-caveat">BodyParts3D 4.0 · skeletal reference · CC BY 4.0 · unreviewed</span><span class="gesture">DRAG TO ORBIT · PINCH TO ZOOM</span></div>
+ <div id="portal" class="portal" hidden aria-label="Detailed anatomy laboratory"><iframe id="region-frame" title="Detailed anatomy laboratory" loading="eager"></iframe><div class="portal-mask" id="portal-mask" hidden></div></div>
+ <div id="seam" class="seam" role="dialog" aria-modal="true" aria-labelledby="seam-title" hidden>
+   <div class="seam-inner"><span class="overline">SOURCE BOUNDARY</span><h2 id="seam-title">Continuing in a different reference.</h2><p>The hip and knee skeleton share a verified BodyParts3D reference frame. The sciatic nerve is a separately registered atlas composite and is <strong>not reconstructed continuously into the knee here.</strong> We'll change context without drawing a missing nerve segment.</p><div class="seam-actions"><button id="seam-cancel" type="button">Remain at hip</button><button id="seam-continue" type="button">Continue to Knee →</button></div></div>
+ </div>
+</section>
+<aside class="sidebar" id="atlas-sidebar" data-expanded="false"><button id="sidebar-toggle" class="sidebar-handle" type="button" aria-expanded="false" aria-controls="sidebar-body"><span class="handle"></span><span id="sidebar-short">Explore the body</span><span id="sidebar-icon" aria-hidden="true">⌃</span></button>
+ <div id="sidebar-body" class="sidebar-body">
+  <span class="overline" id="panel-kicker">SOURCE-DERIVED REFERENCE</span><h1 id="panel-title">The body, connected.</h1>
+  <p id="panel-description">Choose a region to inspect how bones, joints, muscles and nerves relate in space. The overview uses licensed reference-pose skeletal geometry, not an individual medical scan.</p>
+  <div class="section-head">01 / REGIONS</div>
+  <div id="region-list" class="region-list">
+   <button type="button" data-region="hip" aria-pressed="false"><span class="num">01</span><span><strong>Right Hip</strong><small>Peel / articulate / examine</small></span><span aria-hidden="true">↗</span></button>
+   <button type="button" data-region="nerve" aria-pressed="false"><span class="num">02</span><span><strong>Sciatic Nerve</strong><small>Composite / trace / branches</small></span><span aria-hidden="true">↗</span></button>
+   <button type="button" data-region="knee" aria-pressed="false"><span class="num">03</span><span><strong>Right Knee</strong><small>Move / stabilize / understand</small></span><span aria-hidden="true">↗</span></button>
+   <button type="button" data-region="shoulder" aria-pressed="false"><span class="num">04</span><span><strong>Shoulder</strong><small>Illustrative legacy laboratory</small></span><span aria-hidden="true">↗</span></button>
+   <button type="button" data-region="thorax" aria-pressed="false" disabled><span class="num">05</span><span><strong>Thorax</strong><small>Context skeleton only · future lab</small></span><span aria-hidden="true">—</span></button>
+  </div>
+  <div class="section-head">02 / NAVIGATE</div>
+  <div class="guide-row"><button id="enter-region" type="button" disabled>Choose a region</button><button id="continue-knee" type="button" hidden>Continue toward Knee →</button><button id="open-original" type="button" hidden>Open standalone ↗</button></div>
+  <p class="body-note" id="context-note">Available regions are educational demonstrations. An unexplored or unavailable structure isn't automatically reconstructed.</p>
+  <div class="section-head">03 / PROVENANCE</div><a class="source-link" href="/atlas/sources/">Source records, asset license, and scientific boundaries ↗</a>
+  <div class="science-note">Unreviewed anatomical models are preview-only. Licensed source geometry does not imply clinical validation, patient specificity or diagnostic use.</div>
+ </div>
+</aside></main>
+<div class="controlbar" id="controlbar">
+ <div class="control-group"><span class="control-label">MODE</span><div class="seg-control"><button type="button" id="mode-explore" aria-pressed="true">Explore</button><button type="button" id="mode-peel" aria-pressed="false">Peel</button><button type="button" id="mode-trace" aria-pressed="false">Trace</button></div></div>
+ <div class="control-group slider-group"><label for="layer-slider"><span class="control-label">DEPTH</span><output id="layer-output">Surface</output></label><input id="layer-slider" type="range" min="0" max="4" step="1" value="0" aria-label="Anatomy layer depth" disabled/></div>
+ <div class="control-group act-group"><button id="reset-view" type="button" aria-label="Reset current view">Reset view ↺</button></div>
+</div>
+<div id="evidence-sheet" class="evidence-sheet" hidden role="dialog" aria-modal="true" aria-labelledby="evidence-title">
+<div class="evidence-card"><div class="evidence-top"><div><span class="overline">EVIDENCE / LENS</span><h2 id="evidence-title">What are we actually seeing?</h2></div><button id="evidence-close" type="button" aria-label="Close evidence">×</button></div>
+<div class="mode-switch" role="group" aria-label="Anatomical evidence perspective"><button type="button" data-evidence="clean" aria-pressed="true">Clean</button><button type="button" data-evidence="evidence" aria-pressed="false">Show origins</button></div>
+<p id="evidence-intro">Every surface has a source and a review status. A continuous animation is not proof of anatomical continuity.</p><div id="evidence-records" class="evidence-records"></div><a href="/atlas/sources/" class="source-link">Read licensing, methods and accuracy notes ↗</a>
+</div></div>
+</div></body></html>

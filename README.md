@@ -210,3 +210,13 @@ V5.4 quality gate cleared on the exact source commit: 162 full-app Playwright te
 - Explicit dual evidence modes: `Registered composite` (hip and registered nerve) versus `Atlas nerve alone` (source nerve in its unregistered frame, hip hidden). Switching does NOT claim both models were imaged from one donor
 - Evidence inspector shows source license, femur-registration residuals, measured unverified branch gaps, and link to existing Knee skeletal viewport (nerve is NOT reconstructed there).
 - Tests: source graph connectivity and arc-length invariants, Hip–Knee inverse transforms, mobile 320/390/430 interaction, WebKit/Chromium regression; qualified anatomical and license review still required.
+
+## V6 — ATLAS / PORTAL (staging integration only)
+
+- /atlas/: full-body 78-mesh BodyParts3D 4.0 reference skeleton with source-pinned importer, FMA IDs and DBCLS CC BY 4.0 attribution.
+- assets/atlas/: shared navigation state, lazy source loader, WebGL2 source LOD renderer, semantic fallback, region navigation and Evidence Lens.
+- Hip → Sciatic → Knee includes explicit source-boundary disclosure, not fabricated nerve continuity. Existing labs remain unchanged.
+- /atlas/sources/: provenance and medical-accuracy limits. Automated browser and geometry tests; mobile QA.
+- PREVIEW ONLY: dependent on unmerged Hip PR #4, Nerve PR #5 and Follow PR #6. No clinical expert or copyright-license approval on these releases. Do not promote to production until review completed.
+
+V6 plan and release gates: docs/V6_ATLAS_PORTAL_PLAN.md, docs/V6_EVIDENCE_CONTRACT.md, docs/V6_RELEASE_READINESS.md.
