@@ -138,3 +138,30 @@ test('V5.2 attachment graph and inspector are included in the published knee rou
  assert.ok(logic.includes('attachmentGraph.guide(edge,state.flex)'));
  assert.ok(logic.includes('estimated')||read('knee/spatial/attachment-graph.js').includes('estimated/unreviewed'));
 });
+
+test('V5.3 hip route is real, reuses the spatial core, and preserves the original dissection',()=>{
+ for(const path of ['hip/spatial/index.html','hip/spatial/hip.css','hip/spatial/hip.js',
+   'hip/spatial/sources/index.html','hip/spatial/assets/hip-source.json','hip/spatial/assets/provenance.json']){
+  assert.ok(existsSync(new URL('../'+path,import.meta.url)),path);
+ }
+ const html=read('hip/spatial/index.html');
+ assert.ok(html.includes('/assets/spatial-core.js'));
+ assert.ok(html.includes('/hip/spatial/hip.js'));
+ assert.ok(html.includes('/hip/dissection/'));
+ assert.ok(read('hip/index.html').includes('/hip/spatial/'));
+ assert.doesNotThrow(()=>new Function(read('hip/spatial/hip.js')));
+ const scene=JSON.parse(read('hip/spatial/assets/hip-source.json'));
+ const proof=JSON.parse(read('hip/spatial/assets/provenance.json'));
+ assert.equal(Object.keys(scene.parts).length,11);
+ assert.equal(scene.license,'CC BY 4.0');
+ assert.equal(proof.anatomist_reviewed,false);
+ assert.equal(proof.biomechanics_validated,false);
+ assert.ok(read('hip/spatial/sources/index.html').toLowerCase().includes('sciatic nerve guide'));
+});
+test('V5.3 hip motion models are intentionally schematic, not clinical simulations',()=>{
+ const s=read('hip/spatial/hip.js');
+ for(const v of ['flexion','abduction','rotation','SCIATIC PATH','piriformis','gluteus medius','sourceLoaded'])
+  assert.ok(s.toLowerCase().includes(v.toLowerCase()),v);
+ assert.ok(s.includes('NOT validated joint kinematics'));
+ assert.ok(s.includes("data.parts")||s.includes("d.parts"));
+});

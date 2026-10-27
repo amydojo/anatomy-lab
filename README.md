@@ -179,3 +179,14 @@ The KNEE / SPATIAL inspector now differentiates **sourced BodyParts3D bone geome
 - Unit tests assert vertex correspondence, mathematical rigidity, anchored endpoints and transform consistency at 0°, 30°, 60°, 90°, 110°. Browser tests check mobile interaction, cross-region control regressions, and screenshots. Tests do **not** validate physical biomechanics or clinical accuracy.
 
 **No landmark has been approved by a qualified anatomist.** The bounding-box hints are only automated geometry correspondences, not measured insertion points or validated force vectors. Draft V5 preview only; leave V4 in production.
+
+
+## V5.3 — HIP / SPATIAL (preview)
+
+- **New route**: \`/hip/spatial/\` built on shared \`assets/spatial-core.js\`, retaining original \`/hip/\` and \`/hip/dissection/\`.
+- **Sourced alignment**: 11 right-hip bone and gluteal/deep-rotator meshes from BodyParts3D 4.0, downloaded through the hash-pinned \`scripts/import_bp3d_hip.py\` using one coordinate transform. Attribution and per-asset IDs/counts: \`hip/spatial/assets/provenance.json\`. Geometry: \`hip/spatial/assets/hip-source.json\`.
+- **Motion**: rigid educational femoral flexion, abduction and axial rotation with independently adjustable angles. Pelvis and muscle meshes remain in source reference pose; moving muscles are dimmed rather than falsely deformed.
+- **Depth**: Surface → side stabilizers → deep rotators → sciatic guide → skeleton, with actual sourced muscle surfaces and a **schematic**, explicitly unsourced sciatic line.
+- **Learning**: interactive Gluteus Medius lesson (predict → abduct → reveal), structure list/selection, isolation, accessible inspector, orbit/pinch and camera presets.
+- **Tests**: Playwright \`tests/v53-hip.spec.mjs\` across mobile Chromium, WebKit, desktop; Python topology/license validation \`scripts/tests/test_sourced_hip.py\`; full existing regression suite.
+- **Medical boundary**: no individual anatomy, nerve tracing precision, clinically validated joint centre, tissue deformation, stress or diagnostic application. Review checklist \`docs/V53_HIP_ANATOMY_REVIEW.md\`; keep this release in preview pending verification.

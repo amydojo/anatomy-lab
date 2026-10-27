@@ -1,0 +1,52 @@
+/* V5.3 HIP: inherits BODY / LIVE's V5 spatial instrument language. */
+#hip-canvas{width:100%;height:100%;touch-action:none;display:block}
+.hip-controls{gap:19px;min-height:103px}
+.layer-unit{max-width:35%;flex:1}
+.movement-unit{min-width:0;flex:1.5}
+.movement-head{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#c7aa97;font-size:10px;font-weight:750;letter-spacing:.12em;margin-bottom:13px}
+.motion-options{display:flex;gap:4px;flex-wrap:nowrap}
+.motion-options button{border:1px solid #6b4c3a;color:#d4b9a8;border-radius:8px;padding:6px 9px;background:#312118;font-size:10px;letter-spacing:0;min-height:31px}
+.motion-options button[aria-pressed=true]{background:#c68e69;border-color:#c68e69;color:#20130e;font-weight:800}
+.movement-track{display:flex;align-items:center;gap:10px}
+.movement-track input{appearance:none;-webkit-appearance:none;min-width:0;flex:1;width:100%;height:5px;background:#75523d;border-radius:40px;touch-action:pan-y}
+.movement-track input::-webkit-slider-thumb{appearance:none;width:25px;height:25px;background:#cf8b6a;border:4px solid #ffddc1;border-radius:50%}
+.movement-track input::-moz-range-thumb{width:18px;height:18px;background:#cf8b6a;border:4px solid #ffddc1;border-radius:50%}
+.movement-track output{font:400 21px Georgia,serif;min-width:39px;text-align:right;color:#f5d8be}
+.structure-status{font-size:8px;letter-spacing:.1em;color:#c5d7c2}
+.structure-list button{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+.structure-list button[aria-pressed=true] .structure-status{color:#70432b}
+.structure-status.guide{color:#f6cc7d}
+.layer-status{font-size:10px;color:#d3b294;line-height:1.6}
+.attachment-info[hidden],.experiment-panel[hidden]{display:none!important}
+.attachment-info{border:1px solid #9e8650;background:#30291f;padding:14px;border-radius:13px;margin:18px 0}
+.attachment-info p{font-size:12px;color:#d5c4b1;line-height:1.6}
+.attachment-info .eyebrow{color:#f3da9e}
+.experiment-panel{border:1px solid #a27658;background:#3a281c;border-radius:13px;padding:14px;margin:18px 0}
+.experiment-panel h2{font:400 25px/1.15 Georgia,serif;margin:8px 0}
+.experiment-panel p{font-size:12px;color:#dec7b3;line-height:1.65}
+.experiment-choice{border:1px solid #8c654d;border-radius:10px;color:#f1d9c6;background:#553829;width:100%;min-height:44px;text-align:left;padding:10px 12px;margin:4px 0;font-size:12px}
+.experiment-choice:hover{background:#764c33}
+.inspector .action-row button[hidden]{display:none}
+.stage-actions{z-index:4}
+@media(max-width:850px){
+ .hip-controls{min-height:100px;gap:10px;padding:9px 10px max(12px,env(safe-area-inset-bottom))}
+ .movement-head{flex-wrap:wrap;gap:3px;margin-bottom:9px;font-size:9px}
+ .motion-options{gap:3px;width:100%}
+ .motion-options button{padding:5px 6px;min-height:33px;flex:1;font-size:10px}
+ .layer-unit{max-width:38%}
+ .movement-unit{flex:1.6}
+ .control-unit label{align-items:flex-start;gap:3px;flex-wrap:wrap;margin-bottom:0}
+ .control-unit output{max-width:110px}
+ .movement-track output{font-size:18px;min-width:31px}
+ .inspector[data-expanded=true]{height:min(42dvh,350px)}
+ .stage-actions{left:10px;right:10px;bottom:9px;flex-direction:row;justify-content:flex-end;gap:6px}
+ .stage-actions button{min-height:39px;min-width:42px;padding:0 7px;font-size:10px;border-radius:10px}
+ .helper{display:none}
+ .legend{font-size:8px;top:50px}
+}
+@media(max-width:375px){.hip-controls{gap:8px}.motion-options button{font-size:9px;padding:4px}.layer-unit{max-width:37%}.control-unit label span{font-size:8px}.movement-track output{font-size:16px}}
+@media(max-height:690px) and (max-width:850px){.inspector[data-expanded=true]{height:min(33dvh,230px)}.hip-controls{min-height:86px}.stage{min-height:80px}}
+@media(prefers-reduced-motion:reduce){.inspector{transition:none}}
+
+/* V5.3 mobile QA — protect anatomy stage and return to structure explanation. */
+@media(max-width:850px){.inspector[data-expanded=true]{height:min(37dvh,305px)}}
