@@ -134,3 +134,18 @@ test('reduced-motion preference prevents autoplay',async({page})=>{
  await page.locator('#play').click();
  await expect(page.locator('#play')).toHaveAttribute('aria-pressed','false');
 });
+
+test('mobile selected structure returns inspector to its explanation and enlarges stage',async({page})=>{
+ await page.setViewportSize({width:390,height:780});
+ const errors=await start(page);
+ await openSheet(page);
+ await page.locator('[data-part="gemellusInferior"]').click();
+ await expect(page.locator('#inspector-title')).toHaveText('Inferior gemellus');
+ const sizes=await page.evaluate(()=>({top:document.querySelector('#inspector-scroll').scrollTop,
+  stage:document.querySelector('.stage').getBoundingClientRect().height,
+  visible:document.querySelector('#inspector-title').getBoundingClientRect().top}));
+ expect(sizes.top).toBeLessThan(5);
+ expect(sizes.stage).toBeGreaterThan(280);
+ expect(errors).toEqual([]);
+ await page.screenshot({path:'artifacts/v53-mobile-refined.png'});
+});

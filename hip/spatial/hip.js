@@ -196,6 +196,7 @@ function select(id){
  state.selected=id;
  if(id==='sciatic'){state.depth=3;state.trace=true;syncDepth();}
  inspector();draw();if(window.innerWidth<=850)setExpanded(true);
+ $('inspector-scroll').scrollTop=0;
 }
 function syncDepth(){
  $('depth').value=state.depth;
@@ -217,7 +218,7 @@ function axis(which){
 }
 function focus(){
  state.focus=state.focus==='joint'?'whole':'joint';
- state.frameSpan=state.focus==='joint'?3.65:7.5;
+ state.frameSpan=state.focus==='joint'?(window.innerWidth<=850?3.35:4.5):7.5;
  state.zoom=state.focus==='joint'?1.09:1;
  $('focus-toggle').textContent=state.focus==='joint'?'Whole bones':'Joint focus';
  $('focus-toggle').setAttribute('aria-pressed',String(state.focus==='whole'));
@@ -241,7 +242,7 @@ function play(){
 }
 function reset(){
  stop();state.yaw=Math.PI+.28;state.pitch=-.11;state.zoom=1.09;
- state.focus='joint';state.frameSpan=3.65;
+ state.focus='joint';state.frameSpan=window.innerWidth<=850?3.35:4.5;
  state.selected=null;state.isolate=false;state.trace=false;
  state.pose={flexion:0,abduction:0,rotation:0};
  state.axis='flexion';state.depth=0;lesson.phase='idle';renderLesson();
@@ -276,6 +277,7 @@ function beginLesson(){
 }
 function endLesson(){lesson.phase='idle';state.depth=lesson.oldDepth;syncDepth();renderLesson();inspector();draw();}
 function resize(){
+ state.frameSpan=state.focus==='joint'?(window.innerWidth<=850?3.35:4.5):7.5;
  const rect=canvas.getBoundingClientRect();state.width=Math.max(1,rect.width);state.height=Math.max(1,rect.height);
  state.dpr=Math.min(2,window.devicePixelRatio||1);
  canvas.width=Math.ceil(state.width*state.dpr);canvas.height=Math.ceil(state.height*state.dpr);
