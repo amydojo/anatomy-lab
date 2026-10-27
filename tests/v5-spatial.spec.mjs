@@ -103,3 +103,19 @@ test('sourced geometry rotates under flexion while preserving the static femur',
  await expect(page.locator('#scene-status')).toContainText('SOURCED BONES');
  await page.screenshot({path:'artifacts/v5-sourced-bones-flexed.png'});
 });
+
+test('joint focus is default; whole-bone context is a reversible camera choice',async({page})=>{
+ await start(page);
+ const first=await page.evaluate(()=>window.__BODY_SPATIAL__.getState());
+ expect(first.sourcedBoneCount).toBe(4);
+ expect(first.focus).toBe('joint');
+ expect(first.frameSpan).toBe(2.65);
+ await page.locator('#focus-toggle').click();
+ const all=await page.evaluate(()=>window.__BODY_SPATIAL__.getState());
+ expect(all.focus).toBe('whole');
+ expect(all.frameSpan).toBe(7.6);
+ await page.screenshot({path:'artifacts/v5-whole-bones.png'});
+ await page.locator('#focus-toggle').click();
+ expect(await page.evaluate(()=>window.__BODY_SPATIAL__.getState().focus)).toBe('joint');
+ await page.screenshot({path:'artifacts/v5-knee-joint-focus.png'});
+});

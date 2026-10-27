@@ -23,7 +23,7 @@ const DISPLAY_ORDER=['femur','tibia','fibula','patella','menisci','acl','pcl','c
 const PALETTES={femur:DATA.femur.color,tibia:DATA.tibia.color,fibula:DATA.fibula.color,patella:DATA.patella.color,menisci:DATA.menisci.color,acl:DATA.acl.color,pcl:DATA.pcl.color,collateral:DATA.collateral.color,tendon:DATA.tendon.color};
 let sourcedMeshes=null;
 let sourceStatus='Schematic geometry · source loading';
-const state={frameSpan:6.65,yaw:0.47,pitch:-0.11,zoom:1,flex:0,depth:0,selected:null,isolate:false,playing:false,frame:0,prev:0,dir:1,expanded:false,width:0,height:0,dpr:1,hits:[],gestures:new Map(),touchStart:null};
+const state={focus:'joint',frameSpan:6.65,yaw:0.47,pitch:-0.11,zoom:1,flex:0,depth:0,selected:null,isolate:false,playing:false,frame:0,prev:0,dir:1,expanded:false,width:0,height:0,dpr:1,hits:[],gestures:new Map(),touchStart:null};
 const V=(x=0,y=0,z=0)=>({x,y,z});
 const add=(a,b)=>V(a.x+b.x,a.y+b.y,a.z+b.z);
 const sub=(a,b)=>V(a.x-b.x,a.y-b.y,a.z-b.z);
@@ -246,7 +246,10 @@ async function loadSourceGeometry(){
      decoded[bone]={verts,faces};
    }
    sourcedMeshes=decoded;
-   state.frameSpan=7.6;
+   state.focus='joint';
+   state.frameSpan=2.65;
+   state.zoom=1.13;
+   updateFocusButton();
    sourceStatus='BODYPARTS3D 4.0 · REAL BONE MESHES';
    $('scene-status').textContent='SOURCED BONES · SCHEMATIC TISSUES';
    document.querySelector('.disclaimer').textContent='Four aligned static right-knee bone meshes are sourced from BodyParts3D 4.0 (DBCLS, CC BY 4.0), transformed together from the same original frame. Ligaments, cartilage, patellar tracking and flexion remain illustrative and unreviewed.';
@@ -293,8 +296,21 @@ function play(){
  $('play').innerHTML='Ⅱ <span>Pause</span>';$('play').setAttribute('aria-pressed','true');
  state.frame=requestAnimationFrame(animate);
 }
+function updateFocusButton(){
+ const b=$('focus-toggle');if(!b)return;
+ b.textContent=state.focus==='joint'?'Whole bones':'Joint focus';
+ b.setAttribute('aria-pressed',String(state.focus==='whole'));
+ b.setAttribute('aria-label',state.focus==='joint'?'Show whole bones':'Return to knee joint close-up');
+}
+function toggleFocus(){
+ if(!sourcedMeshes)return;
+ state.focus=state.focus==='joint'?'whole':'joint';
+ state.frameSpan=state.focus==='joint'?2.65:7.6;
+ state.zoom=state.focus==='joint'?1.13:1;
+ updateFocusButton();render();
+}
 function reset(){
- stop();state.yaw=.47;state.pitch=-.11;state.zoom=1;state.selected=null;state.isolate=false;setFlex(0);setDepth(0);updateInspector();render();
+ stop();state.yaw=.47;state.pitch=-.11;state.focus='joint';state.zoom=sourcedMeshes?1.13:1;state.frameSpan=sourcedMeshes?2.65:6.65;updateFocusButton();state.selected=null;state.isolate=false;setFlex(0);setDepth(0);updateInspector();render();
 }
 const choices=$('structure-list');
 for(const id of DISPLAY_ORDER){
@@ -305,6 +321,7 @@ for(const id of DISPLAY_ORDER){
 $('depth').addEventListener('input',e=>setDepth(e.target.value));
 $('flexion').addEventListener('input',e=>{stop();setFlex(e.target.value)});
 $('play').addEventListener('click',play);
+$('focus-toggle').addEventListener('click',toggleFocus);
 $('front').addEventListener('click',()=>{state.yaw=0;state.pitch=0;render()});
 $('side').addEventListener('click',()=>{state.yaw=1.55;state.pitch=0;render()});
 $('reset').addEventListener('click',reset);
