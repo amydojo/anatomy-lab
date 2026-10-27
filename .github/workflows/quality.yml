@@ -27,3 +27,9 @@ jobs:
           name: body-live-visual-qa
           path: artifacts/
           if-no-files-found: ignore
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlas-v6-visual-qa
+          path: artifacts/v6-*.png
+          if-no-files-found: ignore
