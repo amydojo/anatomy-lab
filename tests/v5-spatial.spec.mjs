@@ -9,6 +9,7 @@ async function start(page){
 }
 test('spatial 3D specimen initializes and supports anatomical selection and reset',async({page})=>{
  const errors=await start(page);
+ if((await page.viewportSize()).width<=850)await page.locator('#inspector-toggle').click();
  await page.locator('[data-structure="acl"]').click();
  await expect(page.locator('#inspector-title')).toHaveText('ACL');
  await page.locator('#isolate').click();
@@ -64,6 +65,7 @@ test('short-screen interaction stays reachable and reduced motion does not autop
 });
 test('provenance and V4 fallback are explicit',async({page})=>{
  await start(page);await expect(page.locator('a[href="/knee/"]')).toBeVisible();
+ if((await page.viewportSize()).width<=850)await page.locator('#inspector-toggle').click();
  await page.locator('a[href="/knee/spatial/sources/"]').click();
  await expect(page.locator('body')).toContainText('What is real.');
  await expect(page.locator('body')).toContainText('BodyParts3D');
