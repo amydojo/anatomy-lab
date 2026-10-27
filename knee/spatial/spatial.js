@@ -362,7 +362,8 @@ function renderExperiment(){
  }
 }
 function beginExperiment(){
- stop();study.stage='predict';study.guess=null;study.originalDepth=state.depth;
+ stop();if(study.stage==='idle')study.originalDepth=state.depth;
+ study.stage='predict';study.guess=null;
  setFlex(0);setDepth(3);setExpanded(true);renderExperiment();
 }
 function endExperiment(){

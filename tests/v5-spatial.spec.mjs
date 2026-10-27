@@ -122,6 +122,7 @@ test('joint focus is default; whole-bone context is a reversible camera choice',
 
 test('guided experiment uses actual joint manipulation to reveal explanation',async({page})=>{
  const errors=await start(page);
+ if((await page.viewportSize()).width<=850)await page.locator('#inspector-toggle').click();
  await page.locator('#experiment-start').click();
  await expect(page.locator('#experiment-panel')).toContainText('What moves when the knee bends?');
  await expect(page.locator('#depth')).toHaveValue('3');
