@@ -39,3 +39,11 @@
 .attachment-info a{font-size:11px;color:#f5c98a;display:block;margin-top:10px}
 .action-row button:disabled{opacity:.5;cursor:not-allowed}
 .action-row #follow[aria-pressed=true]{background:#815d30;border-color:#e2c176}
+
+/* V5.2 mobile visual QA: preserve specimen space with attachment inspector expanded. */
+@media(max-width:850px){
+ .inspector[data-expanded=true]{height:min(40dvh,340px)}
+ .stage-actions{left:10px;right:10px;bottom:8px;flex-direction:row;justify-content:flex-end;gap:6px}
+ .stage-actions button{min-height:36px;min-width:44px;padding:0 9px;border-radius:9px;font-size:10px}
+ .helper{display:none}
+}

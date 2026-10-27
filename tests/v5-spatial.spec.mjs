@@ -207,3 +207,20 @@ for(const width of [320,390,430]){
    await page.screenshot({path:'artifacts/v52-pcl-'+width+'.png'});
  });
 }
+
+test('V5.2 compact camera controls preserve specimen space on short mobile',async({page})=>{
+ await page.setViewportSize({width:320,height:780});
+ const errors=await start(page);
+ await page.locator('#inspector-toggle').click();
+ await page.locator('[data-structure="acl"]').click();
+ await page.locator('#follow').click();
+ const boxes=await page.evaluate(()=>{
+   const bounds=sel=>{const x=document.querySelector(sel).getBoundingClientRect();return {x:x.x,y:x.y,width:x.width,height:x.height,bottom:x.bottom,right:x.right}};
+   return {stage:bounds('.stage'),inspector:bounds('.inspector'),buttons:[...document.querySelectorAll('.stage-actions button')].map(x=>{const b=x.getBoundingClientRect();return {x:b.x,y:b.y,right:b.right,bottom:b.bottom}})};
+ });
+ expect(boxes.stage.height).toBeGreaterThan(280);
+ expect(boxes.buttons.every(b=>b.y>=boxes.stage.y&&b.bottom<=boxes.stage.bottom+1)).toBe(true);
+ expect(boxes.buttons.every(b=>b.x>=0&&b.right<=321)).toBe(true);
+ await page.screenshot({path:'artifacts/v52-mobile-roomier-stage.png'});
+ expect(errors).toEqual([]);
+});
