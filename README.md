@@ -130,3 +130,22 @@ V5's first spatial prototype introduces a dependency-free **3D perspective mesh 
 The next import step is the official CC BY 4.0 BodyParts3D skeletal subset (right femur, tibia, fibula and patella) after a verifiable file hash and alignment audit. Menisci and ligaments require separately reviewed geometry, as BodyParts3D's skeletal collection does not itself supply the complete structures. Avoid mixing Z-Anatomy CC BY-SA and third-party noncommercial material without checking and satisfying licenses.
 
 Regression suite: `tests/v5-spatial.spec.mjs`, automated through the existing Playwright CI matrix, with visual screenshots and source integrity assertions. Production remains on V4 until the new experiment is reviewed and explicitly promoted.
+
+### Reproducible sourced-geometry preflight
+
+When the official BodyParts3D reference meshes have been obtained through an authorized download, extract all **four right-side** bones from the same dataset release in the unmodified whole-body coordinate frame. The current reference FMA identifiers are 24474 (right femur), 24477 (right tibia), 24480 (right fibula), and 24486 (right patella); recheck them against the exact release manifest.
+
+Use the new local-only geometry preflight to emit a hash-bound, review-required manifest:
+
+```bash
+python3 scripts/validate_spatial_assets.py \\
+  --release 'BodyParts3D official / verified version' \\
+  --license-url 'https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html' \\
+  --mesh femur=path/to/FMA24474.stl \\
+  --mesh tibia=path/to/FMA24477.stl \\
+  --mesh fibula=path/to/FMA24480.stl \\
+  --mesh patella=path/to/FMA24486.stl \\
+  --out artifacts/right-knee-mesh-manifest.json
+```
+
+This produces SHA-256 hashes, size, bounding boxes, coordinate spans, an approximate alignment check, and mandatory review warnings. It does **not** validate anatomical identity, articular congruence, entheses, kinematic constraints, or specialist clinical suitability. No mesh has been downloaded or added to this V5 preview yet. Tests run with `python3 -m unittest discover -s scripts/tests` and CI.

@@ -16,6 +16,7 @@ jobs:
           node-version: '22'
       - run: npm install --no-audit --no-fund
       - run: npm test
+      - run: python3 -m unittest discover -s scripts/tests
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:e2e
       - if: always()
