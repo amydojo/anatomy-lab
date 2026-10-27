@@ -1,0 +1,135 @@
+{
+  "schema": "body-live/bp3d-import-provenance-v1",
+  "upstream_project": "https://github.com/ashemag/human-atlas",
+  "source_dataset": "Official BodyParts3D 4.0 IS-A Tree, 99%-polygon-reduced",
+  "source_archive": "isa_BP3D_4.0_obj_99.zip",
+  "original_creator": "Database Center for Life Science (DBCLS)",
+  "required_attribution": "BodyParts3D, \u00a9 The Database Center for Life Science licensed under CC Attribution 4.0 International",
+  "license_url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html",
+  "upstream_commit": "1c38bf35c254a891200d3cedecfd57abebe83d8d",
+  "atlas": {
+    "upstream_url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/atlas.json",
+    "git_blob_sha1": "0f81b5621479a0c0548f4683c316f33bd4d6545b",
+    "sha256": "c359f4bcd2cba90b7411d66d5e9fc04dc81294d46cd5c1e8b212c824f2e5bbee",
+    "bytes": 1335285
+  },
+  "packed_chunk": {
+    "upstream_url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-13.bin",
+    "git_blob_sha1": "24a9953b6677cf07cd6beea9f221a0690c6efa44",
+    "sha256": "4c51b6be85d5b705d2b52b79b9ad1cdae0b65ad03c9402a2f2673c7633fd94f3",
+    "bytes": 4004548
+  },
+  "meshes": {
+    "femur": {
+      "id": "FJ3365",
+      "fma": "FMA24474",
+      "original_name": "Right femur",
+      "source_vertex_count": 480,
+      "source_triangle_count": 930,
+      "source_bounds_metres": {
+        "min": [
+          -0.149964,
+          0.4462612,
+          -0.0504698
+        ],
+        "max": [
+          -0.0318943,
+          0.9118542,
+          0.011939
+        ]
+      },
+      "source_offsets_bytes": {
+        "vertices": 1120880,
+        "indices": 1129520
+      }
+    },
+    "tibia": {
+      "id": "FJ3387",
+      "fma": "FMA24477",
+      "original_name": "Right tibia",
+      "source_vertex_count": 334,
+      "source_triangle_count": 634,
+      "source_bounds_metres": {
+        "min": [
+          -0.109192,
+          0.0720868,
+          -0.0479271
+        ],
+        "max": [
+          -0.035216,
+          0.4520312,
+          0.014835
+        ]
+      },
+      "source_offsets_bytes": {
+        "vertices": 1741020,
+        "indices": 1747032
+      }
+    },
+    "fibula": {
+      "id": "FJ3366",
+      "fma": "FMA24480",
+      "original_name": "Right fibula",
+      "source_vertex_count": 162,
+      "source_triangle_count": 298,
+      "source_bounds_metres": {
+        "min": [
+          -0.120165,
+          0.0528313,
+          -0.0515126
+        ],
+        "max": [
+          -0.0843557,
+          0.4369522,
+          -0.0221566
+        ]
+      },
+      "source_offsets_bytes": {
+        "vertices": 1140680,
+        "indices": 1143596
+      }
+    },
+    "patella": {
+      "id": "FJ3381",
+      "fma": "FMA24486",
+      "original_name": "Right patella",
+      "source_vertex_count": 176,
+      "source_triangle_count": 304,
+      "source_bounds_metres": {
+        "min": [
+          -0.102288,
+          0.4395972,
+          0.000992
+        ],
+        "max": [
+          -0.0606208,
+          0.4789072,
+          0.022727
+        ]
+      },
+      "source_offsets_bytes": {
+        "vertices": 1504376,
+        "indices": 1507544
+      }
+    }
+  },
+  "coordinate_frame": "Original four elements share reference pose; uniformly transformed for display; never independently aligned",
+  "transforms": {
+    "origin_metres": [
+      -0.09092915,
+      0.4491462,
+      -0.01654605
+    ],
+    "scale_to_scene": 7.5,
+    "source_axes": "metres, Y-up, transformed uniformly from the BodyParts3D coordinate system"
+  },
+  "anatomist_reviewed": false,
+  "kinematically_validated": false,
+  "soft_tissue_status": "Hand-authored illustrative geometry; not part of BodyParts3D bone import",
+  "warnings": [
+    "BodyParts3D dataset authors warn of possible structure assignment errors.",
+    "The static reference alignment does not validate joint movement.",
+    "Patella tracking and ligament attachment points remain schematic.",
+    "Do not infer forces, nerve effects, diagnosis, or surgical accuracy."
+  ]
+}
