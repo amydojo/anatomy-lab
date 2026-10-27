@@ -8,7 +8,9 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 22
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -17,7 +19,7 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npm test
       - run: python3 -m unittest discover -s scripts/tests
-      - run: npx playwright install --with-deps chromium webkit
+      - run: npx playwright install chromium webkit
       - run: npm run test:e2e
       - if: always()
         uses: actions/upload-artifact@v4

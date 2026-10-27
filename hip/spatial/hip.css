@@ -64,3 +64,31 @@
 .nerve-measures strong{font:400 23px Georgia,serif;color:#f9dfa6;display:block}
 .nerve-measures small{font-size:10px;line-height:1.5;color:#cbbca0;display:block}
 @media(max-width:370px){.nerve-actions button{flex:1;min-width:42%}}
+
+/* V5.5 — live spatial follow controls belong in the specimen viewport on phones. */
+.nerve-follow-stage[hidden],.nerve-frames[hidden]{display:none!important}
+.nerve-follow-stage{
+ position:absolute;z-index:5;left:14px;right:14px;bottom:58px;
+ border:1px solid #a9895d;border-radius:13px;background:#251b15ed;
+ backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+ padding:11px 14px 12px;color:#f7e4c9;box-shadow:0 8px 30px #0008;
+}
+.follow-top,.follow-branch-row,.follow-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.follow-kicker{font-size:10px;font-weight:750;letter-spacing:.16em}
+.follow-kicker span{color:#d7a985;font-size:9px;letter-spacing:.08em;margin-left:4px}
+#follow-exit{font-size:20px;line-height:1;color:#f8d8af;min-width:36px;min-height:36px;border:1px solid #7c6249;border-radius:8px;background:#403126}
+.follow-branch-row{margin:4px 0 11px}
+.follow-branch-row label{font-size:9px;letter-spacing:.1em;color:#cdb594}
+#follow-branch{flex:1;max-width:250px;min-width:0;background:#57412c;border:1px solid #997954;color:#fae6cf;min-height:37px;border-radius:8px;padding:6px 10px;font-size:12px}
+#follow-distance{font:400 17px Georgia,serif;white-space:nowrap;min-width:55px;text-align:right}
+#follow-progress{width:100%;accent-color:#e7b97f;touch-action:pan-y;min-height:22px}
+.follow-foot{margin-top:3px;color:#c5ab91;font-size:10px;line-height:1.4}
+.follow-foot span:first-child{max-width:83%}
+.nerve-frames{border:1px solid #896b47;border-radius:12px;padding:12px;margin:12px 0;background:#31261a}
+.nerve-frame-controls{display:flex;gap:7px;margin:10px 0}
+.nerve-frame-controls button{flex:1;min-height:44px;border:1px solid #906f4c;border-radius:8px;background:#46301f;color:#e7caaa;font-size:11px;padding:7px}
+.nerve-frame-controls button[aria-pressed=true]{background:#ad8155;color:#211710;border-color:#f1c387;font-weight:750}
+.nerve-frames p{font-size:11px;color:#cfb9a1;line-height:1.5;margin:8px 0 0}
+@media(max-width:850px){.nerve-follow-stage{left:8px;right:8px;bottom:58px;padding:9px 12px}.stage:has(.nerve-follow-stage:not([hidden])) .helper{display:none}}
+@media(max-height:690px) and (max-width:850px){.nerve-follow-stage{bottom:51px;padding:6px 10px}.follow-top{line-height:1}.follow-branch-row{margin:2px 0 5px}.follow-foot{margin-top:1px}}
+@media(prefers-reduced-motion:reduce){.nerve-follow-stage{transition:none}}

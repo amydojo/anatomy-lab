@@ -14,15 +14,17 @@
  function project(point,camera){
    const yaw=camera.yaw||0,pitch=camera.pitch||0;
    const yc=Math.cos(yaw),ys=Math.sin(yaw),xc=Math.cos(pitch),xs=Math.sin(pitch);
-   const x=point.x*yc+point.z*ys;
-   const z=point.z*yc-point.x*ys;
-   const y2=point.y*xc-z*xs;
-   const z2=point.y*xs+z*xc;
+   const pivot=camera.target||{x:0,y:0,z:0};
+   const dx=point.x-pivot.x,dy=point.y-pivot.y,dz=point.z-pivot.z;
+   const x=dx*yc+dz*ys;
+   const z=dz*yc-dx*ys;
+   const y2=dy*xc-z*xs;
+   const z2=dy*xs+z*xc;
    const view={x,y:y2,z:z2};
    const perspective=7.4/(7.4-z2);
    const scale=Math.min(camera.width/3.25,camera.height/(camera.frameSpan||6.65))*camera.zoom;
    return {x:camera.width*.50+x*scale*perspective,
-     y:camera.height*.50-(y2-.04)*scale*perspective,z:z2,world:view};
+     y:camera.height*(Number.isFinite(camera.anchorY)?camera.anchorY:.50)-(y2-.04)*scale*perspective,z:z2,world:view};
  }
  function attachOrbit(canvas,{state,render,pick,minZoom=.7,maxZoom=2.5}){
    const pointers=new Map();let origin=null,travel=false;

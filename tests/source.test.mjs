@@ -179,3 +179,63 @@ test('V5.4 sciatic geometry imported separately from medical imaging',()=>{
  assert.ok(read('hip/spatial/index.html').includes('id="nerve-evidence"'));
  assert.ok(read('hip/spatial/sources/index.html').includes('Mixed-source registration'));
 });
+
+test('V5.5 nerve graph: anatomical hierarchy separated from unverified source surface seams',()=>{
+ const host={};
+ new Function('window',read('hip/spatial/nerve-follow.js'))(host);
+ const d=JSON.parse(read('hip/spatial/assets/sciatic-source.json'));
+ const g=host.BodyNerveFollow.create(d);
+ assert.deepEqual(g.segments,['sciatic','tibial','commonFibular']);
+ assert.equal(g.parents.sciatic,null);
+ for(const id of ['sciatic','tibial','commonFibular']){
+   assert.ok(g.branches[id].length>.2);
+   assert.ok(g.topology[id].count>=1);
+   const curve=g.branches[id];
+   assert.ok(curve.proximal[1]>curve.distal[1],id+' path should travel inferiorly');
+   let prev=null;
+   for(let step=0;step<=100;step++){
+     const p=g.sample(id,step/100);
+     assert.ok(p.every(Number.isFinite));
+     if(prev)assert.ok(host.BodyNerveFollow.dist(p,prev)<=curve.length/100*1.15,'arc-length jump '+id);
+     prev=p;
+   }
+ }
+ for(const id of ['tibial','commonFibular']){
+   assert.equal(g.parents[id],'sciatic');
+   assert.equal(g.junctions[id].displayedAsContinuousSource,false);
+   assert.ok(g.junctions[id].sourceGap>0);
+   assert.ok(g.junctions[id].guidance.length>30);
+ }
+ assert.equal(g.imagingDerived,false);
+ assert.equal(g.anatomistReviewed,false);
+});
+test('V5.5 Hip/Knee source-frame conversion matches 480 corresponding femur vertices',()=>{
+ const host={};
+ new Function('window',read('assets/hip-knee-bridge.js'))(host);
+ const hip=JSON.parse(read('hip/spatial/assets/hip-source.json'));
+ const knee=JSON.parse(read('knee/spatial/assets/bp3d-right-knee-4.0.json'));
+ const b=host.BodyHipKneeBridge;
+ const result=b.verify(hip,knee);
+ assert.equal(result.matchedVertices,480);
+ assert.ok(result.verifiedWithinSourceRounding);
+ assert.ok(result.maximumSceneUnits<.00005);
+ assert.equal(result.establishesNervePlacement,false);
+ for(const p of [[1,2,3],[-.5,0,1]]){
+   const roundTrip=b.hipToKnee(b.kneeToHip(p));
+   assert.ok(Math.hypot(...roundTrip.map((v,i)=>v-p[i]))<1e-9);
+ }
+ const source=read('assets/spatial-core.js');
+ assert.ok(source.includes('camera.target||{x:0,y:0,z:0}'));
+});
+test('V5.5 mobile Follow controls and source mode do not claim patient images',()=>{
+ const hip=read('hip/spatial/index.html'),js=read('hip/spatial/hip.js'),css=read('hip/spatial/hip.css');
+ for(const path of ['hip/spatial/nerve-follow.js','assets/hip-knee-bridge.js'])assert.ok(existsSync(new URL('../'+path,import.meta.url)));
+ for(const phrase of ['id="follow-stage"','id="follow-progress"','id="follow-branch"','data-nerve-frame="atlas"','data-nerve-frame="composite"'])
+   assert.ok(hip.includes(phrase),phrase);
+ assert.ok(js.includes('startFollow'));
+ assert.ok(js.includes('stopFollow'));
+ assert.ok(js.includes('sourceTrace'));
+ assert.ok(js.includes('HIP ↔ KNEE FRAME VERIFIED'));
+ assert.ok(css.includes('.nerve-follow-stage'));
+ assert.ok(js.includes('if(!nerveTruth)'));
+});

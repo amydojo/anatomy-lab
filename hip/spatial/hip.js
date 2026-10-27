@@ -43,7 +43,9 @@ const state={yaw:Math.PI+.28,pitch:-.11,zoom:1.08,frameSpan:4.5,width:0,height:0
  axis:'flexion',pose:{flexion:0,abduction:0,rotation:0},selected:null,isolate:false,trace:false,
  expanded:false,playing:false,frame:0,prev:0,dir:1,sourceLoaded:false,sourceLabel:'LOADING'};
 const lesson={phase:'idle',guess:null,oldDepth:0,oldAxis:'flexion'};
-let meshes=null,nerveMeshes=[],nerveTruth=null,nerveAssetError='',nerveEvidenceOpen=false,rendering=false,hits=[];
+let meshes=null,nerveMeshes=[],nerveTruth=null,nerveGraph=null,nerveAssetError='',nerveEvidenceOpen=false,rendering=false,hits=[];
+let hipSourceData=null,bridgeEvidence=null;
+const follow={active:false,branch:'sciatic',progress:0,frame:'composite',savedZoom:1.08,raf:0};
 function toLocal(x,y,z){const o=[-.057,.895,-.045],s=10;return V((x-o[0])*s,(y-o[1])*s,(z-o[2])*s);}
 const routeSource=[[-.039,.949,-.088],[-.066,.918,-.091],[-.082,.891,-.099],[-.098,.843,-.104],[-.108,.792,-.097],[-.114,.733,-.084]];
 const nervePoints=routeSource.map(p=>toLocal(...p));
@@ -91,6 +93,7 @@ function fallback(){
    ellipse('sacrum',V(0,.2,-.22),.30,.7,.25),ellipse('maximus',V(-.45,-.05,-.35),.55,.8,.25)];
 }
 function alphaFor(id){
+ if(follow.frame==='atlas'&&nerveTruth&&!NERVES.includes(id))return 0;
  const layer=state.depth;
  const visible={
    hipBone:true,femur:true,sacrum:true,
@@ -117,6 +120,7 @@ function alphaFor(id){
  if(state.selected&&state.selected!==id)opacity*=state.isolate?.12:.45;
  if(state.selected===id)opacity=Math.min(1,opacity+.07);
  if(state.trace&&NERVES.includes(id))opacity=1;
+ if(follow.active&&!NERVES.includes(id))opacity*=id==='piriformis'?.35:BONES.includes(id)?.23:.12;
  return opacity;
 }
 function shade(hex,b){const rgb=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));return 'rgb('+rgb.map(v=>Math.round(clamp(v*b,0,255))).join(',')+')';}
@@ -137,7 +141,8 @@ function draw(){
  const w=state.width,h=state.height;if(!w||!h)return;
  ctx.clearRect(0,0,w,h);
  const candidates=[];
- const source=(meshes||fallback()).concat(nerveMeshes);
+ const source=(follow.frame==='atlas'&&nerveTruth?[]:(meshes||fallback()))
+   .concat(follow.frame==='atlas'&&nerveTruth?nerveMeshes.map(m=>({...m,verts:m.verts.map(unregisterPoint)})):nerveMeshes);
  for(const m of source){
   if(m.id==='sciatic'&&!nerveTruth)continue;
   const a=alphaFor(m.id);if(a<=0)continue;
@@ -170,9 +175,17 @@ function draw(){
  if(state.trace){
   ctx.lineWidth=2.5;ctx.strokeStyle='#f0d283';ctx.globalAlpha=.95;
   const sourceTrace=nerveTruth?.segments?.[state.selected]||nerveTruth?.segments?.sciatic;
-  const pts=nerveTruth?sourceTrace.tracePoints_derived_not_measured.map(p=>V(...p)):nervePoints;
+  const pts=nerveGraph?nerveGraph.branches[(NERVES.includes(state.selected)?state.selected:'sciatic')].points.map(p=>V(...toDisplayPoint(p)))
+   :nerveTruth?sourceTrace.tracePoints_derived_not_measured.map(p=>V(...p)):nervePoints;
   ctx.beginPath();pts.map(p=>core.project(p,state)).forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();
   ctx.globalAlpha=1;
+ }
+ if(follow.active&&nerveGraph){
+  const p=toDisplayPoint(nerveGraph.sample(follow.branch,follow.progress));
+  const pt=core.project(V(...p),state);
+  ctx.save();ctx.globalAlpha=1;ctx.lineWidth=2.2;ctx.strokeStyle='#ffdaa1';
+  ctx.fillStyle='#261a13';ctx.beginPath();ctx.arc(pt.x,pt.y,8,0,Math.PI*2);ctx.fill();ctx.stroke();
+  ctx.fillStyle='#f9e2b4';ctx.beginPath();ctx.arc(pt.x,pt.y,3.1,0,Math.PI*2);ctx.fill();ctx.restore();
  }
  }finally{rendering=false;}
 }
@@ -181,6 +194,98 @@ function setExpanded(v){
  panel.dataset.expanded=String(v);$('inspector-toggle').setAttribute('aria-expanded',String(v));
  $('inspector-toggle').querySelector('.grab-icon').textContent=v?'⌄':'⌃';
  requestAnimationFrame(resize);
+}
+
+
+function unregisterPoint(p){
+ if(!nerveTruth)return p;
+ const R=nerveTruth.registration.rotation,t=nerveTruth.registration.translation;
+ const q=[p.x-t[0],p.y-t[1],p.z-t[2]];
+ return V(
+  q[0]*R[0][0]+q[1]*R[0][1]+q[2]*R[0][2],
+  q[0]*R[1][0]+q[1]*R[1][1]+q[2]*R[1][2],
+  q[0]*R[2][0]+q[1]*R[2][1]+q[2]*R[2][2]
+ );
+}
+function toDisplayPoint(p){
+ const point=Array.isArray(p)?V(...p):p;
+ const q=follow.frame==='atlas'?unregisterPoint(point):point;
+ return [q.x,q.y,q.z];
+}
+function renderFollow(){
+ const panel=$('follow-stage');panel.hidden=!follow.active;
+ if(!follow.active||!nerveGraph)return;
+ $('follow-branch').value=follow.branch;
+ $('follow-mode-label').textContent=follow.frame==='atlas'?'ATLAS SOURCE':'REGISTERED COMPOSITE';
+ const route=nerveGraph.branches[follow.branch];
+ $('follow-progress').value=Math.round(follow.progress*100);
+ $('follow-distance').textContent='≈'+Math.round(route.length*follow.progress*100)+' mm';
+ $('follow-percent').textContent=Math.round(follow.progress*100)+'%';
+ const join=nerveGraph.junctions[follow.branch];
+ $('follow-path-note').textContent=join
+  ?'UNVERIFIED branch junction gap ≈'+(join.sourceGap*100).toFixed(0)+' mm · no source connecting surface'
+  :'Surface-sampled visual centreline, not MRI';
+}
+function moveFollowCamera(smooth){
+ if(!follow.active||!nerveGraph)return;
+ const dest=V(...toDisplayPoint(nerveGraph.sample(follow.branch,follow.progress)));
+ if(follow.raf)cancelAnimationFrame(follow.raf);
+ const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+ if(!smooth||reduced||!state.target){state.target=dest;draw();return;}
+ const start=V(state.target.x,state.target.y,state.target.z);
+ let first=null;
+ const frame=time=>{
+  if(!follow.active)return;
+  if(first===null)first=time;
+  const u=Math.min(1,(time-first)/220),e=u*u*(3-2*u);
+  state.target=V(start.x+(dest.x-start.x)*e,start.y+(dest.y-start.y)*e,start.z+(dest.z-start.z)*e);
+  draw();
+  if(u<1)follow.raf=requestAnimationFrame(frame);else follow.raf=0;
+ };
+ follow.raf=requestAnimationFrame(frame);
+}
+function setFollowProgress(next){
+ if(!follow.active||!nerveGraph)return;
+ follow.progress=clamp(Number(next)/100,0,1);
+ renderFollow();moveFollowCamera(false);
+}
+function startFollow(id='sciatic'){
+ if(!nerveGraph||!NERVES.includes(id))return false;
+ if(!follow.active)follow.savedZoom=state.zoom;
+ follow.active=true;follow.branch=id;follow.progress=0;
+ state.selected=id;state.trace=true;state.depth=3;
+ state.zoom=window.innerWidth<=850?1.25:1.4;
+ state.anchorY=window.innerWidth<=850?.29:.42;
+ state.frameSpan=window.innerWidth<=850?3.35:4.5;
+ syncDepth();renderFollow();moveFollowCamera(false);
+ if(window.innerWidth<=850)setExpanded(false);
+ inspector();draw();return true;
+}
+function stopFollow(){
+ follow.active=false;if(follow.raf)cancelAnimationFrame(follow.raf);follow.raf=0;
+ state.target=follow.frame==='atlas'&&nerveGraph?V(...toDisplayPoint(nerveGraph.sample(follow.branch,.35))):null;
+ state.zoom=follow.savedZoom;state.anchorY=.5;renderFollow();inspector();draw();
+}
+function setNerveFrame(frame){
+ if(!nerveTruth||!['atlas','composite'].includes(frame))return;
+ follow.frame=frame;
+ if(follow.active)moveFollowCamera(false);
+ else state.target=frame==='atlas'&&nerveGraph?V(...toDisplayPoint(nerveGraph.sample(NERVES.includes(state.selected)?state.selected:'sciatic',.35))):null;
+ renderFollow();inspector();draw();
+}
+async function checkBridge(){
+ if(!hipSourceData||!window.BodyHipKneeBridge)return;
+ try{
+  const r=await fetch('/knee/spatial/assets/bp3d-right-knee-4.0.json',{cache:'force-cache'});
+  if(!r.ok)throw Error('Knee source unavailable');
+  bridgeEvidence=window.BodyHipKneeBridge.verify(hipSourceData,await r.json());
+  if(!bridgeEvidence.verifiedWithinSourceRounding)throw Error('Hip/Knee correspondence beyond source rounding');
+  if(nerveEvidenceOpen)renderNerveEvidence();
+ }catch(err){
+  bridgeEvidence=null;
+  console.warn('Hip/Knee source bridge:',err.message);
+  if(nerveEvidenceOpen)renderNerveEvidence();
+ }
 }
 
 function renderNerveEvidence(){
@@ -199,6 +304,10 @@ function renderNerveEvidence(){
   metrics+
   '<p>These geometric discrepancies are from the <strong>femur surface</strong> alignment; they are NOT errors measured against a verified nerve, nor accuracy guarantees.</p>'+
   '<p>Medical imaging and 2026 sciatic micro-CT microstructure are not included. Expert registration and anatomical placement review remain pending.</p>'+
+  '<p class="bridge-check">'+(bridgeEvidence?.verifiedWithinSourceRounding
+   ?'HIP ↔ KNEE FRAME VERIFIED: '+bridgeEvidence.matchedVertices+' matching femoral vertices after shared-source transform, within rounding. This does not validate the nerve. '
+   :'Hip ↔ Knee frame correspondence is not verified; do not infer nerve continuation into Knee. ')+
+   '<a href="/knee/spatial/">Open knee skeleton (nerve not reconstructed there) ↗</a></p>'+
   '<a href="/hip/spatial/sources/">Detailed source audit ↗</a> · <a href="/hip/spatial/assets/sciatic-provenance.json">Machine-readable registration evidence ↗</a>';
 }
 async function loadNerveTruth(){
@@ -218,14 +327,16 @@ async function loadNerveTruth(){
    if(m.faces.some(f=>f.length!==3||f.some(i=>!Number.isInteger(i)||i<0||i>=verts.length)))throw Error('Invalid faces');
    next.push({id,verts,faces:m.faces});
   }
+  nerveGraph=window.BodyNerveFollow.create(d);
   nerveMeshes=next;nerveTruth=d;
+  checkBridge();
   $('asset-status').textContent='SOURCED BONES + MUSCLES · REGISTERED NERVE COMPOSITE';
   document.querySelectorAll('[data-part]').forEach(b=>{
    if(NERVES.includes(b.dataset.part))b.querySelector('.structure-status').textContent='Z-ATLAS';
   });
   inspector();draw();
  }catch(e){
-  nerveMeshes=[];nerveTruth=null;nerveAssetError=e.message;
+  nerveMeshes=[];nerveTruth=null;nerveGraph=null;nerveAssetError=e.message;
   document.querySelectorAll('[data-part]').forEach(b=>{
    if(NERVES.includes(b.dataset.part))b.querySelector('.structure-status').textContent='SCHEMATIC';
   });
@@ -245,8 +356,14 @@ function inspector(){
  $('anatomy-fact').querySelector('p').textContent=obj?obj.fact:'The femoral head moves within the acetabulum. This educational model uses a fixed estimated pivot, not personalized joint mechanics.';
  $('isolate').disabled=!obj;$('isolate').setAttribute('aria-pressed',String(state.isolate));
  $('nerve-follow').hidden=!NERVES.includes(state.selected)&&state.depth!==3;
- $('nerve-follow').setAttribute('aria-pressed',String(state.trace));
- $('nerve-follow').textContent=state.trace?'Hide trace':'Trace nerve';
+ $('nerve-follow').setAttribute('aria-pressed',String(follow.active));
+ $('nerve-follow').textContent=follow.active?'Exit Follow':'Follow nerve';
+ $('nerve-follow').disabled=!!nerveTruth&&!nerveGraph;
+ $('nerve-frames').hidden=!nerveTruth||(!state.trace&&!follow.active);
+ document.querySelectorAll('[data-nerve-frame]').forEach(b=>b.setAttribute('aria-pressed',String(follow.frame===b.dataset.nerveFrame)));
+ $('nerve-frame-note').textContent=follow.frame==='atlas'
+  ?'Unregistered Z-Anatomy nerve surface alone. Hip structures are hidden because they are a different reference.'
+  :'Source nerve transformed onto BodyParts3D hip. Mixed-source composite; not verified in situ.';
  $('nerve-info').hidden=!state.trace;
  if(state.trace)$('nerve-info').innerHTML=nerveTruth
  ?'<div class="eyebrow">Z-ANATOMY · SOURCE-DERIVED SURFACE</div><p>The imported nerve is a separate atlas source. The gold line is estimated from surface slices, NOT an MRI centreline.</p><div class="nerve-actions"><button data-nerve="sciatic">Sciatic trunk</button><button data-nerve="tibial">Tibial</button><button data-nerve="commonFibular">Common fibular</button></div><p>Mixed-reference alignment is unreviewed. A source surface is not a verified patient reconstruction.</p>'
@@ -256,6 +373,10 @@ function inspector(){
 }
 function select(id){
  if(!DATA[id])return;
+ if(follow.active){
+  if(NERVES.includes(id)){follow.branch=id;follow.progress=0;moveFollowCamera(false);renderFollow();}
+  else stopFollow();
+ }
  if(state.selected!==id)state.isolate=false;
  state.selected=id;
  if(NERVES.includes(id)){state.depth=3;state.trace=true;syncDepth();}
@@ -267,7 +388,7 @@ function syncDepth(){
  $('depth-output').textContent=['SURFACE','STABILIZERS','DEEP ROTATORS','SCIATIC PATH','SKELETON'][state.depth];
  $('view-caption').textContent='RIGHT HIP · '+['POSTERIOR','SIDE STABILIZERS','DEEP ROTATORS','NERVE RELATIONSHIP','SKELETAL FRAME'][state.depth];
 }
-function depth(v){state.depth=clamp(Number(v),0,4);if(state.depth!==3)state.trace=false;syncDepth();inspector();draw();}
+function depth(v){if(follow.active&&Number(v)!==3)stopFollow();state.depth=clamp(Number(v),0,4);if(state.depth!==3)state.trace=false;syncDepth();inspector();draw();}
 function pose(v){state.pose[state.axis]=Number(v);$('motion-output').textContent=Math.round(Number(v))+'°';
  if(lesson.phase==='move'&&state.axis==='abduction'&&state.pose.abduction>=20){lesson.phase='reveal';stop();renderLesson();}
  draw();}
@@ -305,6 +426,7 @@ function play(){
  state.frame=requestAnimationFrame(tick);
 }
 function reset(){
+ if(follow.active)stopFollow();
  stop();state.yaw=Math.PI+.28;state.pitch=-.11;state.zoom=1.09;
  state.focus='joint';state.frameSpan=window.innerWidth<=850?3.35:4.5;
  state.selected=null;state.isolate=false;state.trace=false;
@@ -342,6 +464,7 @@ function beginLesson(){
 function endLesson(){lesson.phase='idle';state.depth=lesson.oldDepth;syncDepth();renderLesson();inspector();draw();}
 function resize(){
  state.frameSpan=state.focus==='joint'?(window.innerWidth<=850?3.35:4.5):7.5;
+ if(follow.active)state.anchorY=window.innerWidth<=850?.29:.42;
  const rect=canvas.getBoundingClientRect();state.width=Math.max(1,rect.width);state.height=Math.max(1,rect.height);
  state.dpr=Math.min(2,window.devicePixelRatio||1);
  canvas.width=Math.ceil(state.width*state.dpr);canvas.height=Math.ceil(state.height*state.dpr);
@@ -363,7 +486,9 @@ async function load(){
    if(!faces.every(f=>f.length===3&&f.every(i=>Number.isInteger(i)&&i>=0&&i<verts.length)))throw Error('Invalid topology '+id);
    obj[id]={id,verts,faces};
   }
-  meshes=Object.values(obj);state.sourceLoaded=true;state.sourceLabel='BODYPARTS3D 4.0 · CC BY 4.0';
+  hipSourceData=d;
+  meshes=Object.values(obj);state.sourceLoaded=true;
+  checkBridge();state.sourceLabel='BODYPARTS3D 4.0 · CC BY 4.0';
   $('asset-status').textContent='SOURCED BONES + MUSCLES';
   $('asset-status').title='BodyParts3D 4.0 reference-pose geometry; illustrative movement';
   document.querySelectorAll('[data-part]').forEach(b=>{const tag=b.querySelector('.structure-status');if(tag&&!NERVES.includes(b.dataset.part))tag.textContent='SOURCE';});
@@ -391,10 +516,21 @@ $('focus-toggle').addEventListener('click',focus);
 $('reset').addEventListener('click',reset);
 $('inspector-toggle').addEventListener('click',()=>setExpanded(!state.expanded));
 $('isolate').addEventListener('click',()=>{if(!state.selected)return;state.isolate=!state.isolate;inspector();draw();});
-$('show-all').addEventListener('click',()=>{state.selected=null;state.isolate=false;state.trace=false;state.depth=0;syncDepth();inspector();draw();});
+$('show-all').addEventListener('click',()=>{if(follow.active)stopFollow();state.selected=null;state.isolate=false;state.trace=false;state.depth=0;syncDepth();inspector();draw();});
+$('follow-progress').addEventListener('input',e=>setFollowProgress(e.target.value));
+$('follow-branch').addEventListener('change',e=>{
+ const id=e.target.value;if(!NERVES.includes(id))return;
+ follow.branch=id;follow.progress=0;state.selected=id;
+ inspector();renderFollow();moveFollowCamera(true);
+});
+$('follow-exit').addEventListener('click',stopFollow);
+document.querySelectorAll('[data-nerve-frame]').forEach(b=>b.addEventListener('click',()=>setNerveFrame(b.dataset.nerveFrame)));
 $('nerve-evidence-toggle').addEventListener('click',()=>{nerveEvidenceOpen=!nerveEvidenceOpen;renderNerveEvidence();});
 $('nerve-info').addEventListener('click',e=>{const b=e.target.closest('[data-nerve]');if(b)select(b.dataset.nerve);});
-$('nerve-follow').addEventListener('click',()=>{state.trace=!state.trace;if(state.trace){state.depth=3;syncDepth();}inspector();draw();});
+$('nerve-follow').addEventListener('click',()=>{
+ if(!nerveTruth||!nerveGraph){state.trace=!state.trace;if(state.trace){state.depth=3;syncDepth();}inspector();draw();return;}
+ if(follow.active)stopFollow();else startFollow(NERVES.includes(state.selected)?state.selected:'sciatic');
+});
 $('lesson-start').addEventListener('click',()=>lesson.phase==='idle'?beginLesson():endLesson());
 $('lesson-panel').addEventListener('click',e=>{
  const b=e.target.closest('[data-guess]');if(b&&lesson.phase==='predict'){
@@ -414,9 +550,13 @@ window.addEventListener('resize',resize,{passive:true});
 if('ResizeObserver' in window)new ResizeObserver(resize).observe(document.querySelector('.stage'));
 window.__HIP_SPATIAL__={
  getState:()=>({depth:state.depth,pose:{...state.pose},axis:state.axis,selected:state.selected,trace:state.trace,
+  followActive:follow.active,followBranch:follow.branch,followProgress:follow.progress,displaySourceFrame:follow.frame,
+  cameraTarget:state.target?{...state.target}:null,cameraAnchorY:state.anchorY??.5,graphTopology:nerveGraph?.topology||null,
+  junctionGapScene:nerveGraph?.junctions?.[follow.branch]?.sourceGap||null,
+  kneeBridgeVerified:bridgeEvidence?.verifiedWithinSourceRounding||false,
   sourceLoaded:state.sourceLoaded,sourceLabel:state.sourceLabel,sourceCount:meshes?.length||0,nerveSourceLoaded:!!nerveTruth,nerveSegments:nerveMeshes.length,nerveEvidenceOpen,compositeFitMedian:nerveTruth?.registration?.fit?.median_scene_units||null,lesson:lesson.phase,
   yaw:state.yaw,pitch:state.pitch,zoom:state.zoom,viewport:{w:state.width,h:state.height},hitCount:hits.length}),
- transformFemur,select,depth,pose,axis,reset
+ transformFemur,select,depth,pose,axis,reset,startFollow,setFollowProgress,setNerveFrame
 };
 syncDepth();inspector();resize();load().then(loadNerveTruth);
 })();
