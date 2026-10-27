@@ -156,7 +156,7 @@ test('V5.3 hip route is real, reuses the spatial core, and preserves the origina
  assert.equal(scene.license,'CC BY 4.0');
  assert.equal(proof.anatomist_reviewed,false);
  assert.equal(proof.biomechanics_validated,false);
- assert.ok(read('hip/spatial/sources/index.html').toLowerCase().includes('sciatic nerve guide'));
+ assert.ok(read('hip/spatial/sources/index.html').toLowerCase().includes('z-anatomy'));
 });
 test('V5.3 hip motion models are intentionally schematic, not clinical simulations',()=>{
  const s=read('hip/spatial/hip.js');

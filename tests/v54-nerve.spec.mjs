@@ -57,7 +57,7 @@ test('source notes identify nerve as not MRI and preserve legacy Hip and Knee',a
  await page.goto('/hip/spatial/sources/');
  await expect(page.locator('body')).toContainText('Z-Anatomy');
  await expect(page.locator('body')).toContainText('micro-CT');
- await expect(page.locator('body')).toContainText('NOT the anatomic course');
+ await expect(page.locator('body')).toContainText('does not contain a whole sciatic nerve');
  await page.goto('/knee/spatial/');
  await expect(page.locator('canvas').first()).toBeVisible();
  await page.goto('/hip/dissection/');
