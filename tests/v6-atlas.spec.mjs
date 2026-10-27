@@ -17,7 +17,7 @@ test('Atlas loads original pinned skeleton and a functioning semantic region lis
  expect(st.pins).toBe(4);
  expect(st.renderer.partCount===78 || st.renderer.webgl===false).toBe(true);
  await expect(page.locator('#region-list button[data-region="hip"]')).toBeVisible();
- await expect(page.locator('a[href="/atlas/sources/"]')).toHaveCount(1);
+ await expect(page.locator('#atlas-sidebar a[href="/atlas/sources/"]')).toHaveCount(1);
  expect(errors).toEqual([]);
  await page.screenshot({path:'artifacts/v6-atlas-overview.png'});
 });
