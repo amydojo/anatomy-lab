@@ -179,3 +179,13 @@ The KNEE / SPATIAL inspector now differentiates **sourced BodyParts3D bone geome
 - Unit tests assert vertex correspondence, mathematical rigidity, anchored endpoints and transform consistency at 0°, 30°, 60°, 90°, 110°. Browser tests check mobile interaction, cross-region control regressions, and screenshots. Tests do **not** validate physical biomechanics or clinical accuracy.
 
 **No landmark has been approved by a qualified anatomist.** The bounding-box hints are only automated geometry correspondences, not measured insertion points or validated force vectors. Draft V5 preview only; leave V4 in production.
+
+## V6 — Atlas / Portal planning (documentation only)
+
+The next proposed release unifies the full-body overview, Hip → Sciatic nerve → Knee transitions, and an explicit Evidence Lens, without equating continuous camera travel with verified anatomical continuity.
+
+- [V6 implementation architecture and staged release criteria](docs/V6_ATLAS_PORTAL_PLAN.md)
+- [Evidence Lens schema and anatomical uncertainty policy](docs/V6_EVIDENCE_CONTRACT.md)
+- [Read-only audit of V5.3/V5.4/V5.5 draft PRs and release blockers](docs/V6_RELEASE_READINESS.md)
+
+**Planning docs do not merge or publish PRs #4–#6 and do not change V5.2 production.** Clinical or anatomist signoff remains unavailable for the unreviewed content.
