@@ -219,7 +219,7 @@ async function loadNerveTruth(){
    next.push({id,verts,faces:m.faces});
   }
   nerveMeshes=next;nerveTruth=d;
-  $('asset-status').textContent='SOURCED HIP + REGISTERED NERVE';
+  $('asset-status').textContent='SOURCED BONES + MUSCLES · REGISTERED NERVE COMPOSITE';
   document.querySelectorAll('[data-part]').forEach(b=>{
    if(NERVES.includes(b.dataset.part))b.querySelector('.structure-status').textContent='Z-ATLAS';
   });
