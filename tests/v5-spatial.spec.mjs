@@ -4,6 +4,8 @@ async function start(page){
  await page.goto('/knee/spatial/');
  await expect(page.locator('#knee-canvas')).toBeVisible();
  await expect(page.locator('#inspector-title')).toContainText('moving machine');
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_SPATIAL__?.getState()?.sourcedBoneCount||0),{timeout:10000}).toBe(4);
+ await expect(page.locator('#scene-status')).toContainText('SOURCED BONES');
  await expect.poll(()=>page.evaluate(()=>window.__BODY_SPATIAL__?.getState()?.hits?.length ?? window.__BODY_SPATIAL__?.getState()?.width ?? 0)).toBeGreaterThan(10);
  return errors;
 }
@@ -69,9 +71,35 @@ test('provenance and V4 fallback are explicit',async({page})=>{
  await page.locator('a[href="/knee/spatial/sources/"]').click();
  await expect(page.locator('body')).toContainText('What is real.');
  await expect(page.locator('body')).toContainText('BodyParts3D');
- await expect(page.locator('body')).toContainText('No BodyParts3D or Z-Anatomy mesh has been imported');
+ await expect(page.locator('body')).toContainText('BodyParts3D 4.0-derived geometry');
 });
 test('V4 knee offers non-destructive entry into spatial experiment',async({page})=>{
  await page.goto('/knee/');
  await expect(page.locator('a[href="/knee/spatial/"]')).toBeVisible();
+});
+
+test('all four licensed bones load from aligned reference coordinates',async({page})=>{
+ const errors=await start(page);
+ const model=await page.evaluate(async()=>await (await fetch('/knee/spatial/assets/bp3d-right-knee-4.0.json')).json());
+ expect(Object.keys(model.bone_meshes).sort()).toEqual(['femur','fibula','patella','tibia']);
+ expect(model.aligned_shared_transform.scale_to_scene).toBe(7.5);
+ for(const bone of Object.values(model.bone_meshes)){
+  expect(bone.vertices.length).toBeGreaterThan(100);
+  expect(bone.faces.length).toBeGreaterThan(200);
+ }
+ const proof=await page.evaluate(async()=>await (await fetch('/knee/spatial/assets/provenance.json')).json());
+ expect(proof.anatomist_reviewed).toBe(false);
+ expect(proof.kinematically_validated).toBe(false);
+ expect(proof.packed_chunk.sha256).toMatch(/^[0-9a-f]{64}$/);
+ expect(errors).toEqual([]);
+});
+test('sourced geometry rotates under flexion while preserving the static femur',async({page})=>{
+ await start(page);
+ const before=await page.evaluate(()=>window.__BODY_SPATIAL__.getState().sourcedBoneCount);
+ await page.locator('#flexion').evaluate(el=>{el.value='80';el.dispatchEvent(new Event('input',{bubbles:true}));});
+ const after=await page.evaluate(()=>window.__BODY_SPATIAL__.getState());
+ expect(before).toBe(4);
+ expect(after.flex).toBe(80);
+ await expect(page.locator('#scene-status')).toContainText('SOURCED BONES');
+ await page.screenshot({path:'artifacts/v5-sourced-bones-flexed.png'});
 });

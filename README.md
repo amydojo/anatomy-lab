@@ -125,15 +125,15 @@ Route: `/knee/spatial/` (kept separate from the stable `/knee/` lab).
 
 V5's first spatial prototype introduces a dependency-free **3D perspective mesh engine** with a shared camera and joint-pose state. It provides orbit, two-finger pinch zoom, selection and isolation, progressive tissue peeling, virtual flexion, animation, accessible sliders, touch-friendly anatomy information and a structured source dossier.
 
-**Accuracy: transparent milestone.** Geometry is **original schematic geometry**, generated using lofts, ellipsoids and curved tubes. It is not a licensed patient scan, BodyParts3D import, clinically verified anatomical asset or validated kinematic simulation. The fixed flexion axis, meniscus proxies, ligament routes and patellar tracking are teaching approximations. See `/knee/spatial/sources/` for the licensed asset review and import gates. Do not label it anatomical accuracy verified until official sourced geometry and qualified review are completed.
+**Accuracy: transparent milestone.** The four skeletal meshes are **real BodyParts3D 4.0-derived geometry**, imported together from one pinned reference dataset, with validated SHA-256 checks, recorded FMA IDs, and an unchanged shared coordinate frame. Ligaments, menisci and tendons remain original schematic geometry. The model is not a patient scan, clinically validated reconstruction or measured biomechanical simulator. The fixed flexion axis, meniscus proxies, ligament routes and patellar tracking are teaching approximations. See `/knee/spatial/sources/` for the licensed asset review and import gates. Do not label it anatomical accuracy verified until official sourced geometry and qualified review are completed.
 
-The next import step is the official CC BY 4.0 BodyParts3D skeletal subset (right femur, tibia, fibula and patella) after a verifiable file hash and alignment audit. Menisci and ligaments require separately reviewed geometry, as BodyParts3D's skeletal collection does not itself supply the complete structures. Avoid mixing Z-Anatomy CC BY-SA and third-party noncommercial material without checking and satisfying licenses.
+The BodyParts3D 4.0 CC BY 4.0 right-knee skeletal subset (femur, tibia, fibula, patella) has been imported by scripts/import_bp3d_right_knee.py using a pinned 4.0 geometry distribution; upstream file hashes and FMA identity checks are recorded in knee/spatial/assets/provenance.json. Menisci and ligaments require separately reviewed geometry, as BodyParts3D's skeletal collection does not itself supply the complete structures. Avoid mixing Z-Anatomy CC BY-SA and third-party noncommercial material without checking and satisfying licenses.
 
 Regression suite: `tests/v5-spatial.spec.mjs`, automated through the existing Playwright CI matrix, with visual screenshots and source integrity assertions. Production remains on V4 until the new experiment is reviewed and explicitly promoted.
 
 ### Reproducible sourced-geometry preflight
 
-When the official BodyParts3D reference meshes have been obtained through an authorized download, extract all **four right-side** bones from the same dataset release in the unmodified whole-body coordinate frame. The current reference FMA identifiers are 24474 (right femur), 24477 (right tibia), 24480 (right fibula), and 24486 (right patella); recheck them against the exact release manifest.
+For a future direct original-OBJ import or replacement, obtain all **four right-side** bones from the same official release in the shared whole-body coordinate frame. The current committed JSON has been extracted from a pinned, documented 4.0-derived distribution. The current reference FMA identifiers are 24474 (right femur), 24477 (right tibia), 24480 (right fibula), and 24486 (right patella); recheck them against the exact release manifest.
 
 Use the new local-only geometry preflight to emit a hash-bound, review-required manifest:
 
@@ -148,6 +148,16 @@ python3 scripts/validate_spatial_assets.py \\
   --out artifacts/right-knee-mesh-manifest.json
 ```
 
-This produces SHA-256 hashes, size, bounding boxes, coordinate spans, an approximate alignment check, and mandatory review warnings. It does **not** validate anatomical identity, articular congruence, entheses, kinematic constraints, or specialist clinical suitability. No mesh has been downloaded or added to this V5 preview yet. Tests run with `python3 -m unittest discover -s scripts/tests` and CI.
+This produces SHA-256 hashes, size, bounding boxes, coordinate spans, an approximate alignment check, and mandatory review warnings. It does **not** validate anatomical identity, articular congruence, entheses, kinematic constraints, or specialist clinical suitability. The four right-knee skeletal meshes have now been added to the preview through the pinned import pipeline; separate sourced ligament and cartilage meshes are not included. Tests run with `python3 -m unittest discover -s scripts/tests` and CI.
 
 Spatial camera orbit, pinch and projection now live in the joint-independent `assets/spatial-core.js`; Knee-specific geometry and pose constraints remain in `knee/spatial/spatial.js`. The shared controller has a disposal API for later Hip and Shoulder spatial scenes.
+
+### V5 sourced skeletal geometry · completed import
+
+- **Four aligned source-derived bones**: `knee/spatial/assets/bp3d-right-knee-4.0.json` (femur FMA24474, tibia FMA24477, fibula FMA24480, patella FMA24486). The source atlas has a unified coordinate frame; the export uses the **same transform for all four bones**.
+- **Attribution and proof**: `knee/spatial/assets/provenance.json` contains the pinned upstream commit, source URLs, original metadata SHA-256, packed source chunk SHA-256, FMA identifiers, vertex and triangle counts, shared transform and explicit review limitations.
+- **Reproducible importer**: `scripts/import_bp3d_right_knee.py`; GitHub Actions `import-bp3d-knee.yml` verifies hashes, geometry and identity before committing derived assets to the V5 feature branch.
+- **Runtime**: KNEE / SPATIAL loads the actual 4.0-derived bone triangles and keeps annotated, schematic menisci/ligaments/tendons. If geometry retrieval fails the prior original sketch remains as fallback.
+- **Static checks**: `scripts/tests/test_sourced_knee.py`. Interaction QA: `tests/v5-spatial.spec.mjs` tests sourced loading in Chromium/WebKit and at multiple mobile sizes.
+
+The actual data originates from BodyParts3D 4.0, © The Database Center for Life Science, available under CC Attribution 4.0 International (https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html). The intermediate distribution `ashemag/human-atlas` converted the official OBJ into metres/Y-up and packed/simplified the geometry. Source coordinates were shifted and scaled uniformly for this specimen viewer, without separate bone-by-bone repositioning. **No specialist anatomical review of this rendered interactive reconstruction has been performed**, and simulated flexion/patellar travel/soft-tissue attachments remain illustrative.

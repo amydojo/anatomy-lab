@@ -61,7 +61,9 @@ test('KNEE / SPATIAL is self contained, labeled as schematic, and protects V4 ro
   const page=read('knee/spatial/index.html');
   assert.ok(page.includes('Return to classic knee lab')&&page.includes('not clinically validated'));
   const dossier=read('knee/spatial/sources/index.html');
-  assert.ok(dossier.includes('No BodyParts3D or Z-Anatomy mesh has been imported'));
+  assert.ok(existsSync(new URL('../knee/spatial/assets/bp3d-right-knee-4.0.json',import.meta.url)));
+  assert.ok(existsSync(new URL('../knee/spatial/assets/provenance.json',import.meta.url)));
+  assert.ok(dossier.includes('BodyParts3D 4.0-derived geometry'));
   assert.ok(read('knee/index.html').includes('/knee/spatial/'));
 });
 
