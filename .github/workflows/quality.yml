@@ -8,6 +8,8 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
     timeout-minutes: 22
     steps:
       - uses: actions/checkout@v4
