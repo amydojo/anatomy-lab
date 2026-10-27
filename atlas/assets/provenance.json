@@ -1,0 +1,766 @@
+{
+  "schema": "body-live/atlas-provenance-v1",
+  "attribution": "BodyParts3D \u00a9 The Database Center for Life Science (DBCLS), CC BY 4.0",
+  "source_license": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html",
+  "distribution": "https://github.com/ashemag/human-atlas",
+  "pinned_commit": "1c38bf35c254a891200d3cedecfd57abebe83d8d",
+  "source_files": {
+    "atlas.json": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/atlas.json",
+      "git_blob_sha1": "0f81b5621479a0c0548f4683c316f33bd4d6545b",
+      "sha256": "c359f4bcd2cba90b7411d66d5e9fc04dc81294d46cd5c1e8b212c824f2e5bbee",
+      "bytes": 1335285
+    },
+    "body-11.bin": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-11.bin",
+      "git_blob_sha1": "f437a61bfd8c976108abf3e3a607784af3eb3575",
+      "sha256": "e8c1afe7f30fe710ad164ec9cd2287a32881606e7eb590af47d76b3f84405027",
+      "bytes": 4037528
+    },
+    "body-12.bin": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-12.bin",
+      "git_blob_sha1": "88e823456d067922f9c27c2405a69fe983eef68b",
+      "sha256": "61a6c8da89bb20df50c575964ac81aa4090eabfc2cb27ad2155aea325f31c6c0",
+      "bytes": 4000292
+    },
+    "body-13.bin": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-13.bin",
+      "git_blob_sha1": "24a9953b6677cf07cd6beea9f221a0690c6efa44",
+      "sha256": "4c51b6be85d5b705d2b52b79b9ad1cdae0b65ad03c9402a2f2673c7633fd94f3",
+      "bytes": 4004548
+    }
+  },
+  "source_frame": {
+    "origin_metres": [
+      0,
+      0.9,
+      0
+    ],
+    "scale": 5,
+    "axes": "BodyParts3D 4.0 derivative metres, Y-up"
+  },
+  "part_count": 78,
+  "lod_triangle_count": 23839,
+  "lod_json_sha256": "7109c5946584a592d105925e62c76883b3757f57497b5534966c2cdffc0e8dcd",
+  "models": {
+    "right-hip-bone": {
+      "fma": "FMA16586",
+      "source_chunk": 11,
+      "source_verts": 1036,
+      "source_triangles": 1898,
+      "lod_vertices": 194,
+      "lod_triangles": 359,
+      "target_faces": 360
+    },
+    "tenth-thoracic-vertebra": {
+      "fma": "FMA10037",
+      "source_chunk": 11,
+      "source_verts": 1251,
+      "source_triangles": 2160,
+      "lod_vertices": 167,
+      "lod_triangles": 289,
+      "target_faces": 290
+    },
+    "eleventh-thoracic-vertebra": {
+      "fma": "FMA10059",
+      "source_chunk": 11,
+      "source_verts": 1238,
+      "source_triangles": 2006,
+      "lod_vertices": 170,
+      "lod_triangles": 289,
+      "target_faces": 290
+    },
+    "twelfth-thoracic-vertebra": {
+      "fma": "FMA10081",
+      "source_chunk": 11,
+      "source_verts": 1228,
+      "source_triangles": 2062,
+      "lod_vertices": 166,
+      "lod_triangles": 290,
+      "target_faces": 290
+    },
+    "first-lumbar-vertebra": {
+      "fma": "FMA13072",
+      "source_chunk": 11,
+      "source_verts": 1391,
+      "source_triangles": 2404,
+      "lod_vertices": 161,
+      "lod_triangles": 290,
+      "target_faces": 290
+    },
+    "first-thoracic-vertebra": {
+      "fma": "FMA9165",
+      "source_chunk": 11,
+      "source_verts": 915,
+      "source_triangles": 1398,
+      "lod_vertices": 184,
+      "lod_triangles": 290,
+      "target_faces": 290
+    },
+    "second-lumbar-vertebra": {
+      "fma": "FMA13073",
+      "source_chunk": 11,
+      "source_verts": 1493,
+      "source_triangles": 2492,
+      "lod_vertices": 167,
+      "lod_triangles": 289,
+      "target_faces": 290
+    },
+    "second-thoracic-vertebra": {
+      "fma": "FMA9187",
+      "source_chunk": 11,
+      "source_verts": 965,
+      "source_triangles": 1570,
+      "lod_vertices": 179,
+      "lod_triangles": 288,
+      "target_faces": 290
+    },
+    "third-cervical-vertebra": {
+      "fma": "FMA12521",
+      "source_chunk": 11,
+      "source_verts": 1184,
+      "source_triangles": 1766,
+      "lod_vertices": 209,
+      "lod_triangles": 290,
+      "target_faces": 290
+    },
+    "third-lumbar-vertebra": {
+      "fma": "FMA13074",
+      "source_chunk": 11,
+      "source_verts": 1420,
+      "source_triangles": 2454,
+      "lod_vertices": 163,
+      "lod_triangles": 290,
+      "target_faces": 290
+    },
+    "third-thoracic-vertebra": {
+      "fma": "FMA9209",
+      "source_chunk": 11,
+      "source_verts": 997,
+      "source_triangles": 1696,
+      "lod_vertices": 170,
+      "lod_triangles": 289,
+      "target_faces": 290
+    },
+    "fourth-cervical-vertebra": {
+      "fma": "FMA12522",
+      "source_chunk": 11,
+      "source_verts": 1288,
+      "source_triangles": 2062,
+      "lod_vertices": 177,
+      "lod_triangles": 290,
+      "target_faces": 290
+    },
+    "fourth-lumbar-vertebra": {
+      "fma": "FMA13075",
+      "source_chunk": 12,
+      "source_verts": 1503,
+      "source_triangles": 2630,
+      "lod_vertices": 160,
+      "lod_triangles": 289,
+      "target_faces": 290
+    },
+    "fourth-thoracic-vertebra": {
+      "fma": "FMA9248",
+      "source_chunk": 12,
+      "source_verts": 1004,
+      "source_triangles": 1684,
+      "lod_vertices": 171,
+      "lod_triangles": 290,
+      "target_faces": 290
+    },
+    "fifth-cervical-vertebra": {
+      "fma": "FMA12523",
+      "source_chunk": 12,
+      "source_verts": 1396,
+      "source_triangles": 1934,
+      "lod_vertices": 237,
+      "lod_triangles": 289,
+      "target_faces": 290
+    },
+    "fifth-lumbar-vertebra": {
+      "fma": "FMA13076",
+      "source_chunk": 12,
+      "source_verts": 1469,
+      "source_triangles": 2640,
+      "lod_vertices": 158,
+      "lod_triangles": 290,
+      "target_faces": 290
+    },
+    "fifth-thoracic-vertebra": {
+      "fma": "FMA9922",
+      "source_chunk": 12,
+      "source_verts": 1089,
+      "source_triangles": 1832,
+      "lod_vertices": 176,
+      "lod_triangles": 290,
+      "target_faces": 290
+    },
+    "sixth-cervical-vertebra": {
+      "fma": "FMA12524",
+      "source_chunk": 12,
+      "source_verts": 1257,
+      "source_triangles": 1928,
+      "lod_vertices": 190,
+      "lod_triangles": 290,
+      "target_faces": 290
+    },
+    "sixth-thoracic-vertebra": {
+      "fma": "FMA9945",
+      "source_chunk": 12,
+      "source_verts": 1127,
+      "source_triangles": 1830,
+      "lod_vertices": 168,
+      "lod_triangles": 289,
+      "target_faces": 290
+    },
+    "seventh-cervical-vertebra": {
+      "fma": "FMA12525",
+      "source_chunk": 12,
+      "source_verts": 1162,
+      "source_triangles": 1520,
+      "lod_vertices": 241,
+      "lod_triangles": 290,
+      "target_faces": 290
+    },
+    "seventh-thoracic-vertebra": {
+      "fma": "FMA9968",
+      "source_chunk": 12,
+      "source_verts": 1223,
+      "source_triangles": 2094,
+      "lod_vertices": 171,
+      "lod_triangles": 288,
+      "target_faces": 290
+    },
+    "eighth-thoracic-vertebra": {
+      "fma": "FMA9991",
+      "source_chunk": 12,
+      "source_verts": 1195,
+      "source_triangles": 2048,
+      "lod_vertices": 176,
+      "lod_triangles": 289,
+      "target_faces": 290
+    },
+    "ninth-thoracic-vertebra": {
+      "fma": "FMA10014",
+      "source_chunk": 12,
+      "source_verts": 1153,
+      "source_triangles": 2040,
+      "lod_vertices": 159,
+      "lod_triangles": 289,
+      "target_faces": 290
+    },
+    "atlas": {
+      "fma": "FMA12519",
+      "source_chunk": 12,
+      "source_verts": 1114,
+      "source_triangles": 1514,
+      "lod_vertices": 223,
+      "lod_triangles": 290,
+      "target_faces": 290
+    },
+    "axis": {
+      "fma": "FMA12520",
+      "source_chunk": 12,
+      "source_verts": 1408,
+      "source_triangles": 2028,
+      "lod_vertices": 215,
+      "lod_triangles": 289,
+      "target_faces": 290
+    },
+    "body-of-sternum": {
+      "fma": "FMA7487",
+      "source_chunk": 12,
+      "source_verts": 2511,
+      "source_triangles": 2810,
+      "lod_vertices": 629,
+      "lod_triangles": 360,
+      "target_faces": 360
+    },
+    "frontal-bone": {
+      "fma": "FMA52734",
+      "source_chunk": 12,
+      "source_verts": 3315,
+      "source_triangles": 5112,
+      "lod_vertices": 455,
+      "lod_triangles": 599,
+      "target_faces": 600
+    },
+    "left-tenth-rib": {
+      "fma": "FMA8472",
+      "source_chunk": 12,
+      "source_verts": 754,
+      "source_triangles": 1500,
+      "lod_vertices": 107,
+      "lod_triangles": 210,
+      "target_faces": 210
+    },
+    "left-eleventh-rib": {
+      "fma": "FMA8532",
+      "source_chunk": 12,
+      "source_verts": 537,
+      "source_triangles": 1070,
+      "lod_vertices": 107,
+      "lod_triangles": 210,
+      "target_faces": 210
+    },
+    "left-twelfth-rib": {
+      "fma": "FMA8534",
+      "source_chunk": 12,
+      "source_verts": 367,
+      "source_triangles": 730,
+      "lod_vertices": 107,
+      "lod_triangles": 210,
+      "target_faces": 210
+    },
+    "left-first-rib": {
+      "fma": "FMA7987",
+      "source_chunk": 12,
+      "source_verts": 507,
+      "source_triangles": 1010,
+      "lod_vertices": 106,
+      "lod_triangles": 208,
+      "target_faces": 210
+    },
+    "left-second-rib": {
+      "fma": "FMA8012",
+      "source_chunk": 12,
+      "source_verts": 656,
+      "source_triangles": 1230,
+      "lod_vertices": 124,
+      "lod_triangles": 209,
+      "target_faces": 210
+    },
+    "left-third-rib": {
+      "fma": "FMA8039",
+      "source_chunk": 12,
+      "source_verts": 802,
+      "source_triangles": 1594,
+      "lod_vertices": 107,
+      "lod_triangles": 210,
+      "target_faces": 210
+    },
+    "left-fourth-rib": {
+      "fma": "FMA8148",
+      "source_chunk": 12,
+      "source_verts": 981,
+      "source_triangles": 1946,
+      "lod_vertices": 107,
+      "lod_triangles": 210,
+      "target_faces": 210
+    },
+    "left-fifth-rib": {
+      "fma": "FMA8093",
+      "source_chunk": 12,
+      "source_verts": 1095,
+      "source_triangles": 2136,
+      "lod_vertices": 112,
+      "lod_triangles": 208,
+      "target_faces": 210
+    },
+    "left-sixth-rib": {
+      "fma": "FMA8202",
+      "source_chunk": 12,
+      "source_verts": 1147,
+      "source_triangles": 2258,
+      "lod_vertices": 110,
+      "lod_triangles": 209,
+      "target_faces": 210
+    },
+    "left-seventh-rib": {
+      "fma": "FMA8256",
+      "source_chunk": 12,
+      "source_verts": 1122,
+      "source_triangles": 2206,
+      "lod_vertices": 109,
+      "lod_triangles": 210,
+      "target_faces": 210
+    },
+    "left-eighth-rib": {
+      "fma": "FMA8310",
+      "source_chunk": 12,
+      "source_verts": 936,
+      "source_triangles": 1832,
+      "lod_vertices": 109,
+      "lod_triangles": 209,
+      "target_faces": 210
+    },
+    "left-ninth-rib": {
+      "fma": "FMA8391",
+      "source_chunk": 12,
+      "source_verts": 843,
+      "source_triangles": 1666,
+      "lod_vertices": 108,
+      "lod_triangles": 210,
+      "target_faces": 210
+    },
+    "left-clavicle": {
+      "fma": "FMA13323",
+      "source_chunk": 12,
+      "source_verts": 426,
+      "source_triangles": 826,
+      "lod_vertices": 185,
+      "lod_triangles": 360,
+      "target_faces": 360
+    },
+    "left-femur": {
+      "fma": "FMA24475",
+      "source_chunk": 12,
+      "source_verts": 459,
+      "source_triangles": 884,
+      "lod_vertices": 186,
+      "lod_triangles": 359,
+      "target_faces": 360
+    },
+    "left-fibula": {
+      "fma": "FMA24481",
+      "source_chunk": 12,
+      "source_verts": 149,
+      "source_triangles": 278,
+      "lod_vertices": 149,
+      "lod_triangles": 278,
+      "target_faces": 278
+    },
+    "left-humerus": {
+      "fma": "FMA23131",
+      "source_chunk": 12,
+      "source_verts": 586,
+      "source_triangles": 962,
+      "lod_vertices": 227,
+      "lod_triangles": 360,
+      "target_faces": 360
+    },
+    "left-parietal-bone": {
+      "fma": "FMA52789",
+      "source_chunk": 12,
+      "source_verts": 2927,
+      "source_triangles": 3732,
+      "lod_vertices": 336,
+      "lod_triangles": 360,
+      "target_faces": 360
+    },
+    "left-patella": {
+      "fma": "FMA24487",
+      "source_chunk": 12,
+      "source_verts": 177,
+      "source_triangles": 304,
+      "lod_vertices": 177,
+      "lod_triangles": 304,
+      "target_faces": 304
+    },
+    "left-radius": {
+      "fma": "FMA23465",
+      "source_chunk": 12,
+      "source_verts": 250,
+      "source_triangles": 406,
+      "lod_vertices": 218,
+      "lod_triangles": 360,
+      "target_faces": 360
+    },
+    "left-scapula": {
+      "fma": "FMA13396",
+      "source_chunk": 12,
+      "source_verts": 3097,
+      "source_triangles": 6180,
+      "lod_vertices": 277,
+      "lod_triangles": 550,
+      "target_faces": 550
+    },
+    "left-temporal-bone": {
+      "fma": "FMA52739",
+      "source_chunk": 12,
+      "source_verts": 1835,
+      "source_triangles": 2828,
+      "lod_vertices": 277,
+      "lod_triangles": 358,
+      "target_faces": 360
+    },
+    "left-tibia": {
+      "fma": "FMA24478",
+      "source_chunk": 12,
+      "source_verts": 331,
+      "source_triangles": 620,
+      "lod_vertices": 188,
+      "lod_triangles": 358,
+      "target_faces": 360
+    },
+    "left-ulna": {
+      "fma": "FMA23468",
+      "source_chunk": 12,
+      "source_verts": 283,
+      "source_triangles": 434,
+      "lod_vertices": 239,
+      "lod_triangles": 360,
+      "target_faces": 360
+    },
+    "left-hip-bone": {
+      "fma": "FMA16587",
+      "source_chunk": 12,
+      "source_verts": 986,
+      "source_triangles": 1808,
+      "lod_vertices": 186,
+      "lod_triangles": 359,
+      "target_faces": 360
+    },
+    "mandible": {
+      "fma": "FMA52748",
+      "source_chunk": 12,
+      "source_verts": 1207,
+      "source_triangles": 2348,
+      "lod_vertices": 304,
+      "lod_triangles": 599,
+      "target_faces": 600
+    },
+    "occipital-bone": {
+      "fma": "FMA52735",
+      "source_chunk": 13,
+      "source_verts": 2938,
+      "source_triangles": 4912,
+      "lod_vertices": 352,
+      "lod_triangles": 600,
+      "target_faces": 600
+    },
+    "right-tenth-rib": {
+      "fma": "FMA8445",
+      "source_chunk": 13,
+      "source_verts": 754,
+      "source_triangles": 1500,
+      "lod_vertices": 107,
+      "lod_triangles": 210,
+      "target_faces": 210
+    },
+    "right-eleventh-rib": {
+      "fma": "FMA8531",
+      "source_chunk": 13,
+      "source_verts": 538,
+      "source_triangles": 1070,
+      "lod_vertices": 107,
+      "lod_triangles": 210,
+      "target_faces": 210
+    },
+    "right-twelfth-rib": {
+      "fma": "FMA8533",
+      "source_chunk": 13,
+      "source_verts": 372,
+      "source_triangles": 740,
+      "lod_vertices": 107,
+      "lod_triangles": 210,
+      "target_faces": 210
+    },
+    "right-first-rib": {
+      "fma": "FMA7857",
+      "source_chunk": 13,
+      "source_verts": 519,
+      "source_triangles": 1032,
+      "lod_vertices": 107,
+      "lod_triangles": 210,
+      "target_faces": 210
+    },
+    "right-second-rib": {
+      "fma": "FMA7882",
+      "source_chunk": 13,
+      "source_verts": 648,
+      "source_triangles": 1230,
+      "lod_vertices": 113,
+      "lod_triangles": 209,
+      "target_faces": 210
+    },
+    "right-third-rib": {
+      "fma": "FMA7909",
+      "source_chunk": 13,
+      "source_verts": 800,
+      "source_triangles": 1594,
+      "lod_vertices": 107,
+      "lod_triangles": 210,
+      "target_faces": 210
+    },
+    "right-fourth-rib": {
+      "fma": "FMA7957",
+      "source_chunk": 13,
+      "source_verts": 979,
+      "source_triangles": 1942,
+      "lod_vertices": 108,
+      "lod_triangles": 210,
+      "target_faces": 210
+    },
+    "right-fifth-rib": {
+      "fma": "FMA8066",
+      "source_chunk": 13,
+      "source_verts": 1093,
+      "source_triangles": 2136,
+      "lod_vertices": 114,
+      "lod_triangles": 209,
+      "target_faces": 210
+    },
+    "right-sixth-rib": {
+      "fma": "FMA8175",
+      "source_chunk": 13,
+      "source_verts": 1147,
+      "source_triangles": 2254,
+      "lod_vertices": 111,
+      "lod_triangles": 209,
+      "target_faces": 210
+    },
+    "right-seventh-rib": {
+      "fma": "FMA8229",
+      "source_chunk": 13,
+      "source_verts": 1122,
+      "source_triangles": 2206,
+      "lod_vertices": 108,
+      "lod_triangles": 209,
+      "target_faces": 210
+    },
+    "right-eighth-rib": {
+      "fma": "FMA8283",
+      "source_chunk": 13,
+      "source_verts": 928,
+      "source_triangles": 1832,
+      "lod_vertices": 107,
+      "lod_triangles": 210,
+      "target_faces": 210
+    },
+    "right-ninth-rib": {
+      "fma": "FMA8364",
+      "source_chunk": 13,
+      "source_verts": 842,
+      "source_triangles": 1666,
+      "lod_vertices": 107,
+      "lod_triangles": 210,
+      "target_faces": 210
+    },
+    "right-radius": {
+      "fma": "FMA23464",
+      "source_chunk": 13,
+      "source_verts": 249,
+      "source_triangles": 408,
+      "lod_vertices": 216,
+      "lod_triangles": 360,
+      "target_faces": 360
+    },
+    "right-clavicle": {
+      "fma": "FMA13322",
+      "source_chunk": 13,
+      "source_verts": 420,
+      "source_triangles": 820,
+      "lod_vertices": 183,
+      "lod_triangles": 358,
+      "target_faces": 360
+    },
+    "right-femur": {
+      "fma": "FMA24474",
+      "source_chunk": 13,
+      "source_verts": 480,
+      "source_triangles": 930,
+      "lod_vertices": 183,
+      "lod_triangles": 359,
+      "target_faces": 360
+    },
+    "right-fibula": {
+      "fma": "FMA24480",
+      "source_chunk": 13,
+      "source_verts": 162,
+      "source_triangles": 298,
+      "lod_vertices": 162,
+      "lod_triangles": 298,
+      "target_faces": 298
+    },
+    "right-humerus": {
+      "fma": "FMA23130",
+      "source_chunk": 13,
+      "source_verts": 794,
+      "source_triangles": 1070,
+      "lod_vertices": 310,
+      "lod_triangles": 359,
+      "target_faces": 360
+    },
+    "right-parietal-bone": {
+      "fma": "FMA52788",
+      "source_chunk": 13,
+      "source_verts": 2734,
+      "source_triangles": 3694,
+      "lod_vertices": 301,
+      "lod_triangles": 359,
+      "target_faces": 360
+    },
+    "right-patella": {
+      "fma": "FMA24486",
+      "source_chunk": 13,
+      "source_verts": 176,
+      "source_triangles": 304,
+      "lod_vertices": 176,
+      "lod_triangles": 304,
+      "target_faces": 304
+    },
+    "right-scapula": {
+      "fma": "FMA13395",
+      "source_chunk": 13,
+      "source_verts": 2896,
+      "source_triangles": 5756,
+      "lod_vertices": 277,
+      "lod_triangles": 550,
+      "target_faces": 550
+    },
+    "right-temporal-bone": {
+      "fma": "FMA52738",
+      "source_chunk": 13,
+      "source_verts": 1976,
+      "source_triangles": 2906,
+      "lod_vertices": 293,
+      "lod_triangles": 360,
+      "target_faces": 360
+    },
+    "right-tibia": {
+      "fma": "FMA24477",
+      "source_chunk": 13,
+      "source_verts": 334,
+      "source_triangles": 634,
+      "lod_vertices": 186,
+      "lod_triangles": 359,
+      "target_faces": 360
+    },
+    "right-ulna": {
+      "fma": "FMA23467",
+      "source_chunk": 13,
+      "source_verts": 305,
+      "source_triangles": 482,
+      "lod_vertices": 228,
+      "lod_triangles": 360,
+      "target_faces": 360
+    },
+    "sacrum": {
+      "fma": "FMA16202",
+      "source_chunk": 13,
+      "source_verts": 2771,
+      "source_triangles": 5058,
+      "lod_vertices": 190,
+      "lod_triangles": 358,
+      "target_faces": 360
+    },
+    "sphenoid-bone": {
+      "fma": "FMA52736",
+      "source_chunk": 13,
+      "source_verts": 2791,
+      "source_triangles": 4238,
+      "lod_vertices": 375,
+      "lod_triangles": 597,
+      "target_faces": 600
+    }
+  },
+  "anatomist_reviewed": false,
+  "same_reference_release": true,
+  "patient_specific": false,
+  "not_complete_body": true,
+  "absent_structures": [
+    "full hand and foot structures",
+    "complete facial bones",
+    "ligaments",
+    "soft tissues",
+    "organs"
+  ],
+  "limitations": [
+    "Source-derived skeletal model from one reference atlas release; not imaged patient anatomy.",
+    "Simplified LOD surfaces are for navigation, not anatomical diagnosis.",
+    "Hip-to-Knee coordinate correspondence still does not verify the separately sourced sciatic nerve.",
+    "Do not represent unsupported regions as fully reconstructed anatomy."
+  ]
+}
