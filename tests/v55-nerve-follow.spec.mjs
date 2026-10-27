@@ -106,7 +106,7 @@ test('on mobile the followed nerve marker sits above the viewport Follow card',a
    const panel=document.querySelector('#follow-stage').getBoundingClientRect();
    const point=window.BodySpatialCore.project(s.cameraTarget,{
     yaw:s.yaw,pitch:s.pitch,zoom:s.zoom,frameSpan:3.35,
-    width:s.viewport.w,height:s.viewport.h,anchorY:s.cameraAnchorY});
+    width:s.viewport.w,height:s.viewport.h,anchorY:s.cameraAnchorY,target:s.cameraTarget});
    return {markerY:stage.top+point.y,panelTop:panel.top,anchor:s.cameraAnchorY};
   });
   expect(placement.anchor).toBeLessThan(.4);
