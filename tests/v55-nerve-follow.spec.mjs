@@ -94,3 +94,24 @@ test('reduced-motion setting avoids animated camera transitions',async({page})=>
  await expect(page.locator('#follow-stage')).toBeHidden();
  expect(errors).toEqual([]);
 });
+
+test('on mobile the followed nerve marker sits above the viewport Follow card',async({page})=>{
+ await page.setViewportSize({width:390,height:700});
+ const errors=await ready(page);await startFollow(page);
+ for(const progress of [8,50,92]){
+  await page.locator('#follow-progress').evaluate((el,value)=>{el.value=String(value);el.dispatchEvent(new Event('input',{bubbles:true}));},progress);
+  const placement=await page.evaluate(()=>{
+   const s=window.__HIP_SPATIAL__.getState();
+   const stage=document.querySelector('#hip-canvas').getBoundingClientRect();
+   const panel=document.querySelector('#follow-stage').getBoundingClientRect();
+   const point=window.BodySpatialCore.project(s.cameraTarget,{
+    yaw:s.yaw,pitch:s.pitch,zoom:s.zoom,frameSpan:3.35,
+    width:s.viewport.w,height:s.viewport.h,anchorY:s.cameraAnchorY});
+   return {markerY:stage.top+point.y,panelTop:panel.top,anchor:s.cameraAnchorY};
+  });
+  expect(placement.anchor).toBeLessThan(.4);
+  expect(placement.markerY+18).toBeLessThan(placement.panelTop);
+ }
+ expect(errors).toEqual([]);
+ await page.screenshot({path:'artifacts/v55-mobile-unoccluded-follow.png'});
+});

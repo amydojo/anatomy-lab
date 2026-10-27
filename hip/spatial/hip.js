@@ -255,6 +255,7 @@ function startFollow(id='sciatic'){
  follow.active=true;follow.branch=id;follow.progress=0;
  state.selected=id;state.trace=true;state.depth=3;
  state.zoom=window.innerWidth<=850?1.25:1.4;
+ state.anchorY=window.innerWidth<=850?.29:.42;
  state.frameSpan=window.innerWidth<=850?3.35:4.5;
  syncDepth();renderFollow();moveFollowCamera(false);
  if(window.innerWidth<=850)setExpanded(false);
@@ -263,7 +264,7 @@ function startFollow(id='sciatic'){
 function stopFollow(){
  follow.active=false;if(follow.raf)cancelAnimationFrame(follow.raf);follow.raf=0;
  state.target=follow.frame==='atlas'&&nerveGraph?V(...toDisplayPoint(nerveGraph.sample(follow.branch,.35))):null;
- state.zoom=follow.savedZoom;renderFollow();inspector();draw();
+ state.zoom=follow.savedZoom;state.anchorY=.5;renderFollow();inspector();draw();
 }
 function setNerveFrame(frame){
  if(!nerveTruth||!['atlas','composite'].includes(frame))return;
@@ -463,6 +464,7 @@ function beginLesson(){
 function endLesson(){lesson.phase='idle';state.depth=lesson.oldDepth;syncDepth();renderLesson();inspector();draw();}
 function resize(){
  state.frameSpan=state.focus==='joint'?(window.innerWidth<=850?3.35:4.5):7.5;
+ if(follow.active)state.anchorY=window.innerWidth<=850?.29:.42;
  const rect=canvas.getBoundingClientRect();state.width=Math.max(1,rect.width);state.height=Math.max(1,rect.height);
  state.dpr=Math.min(2,window.devicePixelRatio||1);
  canvas.width=Math.ceil(state.width*state.dpr);canvas.height=Math.ceil(state.height*state.dpr);
@@ -549,7 +551,7 @@ if('ResizeObserver' in window)new ResizeObserver(resize).observe(document.queryS
 window.__HIP_SPATIAL__={
  getState:()=>({depth:state.depth,pose:{...state.pose},axis:state.axis,selected:state.selected,trace:state.trace,
   followActive:follow.active,followBranch:follow.branch,followProgress:follow.progress,displaySourceFrame:follow.frame,
-  cameraTarget:state.target?{...state.target}:null,graphTopology:nerveGraph?.topology||null,
+  cameraTarget:state.target?{...state.target}:null,cameraAnchorY:state.anchorY??.5,graphTopology:nerveGraph?.topology||null,
   junctionGapScene:nerveGraph?.junctions?.[follow.branch]?.sourceGap||null,
   kneeBridgeVerified:bridgeEvidence?.verifiedWithinSourceRounding||false,
   sourceLoaded:state.sourceLoaded,sourceLabel:state.sourceLabel,sourceCount:meshes?.length||0,nerveSourceLoaded:!!nerveTruth,nerveSegments:nerveMeshes.length,nerveEvidenceOpen,compositeFitMedian:nerveTruth?.registration?.fit?.median_scene_units||null,lesson:lesson.phase,
