@@ -35,7 +35,7 @@ test('sourced hip peel, structure isolation and reset',async({page})=>{
 test('3 axes update the femur without distorting rigid geometry',async({page})=>{
  const errors=await start(page);
  const point={x:.25,y:-.7,z:.12};
- const start=await page.evaluate(p=>window.__HIP_SPATIAL__.transformFemur(p),point);
+ const initialPosition=await page.evaluate(p=>window.__HIP_SPATIAL__.transformFemur(p),point);
  await slide(page,'#motion',65);
  await page.locator('[data-axis="abduction"]').click();
  await slide(page,'#motion',28);
@@ -44,10 +44,10 @@ test('3 axes update the femur without distorting rigid geometry',async({page})=>
  const state=await page.evaluate(()=>window.__HIP_SPATIAL__.getState());
  expect(state.pose).toEqual({flexion:65,abduction:28,rotation:-22});
  const moved=await page.evaluate(p=>window.__HIP_SPATIAL__.transformFemur(p),point);
- expect(moved).not.toEqual(start);
+ expect(moved).not.toEqual(initialPosition);
  await page.locator('#reset').click();
  const restored=await page.evaluate(p=>window.__HIP_SPATIAL__.transformFemur(p),point);
- for(const k of ['x','y','z'])expect(Math.abs(restored[k]-start[k])).toBeLessThan(1e-9);
+ for(const k of ['x','y','z'])expect(Math.abs(restored[k]-initialPosition[k])).toBeLessThan(1e-9);
  expect(errors).toEqual([]);
  await page.screenshot({path:'artifacts/v53-hip-motion.png'});
 });
