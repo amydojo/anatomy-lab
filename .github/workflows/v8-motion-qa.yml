@@ -1,0 +1,49 @@
+name: V8.2 region motion quality
+on:
+  push:
+    branches: [feat/v8-2-regional-motion]
+  pull_request:
+    branches: [feat/v8-0-unified-specimen]
+permissions:
+  contents: read
+concurrency:
+  group: v8-motion-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  focused:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Source geometry and motion source contracts
+        run: npm test
+      - run: npx playwright install chromium webkit
+      - name: Motion modes across nine regions plus full specimen and V7 sites
+        run: npx playwright test tests/v8-motion.spec.mjs tests/v8-atlas.spec.mjs tests/v7-atlas.spec.mjs --reporter=line
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regional-motion-screens
+          path: artifacts/
+          if-no-files-found: ignore
+  regression:
+    needs: focused
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 23
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install chromium webkit
+      - name: Whole BODY LIVE regression
+        run: npm run test:e2e

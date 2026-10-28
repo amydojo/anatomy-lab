@@ -36,10 +36,10 @@ function records(region,manifest,hip,nerve,shoulder,kneeMuscles,expanded,overvie
    'Whole-body region provenance is not available; no sourced geometry should be assumed verified.',tag:'SOURCE / NOT CLINICALLY REVIEWED'});
   output.push({title:'Muscle model scope',label:'Exact named BodyParts3D meshes; not complete muscle coverage',
    content:record?(record.muscle_source_parts||0)+' named source muscle surfaces are available in the Muscle layer. Missing source structures are not invented. Jaw muscles, cartilage, tendons, ligaments, nerves and physiological coupling remain incomplete. Some named leg muscles have an upstream “skeletal” system tag, retained in provenance.':'Muscle provenance unavailable.',tag:'LICENSED MESH / NOT REVIEWED'});
-  output.push({title:extra.motion?'Illustrative joint hinge':'Reference-pose exploration',label:extra.motion?
+  output.push({title:extra.motion?'Region-specific motion · exploratory':'Reference-pose exploration',label:extra.motion?
    extra.motion.label+' · not measured kinematics':'Static source-aligned structure selection',
    content:extra.motion?'Bone hinges and muscle weights are teaching approximations using source-bone proximity. They do not validate physiological attachments, ligaments, cartilage, tendons, coupled rotations, contact or patient-specific movement.':
-   'Bones are inspected in their pinned source reference pose. Breathing, cervical movement and jaw articulation are not yet simulated.',
+   'Rest pose is the pinned source reference. Where selected, movement is a bounded illustration, not anatomical motion validation.',
    tag:'LIMITATION / EXPLICIT'});
  }
   if(region==='shoulder'){
@@ -51,6 +51,13 @@ function records(region,manifest,hip,nerve,shoulder,kneeMuscles,expanded,overvie
    content:'Unverified deltoid coverage, shoulder capsule/ligaments, glenoid labrum, long-head biceps tendon, brachial plexus and axillary/suprascapular nerves are not displayed as sourced anatomy.',tag:'UNAVAILABLE'});
   output.push({title:'Illustrative abduction',label:'Educational single pivot',
    content:'A humerus movement demonstrates an approximate axis. The scapula and source-pose muscles do not undergo validated scapulohumeral rhythm or tissue deformation.',tag:'NOT CLINICALLY VALIDATED'});
+ }
+ if(extra){
+  const specs=window.BodyRegionalMotion?.config(region)||[];
+  output.push({title:'Available educational motion variants',label:'Source meshes · estimated axes and origin/insertion blends',
+   content:specs.length?specs.map(x=>x.label+' (0–'+x.max+x.unit+'): '+x.note).join('. ')+'. All transforms revert exactly to the source rest-pose geometry at zero.':
+    'Motion control is unavailable: source anatomical continuity is not verified.',
+   tag:'KINEMATICS UNVALIDATED'});
  }
  if(region==='hip')output.push({title:'Hip muscles follow bone articulation',label:'8 pinned BodyParts3D source surfaces',content:'Gluteal and deep posterior hip meshes deform between inferred pelvic/sacral origins and moving femoral insertion zones. Muscle origins and tendon paths are not independently annotated, and hip flexion remains a teaching hinge.',tag:'INFERRED RIG / UNREVIEWED'});
  if(region==='knee'){

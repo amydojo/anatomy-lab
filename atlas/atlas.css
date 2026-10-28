@@ -178,3 +178,30 @@
  .overview-system-label{font-size:8px}.overview-system-label span{max-width:86px;font-size:7px}
  .overview-system-buttons button{min-width:53px;font-size:9px}
 }
+
+
+/* V8.2: every site has named motion modes. The selector stays inside the
+ * already-reserved joint toolbar without resizing the scene/camera. */
+#joint-motion-kind{
+ flex:0 1 174px;min-width:96px;max-width:190px;min-height:38px;
+ background:#302119;border:1px solid #936b4c;border-radius:9px;
+ color:#f2d9c4;padding:6px 8px;font:600 11px/1.25 -apple-system,BlinkMacSystemFont,sans-serif;
+}
+#joint-motion-kind:focus-visible{outline:2px solid #ffd6aa;outline-offset:2px}
+#joint-motion-kind[hidden]{display:none}
+.joint-motion label{flex:0 1 195px;min-width:0;white-space:normal}
+.joint-motion label strong{display:block;max-width:190px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.joint-motion label span{display:block;max-width:190px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:850px){
+ .joint-motion{gap:5px;padding:7px 8px}
+ .joint-motion label{min-width:0;flex:0 1 95px}
+ .joint-motion label strong{font-size:10px;max-width:95px}
+ .joint-motion label span{max-width:95px;font-size:7px}
+ #joint-motion-kind{flex:0 1 120px;min-width:78px;min-height:37px;max-width:128px;font-size:10px;padding:4px 5px}
+ .joint-motion input{flex:1 1 40px;min-width:38px}
+ .joint-motion output{min-width:29px;font-size:12px}
+}
+@media(max-width:360px){
+ .joint-motion label{flex-basis:75px}.joint-motion label strong,.joint-motion label span{max-width:75px}
+ #joint-motion-kind{flex-basis:97px;min-width:72px;font-size:9px}
+}

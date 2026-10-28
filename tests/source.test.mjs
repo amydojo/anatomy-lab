@@ -508,6 +508,7 @@ test('V7 six new source-matched body regions are fully FMA-attributed and SHA-pi
  }
  assert.equal(n,84);
  const win={};const {runInNewContext}=await import('node:vm');
+ runInNewContext(read('assets/atlas/atlas-regional-motion.js'),{window:win,Float32Array});
  runInNewContext(read('assets/atlas/atlas-extended-regions.js'),{window:win,Float32Array});
  const X=win.BodyExtendedRegions;
  assert.equal(X.ids.length,6);
@@ -521,14 +522,14 @@ test('V7 six new source-matched body regions are fully FMA-attributed and SHA-pi
   }
   assert.equal(X.config[region].labels[4],'Source muscles');
   if(X.config[region].motion){
-   const [muscleId,musclePart]=Object.entries(asset.muscle_parts)[0];
+   const [muscleId,musclePart]=Object.entries(asset.muscle_parts).find(([id])=>region!=='skull'||/mylohyoid/.test(id));
    const skin=X.createSkin(region,muscleId,musclePart.vertices,asset.parts);
    assert.ok(skin&&!skin.validated&&skin.weights.length===musclePart.vertices.length);
    assert.equal(skin.method,'source-surface-proximity-inferred');
    assert.ok(skin.weights.every(w=>Number.isFinite(w)&&w>=0&&w<=1));
    const bent=X.createPose(region,asset,X.config[region].motion.max);
    const moving=Object.keys(asset.parts).filter(id=>X.moving(region,id));
-   assert.ok(moving.length>=2,region+' no moving sourced bones');
+   assert.ok(moving.length>=(region==='skull'?1:2),region+' no moving sourced bones');
    const p=asset.parts[moving[0]].vertices[0];
    const moved=X.transform(bent.matrices[moving[0]],p);
    assert.ok(Math.hypot(...p.map((x,i)=>x-moved[i]))>.001,region+' motion is inert');
@@ -536,6 +537,7 @@ test('V7 six new source-matched body regions are fully FMA-attributed and SHA-pi
   }
  }
  const html=read('atlas/index.html');
+ assert.ok(html.includes('atlas-regional-motion.js'));
  assert.ok(html.includes('atlas-extended-regions.js'));
  assert.ok(html.includes('class="region-dock"'),'persistent mobile region navigation absent');
  for(const name of ['hip','nerve','knee','shoulder','thorax','neck','skull','elbow','wrist','ankle'])
@@ -602,4 +604,52 @@ test('V8 canonical specimen keeps every source bone once and exposes licensed mu
  for(const mode of ['bones','muscles','combined'])assert.ok(html.includes('data-overview-system="'+mode+'"'));
  assert.ok(read('assets/atlas/atlas-loader.js').includes('verifyOverview'));
  assert.ok(read('assets/atlas/atlas-renderer.js').includes('loadOverview(asset)'));
+});
+
+test('V8.2 twenty distinct motion modes use exact source geometry, bounded transforms and zero-degree identity',async()=>{
+ const {runInNewContext}=await import('node:vm');
+ const w={};
+ runInNewContext(read('assets/atlas/atlas-regional-motion.js'),{window:w,Float32Array});
+ const M=w.BodyRegionalMotion;
+ const source={
+  skull:JSON.parse(read('atlas/regions/skull.json')).parts,
+  neck:JSON.parse(read('atlas/regions/neck.json')).parts,
+  thorax:JSON.parse(read('atlas/regions/thorax.json')).parts,
+  elbow:JSON.parse(read('atlas/regions/elbow.json')).parts,
+  wrist:JSON.parse(read('atlas/regions/wrist.json')).parts,
+  ankle:JSON.parse(read('atlas/regions/ankle.json')).parts,
+  hip:JSON.parse(read('hip/spatial/assets/hip-source.json')).parts,
+  knee:JSON.parse(read('knee/spatial/assets/bp3d-right-knee-4.0.json')).bone_meshes,
+  shoulder:Object.fromEntries(Object.entries(JSON.parse(read('shoulder/spatial/assets/shoulder-source.json')).parts)
+     .filter(([id,p])=>p.system==='bone'))
+ };
+ let total=0;
+ for(const [region,parts] of Object.entries(source)){
+  const modes=M.config(region);
+  assert.ok(modes.length>=2,region+' has no secondary motion');
+  assert.equal(new Set(modes.map(x=>x.id)).size,modes.length);
+  for(const spec of modes){
+   total++;
+   assert.ok(spec.max>0&&spec.max<=130);
+   assert.ok(spec.note.includes('not ')||/without|approximation|inferred|measured|no /i.test(spec.note),region+' missing limitation');
+   const reset=M.pose(region,parts,0,spec.id);
+   const high=M.pose(region,parts,spec.max,spec.id);
+   const capped=M.pose(region,parts,spec.max*10,spec.id);
+   assert.equal(high.validated,false);assert.equal(high.mode,spec.id);
+   assert.equal(capped.degrees,spec.max);
+   let motion=0;
+   for(const [id,part]of Object.entries(parts)){
+    if(!part?.vertices?.length||!reset.matrices[id])continue;
+    const sampled=part.vertices[Math.floor(part.vertices.length/3)];
+    const initial=M.transform(reset.matrices[id],sampled);
+    assert.ok(initial.every(Number.isFinite)&&Math.hypot(...initial.map((v,i)=>v-sampled[i]))<1e-7,region+'/'+spec.id+' rest drift');
+    const moved=M.transform(high.matrices[id],sampled);
+    assert.ok(moved.every(Number.isFinite),region+'/'+spec.id+' nonfinite');
+    motion=Math.max(motion,Math.hypot(...moved.map((v,i)=>v-sampled[i])));
+   }
+   assert.ok(motion>.0001,region+'/'+spec.id+' did not articulate any sourced bone');
+  }
+ }
+ assert.equal(total,20);
+ assert.equal(M.config('nerve').length,0,'Sciatic path must not receive unsourced motion');
 });

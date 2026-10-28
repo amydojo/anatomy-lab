@@ -39,7 +39,7 @@ function resize(){
 }
 function render(){
  if(document.hidden||(state.data.view==='detail'&&!U.isActive()))return;
- model.render(state.data.camera,U.getRegion()||state.data.region,state.data.evidenceMode,state.data.layer,U.getReveal(),U.getMotion(),U.getSelected());
+ model.render(state.data.camera,U.getRegion()||state.data.region,state.data.evidenceMode,state.data.layer,U.getReveal(),U.getMotion(),U.getSelected(),U.getMotionMode());
  window.BodyShoulderDebug?.draw(state.data.camera,
   state.data.view==='detail'&&U.getRegion()==='shoulder'?model.shoulderDiagnostics(U.getMotion()):null);
  if(state.data.view==='overview'&&!U.isActive())drawPins();
@@ -552,6 +552,7 @@ function setup(){
  document.querySelectorAll('.seg-control button').forEach(b=>b.onclick=()=>setMode(b.id.replace('mode-','')));
  $('layer-slider').oninput=e=>depthChange(e.target.value);
  $('joint-motion-slider').oninput=e=>U.setMotion(e.target.value);
+ $('joint-motion-kind').onchange=e=>U.setMotionMode(e.target.value);
  $('structure-chip-more').onclick=()=>U.showSelected();
  $('structure-chip-close').onclick=()=>{U.clearSelection();render();};
  buildPins();resize();
