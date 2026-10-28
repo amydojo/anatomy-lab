@@ -46,16 +46,31 @@ function create(canvas,onContextLost=()=>{}){
  try{setup();}catch(e){status='fallback';onContextLost(e.message);}
  function makeBuffer(part,id,group,color,tissue=false){
   if(!Array.isArray(part.vertices)||!Array.isArray(part.faces)||part.vertices.length<50||part.faces.length<50)throw Error('Incomplete sourced mesh: '+id);
+  const vs=part.vertices,normal=new Float32Array(vs.length*3);
+  for(const tri of part.faces){
+   if(tri.length!==3||tri.some(i=>!Number.isInteger(i)||i<0||i>=vs.length))throw Error('Invalid sourced triangle: '+id);
+   const [ia,ib,ic]=tri,a=vs[ia],b=vs[ib],c=vs[ic];
+   if([a,b,c].some(p=>!Array.isArray(p)||p.length!==3||p.some(v=>!Number.isFinite(v))))throw Error('Nonfinite coordinate: '+id);
+   const u=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],v=[c[0]-a[0],c[1]-a[1],c[2]-a[2]];
+   // Area-weighted shared-vertex normals: render polish only; original source
+   // positions/topology and anatomical correspondence are never modified.
+   const n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];
+   for(const index of tri)for(let j=0;j<3;j++)normal[index*3+j]+=n[j];
+  }
+  for(let i=0;i<vs.length;i++){
+   const off=i*3,l=Math.hypot(normal[off],normal[off+1],normal[off+2])||1;
+   for(let j=0;j<3;j++)normal[off+j]/=l;
+  }
   const flat=new Float32Array(part.faces.length*18);let cursor=0;
   for(const tri of part.faces){
-   if(tri.length!==3||tri.some(i=>!Number.isInteger(i)||i<0||i>=part.vertices.length))throw Error('Invalid sourced triangle: '+id);
-   const a=part.vertices[tri[0]],b=part.vertices[tri[1]],c=part.vertices[tri[2]];
-   const v=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],w=[c[0]-a[0],c[1]-a[1],c[2]-a[2]];
-   let n=[v[1]*w[2]-v[2]*w[1],v[2]*w[0]-v[0]*w[2],v[0]*w[1]-v[1]*w[0]];
-   const ln=Math.hypot(...n)||1;n=n.map(x=>x/ln);
-   for(const p of [a,b,c]){if(p.some(q=>!Number.isFinite(q)))throw Error('Nonfinite coordinate: '+id);flat.set([p[0],p[1],p[2],...n],cursor);cursor+=6;}
+   for(const i of tri){
+    flat.set(vs[i],cursor);
+    flat.set(normal.subarray(i*3,i*3+3),cursor+3);
+    cursor+=6;
+   }
   }
-  const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,flat,gl.STATIC_DRAW);
+  const buffer=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,flat,gl.STATIC_DRAW);
   return {id,group,color,tissue,buffer,count:part.faces.length*3};
  }
  function load(asset){
