@@ -211,7 +211,8 @@ function body(){
  state.body();
  const home={...state.data.camera,target:{...state.data.camera.target}};
  Object.assign(state.data.camera,from);
- $('atlas-app').dataset.mode='overview';
+ // Preserve the destination viewport until it has faded; resizing an active
+ // embedded lab would look like another page jump on mobile.
  const portal=$('portal');portal.dataset.phase='leaving';
  portal.setAttribute('inert','');portal.setAttribute('aria-hidden','true');
  $('portal-mask').hidden=true;
@@ -230,6 +231,7 @@ function body(){
  animateCamera(home,reduce()?0:740,()=>{if(seq===token)render();});
  exitTimer=setTimeout(()=>{
   if(seq!==token)return;
+  $('atlas-app').dataset.mode='overview';
   portal.hidden=true;portal.dataset.phase='preload';
   $('region-frame').onload=null;$('region-frame').removeAttribute('src');
  },reduce()?0:490);
@@ -247,11 +249,12 @@ function toKnee(){
  const token=++seq,portal=$('portal');
  clearTimeout(frameTimeout);clearTimeout(entryTimer);clearTimeout(exitTimer);
  portal.dataset.phase='leaving';portal.setAttribute('inert','');portal.setAttribute('aria-hidden','true');
- $('portal-mask').hidden=true;$('atlas-app').dataset.mode='overview';
+ $('portal-mask').hidden=true;
  state.select('knee');$('hotspots').hidden=true;render();
  exitTimer=setTimeout(()=>{
   if(seq!==token)return;
   portal.hidden=true;
+  $('atlas-app').dataset.mode='overview';
   $('region-frame').onload=null;$('region-frame').removeAttribute('src');
   choose('knee');
  },reduce()?0:420);
