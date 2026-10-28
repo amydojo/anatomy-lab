@@ -1,7 +1,7 @@
 /* V6.3: no renderer handoff for source-matched Hip and Knee.
  * Source bones and detail layers remain in the same WebGL coordinate frame. */
 (function(){'use strict';
-function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,centerPoint,shortestYaw,enableControls,NOTE,LABEL}){
+function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,centerPoint,shortestYaw,enableControls,NOTE,LABEL,navigate}){
  const $=id=>document.getElementById(id);
  let region=null,reveal=0,animation=0,token=0,returning=false,pending=false,motion=0,selected=null,navigation=null;
  const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
@@ -78,8 +78,27 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   $('joint-motion-value').textContent=motion+'°';
   render();
  }
+ function interrupt(){
+  if(!isActive())return;
+  cancelAnimationFrame(animation);animation=0;
+  if(returning){
+   region=null;reveal=0;returning=false;pending=false;motion=0;
+   state.data.layer=0;$('atlas-app').dataset.mode='overview';
+   $('hotspots').hidden=false;
+   setStatus('SOURCED SKELETON · 78 STRUCTURES');
+   render();return;
+  }
+  if(pending)return;
+  if(region&&state.data.view==='focused'){
+   state.enter();state.data.frameReady=true;
+   reveal=1;$('atlas-app').dataset.mode='immersive';
+   enableControls(region);syncControls(region);
+   $('joint-motion').hidden=false;$('back-body').hidden=false;
+   $('hotspots').hidden=true;updateURL();render();
+  }
+ }
  function nextRegion(name){
-  if(!['hip','knee'].includes(name))return false;
+  if(!['hip','knee','nerve','shoulder'].includes(name))return false;
   if(!isActive())return choose(name);
   if(region===name)return false;
   navigation=name;
@@ -169,7 +188,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
    region=null;reveal=0;returning=false;state.data.layer=0;motion=0;
    $('hotspots').hidden=false;setStatus('SOURCED SKELETON · 78 STRUCTURES');
    render();
-   if(navigation){const to=navigation;navigation=null;choose(to);}
+   if(navigation){const to=navigation;navigation=null;navigate(to);}
   });
  }
  function travelKnee(){
@@ -221,7 +240,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   const id=++token;
   travel(home,reduce()?0:480,()=>{},()=>{if(id===token)render();});
  }
- return Object.freeze({choose,back,travelKnee,isActive,getRegion,getReveal,getMotion,snapshot,depthChange,setMode,reset,setMotion,pickAt,clearSelection,showSelected,nextRegion});
+ return Object.freeze({choose,back,travelKnee,isActive,getRegion,getReveal,getMotion,snapshot,depthChange,setMode,reset,setMotion,pickAt,clearSelection,showSelected,nextRegion,interrupt});
 }
 window.BodyAtlasUnified=Object.freeze({create});
 })();
