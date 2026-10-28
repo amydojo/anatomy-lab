@@ -22,6 +22,22 @@ test('Atlas loads original pinned skeleton and a functioning semantic region lis
  expect(errors).toEqual([]);
  await page.screenshot({path:'artifacts/v6-atlas-overview.png'});
 });
+test('Mapped bones accept direct taps while empty canvas does not invent a region',async({page})=>{
+ const errors=await atlas(page);
+ const hit=await page.evaluate(()=>{
+  const empty=window.__BODY_ATLAS__.pickAt(3,3);
+  const pin=document.querySelector('#hotspots [data-region="hip"]');
+  const x=parseFloat(pin.style.left)+Math.min(22,document.querySelector('#atlas-canvas').clientWidth*.055);
+  const y=parseFloat(pin.style.top)-12;
+  const selected=window.__BODY_ATLAS__.pickAt(x,y);
+  return {empty,selected};
+ });
+ expect(hit.empty).toBe(null);
+ expect(hit.selected).toBe('hip');
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:15000}).toBe('detail');
+ expect(new URL(page.url()).pathname).toBe('/atlas/');
+ expect(errors).toEqual([]);
+});
 test('Region selection travels through source geometry before revealing its preloaded detail',async({page})=>{
  const errors=await atlas(page);
  await page.evaluate(()=>window.__BODY_ATLAS__.choose('hip'));
