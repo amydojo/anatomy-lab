@@ -95,6 +95,10 @@ function createPose(region,asset,flex){
  const matrices=Object.fromEntries(Object.keys(asset.parts).map(id=>[id,moving(region,id)?hinged:I()]));
  return {degrees,pivot,matrices,validated:false,method:'illustrative-unmeasured-joint-hinge'};
 }
+const deformPoint=(p,a,b,weight)=>{
+ const x=transform(a,p),y=transform(b,p),w=clamp(Number(weight)||0,0,1);
+ return x.map((v,i)=>v*(1-w)+y[i]*w);
+};
 const has=name=>IDS.includes(name);
-window.BodyExtendedRegions=Object.freeze({ids:IDS,config:REGIONS,has,createPose,layers,moving,identity:I,transform});
+window.BodyExtendedRegions=Object.freeze({ids:IDS,config:REGIONS,has,createPose,layers,moving,identity:I,transform,deformPoint});
 })();
