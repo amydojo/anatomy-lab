@@ -11,7 +11,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   shoulder:['Surface · partial','Rotator cuff','Cuff only','Bones only'],
   ...Object.fromEntries(Object.entries(window.BodyExtendedRegions.config).map(([id,c])=>[id,c.labels]))
  };
- const layerText=()=>LAYERS[region]?.[Math.min(3,state.data.layer)]||'Surface';
+ const layerText=()=>LAYERS[region]?.[Math.min(window.BodyExtendedRegions.has(region)?4:3,state.data.layer)]||'Surface';
  const snapshot=()=>({region,reveal,returning,pending,motion,selected:selected?.id||null});
  const isActive=()=>!!region||pending;
  const getRegion=()=>region;
@@ -94,7 +94,8 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   }
   selected=hit;
   const [name,desc]=INFORMATION[hit.id]||(window.BodyExtendedRegions.has(hit.region)?
-    [hit.id.split('-').map(x=>x[0].toUpperCase()+x.slice(1)).join(' '),
+    [hit.name||hit.id.split('-').map(x=>x[0].toUpperCase()+x.slice(1)).join(' '),
+     hit.tissue?'Licensed BodyParts3D 4.0 muscle surface. Where joints move, inferred proximity-to-bone attachment weights are illustrative, not verified physiology.':
      'Real BodyParts3D 4.0 bone surface in a registered reference pose. Selection and any illustrative motion are not an expert-verified diagnosis or biomechanical model.']:
     [hit.id,'Sourced anatomical reference, not clinically validated.']);
   $('structure-chip-name').textContent=name;
@@ -221,6 +222,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  function back(){
   const id=++token;cancelAnimationFrame(animation);pending=false;
   $('joint-motion').hidden=true;clearSelection();
+  $('mode-trace').textContent='Trace';
   const c=state.data.camera;
   const from={yaw:c.yaw,pitch:c.pitch,zoom:c.zoom,frameSpan:c.frameSpan,target:{...c.target}};
   const departingLayer=state.data.layer;
@@ -259,14 +261,16 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  }
  function syncControls(name){
   const trace=$('mode-trace'),peel=$('mode-peel'),output=$('layer-output');
-  trace.disabled=true;
-  trace.title='A continuous nerve path is not verified in this source-derived scene';
+  const extended=window.BodyExtendedRegions.has(name);
+  trace.disabled=!extended;
+  trace.textContent=extended?'Muscles':'Trace';
+  trace.title=extended?'Show licensed source muscle meshes with faint bone context':'A continuous nerve path is not verified in this source-derived scene';
   peel.textContent=window.BodyExtendedRegions.has(name)?'Isolate':name==='knee'?'Isolate':name==='shoulder'?'Layers':'Peel';
   $('joint-motion-label').textContent=window.BodyExtendedRegions.config[name]?.motion?.label|| (name==='hip'?'Hip flexion':name==='shoulder'?'Shoulder abduction':'Knee flexion');
   $('motion-description').textContent=window.BodyExtendedRegions.has(name)?'ILLUSTRATIVE HINGE · UNVALIDATED':'INFERRED ATTACHMENTS';
   $('joint-motion-slider').max=String(window.BodyExtendedRegions.config[name]?.motion?.max||(name==='hip'?65:name==='shoulder'?110:105));
   $('joint-motion-slider').value='0';$('joint-motion-value').textContent='0°';
-  $('layer-slider').max='3';
+  $('layer-slider').max=extended?'4':'3';
   $('layer-slider').disabled=false;
   output.textContent=LAYERS[name][0];
  }
@@ -275,11 +279,15 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   const v=state.data.layer;clearSelection();
   $('layer-output').textContent=layerText();
   state.mode(v>0?'peel':'explore');
-  document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-'+(v>0?'peel':'explore'))));
+  const displayed=v===4&&window.BodyExtendedRegions.has(region)?'trace':v>0?'peel':'explore';
+  document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-'+displayed)));
   render();
  }
  function setMode(mode){
-  if(mode==='trace')return;
+  if(mode==='trace'){
+   if(window.BodyExtendedRegions.has(region)&&state.data.view==='detail')depthChange(4);
+   return;
+  }
   if(!state.mode(mode))return;
   // Mode buttons are actions, not mere labels. Explore restores all available
   // sourced surfaces; Peel/Isolate enters a meaningful first depth stage.
