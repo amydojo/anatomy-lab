@@ -183,6 +183,31 @@ test('Changing regions and interrupting camera travel cannot leave controls stuc
  await page.locator('#atlas-canvas').dispatchEvent('pointerup',{pointerId:73,clientX:130,clientY:240});
  expect(errors).toEqual([]);
 });
+test('Explore, Peel and Isolate buttons change actual specimen layers',async({page})=>{
+ const errors=await atlas(page);
+ await choose(page,'hip');
+ await page.locator('#mode-peel').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().layer)).toBe(1);
+ await expect(page.locator('#layer-output')).toHaveText('Stabilizers');
+ await page.locator('#mode-explore').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().layer)).toBe(0);
+ await page.locator('#back-body').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view)).toBe('overview');
+ await choose(page,'knee');
+ await expect(page.locator('#mode-peel')).toHaveText('Isolate');
+ await page.locator('#mode-peel').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().layer)).toBe(1);
+ await expect(page.locator('#layer-output')).toHaveText('Femur focus');
+ expect(errors).toEqual([]);
+});
+test('Desktop wheel on specimen directly controls zoom without modifier keys',async({page})=>{
+ const errors=await atlas(page);await choose(page,'hip');
+ const before=await page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.zoom);
+ await page.locator('#atlas-canvas').hover({position:{x:90,y:90}});
+ await page.mouse.wheel(0,-200);
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.zoom)).toBeGreaterThan(before);
+ expect(errors).toEqual([]);
+});
 test('Direct mapped-bone tap moves toward the anatomy; empty canvas does not invent selection',async({page})=>{
  const errors=await atlas(page);
  const tap=await page.evaluate(()=>{
