@@ -148,3 +148,33 @@
  .region-dock-grid button[aria-pressed="true"]{background:#d8ad8e;color:#2b1b13;border-color:#f3cbb0}
  .region-dock-grid button:focus-visible{outline:2px solid #ffdaa9;outline-offset:1px}
 }
+
+
+/* V8 canonical full-body display controls live outside the specimen viewport.
+   Height never changes across region travel, so the specimen cannot jump. */
+.overview-system-switch{
+ flex:0 0 47px;min-height:47px;z-index:7;display:flex;align-items:center;
+ justify-content:center;gap:20px;background:#19130ff7;
+ border-bottom:1px solid #68503c;padding:4px 16px;
+}
+.overview-system-label{display:flex;gap:11px;align-items:center;font:700 10px/1.2 -apple-system,BlinkMacSystemFont,sans-serif;letter-spacing:.13em;color:#ebc7a7}
+.overview-system-label span{color:#ab9180;font-size:9px;letter-spacing:.06em;white-space:nowrap}
+.overview-system-buttons{display:flex;gap:3px;padding:3px;border:1px solid #785947;border-radius:10px;background:#302219}
+.overview-system-buttons button{border:0;min-height:32px;min-width:75px;padding:5px 9px;
+ background:transparent;border-radius:7px;color:#d9bfae;font-weight:700;font-size:11px;cursor:pointer}
+.overview-system-buttons button[aria-pressed="true"]{background:#d5aa85;color:#241811}
+.overview-system-buttons button:focus-visible{outline:2px solid #ffd6a9;outline-offset:2px}
+.app[data-mode="immersive"] .overview-system-switch,
+.app[data-mode="detail"] .overview-system-switch,
+.app[data-mode="focus"] .overview-system-switch{visibility:hidden;pointer-events:none}
+@media(max-width:850px){
+ .overview-system-switch{flex-basis:43px;min-height:43px;padding:3px 8px;gap:9px;justify-content:space-between}
+ .overview-system-label{font-size:9px;letter-spacing:.03em;flex-direction:column;align-items:flex-start;gap:1px;min-width:0}
+ .overview-system-label span{font-size:8px;max-width:115px;overflow:hidden;text-overflow:ellipsis}
+ .overview-system-buttons{flex-shrink:0}
+ .overview-system-buttons button{min-width:61px;min-height:32px;padding:4px 6px;font-size:10px}
+}
+@media(max-width:360px){
+ .overview-system-label{font-size:8px}.overview-system-label span{max-width:86px;font-size:7px}
+ .overview-system-buttons button{min-width:53px;font-size:9px}
+}

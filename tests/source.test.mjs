@@ -545,3 +545,61 @@ test('V7 six new source-matched body regions are fully FMA-attributed and SHA-pi
  const source=read('atlas/sources/index.html');
  assert.ok(source.includes('/atlas/regions/provenance.json'));
 });
+
+test('V8 canonical specimen keeps every source bone once and exposes licensed muscles across all ten regions',async()=>{
+ const {createHash}=await import('node:crypto');
+ const root=JSON.parse(read('atlas/assets/body-skeleton.json'));
+ const atlas=JSON.parse(read('atlas/assets/v8-overview-detail.json'));
+ const proof=JSON.parse(read('atlas/assets/v8-overview-provenance.json'));
+ const expectedRegions=['skull','neck','thorax','elbow','wrist','ankle','left-wrist','left-ankle','hip','knee','shoulder','left-hip','left-knee','left-shoulder'];
+ assert.equal(atlas.schema,'body-live/overview-v8-v1');
+ assert.equal(proof.schema,'body-live/overview-v8-provenance-v1');
+ assert.equal(atlas.source_commit,root.source_commit);
+ assert.equal(atlas.source_commit,proof.source_commit);
+ assert.deepEqual(atlas.source_frame,root.source_frame);
+ assert.equal(proof.original_bones,78);
+ assert.equal(Object.keys(atlas.bones).length,59);
+ assert.equal(Object.keys(atlas.muscles).length,149);
+ assert.equal(proof.additional_bones,59);
+ assert.equal(proof.unique_muscles,149);
+ assert.equal(proof.anatomist_reviewed,false);
+ assert.equal(proof.kinematics_validated,false);
+ assert.equal(createHash('sha256').update(read('atlas/assets/v8-overview-detail.json')).digest('hex'),proof.overview_sha256);
+ const ids=new Set(root.parts.map(p=>p.id));
+ for(const [id,part]of Object.entries(atlas.bones)){
+  assert.ok(!ids.has(id),'duplicate overview bone: '+id);ids.add(id);
+  assert.ok(part.name&&part.fma&&part.system==='bone');
+  assert.ok(expectedRegions.includes(part.region));
+ }
+ for(const [id,part]of Object.entries(atlas.muscles)){
+  assert.ok(!ids.has(id),'duplicate anatomical source identity: '+id);ids.add(id);
+  assert.ok(part.name&&part.fma&&part.system==='muscle');
+  assert.ok(expectedRegions.includes(part.region));
+ }
+ for(const [region,expected]of Object.entries(proof.region_counts)){
+  const source=JSON.parse(read('atlas/regions/'+region+'.json'));
+  assert.equal(expected.bones,Object.keys(source.parts).length);
+  assert.equal(expected.muscles,Object.keys(source.muscle_parts).length);
+  assert.equal(createHash('sha256').update(read('atlas/regions/'+region+'.json')).digest('hex'),proof.detail_sha256[region]);
+  for(const [id,part]of Object.entries({...source.parts,...source.muscle_parts})){
+   const overview=atlas.bones[id]||atlas.muscles[id]||root.parts.find(p=>p.id===id);
+   assert.ok(overview,'source part missing from the unified specimen: '+region+'/'+id);
+   assert.equal(overview.fma,part.fma);
+  }
+ }
+ assert.equal(ids.size,78+59+149);
+ assert.deepEqual(proof.bilateral_added,{bones:25,muscles:54});
+ assert.deepEqual(proof.additional_lab_muscles,{hip:8,shoulder:9,knee:5});
+ for(const [region,path] of Object.entries({hip:'hip/spatial/assets/hip-source.json',shoulder:'shoulder/spatial/assets/shoulder-source.json',knee:'knee/spatial/assets/knee-muscles-source.json'}))
+  assert.equal(createHash('sha256').update(read(path)).digest('hex'),proof.source_lab_sha256[region]);
+ assert.equal(Object.keys(proof.bilateral_source_sha256).length,6);
+ for(const path of ['assets/atlas/atlas-registry.js','assets/atlas/atlas-renderer.js',
+   'assets/atlas/atlas-controller.js','assets/atlas/atlas-loader.js']){
+  assert.doesNotThrow(()=>new Function(read(path)),path+' syntax');
+ }
+ const html=read('atlas/index.html');
+ assert.ok(html.includes('atlas-registry.js'));
+ for(const mode of ['bones','muscles','combined'])assert.ok(html.includes('data-overview-system="'+mode+'"'));
+ assert.ok(read('assets/atlas/atlas-loader.js').includes('verifyOverview'));
+ assert.ok(read('assets/atlas/atlas-renderer.js').includes('loadOverview(asset)'));
+});

@@ -1,7 +1,7 @@
 /* V6 evidence categories are independent of graphical rendering. */
 (function(){'use strict';
 const INTRO={overview:{title:'Sourced overview',origin:'Source-derived skeletal context',note:'One BodyParts3D 4.0 reference release. Simplified bone surfaces; not a patient scan, complete anatomy or anatomist-reviewed reconstruction.'},hip:{title:'Right Hip',origin:'Sourced bones and muscles',note:'BodyParts3D 4.0 meshes use one reference frame. Joint pivot, muscle responses and movement remain illustrative and unreviewed.'},nerve:{title:'Sciatic nerve',origin:'Registered atlas composite',note:'Z-Anatomy source-derived nerve surface registered against a different BodyParts3D femur. Not medical imaging, not same validated donor, and not an independently validated nerve course.'},knee:{title:'Right Knee',origin:'Source bones and five knee-spanning muscles',note:'Four sourced bones and five licensed muscle surfaces share the pinned BodyParts3D reference. Attachment weights and simplified flexion are inferred, not anatomist-validated; menisci and ligaments are not supplied.'},shoulder:{title:'Right Shoulder',origin:'Sourced bones and four rotator-cuff muscles',note:'Scapula, clavicle, humerus and rotator-cuff meshes use the same pinned BodyParts3D source coordinates. Deltoid, tendon, labrum, ligament and nerves are not comprehensively reconstructed. Movement uses an estimated pivot and is not anatomist-reviewed.'}};
-function records(region,manifest,hip,nerve,shoulder,kneeMuscles,expanded){
+function records(region,manifest,hip,nerve,shoulder,kneeMuscles,expanded,overviewProof){
  const extra=window.BodyExtendedRegions?.config[region];
  const item=extra?{title:extra.title,origin:'Pinned BodyParts3D 4.0 bone + muscle surfaces',
   note:'Reference-pose source bones and selected muscles, not complete surgical anatomy. Joint pivots and soft-tissue attachment weights are inferred demonstrations, never validated physiology or patient-specific simulation.'}:INTRO[region]||INTRO.overview;
@@ -9,6 +9,14 @@ function records(region,manifest,hip,nerve,shoulder,kneeMuscles,expanded){
  if(!region||region==='overview'){
   output.push({title:'Original skeletal dataset',label:'BodyParts3D 4.0 · CC BY 4.0',
    content:manifest?manifest.part_count+' sourced LOD skeletal components; '+manifest.lod_triangle_count.toLocaleString()+' triangles. Source release pinned; missing hands/feet and some anatomy acknowledged.':'Skeletal overview data unavailable. Semantic region navigation remains usable.',tag:'SOURCE REFERENCE'});
+ }
+ if(!region||region==='overview'){
+  output.push({title:'V8 canonical specimen · source coverage',label:'Pinned BodyParts3D 4.0 · no generated anatomy',
+   content:overviewProof?overviewProof.original_bones+' original skeletal LOD meshes, '+overviewProof.additional_bones+
+    ' additional bone meshes, and '+overviewProof.unique_muscles+
+    ' source-verified muscle meshes, deduplicated by anatomical ID. The left hand and foot now have real overview-only source meshes; the interactive wrist and ankle labs remain right-sided. Neither finger/toe phalanges nor complete connective/nerve systems have been reconstructed.':
+    'V8 source-verified muscle and supplemental bone coverage unavailable. The original skeletal LOD remains visible.',
+   tag:'SOURCE / LICENSED / UNREVIEWED'});
  }
  if(region==='hip'||region==='nerve'){
   output.push({title:'Hip source geometry',label:'BodyParts3D 4.0 · CC BY 4.0',

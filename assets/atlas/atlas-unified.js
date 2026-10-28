@@ -124,7 +124,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
    region=null;reveal=0;returning=false;pending=false;motion=0;navigation=null;
    state.data.layer=0;$('atlas-app').dataset.mode='overview';
    $('hotspots').hidden=false;
-   setStatus('SOURCED SKELETON · 78 STRUCTURES');
+   setStatus((model.stats().overviewBones?'SOURCE-ALIGNED BONES + MUSCLES · V8':'SOURCED SKELETON · 78 STRUCTURES'));
    render();return;
   }
   if(pending)return;
@@ -246,7 +246,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   travel(home,reduce()?0:850,v=>{reveal=1-v;},()=>{
    if(id!==token)return;
    region=null;reveal=0;returning=false;state.data.layer=0;motion=0;
-   $('hotspots').hidden=false;setStatus('SOURCED SKELETON · 78 STRUCTURES');
+   $('hotspots').hidden=false;setStatus((model.stats().overviewBones?'SOURCE-ALIGNED BONES + MUSCLES · V8':'SOURCED SKELETON · 78 STRUCTURES'));
    render();
    if(navigation){const to=navigation;navigation=null;navigate(to);}
   });
