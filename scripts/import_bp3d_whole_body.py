@@ -33,6 +33,18 @@ ANKLE=["Right tibia","Right fibula","Right talus","Right calcaneus","Navicular b
  f"Right {s} metatarsal bone" for s in ("first","second","third","fourth","fifth")]
 REGIONS={"skull":SKULL,"neck":NECK,"thorax":THORAX,"elbow":ELBOW,"wrist":WRIST,"ankle":ANKLE}
 
+# Explicit, exact source names. "Muscle" is a functional grouping here:
+# BodyParts3D categorizes a few named lower-limb muscles as skeletal.
+# The raw upstream system label is retained in the provenance record.
+MUSCLES={
+ "skull": ["Right inferior rectus","Right lateral rectus","Right medial rectus","Right superior rectus","Right superior oblique","Right inferior oblique","Left inferior rectus","Left lateral rectus","Left medial rectus","Left superior rectus","Left superior oblique","Left inferior oblique","Right mylohyoid","Left mylohyoid","Right geniohyoid","Left geniohyoid"],
+ "neck": ["Left sternocleidomastoid","Right sternocleidomastoid","Left scalenus anterior","Right scalenus anterior","Left scalenus medius","Right scalenus medius","Left scalenus posterior","Right scalenus posterior","Left splenius capitis","Right splenius capitis","Left longus capitis","Right longus capitis","Left platysma","Right platysma"],
+ "thorax": ["Right serratus anterior","Left serratus anterior","Right pectoralis minor","Left pectoralis minor","Sternocostal part of right pectoralis major","Sternocostal part of left pectoralis major","Right transversus thoracis","Left transversus thoracis","Diaphragm","external intercostal muscle","Internal intercostal muscle"],
+ "elbow": ["Right brachialis","Right brachioradialis","Long head of right biceps brachii","Short head of right biceps brachii","Lateral head of right triceps brachii","Long head of right triceps brachii","Medial head of right triceps brachii","Right supinator","Humeral head of right pronator teres","Ulnar head of right pronator teres"],
+ "wrist": ["Right flexor carpi radialis","Right palmaris longus","Right extensor carpi radialis brevis","Right extensor carpi radialis longus","Right flexor digitorum profundus","Right extensor digitorum","Right opponens pollicis","Right abductor pollicis brevis","Right abductor pollicis longus","Humeral head of right flexor carpi ulnaris"],
+ "ankle": ["Right tibialis anterior","Right tibialis posterior","Right fibularis longus","Right fibularis brevis","Lateral head of right gastrocnemius","Medial head of right gastrocnemius","Right soleus","Right flexor hallucis longus","Right extensor hallucis longus","Right flexor digitorum longus","Right extensor digitorum longus","Right flexor digitorum brevis"],
+}
+
 def load(name):
  url=BASE+name
  for attempt in range(3):
@@ -79,6 +91,17 @@ def main():
    if len(options)!=1:raise ValueError(f"{region}: {name}: {len(options)} exact source candidates")
    chosen.append(options[0])
   groups[region]=chosen
+ muscle_groups={}
+ for region,names in MUSCLES.items():
+  if len(set(names))!=len(names):raise ValueError("Duplicate muscle label "+region)
+  selected=[]
+  for name in names:
+   options=index.get(name,[])
+   if len(options)!=1:raise ValueError(f"{region}: muscle {name}: {len(options)} exact source candidates")
+   info=options[0]
+   if info["vertexCount"]<35 or info["indexCount"]<150:raise ValueError("Incomplete muscle "+name)
+   selected.append(info)
+  muscle_groups[region]=selected
  chunks={}
  proof={"schema":"body-live/extended-regions-provenance-v1","dataset":"BodyParts3D 4.0",
   "attribution":"BodyParts3D © Database Center for Life Science","license":"CC BY 4.0",
@@ -88,10 +111,11 @@ def main():
   "anatomist_reviewed":False,"kinematics_validated":False,"inputs":{"atlas.json":atlasmeta},
   "regions":{},"unsupported":[
    "Tendons, cartilage, ligaments, nerve geometry, and connective tissue not reconstructed by this import",
+   "Muscle meshes are licensed reference-pose anatomy; named subsets are not exhaustive, attachments are not experimentally verified",
    "No measured elbow, radiocarpal, ankle, craniocervical, or temporomandibular motion",
    "A source mesh's presence does not certify clinical accuracy or patient-specific anatomy"]}
  DEST.mkdir(parents=True,exist_ok=True)
- for chunk in sorted({x["chunk"] for v in groups.values() for x in v}):
+ for chunk in sorted({x["chunk"] for v in list(groups.values())+list(muscle_groups.values()) for x in v}):
   raw,meta=load(f"body-{chunk}.bin")
   if len(raw)!=atlas["chunks"][chunk]["bytes"]:raise ValueError("Chunk byte mismatch")
   chunks[chunk]=raw;proof["inputs"][f"body-{chunk}.bin"]=meta
@@ -104,18 +128,29 @@ def main():
    key=id_of(info["name"])
    parts[key]={"name":info["name"],"fma":info["conceptId"],"system":"bone",
     "vertices":vertices,"faces":faces}
+  muscle_parts={}
+  for info in muscle_groups[region]:
+   verts,faces=decode(chunks[info["chunk"]],info)
+   vertices=[[round((p[i]-(.9 if i==1 else 0))*5,5) for i in range(3)] for p in verts]
+   key=id_of(info["name"])
+   if key in parts or key in muscle_parts:raise ValueError("Duplicate anatomical ID "+key)
+   muscle_parts[key]={"name":info["name"],"fma":info["conceptId"],"system":"muscle",
+    "source_system":info["system"],"vertices":vertices,"faces":faces}
   asset={"schema":"body-live/extended-region-v1","region":region,"dataset":"BodyParts3D 4.0",
    "license":"CC BY 4.0","source_commit":PIN,
    "source_frame":{"origin_metres":[0,.9,0],"scale":5,"axes":"Y-up source metres"},
-   "parts":parts}
+   "parts":parts,"muscle_parts":muscle_parts}
   path=DEST/f"{region}.json"
   path.write_text(json.dumps(asset,separators=(",",":"))+"\n")
   proof["regions"][region]={"asset_sha256":hashlib.sha256(path.read_bytes()).hexdigest(),
    "structures":{k:{"name":v["name"],"fma":v["fma"],"vertices":len(v["vertices"]),
       "triangles":len(v["faces"])} for k,v in parts.items()},
-   "source_parts":len(parts),"triangles":sum(len(v["faces"]) for v in parts.values()),
+   "source_parts":len(parts),"muscle_source_parts":len(muscle_parts),
+   "muscles":{k:{"name":v["name"],"fma":v["fma"],"source_system":v["source_system"],
+     "vertices":len(v["vertices"]),"triangles":len(v["faces"])} for k,v in muscle_parts.items()},
+   "triangles":sum(len(v["faces"]) for v in list(parts.values())+list(muscle_parts.values())),
    "movement":"source-reference-pose; no measured biomechanics"}
-  print(region,len(parts),"parts",proof["regions"][region]["triangles"],"triangles",path.stat().st_size,"bytes")
+  print(region,len(parts),"bones",len(muscle_parts),"muscles",proof["regions"][region]["triangles"],"triangles",path.stat().st_size,"bytes")
  (DEST/"provenance.json").write_text(json.dumps(proof,indent=2)+"\n")
 
 if __name__=="__main__":main()
