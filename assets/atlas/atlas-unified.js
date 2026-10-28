@@ -163,7 +163,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
    setStatus('TRAVELING IN ONE ANATOMICAL SCENE');
    const c=state.data.camera;
    const to={yaw:shortestYaw(c.yaw,name==='hip'?Math.PI+.28:name==='shoulder'?.48:.47),
-     pitch:-.11,zoom:name==='hip'?1.05:1.10,frameSpan:name==='hip'?3.4:name==='shoulder'?3.15:3.2,target:centerPoint(name)};
+     pitch:-.11,zoom:name==='hip'?1.05:name==='shoulder'?1.18:1.10,frameSpan:name==='hip'?3.4:name==='shoulder'?3.15:3.2,target:centerPoint(name)};
    travel(to,reduce()?0:1150,v=>{reveal=clamp((v-.46)/.54,0,1);},()=>{
     if(id!==token)return;
     state.enter();state.data.frameReady=true;reveal=1;
