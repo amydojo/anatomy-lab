@@ -26,10 +26,11 @@
    return {x:camera.width*.50+x*scale*perspective,
      y:camera.height*(Number.isFinite(camera.anchorY)?camera.anchorY:.50)-(y2-.04)*scale*perspective,z:z2,world:view};
  }
- function attachOrbit(canvas,{state,render,pick,minZoom=.7,maxZoom=2.5}){
+ function attachOrbit(canvas,{state,render,pick,onInteract=()=>{},minZoom=.7,maxZoom=4}){
    const pointers=new Map();let origin=null,travel=false;
    const distance=()=>{const [a,b]=[...pointers.values()];return Math.hypot(a.x-b.x,a.y-b.y)};
    function start(e){
+     onInteract();
      pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
      travel=false;
      if(pointers.size===1)origin={x:e.clientX,y:e.clientY,yaw:state.yaw,pitch:state.pitch};
@@ -67,7 +68,7 @@
    function cancel(e){pointers.delete(e.pointerId);origin=null}
    function wheel(e){
      if(e.ctrlKey||e.shiftKey){
-       e.preventDefault();state.zoom=clamp(state.zoom*(e.deltaY<0?1.09:.91),minZoom,maxZoom);render();
+       onInteract();e.preventDefault();state.zoom=clamp(state.zoom*(e.deltaY<0?1.09:.91),minZoom,maxZoom);render();
      }
    }
    canvas.addEventListener('pointerdown',start);
