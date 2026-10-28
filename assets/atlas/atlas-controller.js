@@ -221,10 +221,10 @@ function checkSourceReady(token,tries=0){
  if(!task||token!==seq||!task.matched)return;
  const api=labAPI(task.region),st=api?.getState?.();
  const loaded=task.region==='hip'?st?.sourceLoaded:st?.sourcedBoneCount>=4;
- const cam=loaded?sourceCameraFor(task.region):null;
- if(loaded&&cam&&api.prepareAtlasEntry?.(cam)){
-  task.ready=true;
-  clearTimeout(entryTimer);finishEntry(token);return;
+ if(loaded){
+  // Do not lock the child camera while the parent is still traveling.
+  // The final source-camera position is computed exactly at reveal time.
+  task.ready=true;clearTimeout(entryTimer);finishEntry(token);return;
  }
  if(tries<150)frameTimeout=setTimeout(()=>checkSourceReady(token,tries+1),90);
  else $('scene-status').textContent='COULD NOT ALIGN SOURCE VIEW · STAYING IN ATLAS';
@@ -232,6 +232,14 @@ function checkSourceReady(token,tries=0){
 function finishEntry(token){
  const task=pendingEntry;
  if(!task||task.token!==seq||!task.matched||!task.ready||!task.traveled)return;
+ // The model is now at its FINAL end pose, and both viewports have
+ // their permanent dimensions. Calibrate once, just before cross-dissolve.
+ const match=sourceCameraFor(task.region);
+ if(!match||!labAPI(task.region)?.prepareAtlasEntry?.(match)){
+  $('scene-status').textContent='SOURCE CAMERA UNAVAILABLE · KEEPING ATLAS VIEW';
+  $('enter-region').disabled=false;$('enter-region').textContent='Retry close view ↗';
+  return;
+ }
  if(!state.enter())return;
  const region=task.region,portal=$('portal');
  state.data.frameReady=true;
