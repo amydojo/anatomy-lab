@@ -58,8 +58,11 @@ function drawPins(){
  for(const el of pins){
   const point=centerPoint(el.dataset.region);const q=window.BodySpatialCore.project(point,{...state.data.camera,width:w,height:h});
   // Keep semantic region list available when the model is outside the viewport.
-  el.style.left=Math.max(65,Math.min(w-65,q.x))+'px';
-  el.style.top=Math.max(74,Math.min(h-120,q.y))+'px';
+  let px=q.x,py=q.y;
+  if(el.dataset.region==='nerve'){px+=Math.min(96,w*.23);py-=18;}
+  if(el.dataset.region==='hip'){px-=Math.min(22,w*.055);py+=12;}
+  el.style.left=Math.max(65,Math.min(w-65,px))+'px';
+  el.style.top=Math.max(74,Math.min(h-120,py))+'px';
   el.setAttribute('aria-pressed',String(el.dataset.region===state.data.region));
  }
 }
@@ -106,6 +109,16 @@ function choose(region){
  const q=centerPoint(region);const camera={yaw:region==='nerve'?Math.PI+.24:-.2,pitch:-.07,zoom:region==='nerve'?1.28:1.07,frameSpan:region==='shoulder'?5.3:region==='knee'?4.4:region==='nerve'?4.6:4.7,target:q};
  animateCamera(camera,reduce()?0:480,()=>{if(seq!==token)return;enter(region);});
 }
+function adaptEmbeddedFrame(frame,region){
+ if(region==='shoulder')return;
+ try{
+  const doc=frame.contentDocument;
+  if(!doc||doc.getElementById('atlas-embed-style'))return;
+  const style=doc.createElement('style');style.id='atlas-embed-style';
+  style.textContent='header.topbar{display:none!important}html,body,#app{height:100%!important}';
+  doc.head.appendChild(style);
+ }catch(err){console.warn('Atlas lab presentation:',err.message);}
+}
 function enableControls(region){
  const detail=state.data.view==='detail';
  $('layer-slider').disabled=!detail||region==='shoulder';
@@ -114,6 +127,7 @@ function enableControls(region){
  $('enter-region').disabled=true;$('enter-region').textContent=detail?'Inside '+LABEL[region]:'Choose a region';
  document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-explore')));
  $('back-body').hidden=!detail;
+ $('top-continue-knee').hidden=!detail||!['hip','nerve'].includes(region);
 }
 function enter(region=state.data.region){
  if(!state.enter())return;const route=HERE[region];if(!route)return;
@@ -129,7 +143,7 @@ function enter(region=state.data.region){
  activeFrameRoute=route;const token=++seq;
  const onLoad=()=>{
   if(seq!==token||state.data.view!=='detail')return;
-  state.data.frameReady=true;$('portal-mask').hidden=true;
+  state.data.frameReady=true;adaptEmbeddedFrame(frame,region);$('portal-mask').hidden=true;
   if(region==='nerve')initNerve(token);
  };
  frame.onload=onLoad;
@@ -153,6 +167,7 @@ function body(){
  $('panel-description').textContent='Choose a region to inspect bones, muscles and nerves in spatial context. Reference anatomy is not one patient scan or a clinically validated reconstruction.';
  $('sidebar-short').textContent='Explore the body';$('stage-title').textContent='ONE BODY · MANY SYSTEMS';
  $('stage-caveat').textContent='BodyParts3D 4.0 · skeletal reference · CC BY 4.0 · unreviewed';
+ $('scene-status').textContent=model.getStatus()==='ready'?'SOURCED SKELETON · 78 STRUCTURES':'2D FALLBACK';
  $('context-note').textContent='Some regions and relationships are estimated or not yet reconstructed. Evidence is accessible in one tap.';
  document.querySelectorAll('[data-region]').forEach(b=>b.setAttribute('aria-pressed','false'));
  enableControls(null);if(window.innerWidth<=850)setExpanded(false);updateURL();
@@ -175,7 +190,7 @@ function toKnee(){
  document.querySelectorAll('[data-region]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.region==='knee')));
  enableControls('knee');updateURL();const token=++seq;
  const frame=$('region-frame');$('portal-mask').hidden=false;
- frame.onload=()=>{if(token===seq){state.data.frameReady=true;$('portal-mask').hidden=true;}};
+ frame.onload=()=>{if(token===seq){state.data.frameReady=true;adaptEmbeddedFrame(frame,'knee');$('portal-mask').hidden=true;}};
  frame.src=HERE.knee;
 }
 function setMode(mode){
@@ -243,6 +258,7 @@ function setup(){
  document.querySelectorAll('[data-region]').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.region)));
  $('enter-region').onclick=()=>enter();
  $('continue-knee').onclick=seam;
+ $('top-continue-knee').onclick=seam;
  $('seam-cancel').onclick=()=>{state.closeSeam();$('seam').hidden=true;previousFocus?.focus?.();};
  $('seam-continue').onclick=toKnee;
  $('back-body').onclick=body;

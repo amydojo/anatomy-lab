@@ -3,3 +3,11 @@
 @media(max-width:370px){.topbar{gap:4px}.masthead strong{font-size:12px}.masthead .overline{font-size:6px}.topactions{gap:4px}.top-pill{padding:7px 6px}.text-btn{padding:7px 5px}.controlbar{gap:5px}.seg-control button{padding:5px 7px;font-size:9px}.act-group button{padding:5px 6px;font-size:9px}.sidebar[data-expanded=true]{height:min(42dvh,300px)}.stage-bottom{font-size:8px}}
 @media(max-height:680px) and (max-width:850px){.sidebar[data-expanded=true]{height:min(39dvh,245px)}.controlbar{height:86px;flex-basis:86px}.stage-bottom{bottom:95px}.hotspot{font-size:9px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* V6 integrated lab polish: one navigation shell, preserve lab's own controls. */
+.app[data-mode="detail"] .workspace{display:block}
+.app[data-mode="detail"] .stage{height:100%;width:100%;position:relative}
+.app[data-mode="detail"] .sidebar,.app[data-mode="detail"] .controlbar{display:none!important}
+.app[data-mode="detail"] .stage-meta,.app[data-mode="detail"] .stage-bottom{display:none}
+.app[data-mode="detail"] .stage{background:#17110e}
+@media(max-width:600px){.app[data-mode="detail"] .masthead{display:none}.app[data-mode="detail"] .topbar{justify-content:space-between}.app[data-mode="detail"] .topactions{margin-left:auto}}

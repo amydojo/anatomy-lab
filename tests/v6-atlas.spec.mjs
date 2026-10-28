@@ -35,8 +35,8 @@ test('Hip laboratory opens inside shared Atlas, universal peeling controls work'
 test('Nerve Follow and Knee reference change have explicit discontinuity dialog',async({page})=>{
  const errors=await atlas(page);await choose(page,'nerve');
  await expect.poll(()=>page.evaluate(()=>document.querySelector('#region-frame').contentWindow.__HIP_SPATIAL__?.getState().followActive||false),{timeout:20000}).toBe(true);
- await expect(page.locator('#continue-knee')).toBeVisible();
- await page.locator('#continue-knee').click();
+ await expect(page.locator('#top-continue-knee')).toBeVisible();
+ await page.locator('#top-continue-knee').click();
  await expect(page.locator('#seam')).toBeVisible();
  await expect(page.locator('#seam')).toContainText('not reconstructed continuously');
  await page.locator('#seam-continue').click();
