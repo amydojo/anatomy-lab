@@ -26,7 +26,7 @@
    return {x:camera.width*.50+x*scale*perspective,
      y:camera.height*(Number.isFinite(camera.anchorY)?camera.anchorY:.50)-(y2-.04)*scale*perspective,z:z2,world:view};
  }
- function attachOrbit(canvas,{state,render,pick,onInteract=()=>{},minZoom=.7,maxZoom=4}){
+ function attachOrbit(canvas,{state,render,pick,onInteract=()=>{},minZoom=.7,maxZoom=2.5}){
    const pointers=new Map();let origin=null,travel=false;
    const distance=()=>{const [a,b]=[...pointers.values()];return Math.hypot(a.x-b.x,a.y-b.y)};
    function start(e){
