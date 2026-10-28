@@ -521,9 +521,9 @@ test('V7 six new source-matched body regions are fully FMA-attributed and SHA-pi
   }
   assert.equal(X.config[region].labels[4],'Source muscles');
   if(X.config[region].motion){
-   const [id,p]=Object.entries(asset.muscle_parts)[0];
-   const skin=X.createSkin(region,id,p.vertices,asset.parts);
-   assert.ok(skin&&!skin.validated&&skin.weights.length===p.vertices.length);
+   const [muscleId,musclePart]=Object.entries(asset.muscle_parts)[0];
+   const skin=X.createSkin(region,muscleId,musclePart.vertices,asset.parts);
+   assert.ok(skin&&!skin.validated&&skin.weights.length===musclePart.vertices.length);
    assert.equal(skin.method,'source-surface-proximity-inferred');
    assert.ok(skin.weights.every(w=>Number.isFinite(w)&&w>=0&&w<=1));
    const bent=X.createPose(region,asset,X.config[region].motion.max);
