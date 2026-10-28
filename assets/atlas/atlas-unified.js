@@ -233,6 +233,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   trace.title='A continuous nerve path is not verified in this source-derived scene';
   peel.textContent=name==='knee'?'Isolate':name==='shoulder'?'Layers':'Peel';
   $('joint-motion-label').textContent=name==='hip'?'Hip flexion':name==='shoulder'?'Shoulder abduction':'Knee flexion';
+  $('motion-description').textContent=name==='shoulder'?'INFERRED ATTACHMENTS':'ILLUSTRATIVE MOVEMENT';
   $('joint-motion-slider').max=name==='hip'?'65':name==='shoulder'?'110':'105';
   $('joint-motion-slider').value='0';$('joint-motion-value').textContent='0°';
   $('layer-slider').max='3';
