@@ -257,6 +257,7 @@ test('Shoulder opens in one source-frame canvas with real cuff, deltoid and bone
  await expect(page.locator('#joint-motion-label')).toHaveText('Shoulder abduction');
  await expect(page.locator('#mode-peel')).toHaveText('Layers');
  await expect(page.locator('#mode-trace')).toBeDisabled();
+ await page.screenshot({path:'artifacts/v6-shoulder-'+test.info().project.name+'.png',fullPage:true});
  expect(errors).toEqual([]);
 });
 test('Shoulder cuff layers expose true source surfaces and abduction updates the renderer',async({page})=>{
