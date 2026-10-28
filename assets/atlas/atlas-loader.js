@@ -26,7 +26,7 @@ async function load(key,{refresh=false}={}){
   if(!response.ok)throw Error('Asset '+key+': HTTP '+response.status);
   const body=await response.text();
   const json=JSON.parse(body);
-  if(key==='atlas')hashes.set(key,await sha256(body));
+  if(key==='atlas'||key==='shoulderGeometry')hashes.set(key,await sha256(body));
   if(key==='atlas'){
    if(json.schema!=='body-live/atlas-skeleton-v1'||json.license!=='CC BY 4.0'||json.parts?.length<60)throw Error('Invalid Atlas source');
    for(const part of json.parts){
@@ -61,5 +61,15 @@ async function load(key,{refresh=false}={}){
  try{return await promise;}finally{pending.delete(key);}
 }
 function cancel(key){if(key)pending.get(key)?.controller.abort();else for(const x of pending.values())x.controller.abort();}
-window.BodyAtlasLoader=Object.freeze({load,cancel,verifyAtlas,knownAssets:Object.keys(FIXED)});
+function verifyShoulder(asset,proof){
+ if(asset?.schema!=='body-live/shoulder-sourced-v1'||proof?.schema!=='body-live/shoulder-provenance-v1')throw Error('Shoulder source/provenance mismatch');
+ if(asset.source_commit!==proof.pinned_commit||proof.anatomist_reviewed!==false||proof.kinematics_validated!==false)throw Error('Shoulder source truth flags mismatch');
+ if(!/^[a-f0-9]{64}$/i.test(proof.asset_sha256)||hashes.get('shoulderGeometry')!==proof.asset_sha256)throw Error('Shoulder model SHA-256 mismatch');
+ for(const [id,part] of Object.entries(asset.parts)){
+  const item=proof.models?.[id];
+  if(!item||item.fma!==part.fma||item.triangles!==part.faces.length)throw Error('Shoulder structure source audit failed: '+id);
+ }
+ return true;
+}
+window.BodyAtlasLoader=Object.freeze({load,cancel,verifyAtlas,verifyShoulder,knownAssets:Object.keys(FIXED)});
 })();
