@@ -268,10 +268,8 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   state.setDepth(value);
   const v=state.data.layer;clearSelection();
   $('layer-output').textContent=layerText();
-  if(v>0){
-   state.mode('peel');
-   document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-peel')));
-  }
+  state.mode(v>0?'peel':'explore');
+  document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-'+(v>0?'peel':'explore'))));
   render();
  }
  function setMode(mode){
