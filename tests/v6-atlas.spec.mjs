@@ -22,6 +22,42 @@ test('Atlas loads original pinned skeleton and a functioning semantic region lis
  expect(errors).toEqual([]);
  await page.screenshot({path:'artifacts/v6-atlas-overview.png'});
 });
+test('Region selection travels through source geometry before revealing its preloaded detail',async({page})=>{
+ const errors=await atlas(page);
+ await page.evaluate(()=>window.__BODY_ATLAS__.choose('hip'));
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.frameSpan),{timeout:4000}).toBeLessThan(10.8);
+ const during=await page.evaluate(()=>({
+  view:window.__BODY_ATLAS__.getState().view,
+  phase:document.querySelector('#portal').dataset.phase,
+  path:location.pathname,
+  opacity:getComputedStyle(document.querySelector('#portal')).opacity,
+  frameUrl:document.querySelector('#region-frame').getAttribute('src')
+ }));
+ expect(during.view).toBe('focused');
+ expect(during.phase).toBe('preload');
+ expect(Number(during.opacity)).toBe(0);
+ expect(during.path).toBe('/atlas/');
+ expect(during.frameUrl).toBe('/hip/spatial/');
+ await expect.poll(()=>windowGetView(page),{timeout:15000}).toBe('detail');
+ await expect(page.locator('#portal')).toHaveAttribute('data-phase','active');
+ const arrived=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
+ expect(arrived.camera.frameSpan).toBeLessThan(3);
+ expect(arrived.frameReady).toBe(true);
+ expect(new URL(page.url()).pathname).toBe('/atlas/');
+ expect(errors).toEqual([]);
+});
+async function windowGetView(page){return page.evaluate(()=>window.__BODY_ATLAS__.getState().view);}
+test('Back to Body reverses spatial travel without changing the document',async({page})=>{
+ const errors=await atlas(page);await choose(page,'knee');
+ await page.locator('#back-body').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.frameSpan),{timeout:3500}).toBeGreaterThan(10);
+ await expect(page.locator('#portal')).toBeHidden();
+ const state=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
+ expect(state.view).toBe('overview');
+ expect(state.region).toBe(null);
+ expect(new URL(page.url()).pathname).toBe('/atlas/');
+ expect(errors).toEqual([]);
+});
 test('Hip laboratory opens inside shared Atlas, universal peeling controls work',async({page})=>{
  const errors=await atlas(page);await choose(page,'hip');
  await expect.poll(()=>page.evaluate(()=>document.querySelector('#region-frame').contentWindow.__HIP_SPATIAL__?.getState().sourceLoaded||false),{timeout:16000}).toBe(true);
