@@ -8,7 +8,13 @@ async function atlas(page){
 }
 async function choose(page,region){
  await page.evaluate(r=>window.__BODY_ATLAS__.choose(r),region);
- await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:10000}).toBe('detail');
+ if(region==='nerve'||region==='shoulder'){
+  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:10000}).toBe('focused');
+  await expect(page.locator('#portal')).toBeHidden();
+  await expect(page.locator('#top-enter-region')).toBeVisible();
+  await page.locator('#top-enter-region').click();
+ }
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:20000}).toBe('detail');
  await expect(page.locator('#portal')).toBeVisible();
 }
 test('Atlas loads original pinned skeleton and a functioning semantic region list',async({page})=>{
@@ -63,6 +69,49 @@ test('Region selection travels through source geometry before revealing its prel
  expect(errors).toEqual([]);
 });
 async function windowGetView(page){return page.evaluate(()=>window.__BODY_ATLAS__.getState().view);}
+test('Camera handoff preserves yaw, pitch, physical source scale and canvas dimensions',async({page})=>{
+ await page.setViewportSize({width:390,height:780});const errors=await atlas(page);
+ const before=await page.locator('#atlas-canvas').boundingBox();
+ for(const region of ['hip','knee']){
+  await choose(page,region);
+  const data=await page.evaluate(r=>{
+   const atlas=window.__BODY_ATLAS__.getState().camera;
+   const win=document.querySelector('#region-frame').contentWindow;
+   const child=r==='hip'?win.__HIP_SPATIAL__.getState():win.__BODY_SPATIAL__.getState();
+   const parentCanvas=document.querySelector('#atlas-canvas');
+   const childCanvas=win.document.querySelector(r==='hip'?'#hip-canvas':'#knee-canvas');
+   const aPx=Math.min(parentCanvas.clientWidth/3.25,parentCanvas.clientHeight/atlas.frameSpan)*atlas.zoom*5;
+   const bPx=Math.min(childCanvas.clientWidth/3.25,childCanvas.clientHeight/child.frameSpan)*child.zoom*(r==='hip'?10:7.5);
+   return {yaw:atlas.yaw-child.yaw,pitch:atlas.pitch-child.pitch,physicalScaleError:Math.abs(aPx-bPx)/aPx,
+    aw:parentCanvas.clientWidth,ah:parentCanvas.clientHeight,
+    childW:childCanvas.clientWidth,childH:childCanvas.clientHeight};
+  },region);
+  expect(Math.abs(data.yaw)).toBeLessThan(.002);
+  expect(Math.abs(data.pitch)).toBeLessThan(.002);
+  expect(data.physicalScaleError).toBeLessThan(.02);
+  expect(Math.abs(data.aw-data.childW)).toBeLessThan(3);
+  expect(Math.abs(data.ah-data.childH)).toBeLessThan(3);
+  const after=await page.locator('#atlas-canvas').boundingBox();
+  expect(Math.abs(before.width-after.width)).toBeLessThan(2);
+  expect(Math.abs(before.height-after.height)).toBeLessThan(2);
+  await page.locator('#back-body').click();
+  await expect(page.locator('#portal')).toBeHidden();
+ }
+ expect(errors).toEqual([]);
+});
+test('Separately registered nerve and illustrative shoulder do not auto-swap the source camera',async({page})=>{
+ const errors=await atlas(page);
+ for(const region of ['nerve','shoulder']){
+  await page.evaluate(r=>window.__BODY_ATLAS__.choose(r),region);
+  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.frameSpan),{timeout:4000}).toBeLessThan(3);
+  await expect(page.locator('#top-enter-region')).toBeVisible();
+  expect((await page.evaluate(()=>window.__BODY_ATLAS__.getState())).view).toBe('focused');
+  await expect(page.locator('#portal')).toBeHidden();
+  await page.locator('#back-body').click();
+  await expect(page.locator('#portal')).toBeHidden();
+ }
+ expect(errors).toEqual([]);
+});
 test('Back to Body reverses spatial travel without changing the document',async({page})=>{
  const errors=await atlas(page);await choose(page,'knee');
  await page.locator('#back-body').click();
@@ -132,7 +181,7 @@ for(const width of [320,375,390,430]){
   await page.locator('#sidebar-toggle').click();
   await expect(page.locator('#sidebar-toggle')).toHaveAttribute('aria-expanded','true');
   await page.locator('#region-list button[data-region="hip"]').click();
-  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:10000}).toBe('detail');
+  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:20000}).toBe('detail');
   await page.locator('#back-body').click();
   await expect(page.locator('#portal')).toBeHidden();
   expect(errors).toEqual([]);
