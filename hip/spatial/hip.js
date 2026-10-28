@@ -134,11 +134,23 @@ function inTriangle(x,y,c){
 }
 let cachedGuide=null;
 function getGuide(){return cachedGuide||(cachedGuide=tube('sciatic',nervePoints,.030));}
+function protectFollowMarker(){
+ // Adaptive mobile camera anchor: short WebKit viewports can put the tracked
+ // marker underneath the on-stage Follow card. Read real geometry, not guessed
+ // viewport percentages, and leave large-screen compositions unchanged.
+ if(!follow.active||window.innerWidth>850)return;
+ const panel=$('follow-stage'),stage=canvas.getBoundingClientRect();
+ if(panel.hidden||stage.height<1)return;
+ const safeTop=panel.getBoundingClientRect().top-stage.top-34;
+ if(!Number.isFinite(safeTop)||safeTop<0)return;
+ state.anchorY=Math.min(.29,Math.max(.065,safeTop/stage.height));
+}
 function draw(){
  if(rendering)return;
  rendering=true;
  try{
  const w=state.width,h=state.height;if(!w||!h)return;
+ protectFollowMarker();
  ctx.clearRect(0,0,w,h);
  const candidates=[];
  const source=(follow.frame==='atlas'&&nerveTruth?[]:(meshes||fallback()))
