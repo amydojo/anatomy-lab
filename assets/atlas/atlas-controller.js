@@ -3,7 +3,7 @@
 const $=id=>document.getElementById(id);
 const state=window.BodyAtlasState.create();
 const loader=window.BodyAtlasLoader,model=window.BodyAtlasRenderer.create($('atlas-canvas'),reason=>fallback(reason));
-const E=window.BodyAtlasEvidence;let source=null,proof=null,hipProof=null,nerveProof=null;
+const E=window.BodyAtlasEvidence;let source=null,proof=null,hipProof=null,nerveProof=null,shoulderProof=null;
 let lastFocus=null,activeFrameRoute=null,motionFrame=0,travelMixFrame=0,frameTimeout=0,entryTimer=0,exitTimer=0,seq=0,previousFocus=null,pins=[],loaded=false,pendingEntry=null,sourceSeamPending=false;
 const reduce=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const HERE={hip:'/hip/spatial/',nerve:'/hip/spatial/',knee:'/knee/spatial/',shoulder:'/shoulder/'};
@@ -12,7 +12,7 @@ const NOTE={
 hip:'Source hip bones and muscles; muscle layer and joint movement remain illustrative, pending expert review.',
 nerve:'Atlas-derived nerve registered to a separate skeletal source; nerve continuity is not independently imaged or reviewed.',
 knee:'Source-matched right knee bones and illustrative soft tissues. Sciatic nerve does not continue through this scene.',
-shoulder:'Legacy instructional anatomy; not source-reconstructed in the V6 spatial system.'};
+shoulder:'Source-matched scapula, clavicle and humerus with four sourced rotator-cuff muscle surfaces. Deltoid/ligament/labrum/nerve coverage is incomplete; abduction is illustrative.'};
 const MODE_TEXT={explore:'Explore',peel:'Peel',trace:'Trace'};
 function updateURL(){
  const q=new URLSearchParams(location.search);
@@ -58,14 +58,18 @@ const SOURCE_PIVOT={
 function centerPoint(region){
  if(region==='hip'||region==='knee')return {...SOURCE_PIVOT[region]};
  if(region==='nerve')return {...SOURCE_PIVOT.hip};
- let a=sourceAnchor(region==='shoulder'?'right-humerus':'body-of-sternum','mean');
+ if(region==='shoulder'){
+  const a=sourceAnchor('right-humerus','proximal')||[-1.2,2.1,0];
+  return {x:a[0],y:a[1]-.48,z:a[2]};
+ }
+ let a=sourceAnchor('body-of-sternum','mean');
  if(!a)a={shoulder:[-1,2.2,0],thorax:[0,1.3,0]}[region]||[0,0,0];
  return {x:a[0],y:a[1],z:a[2]};
 }
 function shortestYaw(from,to){
  return from+Math.atan2(Math.sin(to-from),Math.cos(to-from));
 }
-function isSourceAligned(region){return region==='hip'||region==='knee';}
+function isSourceAligned(region){return region==='hip'||region==='knee'||region==='shoulder';}
 function labAPI(region){
  const w=$('region-frame').contentWindow;
  try{return region==='knee'?w.__BODY_SPATIAL__:w.__HIP_SPATIAL__;}catch{return null;}
@@ -450,11 +454,12 @@ function showEvidence(){
 async function renderEvidence(){
  let names=['provenance'];if(['hip','nerve'].includes(state.data.region))names.push('hip');
  if(state.data.region==='nerve')names.push('nerve');
+ if(state.data.region==='shoulder')names.push('shoulderProof');
  const collected=await Promise.all(names.map(async key=>{try{return [key,await loader.load(key)];}catch{return [key,null];}}));
- for(const [name,obj] of collected){if(name==='provenance')proof=obj;if(name==='hip')hipProof=obj;if(name==='nerve')nerveProof=obj;}
+ for(const [name,obj] of collected){if(name==='provenance')proof=obj;if(name==='hip')hipProof=obj;if(name==='nerve')nerveProof=obj;if(name==='shoulderProof')shoulderProof=obj;}
  if(!state.data.evidence)return;
  $('evidence-intro').textContent='Origin and expert review are separate. Neither a licensed atlas nor a smooth camera transition is medical validation.';
- const list=E.records(state.data.region||'overview',proof,hipProof,nerveProof);
+ const list=E.records(state.data.region||'overview',proof,hipProof,nerveProof,shoulderProof);
  $('evidence-records').replaceChildren();
  for(const entry of list){
   const box=document.createElement('article');box.className='evidence-record';

@@ -1,6 +1,6 @@
 /* V6 abortable lazy geometry/provenance loader. Fixed, audited same-origin paths. */
 (function(){'use strict';
-const FIXED={atlas:'/atlas/assets/body-skeleton.json',provenance:'/atlas/assets/provenance.json',hip:'/hip/spatial/assets/provenance.json',nerve:'/hip/spatial/assets/sciatic-provenance.json',hipGeometry:'/hip/spatial/assets/hip-source.json',kneeGeometry:'/knee/spatial/assets/bp3d-right-knee-4.0.json'};
+const FIXED={atlas:'/atlas/assets/body-skeleton.json',provenance:'/atlas/assets/provenance.json',hip:'/hip/spatial/assets/provenance.json',nerve:'/hip/spatial/assets/sciatic-provenance.json',hipGeometry:'/hip/spatial/assets/hip-source.json',kneeGeometry:'/knee/spatial/assets/bp3d-right-knee-4.0.json',shoulderGeometry:'/shoulder/spatial/assets/shoulder-source.json',shoulderProof:'/shoulder/spatial/assets/provenance.json'};
 const cache=new Map(),pending=new Map(),hashes=new Map();
 async function sha256(text){
  if(!globalThis.crypto?.subtle||typeof TextEncoder==='undefined')throw Error('Secure browser digest unavailable; refusing unverified geometry');
@@ -26,7 +26,7 @@ async function load(key,{refresh=false}={}){
   if(!response.ok)throw Error('Asset '+key+': HTTP '+response.status);
   const body=await response.text();
   const json=JSON.parse(body);
-  if(key==='atlas')hashes.set(key,await sha256(body));
+  if(key==='atlas'||key==='shoulderGeometry')hashes.set(key,await sha256(body));
   if(key==='atlas'){
    if(json.schema!=='body-live/atlas-skeleton-v1'||json.license!=='CC BY 4.0'||json.parts?.length<60)throw Error('Invalid Atlas source');
    for(const part of json.parts){
@@ -45,11 +45,31 @@ async function load(key,{refresh=false}={}){
     const required=hip?['hipBone','femur','sacrum','maximus','medius','minimus','piriformis','obturator','gemellusSuperior','gemellusInferior','quadratus']:['femur','tibia','fibula','patella'];
     if(!parts||required.some(k=>!parts[k]?.vertices?.length||!parts[k]?.faces?.length))throw Error('Incomplete licensed source geometry');
   }
+  if(key==='shoulderGeometry'){
+    if(json.schema!=='body-live/shoulder-sourced-v1'||json.license!=='CC BY 4.0'||json.source_commit!=='1c38bf35c254a891200d3cedecfd57abebe83d8d')throw Error('Shoulder source identity mismatch');
+    if(json.source_frame?.scale!==5||JSON.stringify(json.source_frame?.origin_metres)!=='[0,0.9,0]')throw Error('Shoulder source coordinate frame does not match skeleton');
+    for(const id of ['scapula','humerus','clavicle','supraspinatus','infraspinatus','subscapularis','teresMinor']){
+      const part=json.parts?.[id];
+      if(!part||!Array.isArray(part.vertices)||part.vertices.length<35||!Array.isArray(part.faces)||part.faces.length<60)throw Error('Missing or incomplete real right-shoulder model '+id);
+      if(part.faces.some(face=>face.length!==3||face.some(v=>!Number.isInteger(v)||v<0||v>=part.vertices.length)))throw Error('Corrupt shoulder topology '+id);
+    }
+  }
+  if(key==='shoulderProof'&&(json.schema!=='body-live/shoulder-provenance-v1'||json.anatomist_reviewed!==false||json.pinned_commit!=='1c38bf35c254a891200d3cedecfd57abebe83d8d'))throw Error('Shoulder source provenance mismatch');
   cache.set(key,json);return json;
  })();
  pending.set(key,{controller,promise});
  try{return await promise;}finally{pending.delete(key);}
 }
 function cancel(key){if(key)pending.get(key)?.controller.abort();else for(const x of pending.values())x.controller.abort();}
-window.BodyAtlasLoader=Object.freeze({load,cancel,verifyAtlas,knownAssets:Object.keys(FIXED)});
+function verifyShoulder(asset,proof){
+ if(asset?.schema!=='body-live/shoulder-sourced-v1'||proof?.schema!=='body-live/shoulder-provenance-v1')throw Error('Shoulder source/provenance mismatch');
+ if(asset.source_commit!==proof.pinned_commit||proof.anatomist_reviewed!==false||proof.kinematics_validated!==false)throw Error('Shoulder source truth flags mismatch');
+ if(!/^[a-f0-9]{64}$/i.test(proof.asset_sha256)||hashes.get('shoulderGeometry')!==proof.asset_sha256)throw Error('Shoulder model SHA-256 mismatch');
+ for(const [id,part] of Object.entries(asset.parts)){
+  const item=proof.models?.[id];
+  if(!item||item.fma!==part.fma||item.triangles!==part.faces.length)throw Error('Shoulder structure source audit failed: '+id);
+ }
+ return true;
+}
+window.BodyAtlasLoader=Object.freeze({load,cancel,verifyAtlas,verifyShoulder,knownAssets:Object.keys(FIXED)});
 })();

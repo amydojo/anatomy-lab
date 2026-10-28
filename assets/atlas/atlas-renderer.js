@@ -5,6 +5,13 @@ const COLORS={head:[.89,.78,.66],thorax:[.83,.69,.55],spine:[.72,.60,.49],upper:
 const HIP_COLORS={maximus:[.68,.39,.36],medius:[.82,.54,.47],minimus:[.78,.52,.46],piriformis:[.91,.59,.48],obturator:[.73,.49,.43],gemellusSuperior:[.78,.56,.47],gemellusInferior:[.78,.53,.46],quadratus:[.72,.48,.42]};
 const HIP_HIDDEN={hipBone:'right-hip-bone',femur:'right-femur',sacrum:'sacrum'};
 const KNEE_HIDDEN={femur:'right-femur',tibia:'right-tibia',fibula:'right-fibula',patella:'right-patella'};
+const SHOULDER_HIDDEN={clavicle:'right-clavicle',scapula:'right-scapula',humerus:'right-humerus'};
+const SHOULDER_COLORS={supraspinatus:[.85,.52,.40],infraspinatus:[.73,.40,.34],subscapularis:[.86,.57,.43],teresMinor:[.91,.63,.48],teresMajor:[.69,.39,.32],coracobrachialis:[.78,.51,.43],deltoidClavicular:[.81,.45,.38],deltoidAcromial:[.78,.41,.36],deltoidSpinal:[.72,.38,.35],bicepsLong:[.73,.49,.41],bicepsShort:[.73,.49,.41],pectoralisClavicular:[.80,.47,.38]};
+const SHOULDER_LAYERS={
+ 0:{teresMajor:.88,coracobrachialis:.75,deltoidClavicular:.9,deltoidAcromial:.9,deltoidSpinal:.9,pectoralisClavicular:.6,bicepsLong:.7,bicepsShort:.7},
+ 1:{supraspinatus:.88,infraspinatus:.90,subscapularis:.85,teresMinor:.95,teresMajor:.24},
+ 2:{supraspinatus:.88,infraspinatus:.9,subscapularis:.9,teresMinor:.96}
+};
 const DEPTH_HIP={
   0:{maximus:.79,medius:.24},
   1:{medius:.88,minimus:.48},
@@ -14,7 +21,7 @@ const DEPTH_HIP={
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function create(canvas,onContextLost=()=>{}){
  let gl=null,program=null,buffers=[],status='loading',model=null;
- const detail=new Map(),detailData=new Map();
+ const detail=new Map(),detailData=new Map();let shoulderPivot=[-1.1,1.9,0];
  function cleanup(){if(gl){for(const item of [...buffers,...[...detail.values()].flat()])gl.deleteBuffer(item.buffer);if(program)gl.deleteProgram(program);}buffers=[];detail.clear();program=null;}
  function compile(type,source){const sh=gl.createShader(type);gl.shaderSource(sh,source);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(sh));return sh;}
  function setup(){
@@ -22,13 +29,13 @@ function create(canvas,onContextLost=()=>{}){
   if(!gl){status='fallback';return false;}
   const vert=[
    '#version 300 es','precision highp float;','in vec3 aPosition;','in vec3 aNormal;',
-   'uniform vec2 uViewport;','uniform float uYaw;','uniform float uPitch;','uniform float uFrameSpan;','uniform float uZoom;','uniform vec3 uTarget;','uniform float uMotion;','uniform float uFlex;','uniform vec3 uPivot;','out vec3 vNormal;',
-   'void main(){','vec3 bone=aPosition;','if(uMotion>.5){vec3 d=bone-uPivot;float ca=cos(uFlex),sa=sin(uFlex);bone=uPivot+vec3(d.x,d.y*ca-d.z*sa,d.y*sa+d.z*ca);}','vec3 p=bone-uTarget;','float cy=cos(uYaw),sy=sin(uYaw),cp=cos(uPitch),sp=sin(uPitch);',
+   'uniform vec2 uViewport;','uniform float uYaw;','uniform float uPitch;','uniform float uFrameSpan;','uniform float uZoom;','uniform vec3 uTarget;','uniform float uMotion;','uniform float uFlex;','uniform vec3 uPivot;','uniform float uMotionAxis;','out vec3 vNormal;',
+   'void main(){','vec3 bone=aPosition;','vec3 n=aNormal;','if(uMotion>.5){vec3 d=bone-uPivot;float ca=cos(uFlex),sa=sin(uFlex);bone=uPivot+(uMotionAxis>.5?vec3(d.x*ca-d.y*sa,d.x*sa+d.y*ca,d.z):vec3(d.x,d.y*ca-d.z*sa,d.y*sa+d.z*ca));n=uMotionAxis>.5?vec3(n.x*ca-n.y*sa,n.x*sa+n.y*ca,n.z):vec3(n.x,n.y*ca-n.z*sa,n.y*sa+n.z*ca);}','vec3 p=bone-uTarget;','float cy=cos(uYaw),sy=sin(uYaw),cp=cos(uPitch),sp=sin(uPitch);',
    'float x=p.x*cy+p.z*sy;','float z=p.z*cy-p.x*sy;','float y=p.y*cp-z*sp;','float z2=p.y*sp+z*cp;',
    'float scale=min(uViewport.x/3.25,uViewport.y/uFrameSpan)*uZoom;',
    'float w=max(.10,(7.4-z2)/7.4);',
    'gl_Position=vec4(x*scale/(uViewport.x*.5),y*scale/(uViewport.y*.5),-z2/15.0,w);',
-   'vNormal=aNormal;','}'
+   'vNormal=n;','}'
   ].join('\n');
   const frag=['#version 300 es','precision mediump float;','in vec3 vNormal;','uniform vec3 uColor;','uniform float uDim;','uniform float uAlpha;','out vec4 outColor;',
     'void main(){','float light=.60+.40*abs(dot(normalize(vNormal),normalize(vec3(.42,.70,.65))));',
@@ -83,33 +90,40 @@ function create(canvas,onContextLost=()=>{}){
   return true;
  }
  function loadDetail(region,asset){
-  if(!['hip','knee'].includes(region)||!model||asset.source_commit!==model.source_commit&&asset.upstream_commit!==model.source_commit)throw Error('Detail reference does not match pinned Atlas release');
-  const hip=region==='hip';
-  const allowed=hip?HIP_HIDDEN:KNEE_HIDDEN;
+  if(!['hip','knee','shoulder'].includes(region)||!model||(asset.source_commit!==model.source_commit&&asset.upstream_commit!==model.source_commit))throw Error('Detail reference does not match pinned Atlas release');
+  const hip=region==='hip',shoulder=region==='shoulder';
+  const allowed=shoulder?SHOULDER_HIDDEN:hip?HIP_HIDDEN:KNEE_HIDDEN;
   if(hip&&(asset.schema!=='body-live/hip-sourced-v1'||asset.license!=='CC BY 4.0'))throw Error('Invalid hip source license/schema');
-  if(!hip&&(asset.schema!=='body-live/sourced-knee-geometry-v1'||asset.license!=='CC BY 4.0'))throw Error('Invalid knee source license/schema');
-  const origin=hip?[-.057,.895,-.045]:[-.09092915,.4491462,-.01654605];
-  const factor=hip?10:7.5;
-  const transform=hip?asset.shared_transform:asset.aligned_shared_transform;
+  if(!hip&&!shoulder&&(asset.schema!=='body-live/sourced-knee-geometry-v1'||asset.license!=='CC BY 4.0'))throw Error('Invalid knee source license/schema');
+  if(shoulder&&(asset.schema!=='body-live/shoulder-sourced-v1'||asset.license!=='CC BY 4.0'))throw Error('Invalid licensed shoulder source');
+  const origin=shoulder?[0,.9,0]:hip?[-.057,.895,-.045]:[-.09092915,.4491462,-.01654605];
+  const factor=shoulder?5:hip?10:7.5;
+  const transform=shoulder?asset.source_frame:hip?asset.shared_transform:asset.aligned_shared_transform;
   if(!transform)throw Error('Missing detail source transform');
   const actualOrigin=transform.origin_metres;
   const actualFactor=transform.scale||transform.scale_to_scene;
   if(!Array.isArray(actualOrigin)||actualOrigin.some((n,i)=>Math.abs(n-origin[i])>1e-6)||Math.abs(actualFactor-factor)>1e-6)throw Error('Detail model frame not matched to Atlas');
   if(!gl||status!=='ready')return false;
   const next=[];
-  const entries=hip?Object.entries(asset.parts):Object.entries(asset.bone_meshes);
+  const entries=hip||shoulder?Object.entries(asset.parts):Object.entries(asset.bone_meshes);
   try{
    for(const [id,part] of entries){
-    const tissue=hip&&!Object.hasOwn(allowed,id);
+    const tissue=(hip||shoulder)&&!Object.hasOwn(allowed,id);
     if(!tissue&&!Object.hasOwn(allowed,id))continue;
     const converted={vertices:part.vertices.map(p=>p.map((v,i)=>(v/factor+origin[i]-[0,.9,0][i])*5)),faces:part.faces};
-    const color=tissue?HIP_COLORS[id]:COLORS.lower;
+    const color=tissue?(shoulder?SHOULDER_COLORS[id]:HIP_COLORS[id]):(shoulder?COLORS.upper:COLORS.lower);
     if(!color)throw Error('Unidentified tissue geometry: '+id);
     next.push(makeBuffer(converted,id,tissue?'tissue':'lower',color,tissue));
    }
-   if(next.filter(p=>!p.tissue).length!==(hip?3:4))throw Error('Incomplete detailed bone registration');
+   if(next.filter(p=>!p.tissue).length!==(hip||shoulder?3:4))throw Error('Incomplete detailed bone registration');
   }catch(error){for(const p of next)gl.deleteBuffer(p.buffer);throw error;}
   for(const old of detail.get(region)||[])gl.deleteBuffer(old.buffer);
+  if(shoulder){
+    const vs=next.find(p=>p.id==='humerus')?.verts||[];
+    if(vs.length<50)throw Error('Sourced humeral pivot unavailable');
+    const high=Math.max(...vs.map(p=>p[1])),proximal=vs.filter(p=>p[1]>=high-.26);
+    shoulderPivot=[0,1,2].map(i=>proximal.reduce((n,p)=>n+p[i],0)/proximal.length);
+  }
   detail.set(region,next);detailData.set(region,asset);
   return true;
  }
@@ -129,10 +143,10 @@ function create(canvas,onContextLost=()=>{}){
   gl.uniform3f(uni('uTarget'),camera.target.x,camera.target.y,camera.target.z);
   const locP=gl.getAttribLocation(program,'aPosition'),locN=gl.getAttribLocation(program,'aNormal');
   const draw=(item,dim=1,alpha=1)=>{
-   const moving=(selected==='hip'&&item.id==='femur')||(selected==='knee'&&['tibia','fibula','patella'].includes(item.id));
-   const pivot=selected==='hip'?[-.057*5,(.895-.9)*5,-.045*5]:[-.09092915*5,(.4491462+.08/7.5-.9)*5,-.01654605*5];
-   gl.uniform1f(uni('uMotion'),moving?1:0);
-   gl.uniform1f(uni('uFlex'),Number(flex)*Math.PI/180);
+   const moving=(selected==='hip'&&item.id==='femur')||(selected==='knee'&&['tibia','fibula','patella'].includes(item.id))||(selected==='shoulder'&&item.id==='humerus');
+   const pivot=selected==='hip'?[-.057*5,(.895-.9)*5,-.045*5]:selected==='shoulder'?shoulderPivot:[-.09092915*5,(.4491462+.08/7.5-.9)*5,-.01654605*5];
+   gl.uniform1f(uni('uMotion'),moving?1:0);gl.uniform1f(uni('uMotionAxis'),selected==='shoulder'?1:0);
+   gl.uniform1f(uni('uFlex'),(selected==='shoulder'?-1:1)*Number(flex)*Math.PI/180);
    gl.uniform3fv(uni('uPivot'),pivot);
    gl.uniform3fv(uni('uColor'),item.id===highlight?[1,.81,.48]:item.color);gl.uniform1f(uni('uDim'),dim);gl.uniform1f(uni('uAlpha'),alpha);
    gl.bindBuffer(gl.ARRAY_BUFFER,item.buffer);
@@ -142,7 +156,7 @@ function create(canvas,onContextLost=()=>{}){
   };
   const region=detail.has(selected)?selected:null;
   const r=clamp(Number(reveal)||0,0,1);
-  const replaced=region?new Set(Object.values(region==='hip'?HIP_HIDDEN:KNEE_HIDDEN)):new Set();
+  const replaced=region?new Set(Object.values(region==='shoulder'?SHOULDER_HIDDEN:region==='hip'?HIP_HIDDEN:KNEE_HIDDEN)):new Set();
   const showFocus=region&&r>.001;
   // Context is only an orientation cue; do not paint an entire second knee
   // over the selected right knee or occlude its sourced surfaces.
@@ -150,7 +164,7 @@ function create(canvas,onContextLost=()=>{}){
    let opacity=1;
    if(region){
     if(replaced.has(item.id))opacity=1-r;
-    else if(region==='hip'&&item.id==='left-hip-bone')opacity=1-r*.90;
+    else if((region==='hip'&&item.id==='left-hip-bone')||(region==='shoulder'&&item.id==='left-scapula'))opacity=1-r*.90;
     else opacity=1-r;
    }else if(selected){
     const group=['hip','knee','nerve'].includes(selected)?'lower':selected==='shoulder'?'upper':null;
@@ -169,7 +183,7 @@ function create(canvas,onContextLost=()=>{}){
    const bones=meshes.filter(p=>!p.tissue);
    // Meaningful knee depth states: isolate actual sourced components. Menisci
    // and ligaments are NOT silently fabricated just because a slider moved.
-   const chosen=layer===1?new Set(['femur']):layer===2?new Set(['tibia','fibula']):layer===3?new Set(['patella']):null;
+   const chosen=region==='knee'?(layer===1?new Set(['femur']):layer===2?new Set(['tibia','fibula']):layer===3?new Set(['patella']):null):null;
    for(const bone of bones){
     let a=r;
     if(region==='knee'&&chosen&&!chosen.has(bone.id))a*=.12;
@@ -178,8 +192,8 @@ function create(canvas,onContextLost=()=>{}){
     draw(bone,(highlight&&highlight!==bone.id)?0.52:1,a);
    }
    gl.depthMask(true);
-   if(region==='hip'&&r>0&&layer<3){
-    const levels=DEPTH_HIP[clamp(Number(layer)||0,0,3)]||{};
+   if((region==='hip'||region==='shoulder')&&r>0&&layer<3){
+    const levels=(region==='shoulder'?SHOULDER_LAYERS:DEPTH_HIP)[clamp(Number(layer)||0,0,3)]||{};
     gl.depthMask(false);
     for(const mesh of meshes.filter(p=>p.tissue)){
      const a=(levels[mesh.id]||0)*r;
@@ -195,10 +209,10 @@ function create(canvas,onContextLost=()=>{}){
   const width=canvas.clientWidth,height=canvas.clientHeight;
   if(!width||!height)return null;
   const core=window.BodySpatialCore;if(!core)return null;
-  const pieces=detail.get(region),pivot=region==='hip'?[-.057*5,(.895-.9)*5,-.045*5]:[-.09092915*5,(.4491462+.08/7.5-.9)*5,-.01654605*5];
-  const moveIds=region==='hip'?new Set(['femur']):new Set(['tibia','fibula','patella']);
+  const pieces=detail.get(region),pivot=region==='hip'?[-.057*5,(.895-.9)*5,-.045*5]:region==='shoulder'?shoulderPivot:[-.09092915*5,(.4491462+.08/7.5-.9)*5,-.01654605*5];
+  const moveIds=region==='hip'?new Set(['femur']):region==='shoulder'?new Set(['humerus']):new Set(['tibia','fibula','patella']);
   const chosen=region==='knee'?(layer===1?new Set(['femur']):layer===2?new Set(['tibia','fibula']):layer===3?new Set(['patella']):null):null;
-  const hipLayers=DEPTH_HIP[clamp(Number(layer)||0,0,3)]||{};
+  const hipLayers=(region==='shoulder'?SHOULDER_LAYERS:DEPTH_HIP)[clamp(Number(layer)||0,0,3)]||{};
   const angle=Number(flex)*Math.PI/180,ca=Math.cos(angle),sa=Math.sin(angle);
   let nearest=null,front=-Infinity;
   const projection={...camera,width,height};
@@ -211,13 +225,13 @@ function create(canvas,onContextLost=()=>{}){
   };
   for(const mesh of pieces){
    if(mesh.tissue){
-    if(region!=='hip'||layer>=3||!(hipLayers[mesh.id]>.15))continue;
+    if(!['hip','shoulder'].includes(region)||layer>=3||!(hipLayers[mesh.id]>.15))continue;
    }else if(chosen&&!chosen.has(mesh.id))continue;
    const mapped=mesh.verts.map(v=>{
     let p={x:v[0],y:v[1],z:v[2]};
     if(moveIds.has(mesh.id)&&Math.abs(angle)>.0001){
      const dy=p.y-pivot[1],dz=p.z-pivot[2];
-     p={x:p.x,y:pivot[1]+dy*ca-dz*sa,z:pivot[2]+dy*sa+dz*ca};
+     p=region==='shoulder'?{x:pivot[0]+(p.x-pivot[0])*ca+dy*sa,y:pivot[1]-(p.x-pivot[0])*sa+dy*ca,z:p.z}:{x:p.x,y:pivot[1]+dy*ca-dz*sa,z:pivot[2]+dy*sa+dz*ca};
     }
     return core.project(p,projection);
    });
