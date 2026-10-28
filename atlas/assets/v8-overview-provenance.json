@@ -5,8 +5,20 @@
   "anatomist_reviewed": false,
   "kinematics_validated": false,
   "original_bones": 78,
-  "additional_bones": 34,
-  "unique_muscles": 73,
+  "additional_bones": 59,
+  "unique_muscles": 105,
+  "bilateral_added": {
+    "bones": 25,
+    "muscles": 32
+  },
+  "bilateral_source_sha256": {
+    "atlas.json": "c359f4bcd2cba90b7411d66d5e9fc04dc81294d46cd5c1e8b212c824f2e5bbee",
+    "body-1.bin": "aa077a4675f0d0dd3c9b0af39dc8cf6bcb348c3bf7d283478d4206ce30a5a0de",
+    "body-3.bin": "6febb76b50423331f66802a63bb43f04f99ce08129837015910eed43d0719268",
+    "body-4.bin": "0509e6c996fe5b935ace770a5dbf2d83a474330b7e541a844052a080bbf814bb",
+    "body-12.bin": "61a6c8da89bb20df50c575964ac81aa4090eabfc2cb27ad2155aea325f31c6c0",
+    "body-13.bin": "4c51b6be85d5b705d2b52b79b9ad1cdae0b65ad03c9402a2f2673c7633fd94f3"
+  },
   "region_counts": {
     "skull": {
       "bones": 14,
@@ -41,7 +53,7 @@
     "wrist": "261844080e58237a139cd724c8cfb793caab2d58a9783174d82d267ecb1e8324",
     "ankle": "6431d766c671a80af1a9cc15a740c4195b8ae909fc32850a2b2db34e2d8f2653"
   },
-  "overview_sha256": "efe55085333e67789b42fe12f22a8a57d18db36c83d017cd500726677550d4a8",
+  "overview_sha256": "25cec69baff13bec95bf7798a4ab7d27c63028f4e7727ef3ca20eefd6f4eb040",
   "reused_region_parts": {
     "frontal-bone": [
       "skull"
@@ -192,7 +204,7 @@
   },
   "geometry": "exact source frame; simplification only; no mirroring or synthesized meshes",
   "incomplete": [
-    "Unrepresented left hand and foot bones",
+    "Limited bilateral hand/foot anatomy: no finger or toe phalanges yet",
     "Unrepresented facial/jaw muscles",
     "Missing tendons and ligaments",
     "No anatomist-reviewed muscle attachments",
