@@ -111,6 +111,7 @@ function createSkin(region,id,vertices,bones){
  // Eye muscles are not connected to the mandible. Only floor-of-mouth
  // muscles receive an educational jaw attachment gradient.
  if(region==='skull'&&!/mylohyoid|geniohyoid/.test(id))return null;
+ if(region==='thorax'&&id==='diaphragm')return null; // independent illustrative downward excursion
  const adjusted=(region==='elbow'&&/biceps|brachioradialis|supinator|pronator/.test(id))
   ?['right-humerus','right-radius']:pair;
  const [fixedId,targetId]=adjusted;
