@@ -1,6 +1,6 @@
 /* V6 abortable lazy geometry/provenance loader. Fixed, audited same-origin paths. */
 (function(){'use strict';
-const FIXED={atlas:'/atlas/assets/body-skeleton.json',provenance:'/atlas/assets/provenance.json',hip:'/hip/spatial/assets/provenance.json',nerve:'/hip/spatial/assets/sciatic-provenance.json',hipGeometry:'/hip/spatial/assets/hip-source.json',kneeGeometry:'/knee/spatial/assets/bp3d-right-knee-4.0.json'};
+const FIXED={atlas:'/atlas/assets/body-skeleton.json',provenance:'/atlas/assets/provenance.json',hip:'/hip/spatial/assets/provenance.json',nerve:'/hip/spatial/assets/sciatic-provenance.json',hipGeometry:'/hip/spatial/assets/hip-source.json',kneeGeometry:'/knee/spatial/assets/bp3d-right-knee-4.0.json',shoulderGeometry:'/shoulder/spatial/assets/shoulder-source.json',shoulderProof:'/shoulder/spatial/assets/provenance.json'};
 const cache=new Map(),pending=new Map(),hashes=new Map();
 async function sha256(text){
  if(!globalThis.crypto?.subtle||typeof TextEncoder==='undefined')throw Error('Secure browser digest unavailable; refusing unverified geometry');
@@ -45,6 +45,16 @@ async function load(key,{refresh=false}={}){
     const required=hip?['hipBone','femur','sacrum','maximus','medius','minimus','piriformis','obturator','gemellusSuperior','gemellusInferior','quadratus']:['femur','tibia','fibula','patella'];
     if(!parts||required.some(k=>!parts[k]?.vertices?.length||!parts[k]?.faces?.length))throw Error('Incomplete licensed source geometry');
   }
+  if(key==='shoulderGeometry'){
+    if(json.schema!=='body-live/shoulder-sourced-v1'||json.license!=='CC BY 4.0'||json.source_commit!=='1c38bf35c254a891200d3cedecfd57abebe83d8d')throw Error('Shoulder source identity mismatch');
+    if(json.source_frame?.scale!==5||JSON.stringify(json.source_frame?.origin_metres)!=='[0,0.9,0]')throw Error('Shoulder source coordinate frame does not match skeleton');
+    for(const id of ['scapula','humerus','clavicle','supraspinatus','infraspinatus','subscapularis','teresMinor']){
+      const part=json.parts?.[id];
+      if(!part||!Array.isArray(part.vertices)||part.vertices.length<35||!Array.isArray(part.faces)||part.faces.length<60)throw Error('Missing or incomplete real right-shoulder model '+id);
+      if(part.faces.some(face=>face.length!==3||face.some(v=>!Number.isInteger(v)||v<0||v>=part.vertices.length)))throw Error('Corrupt shoulder topology '+id);
+    }
+  }
+  if(key==='shoulderProof'&&(json.schema!=='body-live/shoulder-provenance-v1'||json.anatomist_reviewed!==false||json.pinned_commit!=='1c38bf35c254a891200d3cedecfd57abebe83d8d'))throw Error('Shoulder source provenance mismatch');
   cache.set(key,json);return json;
  })();
  pending.set(key,{controller,promise});
