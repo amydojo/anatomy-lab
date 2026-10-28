@@ -82,7 +82,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   if(!isActive())return;
   cancelAnimationFrame(animation);animation=0;
   if(returning){
-   region=null;reveal=0;returning=false;pending=false;motion=0;
+   region=null;reveal=0;returning=false;pending=false;motion=0;navigation=null;
    state.data.layer=0;$('atlas-app').dataset.mode='overview';
    $('hotspots').hidden=false;
    setStatus('SOURCED SKELETON · 78 STRUCTURES');
