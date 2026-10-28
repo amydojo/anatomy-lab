@@ -1,11 +1,11 @@
 import {test,expect} from '@playwright/test';
 const regions={
- skull:{parts:14,animated:false},
- neck:{parts:8,animated:false},
- thorax:{parts:30,animated:false},
- elbow:{parts:3,animated:true},
- wrist:{parts:15,animated:true},
- ankle:{parts:14,animated:true}
+ skull:{parts:14,muscles:16,animated:false},
+ neck:{parts:8,muscles:14,animated:false},
+ thorax:{parts:30,muscles:11,animated:false},
+ elbow:{parts:3,muscles:10,animated:true},
+ wrist:{parts:15,muscles:10,animated:true},
+ ankle:{parts:14,muscles:12,animated:true}
 };
 async function open(page,region){
  const errors=[];page.on('pageerror',e=>errors.push(String(e)));
@@ -24,6 +24,9 @@ for(const [region,expected] of Object.entries(regions)){
   expect(state.unified.region).toBe(region);
   expect(state.renderer.expandedRegions).toContain(region);
   expect(state.renderer.expandedMeshes).toBeGreaterThanOrEqual(expected.parts);
+  expect(state.renderer.expandedMuscles).toBeGreaterThanOrEqual(expected.muscles);
+  await expect(page.locator('#mode-trace')).toHaveText('Muscles');
+  await expect(page.locator('#mode-trace')).toBeEnabled();
   expect(await page.locator('#region-frame').getAttribute('src')).toBe(null);
   await expect(page.locator('#layer-output')).toHaveText(/All/);
   if(!expected.animated)await expect(page.locator('#joint-motion')).toBeHidden();
@@ -32,6 +35,12 @@ for(const [region,expected] of Object.entries(regions)){
   await page.locator('#layer-slider').evaluate(el=>{el.value='2';el.dispatchEvent(new Event('input',{bubbles:true}));});
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().layer)).toBe(2);
   await page.locator('#layer-slider').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('input',{bubbles:true}));});
+  await page.locator('#mode-trace').click();
+  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().layer)).toBe(4);
+  await expect(page.locator('#layer-output')).toContainText('Source muscles');
+  await expect(page.locator('#mode-trace')).toHaveAttribute('aria-pressed','true');
+  await page.locator('#mode-explore').click();
+  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().layer)).toBe(0);
   if(expected.animated){
    await expect(page.locator('#joint-motion')).toBeVisible();
    const rest=await page.locator('#atlas-canvas').screenshot();
@@ -81,4 +90,32 @@ test('V7 rejects corrupted skull source hash while retaining original atlas',asy
  await expect(page.locator('#scene-status')).toContainText('UNAVAILABLE',{timeout:20000});
  expect((await page.evaluate(()=>window.__BODY_ATLAS__.getState()).then(s=>s.unified.region))).toBe(null);
  await expect(page.locator('#atlas-canvas')).toBeVisible();
+});
+
+test('Mobile region dock exposes all 10 destinations outside the canvas without clipping',async({page})=>{
+ await page.setViewportSize({width:390,height:780});
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await page.goto('/atlas/');
+ const dock=page.locator('.region-dock');
+ await expect(dock).toBeVisible();
+ const buttons=page.locator('.region-dock-grid [data-region]');
+ await expect(buttons).toHaveCount(10);
+ for(const name of ['hip','nerve','knee','shoulder','thorax','neck','skull','elbow','wrist','ankle'])
+  await expect(page.locator('.region-dock-grid [data-region="'+name+'"]')).toBeVisible();
+ const layout=await page.evaluate(()=>{
+  const dock=document.querySelector('.region-dock').getBoundingClientRect();
+  const stage=document.querySelector('#atlas-stage').getBoundingClientRect();
+  return {dockBottom:dock.bottom,stageTop:stage.top,screenWidth:document.documentElement.clientWidth,
+   totalWidth:document.documentElement.scrollWidth,canvasCount:document.querySelectorAll('#atlas-canvas').length};
+ });
+ expect(layout.dockBottom).toBeLessThanOrEqual(layout.stageTop+2);
+ expect(layout.totalWidth).toBeLessThanOrEqual(layout.screenWidth+2);
+ expect(layout.canvasCount).toBe(1);
+ await page.locator('.region-dock-grid [data-region="neck"]').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:25000}).toBe('neck');
+ await expect(page.locator('.region-dock-grid [data-region="neck"]')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('.region-dock')).toBeVisible();
+ await page.locator('.region-dock-grid [data-region="thorax"]').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:25000}).toBe('thorax');
+ await expect(page.locator('.region-dock-grid [data-region="thorax"]')).toHaveAttribute('aria-pressed','true');
 });
