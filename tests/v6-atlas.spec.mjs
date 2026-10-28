@@ -8,7 +8,7 @@ async function atlas(page){
 }
 async function choose(page,region){
  await page.evaluate(r=>window.__BODY_ATLAS__.choose(r),region);
- if(region==='nerve'||region==='shoulder'){
+ if(region==='nerve'){
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:12000}).toBe('focused');
   await expect(page.locator('#portal')).toBeHidden();
   await expect(page.locator('#top-enter-region')).toBeVisible();
@@ -26,7 +26,7 @@ test('Pinned 78-part sourced skeleton loads in one WebGL canvas',async({page})=>
  await expect(page.locator('a[href="/atlas/sources/"]')).toHaveCount(2);
  expect(errors).toEqual([]);
 });
-for(const region of ['hip','knee']){
+for(const region of ['hip','knee','shoulder']){
  test(region+' enters and exits without changing page, renderer or camera DOM',async({page})=>{
   await page.setViewportSize({width:390,height:780});
   const errors=await atlas(page);
@@ -48,7 +48,7 @@ for(const region of ['hip','knee']){
   expect(during.state.unified.region).toBe(region);
   expect(during.state.unified.reveal).toBe(1);
   expect(during.state.renderer.detailRegions).toContain(region);
-  expect(during.state.renderer.detailMeshes).toBeGreaterThanOrEqual(region==='hip'?11:4);
+  expect(during.state.renderer.detailMeshes).toBeGreaterThanOrEqual(region==='hip'?11:region==='shoulder'?14:4);
   const closeBox=await page.locator('#atlas-canvas').boundingBox();
   expect(Math.abs(closeBox.width-before.width)).toBeLessThan(2);
   expect(Math.abs(closeBox.height-before.height)).toBeLessThan(2);
@@ -233,9 +233,9 @@ test('Hip to Knee preserves required nerve source-discontinuity disclosure',asyn
  expect(await page.locator('#region-frame').getAttribute('src')).toBe(null);
  expect(errors).toEqual([]);
 });
-test('Different-source nerve and illustrative shoulder require explicit separate lab entry',async({page})=>{
+test('Separately registered nerve remains explicitly gated, unlike sourced shoulder',async({page})=>{
  const errors=await atlas(page);
- for(const region of ['nerve','shoulder']){
+ for(const region of ['nerve']){
   await page.evaluate(r=>window.__BODY_ATLAS__.choose(r),region);
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.frameSpan),{timeout:6000}).toBeLessThan(3);
   expect((await page.evaluate(()=>window.__BODY_ATLAS__.getState())).view).toBe('focused');
@@ -244,6 +244,54 @@ test('Different-source nerve and illustrative shoulder require explicit separate
   await page.locator('#back-body').click();
   await expect(page.locator('#portal')).toBeHidden();
  }
+ expect(errors).toEqual([]);
+});
+test('Shoulder opens in one source-frame canvas with real cuff, deltoid and bones',async({page})=>{
+ const errors=await atlas(page);await choose(page,'shoulder');
+ const st=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
+ expect(st.unified.region).toBe('shoulder');
+ expect(st.renderer.detailRegions).toContain('shoulder');
+ expect(st.renderer.detailMeshes).toBeGreaterThanOrEqual(14);
+ await expect(page.locator('#portal')).toBeHidden();
+ expect(await page.locator('#region-frame').getAttribute('src')).toBe(null);
+ await expect(page.locator('#joint-motion-label')).toHaveText('Shoulder abduction');
+ await expect(page.locator('#mode-peel')).toHaveText('Layers');
+ await expect(page.locator('#mode-trace')).toBeDisabled();
+ expect(errors).toEqual([]);
+});
+test('Shoulder cuff layers expose true source surfaces and abduction updates the renderer',async({page})=>{
+ const errors=await atlas(page);await choose(page,'shoulder');
+ await expect(page.locator('#layer-output')).toHaveText('Surface · partial');
+ await page.locator('#mode-peel').click();
+ await expect(page.locator('#layer-output')).toHaveText('Rotator cuff');
+ await page.locator('#layer-slider').evaluate(e=>{e.value='2';e.dispatchEvent(new Event('input',{bubbles:true}));});
+ await expect(page.locator('#layer-output')).toHaveText('Cuff only');
+ await page.locator('#joint-motion-slider').evaluate(e=>{e.value='75';e.dispatchEvent(new Event('input',{bubbles:true}));});
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(75);
+ await expect(page.locator('#joint-motion-value')).toHaveText('75°');
+ await page.locator('#reset-view').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(0);
+ await expect(page.locator('#layer-output')).toHaveText('Surface · partial');
+ expect(errors).toEqual([]);
+});
+test('Shoulder source preserves Evidence provenance and missing ligament/nerve disclosures',async({page})=>{
+ const errors=await atlas(page);await choose(page,'shoulder');
+ await page.locator('#evidence-toggle').click();
+ await expect(page.locator('#evidence-records')).toContainText('Sourced shoulder mesh set');
+ await expect(page.locator('#evidence-records')).toContainText('Missing structures');
+ await expect(page.locator('#evidence-records')).toContainText('Illustrative abduction');
+ await page.locator('#evidence-close').click();
+ expect(errors).toEqual([]);
+});
+test('Shoulder ↔ Hip ↔ Knee navigation remains reversible without any shoulder iframe',async({page})=>{
+ const errors=await atlas(page);await choose(page,'shoulder');
+ await page.evaluate(()=>window.__BODY_ATLAS__.choose('hip'));
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:15000}).toBe('hip');
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:15000}).toBe('detail');
+ await page.evaluate(()=>window.__BODY_ATLAS__.choose('shoulder'));
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:15000}).toBe('shoulder');
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:15000}).toBe('detail');
+ expect(await page.locator('#region-frame').getAttribute('src')).toBe(null);
  expect(errors).toEqual([]);
 });
 test('Nerve source viewer retains explicit provenance and a gap before Knee',async({page})=>{
