@@ -31,7 +31,7 @@ function resize(){
 }
 function render(){
  if(document.hidden||(state.data.view==='detail'&&!U.isActive()))return;
- model.render(state.data.camera,U.getRegion()||state.data.region,state.data.evidenceMode,state.data.layer,U.getReveal(),U.getMotion());
+ model.render(state.data.camera,U.getRegion()||state.data.region,state.data.evidenceMode,state.data.layer,U.getReveal(),U.getMotion(),U.getSelected());
  if(state.data.view==='overview'&&!U.isActive())drawPins();
 }
 function fallback(reason){
@@ -517,7 +517,7 @@ function setup(){
  $('layer-slider').oninput=e=>depthChange(e.target.value);
  $('joint-motion-slider').oninput=e=>U.setMotion(e.target.value);
  $('structure-chip-more').onclick=()=>U.showSelected();
- $('structure-chip-close').onclick=()=>U.clearSelection();
+ $('structure-chip-close').onclick=()=>{U.clearSelection();render();};
  buildPins();resize();
  Promise.all([loader.load('atlas'),loader.load('provenance')]).then(([asset,provenance])=>{
   loader.verifyAtlas(asset,provenance);
