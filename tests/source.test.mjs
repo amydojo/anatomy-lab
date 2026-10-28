@@ -405,9 +405,62 @@ test('V6.8 coordinated shoulder transforms keep AC and GH connections closed thr
  assert.equal(solver.validated,false);
  assert.equal(JSON.stringify(source),original,'source meshes and attribution must stay unchanged');
  const shader=read('assets/atlas/atlas-renderer.js');
- for(const term of ['uShoulderGraph','uOriginPose','uInsertionPose','shoulderDiagnostics','kin.deformPoint'])
+ for(const term of ['uJointGraph','uOriginPose','uInsertionPose','shoulderDiagnostics','kin.deformPoint'])
   assert.ok(shader.includes(term),'missing shared WebGL/CPU rig support: '+term);
  const html=read('atlas/index.html');
  assert.ok(html.indexOf('atlas-shoulder-kinematics.js')<html.indexOf('atlas-renderer.js'));
  assert.ok(html.includes('shoulder-rig-toggle'));
+});
+
+test('V6.9 hip and knee muscle skinning follows pinned-source attachment bones without rewriting meshes',async()=>{
+ const {runInNewContext}=await import('node:vm'),win={};
+ runInNewContext(read('assets/atlas/atlas-lower-limb-rig.js'),{window:win,Float32Array});
+ const R=win.BodyLowerLimbRig;
+ const hip=JSON.parse(read('hip/spatial/assets/hip-source.json'));
+ const knee=JSON.parse(read('knee/spatial/assets/bp3d-right-knee-4.0.json'));
+ const muscles=JSON.parse(read('knee/spatial/assets/knee-muscles-source.json'));
+ const proof=JSON.parse(read('knee/spatial/assets/knee-muscles-provenance.json'));
+ const pinned=JSON.parse(read('atlas/assets/body-skeleton.json')).source_commit;
+ assert.equal(muscles.source_commit,pinned);assert.equal(proof.pinned_commit,pinned);
+ assert.equal(muscles.schema,'body-live/knee-muscles-v1');
+ assert.equal(proof.anatomist_reviewed,false);assert.equal(proof.kinematics_validated,false);
+ assert.deepEqual(muscles.source_frame.origin_metres,[-.09092915,.4491462,-.01654605]);
+ assert.equal(muscles.source_frame.scale,7.5);
+ assert.equal(Object.keys(muscles.parts).length,5);
+ for(const [id,p] of Object.entries(muscles.parts)){
+  assert.equal(p.system,'muscle');assert.equal(proof.models[id].triangles,p.faces.length);
+  assert.equal(proof.models[id].fma,p.fma);
+  assert.ok(p.vertices.length>100&&p.faces.length>200);
+  assert.ok(p.faces.every(f=>f.length===3&&f.every(i=>Number.isInteger(i)&&i>=0&&i<p.vertices.length)));
+ }
+ const original=JSON.stringify({hip:hip.parts,knee:muscles.parts});
+ const world=(p,frame)=>p.vertices.map(v=>v.map((z,i)=>(z/(frame.scale||frame.scale_to_scene)+frame.origin_metres[i]-(i===1?.9:0))*5));
+ const h=Object.fromEntries(Object.entries(hip.parts).map(([id,p])=>[id,{vertices:world(p,hip.shared_transform)}]));
+ const k=Object.fromEntries(Object.entries({...knee.bone_meshes,...muscles.parts}).map(([id,p])=>[id,{vertices:world(p,knee.aligned_shared_transform)}]));
+ const distance=(a,b)=>Math.hypot(...a.map((v,i)=>v-b[i]));
+ for(const [region,parts,angles] of [['hip',h,[0,15,30,45,65]],['knee',k,[0,15,30,60,90,105]]]){
+  const ids=Object.keys(R.rules[region]);assert.equal(ids.length,region==='hip'?8:5);
+  for(const id of ids){
+   const skin=R.createSkin(region,id,parts[id].vertices,parts);
+   assert.equal(skin.validated,false);
+   assert.equal(skin.weights.length,parts[id].vertices.length);
+   assert.ok(Math.min(...skin.weights)<.001&&Math.max(...skin.weights)>.999,id);
+   for(const angle of angles){
+    const pose=R.pose(region,angle);
+    const a=pose.matrices[skin.fixedId],b=pose.matrices[skin.targetId];
+    const p=R.deformPoint(skin.origin,a,b,0),q=R.deformPoint(skin.insertion,a,b,1);
+    assert.ok(distance(p,R.transform(a,skin.origin))<1e-7,id+' origin detach');
+    assert.ok(distance(q,R.transform(b,skin.insertion))<1e-7,id+' insertion detach');
+    const index=Math.floor(parts[id].vertices.length/2);
+    const moved=R.deformPoint(parts[id].vertices[index],a,b,skin.weights[index]);
+    assert.ok(moved.every(Number.isFinite),id+' nonfinite');
+    if(angle===0)assert.ok(distance(moved,parts[id].vertices[index])<1e-7,id+' failed rest pose');
+   }
+  }
+ }
+ assert.equal(JSON.stringify({hip:hip.parts,knee:muscles.parts}),original);
+ const shader=read('assets/atlas/atlas-renderer.js');
+ for(const id of ['uJointGraph','KNEE_MUSCLE_LAYERS','kin.deformPoint','riggedHipMuscles','riggedKneeMuscles'])
+  assert.ok(shader.includes(id),id);
+ assert.ok(read('assets/atlas/atlas-unified.js').includes('verifyKneeMuscles'));
 });
