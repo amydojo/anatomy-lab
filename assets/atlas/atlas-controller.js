@@ -354,7 +354,7 @@ function enableControls(region){
  const unified=detail&&U.isActive()&&isSourceAligned(region);
  $('layer-slider').disabled=!detail||region==='shoulder';
  $('layer-slider').max=region==='knee'?'3':'4';$('layer-slider').value='0';$('layer-output').textContent='Surface';
- $('open-original').hidden=!detail;$('continue-knee').hidden=!detail||!['nerve','hip'].includes(region);
+ $('open-original').hidden=!detail||!!window.BodyExtendedRegions?.has(region);$('continue-knee').hidden=!detail||!['nerve','hip'].includes(region);
  $('enter-region').disabled=true;$('enter-region').textContent=detail?'Inside '+LABEL[region]:'Choose a region';
  document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-explore')));
  $('back-body').hidden=!detail;
