@@ -85,7 +85,13 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  function pickAt(x,y){
   if(state.data.view!=='detail'||!region||returning)return null;
   const hit=model.hitTest(state.data.camera,region,state.data.layer,motion,x,y);
-  if(!hit){clearSelection();render();return null;}
+  // A miss must not redraw the full WebGL scene unless it clears an existing
+  // highlight. Repeated empty taps (including mobile hit probing) otherwise
+  // force synchronous GPU work and can stall the inspector interaction.
+  if(!hit){
+   if(selected){clearSelection();render();}
+   return null;
+  }
   selected=hit;
   const [name,desc]=INFORMATION[hit.id]||(window.BodyExtendedRegions.has(hit.region)?
     [hit.id.split('-').map(x=>x[0].toUpperCase()+x.slice(1)).join(' '),
