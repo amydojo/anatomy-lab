@@ -70,16 +70,25 @@ function pose(region,parts,value,mode){
   pivot=[high[0],(high[1]+base[1])/2,high[2]];
   set('mandible',spec.id==='jaw-glide'?shift([0,-.015*u,.055*u]):rot('x',pivot,-t));
  } else if(region==='neck'){
+  // Articulate C7 -> C3 -> C2 -> C1 as a cumulative chain. The source
+  // meshes do not contain discs, so pivots are estimated between adjacent
+  // source-body centroids and contact gaps must not be interpreted clinically.
   pivot=averagePart(parts['seventh-cervical-vertebra']);
-  const rates={'atlas':1,'axis':.94,'third-cervical-vertebra':.80,
-   'fourth-cervical-vertebra':.64,'fifth-cervical-vertebra':.47,
-   'sixth-cervical-vertebra':.26,'seventh-cervical-vertebra':0,'hyoid-bone':.47};
-  each((id,p)=>{
-   const weight=rates[id]??0;if(weight<.01)return;
-   const origin=averagePart(p);
-   const anchor=[origin[0],(pivot[1]+origin[1])/2,origin[2]];
-   set(id,rot(spec.id==='neck-rotate'?'y':'x',anchor,t*weight));
-  });
+  const chain=['seventh-cervical-vertebra','sixth-cervical-vertebra',
+   'fifth-cervical-vertebra','fourth-cervical-vertebra',
+   'third-cervical-vertebra','axis','atlas'];
+  const factors=spec.id==='neck-rotate'?[0,.07,.08,.10,.10,.36,.29]:
+   [0,.13,.17,.18,.19,.18,.15];
+  let cumulative=I();
+  for(let i=1;i<chain.length;i++){
+   const id=chain[i],lower=chain[i-1];
+   if(!parts[id]||!parts[lower])throw Error('Incomplete source cervical chain');
+   const c=averagePart(parts[id]),d=averagePart(parts[lower]);
+   const joint=mean([c,d]);
+   cumulative=multiply(cumulative,rot(spec.id==='neck-rotate'?'y':'x',joint,t*factors[i]));
+   set(id,cumulative);
+  }
+  set('hyoid-bone',matrices['fourth-cervical-vertebra']);
  } else if(region==='thorax'){
   pivot=averagePart(parts['body-of-sternum']);
   each((id,p)=>{
@@ -95,6 +104,9 @@ function pose(region,parts,value,mode){
     set(id,shift([0,.022*u,.055*u]));
    }
   });
+  // The diaphragm is a real pinned muscle surface, not manufactured mesh.
+  // This small downward excursion is an explicit educational approximation.
+  matrices.diaphragm=shift([0,-.11*u,0]);
  } else if(region==='elbow'){
   pivot=mean([proximal(parts['right-radius']),proximal(parts['right-ulna'])]);
   if(spec.id==='elbow-flex'){
@@ -116,7 +128,7 @@ function pose(region,parts,value,mode){
   });
  } else if(region==='hip'||region==='knee'||region==='shoulder'){
   if(region==='hip'){
-   pivot=averagePart(parts.hipBone);
+   pivot=proximal(parts.femur);
    set('femur',rot(spec.id==='hip-abduct'?'z':'y',pivot,(spec.id==='hip-abduct'?-1:1)*t));
   }else if(region==='knee'){
    pivot=proximal(parts.tibia);
