@@ -53,7 +53,7 @@
     "wrist": "261844080e58237a139cd724c8cfb793caab2d58a9783174d82d267ecb1e8324",
     "ankle": "6431d766c671a80af1a9cc15a740c4195b8ae909fc32850a2b2db34e2d8f2653"
   },
-  "overview_sha256": "25cec69baff13bec95bf7798a4ab7d27c63028f4e7727ef3ca20eefd6f4eb040",
+  "overview_sha256": "56e7511798eb42e07e073b2fe1bb54cf448fe16dac12e223c2cdcc8ac8dfc8df",
   "reused_region_parts": {
     "frontal-bone": [
       "skull"
