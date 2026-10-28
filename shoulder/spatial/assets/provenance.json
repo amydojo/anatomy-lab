@@ -153,6 +153,6 @@
   "notes": [
     "Reference-pose source geometry; source meshes share atlas coordinate frame.",
     "A single humeral teaching pivot is not validated glenohumeral/scapulothoracic kinematics.",
-    "Muscles stay in source pose during movement; do not infer tendon deformation."
+    "At runtime, muscle surfaces deform using inferred scapula/clavicle-to-humerus skin weights. Rest-pose meshes are unchanged; origin/insertion correspondence and tissue motion have not been independently validated."
   ]
 }
