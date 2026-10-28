@@ -119,3 +119,31 @@ test('Mobile region dock exposes all 10 destinations outside the canvas without 
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:25000}).toBe('thorax');
  await expect(page.locator('.region-dock-grid [data-region="thorax"]')).toHaveAttribute('aria-pressed','true');
 });
+
+test('Elbow muscle layer identifies a sourced muscle from its projected triangle, not a fabricated label',async({page})=>{
+ const errors=await open(page,'elbow');
+ await page.locator('#mode-trace').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().layer)).toBe(4);
+ const selected=await page.evaluate(async()=>{
+  const asset=await (await fetch('/atlas/regions/elbow.json')).json();
+  const state=window.__BODY_ATLAS__.getState();
+  const canvas=document.querySelector('#atlas-canvas');
+  const camera={...state.camera,width:canvas.clientWidth,height:canvas.clientHeight};
+  const part=asset.muscle_parts['right-brachialis'];
+  for(let i=0;i<part.faces.length;i+=4){
+   const face=part.faces[i];
+   const p=face.map(index=>part.vertices[index]);
+   const c={x:(p[0][0]+p[1][0]+p[2][0])/3,
+    y:(p[0][1]+p[1][1]+p[2][1])/3,z:(p[0][2]+p[1][2]+p[2][2])/3};
+   const pos=window.BodySpatialCore.project(c,camera);
+   if(pos.x<20||pos.y<20||pos.x>camera.width-20||pos.y>camera.height-20)continue;
+   const hit=window.__BODY_ATLAS__.pickAt(pos.x,pos.y);
+   if(hit&&window.__BODY_ATLAS__.getState().unified.selected)return hit;
+  }
+  return null;
+ });
+ expect(selected).not.toBe(null);
+ await expect(page.locator('#structure-chip')).toBeVisible();
+ await expect(page.locator('#structure-chip-name')).not.toHaveText('Structure');
+ expect(errors).toEqual([]);
+});
