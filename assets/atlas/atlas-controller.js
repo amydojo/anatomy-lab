@@ -60,7 +60,7 @@ function centerPoint(region){
  if(region==='nerve')return {...SOURCE_PIVOT.hip};
  if(region==='shoulder'){
   const a=sourceAnchor('right-humerus','proximal')||[-1.2,2.1,0];
-  return {x:a[0],y:a[1]-.24,z:a[2]};
+  return {x:a[0],y:a[1]-.48,z:a[2]};
  }
  let a=sourceAnchor('body-of-sternum','mean');
  if(!a)a={shoulder:[-1,2.2,0],thorax:[0,1.3,0]}[region]||[0,0,0];
