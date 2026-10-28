@@ -31,7 +31,7 @@ function resize(){
 }
 function render(){
  if(document.hidden||(state.data.view==='detail'&&!U.isActive()))return;
- model.render(state.data.camera,U.getRegion()||state.data.region,state.data.evidenceMode,state.data.layer,U.getReveal());
+ model.render(state.data.camera,U.getRegion()||state.data.region,state.data.evidenceMode,state.data.layer,U.getReveal(),U.getMotion(),U.getSelected());
  if(state.data.view==='overview'&&!U.isActive())drawPins();
 }
 function fallback(reason){
@@ -104,6 +104,7 @@ function drawPins(){
 // Tapping the actual source-backed skeleton should work like tapping a hotspot,
  // without claiming we have reconstructed unlabeled or missing anatomy.
 function pickAt(x,y){
+ if(U.isActive()&&state.data.view==='detail')return U.pickAt(x,y);
  if(state.data.view!=='overview'||!source||model.getStatus()!=='ready')return null;
  const canvas=$('atlas-canvas'),w=canvas.clientWidth,h=canvas.clientHeight;
  if(!w||!h)return null;
@@ -156,6 +157,7 @@ function choose(region){
   location.assign(HERE[region]);return;
  }
  if(isSourceAligned(region))return U.choose(region);
+ if(U.isActive())return U.nextRegion(region);
  if(state.data.view==='detail'||!window.BodyAtlasState.regions.includes(region))return;
  ++seq;const token=seq;
  clearTimeout(frameTimeout);clearTimeout(entryTimer);clearTimeout(exitTimer);
@@ -477,7 +479,7 @@ function reset(){
 }
 function setup(){
  const canvas=$('atlas-canvas');
- window.BodySpatialCore.attachOrbit(canvas,{state:state.data.camera,render,pick:pickAt});
+ window.BodySpatialCore.attachOrbit(canvas,{state:state.data.camera,render,pick:pickAt,maxZoom:4,onInteract:()=>U.interrupt()});
  window.addEventListener('resize',resize,{passive:true});
  if(typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe($('atlas-stage'));
  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(motionFrame);motionFrame=0;clearTimeout(frameTimeout);}else render();});
@@ -509,10 +511,13 @@ function setup(){
  document.addEventListener('keydown',trapFocus);
 
  $('evidence-sheet').addEventListener('click',e=>{if(e.target===$('evidence-sheet'))closeEvidence();});
- document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('seam').hidden){state.closeSeam();$('seam').hidden=true;previousFocus?.focus?.();}else if(!$('evidence-sheet').hidden)closeEvidence();else if(state.data.view==='detail')body();}});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('seam').hidden){state.closeSeam();$('seam').hidden=true;previousFocus?.focus?.();}else if(!$('evidence-sheet').hidden)closeEvidence();else if(U.getSelected()){U.clearSelection();render();}else if(state.data.view==='detail')body();}});
  document.querySelectorAll('[data-evidence]').forEach(b=>b.onclick=()=>setEvidence(b.dataset.evidence));
  document.querySelectorAll('.seg-control button').forEach(b=>b.onclick=()=>setMode(b.id.replace('mode-','')));
  $('layer-slider').oninput=e=>depthChange(e.target.value);
+ $('joint-motion-slider').oninput=e=>U.setMotion(e.target.value);
+ $('structure-chip-more').onclick=()=>U.showSelected();
+ $('structure-chip-close').onclick=()=>{U.clearSelection();render();};
  buildPins();resize();
  Promise.all([loader.load('atlas'),loader.load('provenance')]).then(([asset,provenance])=>{
   loader.verifyAtlas(asset,provenance);
@@ -524,7 +529,7 @@ function setup(){
   if(new URLSearchParams(location.search).get('evidence')==='1'){setEvidence('evidence');showEvidence();}
  }).catch(err=>fallback(err.message));
 }
-const U=window.BodyAtlasUnified.create({state,model,loader,render,updateURL,resize,setExpanded,reduce,centerPoint,shortestYaw,enableControls,NOTE,LABEL});
+const U=window.BodyAtlasUnified.create({state,model,loader,render,updateURL,resize,setExpanded,reduce,centerPoint,shortestYaw,enableControls,NOTE,LABEL,navigate:region=>choose(region)});
 window.__BODY_ATLAS__={getState:()=>({...state.snapshot(),renderer:model.stats(),unified:U.snapshot(),assetsLoaded:loaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode};
 setup();
 })();

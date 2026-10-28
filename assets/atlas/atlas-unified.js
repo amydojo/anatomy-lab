@@ -1,14 +1,16 @@
 /* V6.3: no renderer handoff for source-matched Hip and Knee.
  * Source bones and detail layers remain in the same WebGL coordinate frame. */
 (function(){'use strict';
-function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,centerPoint,shortestYaw,enableControls,NOTE,LABEL}){
+function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,centerPoint,shortestYaw,enableControls,NOTE,LABEL,navigate}){
  const $=id=>document.getElementById(id);
- let region=null,reveal=0,animation=0,token=0,returning=false,pending=false;
+ let region=null,reveal=0,animation=0,token=0,returning=false,pending=false,motion=0,selected=null,navigation=null;
  const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
- const snapshot=()=>({region,reveal,returning,pending});
+ const snapshot=()=>({region,reveal,returning,pending,motion,selected:selected?.id||null});
  const isActive=()=>!!region||pending;
  const getRegion=()=>region;
  const getReveal=()=>reveal;
+ const getMotion=()=>motion;
+ const getSelected=()=>selected?.id||null;
  const easing=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
  const setStatus=text=>{$('scene-status').textContent=text;};
  function travel(to,ms,progress,done){
@@ -33,6 +35,77 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   };
   if(ms===0)tick(performance.now());else animation=requestAnimationFrame(tick);
  }
+ const INFORMATION={
+  hipBone:['Right hip bone','Sourced pelvis bone forming the acetabulum, or hip socket.'],
+  femur:['Right femur','The thigh bone transfers load between the hip and knee; movement shown here uses a simplified teaching pivot.'],
+  sacrum:['Sacrum','Source-derived fused vertebral bone at the base of the spine.'],
+  maximus:['Gluteus maximus','Large superficial hip extensor. Surface is from the source reference pose, not a deforming muscle simulation.'],
+  medius:['Gluteus medius','Abductor muscle contributing to pelvis stability during single-leg stance.'],
+  minimus:['Gluteus minimus','Deep hip abductor beneath gluteus medius.'],
+  piriformis:['Piriformis','Deep posterior hip rotator. Sciatic nerve position is not verified in this model.'],
+  obturator:['Obturator internus','Deep hip rotator with a tendon curving around the lesser sciatic notch.'],
+  gemellusSuperior:['Superior gemellus','Small deep external rotator near obturator internus.'],
+  gemellusInferior:['Inferior gemellus','Small deep external rotator below obturator internus.'],
+  quadratus:['Quadratus femoris','Deep posterior hip muscle associated with rotation.'],
+  tibia:['Right tibia','Primary weight-bearing shin bone; its movement is a schematic fixed-axis demonstration.'],
+  fibula:['Right fibula','Lateral lower-leg bone.'],
+  patella:['Right patella','Kneecap located anterior to the distal femur. Its tracking here is an approximation.']
+ };
+ function clearSelection(){
+  selected=null;$('structure-chip').hidden=true;$('structure-details').hidden=true;
+ }
+ function pickAt(x,y){
+  if(state.data.view!=='detail'||!region||returning)return null;
+  const hit=model.hitTest(state.data.camera,region,state.data.layer,motion,x,y);
+  if(!hit){clearSelection();render();return null;}
+  selected=hit;
+  const [name,desc]=INFORMATION[hit.id]||[hit.id,'Sourced anatomical reference, not clinically validated.'];
+  $('structure-chip-name').textContent=name;
+  $('structure-chip').hidden=false;
+  $('structure-details-name').textContent=name;
+  $('structure-details-description').textContent=desc;
+  $('structure-details').hidden=false;
+  render();return hit.id;
+ }
+ function showSelected(){
+  if(!selected)return;
+  setExpanded(true);
+  $('structure-details').scrollIntoView({block:'nearest',behavior:reduce()?'auto':'smooth'});
+ }
+ function setMotion(value){
+  if(!region||state.data.view!=='detail')return;
+  const max=region==='hip'?65:105;
+  motion=clamp(Math.round(Number(value)||0),0,max);
+  $('joint-motion-value').textContent=motion+'°';
+  render();
+ }
+ function interrupt(){
+  if(!isActive())return;
+  cancelAnimationFrame(animation);animation=0;
+  if(returning){
+   region=null;reveal=0;returning=false;pending=false;motion=0;navigation=null;
+   state.data.layer=0;$('atlas-app').dataset.mode='overview';
+   $('hotspots').hidden=false;
+   setStatus('SOURCED SKELETON · 78 STRUCTURES');
+   render();return;
+  }
+  if(pending)return;
+  if(region&&state.data.view==='focused'){
+   state.enter();state.data.frameReady=true;
+   reveal=1;$('atlas-app').dataset.mode='immersive';
+   enableControls(region);syncControls(region);
+   $('joint-motion').hidden=false;$('back-body').hidden=false;
+   $('hotspots').hidden=true;updateURL();render();
+  }
+ }
+ function nextRegion(name){
+  if(!['hip','knee','nerve','shoulder'].includes(name))return false;
+  if(!isActive())return choose(name);
+  if(region===name)return false;
+  navigation=name;
+  back();
+  return true;
+ }
  function headline(name){
   $('sidebar-short').textContent=LABEL[name];
   $('panel-title').textContent=name==='hip'?'Inside the right hip.':'Explore the right knee.';
@@ -48,8 +121,9 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   if(window.innerWidth<=850)setExpanded(false);
  }
  async function choose(name){
-  if(!['hip','knee'].includes(name)||state.data.view==='detail')return;
-  const id=++token;cancelAnimationFrame(animation);returning=false;pending=true;
+  if(!['hip','knee'].includes(name))return;
+  if(isActive()&&state.data.view==='detail')return nextRegion(name);
+  const id=++token;cancelAnimationFrame(animation);returning=false;pending=true;motion=0;clearSelection();
   if(!state.select(name))return;
   headline(name);$('atlas-app').dataset.mode='approach';
   setStatus('LOADING LICENSED SOURCE GEOMETRY');
@@ -73,6 +147,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
     $('stage-title').textContent=LABEL[name]+' · IN PLACE';
     setStatus('ONE SCENE · SOURCE GEOMETRY UNREVIEWED');
     enableControls(name);syncControls(name);$('back-body').hidden=false;
+    $('joint-motion').hidden=false;
     $('top-continue-knee').hidden=name!=='hip';
     updateURL();render();
    });
@@ -88,6 +163,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  }
  function back(){
   const id=++token;cancelAnimationFrame(animation);pending=false;
+  $('joint-motion').hidden=true;clearSelection();
   const c=state.data.camera;
   const from={yaw:c.yaw,pitch:c.pitch,zoom:c.zoom,frameSpan:c.frameSpan,target:{...c.target}};
   const departingLayer=state.data.layer;
@@ -110,30 +186,35 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   setStatus('RETURNING THROUGH THE BODY');updateURL();
   travel(home,reduce()?0:850,v=>{reveal=1-v;},()=>{
    if(id!==token)return;
-   region=null;reveal=0;returning=false;state.data.layer=0;
+   region=null;reveal=0;returning=false;state.data.layer=0;motion=0;
    $('hotspots').hidden=false;setStatus('SOURCED SKELETON · 78 STRUCTURES');
    render();
+   if(navigation){const to=navigation;navigation=null;navigate(to);}
   });
  }
  function travelKnee(){
   if(!state.completeTransfer())return false;
-  const saved={...state.data.camera,target:{...state.data.camera.target}};
   $('seam').hidden=true;
-  state.body();Object.assign(state.data.camera,saved);
-  choose('knee');return true;
+  if(region==='hip'){
+   navigation='knee';back();return true;
+  }
+  return nextRegion('knee');
  }
  function syncControls(name){
   const trace=$('mode-trace'),peel=$('mode-peel'),output=$('layer-output');
   trace.disabled=true;
   trace.title='A continuous nerve path is not verified in this source-derived scene';
   peel.textContent=name==='knee'?'Isolate':'Peel';
+  $('joint-motion-label').textContent=name==='hip'?'Hip flexion':'Knee flexion';
+  $('joint-motion-slider').max=name==='hip'?'65':'105';
+  $('joint-motion-slider').value='0';$('joint-motion-value').textContent='0°';
   $('layer-slider').max='3';
   $('layer-slider').disabled=false;
   output.textContent=name==='hip'?'Surface':'Complete joint';
  }
  function depthChange(value){
   state.setDepth(value);
-  const v=state.data.layer;
+  const v=state.data.layer;clearSelection();
   $('layer-output').textContent=region==='hip'?['Surface','Stabilizers','Deep rotators','Skeleton'][v]:['Complete joint','Femur focus','Tibia / fibula','Patella focus'][Math.min(v,3)];
   if(v>0){
    state.mode('peel');
@@ -144,13 +225,20 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  function setMode(mode){
   if(mode==='trace')return;
   if(!state.mode(mode))return;
+  // Mode buttons are actions, not mere labels. Explore restores all available
+  // sourced surfaces; Peel/Isolate enters a meaningful first depth stage.
+  if(mode==='peel'&&state.data.layer===0)state.setDepth(1);
+  if(mode==='explore')state.setDepth(0);
+  $('layer-slider').value=String(state.data.layer);
+  $('layer-output').textContent=region==='hip'?['Surface','Stabilizers','Deep rotators','Skeleton'][state.data.layer]:['Complete joint','Femur focus','Tibia / fibula','Patella focus'][Math.min(state.data.layer,3)];
+  clearSelection();
   document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-'+mode)));
   $('context-note').textContent=mode==='trace'?'Sciatic nerve geometry comes from a separately registered atlas. Open the labeled Sciatic lab from the body overview; no continuous pathway is invented here.':mode==='peel'?'Peel through sourced hip muscles (or use the knee standalone lab for illustrative tissues). This is not a biomechanics simulation.':NOTE[region]||'Source-derived skeletal geometry.';
   render();
  }
  function reset(){
   if(!region)return;
-  state.setDepth(0);$('layer-slider').value='0';
+  state.setDepth(0);motion=0;clearSelection();$('joint-motion-slider').value='0';$('joint-motion-value').textContent='0°';$('layer-slider').value='0';
   $('layer-output').textContent=region==='hip'?'Surface':'Complete joint';
   state.mode('explore');
   document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-explore')));
@@ -160,7 +248,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   const id=++token;
   travel(home,reduce()?0:480,()=>{},()=>{if(id===token)render();});
  }
- return Object.freeze({choose,back,travelKnee,isActive,getRegion,getReveal,snapshot,depthChange,setMode,reset});
+ return Object.freeze({choose,back,travelKnee,isActive,getRegion,getReveal,getMotion,getSelected,snapshot,depthChange,setMode,reset,setMotion,pickAt,clearSelection,showSelected,nextRegion,interrupt});
 }
 window.BodyAtlasUnified=Object.freeze({create});
 })();
