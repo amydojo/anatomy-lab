@@ -119,7 +119,7 @@ test('Reset view restores the selected anatomical region, not just the slider',a
  });
  const yawBefore=await page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.yaw);
  await page.locator('#reset-view').click();
- await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.yaw),{timeout:3000}).toBeGreaterThan(yawBefore+.25);
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.yaw),{timeout:3000}).toBeLessThan(yawBefore-.5);
  await expect(page.locator('#layer-output')).toHaveText('Surface');
  expect(errors).toEqual([]);
 });
