@@ -12,7 +12,7 @@ const NOTE={
 hip:'Source hip bones and muscles; muscle layer and joint movement remain illustrative, pending expert review.',
 nerve:'Atlas-derived nerve registered to a separate skeletal source; nerve continuity is not independently imaged or reviewed.',
 knee:'Source-matched right knee bones and illustrative soft tissues. Sciatic nerve does not continue through this scene.',
-shoulder:'Legacy instructional anatomy; not source-reconstructed in the V6 spatial system.'};
+shoulder:'Source-matched scapula, clavicle and humerus with four sourced rotator-cuff muscle surfaces. Deltoid/ligament/labrum/nerve coverage is incomplete; abduction is illustrative.'};
 const MODE_TEXT={explore:'Explore',peel:'Peel',trace:'Trace'};
 function updateURL(){
  const q=new URLSearchParams(location.search);
@@ -58,14 +58,18 @@ const SOURCE_PIVOT={
 function centerPoint(region){
  if(region==='hip'||region==='knee')return {...SOURCE_PIVOT[region]};
  if(region==='nerve')return {...SOURCE_PIVOT.hip};
- let a=sourceAnchor(region==='shoulder'?'right-humerus':'body-of-sternum','mean');
+ if(region==='shoulder'){
+  const a=sourceAnchor('right-humerus','proximal')||[-1.2,2.1,0];
+  return {x:a[0],y:a[1]-.24,z:a[2]};
+ }
+ let a=sourceAnchor('body-of-sternum','mean');
  if(!a)a={shoulder:[-1,2.2,0],thorax:[0,1.3,0]}[region]||[0,0,0];
  return {x:a[0],y:a[1],z:a[2]};
 }
 function shortestYaw(from,to){
  return from+Math.atan2(Math.sin(to-from),Math.cos(to-from));
 }
-function isSourceAligned(region){return region==='hip'||region==='knee';}
+function isSourceAligned(region){return region==='hip'||region==='knee'||region==='shoulder';}
 function labAPI(region){
  const w=$('region-frame').contentWindow;
  try{return region==='knee'?w.__BODY_SPATIAL__:w.__HIP_SPATIAL__;}catch{return null;}
