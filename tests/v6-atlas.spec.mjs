@@ -142,7 +142,7 @@ test('Nerve source viewer retains explicit provenance and a gap before Knee',asy
 test('Evidence inspector separates sourced geometry and unreviewed claims',async({page})=>{
  const errors=await atlas(page);await choose(page,'hip');
  await page.locator('#evidence-toggle').click();
- await expect(page.locator('#evidence-records')).toContainText('Original skeletal atlas');
+ await expect(page.locator('#evidence-records')).toContainText('Hip source geometry');
  await page.locator('[data-evidence="evidence"]').click();
  await expect(page.locator('[data-evidence="evidence"]')).toHaveAttribute('aria-pressed','true');
  await page.locator('#evidence-close').click();
