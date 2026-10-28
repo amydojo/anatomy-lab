@@ -22,6 +22,9 @@
   const tools=$('shoulder-rig-tools'),svg=$('shoulder-rig-overlay');
   const active=!!diag;
   tools.hidden=!active;
+  $('shoulder-rig-readout').textContent=active&&shown?
+   'CL '+diag.degrees.clavicleElevation.toFixed(0)+'° · SCAP '+diag.degrees.scapulaUpward.toFixed(0)+'° · GH '+diag.degrees.relativeGlenohumeral.toFixed(0)+'°':
+   'Estimated pivots · unvalidated';
   svg.hidden=!active||!shown;
   if(!active||!shown){svg.replaceChildren();return;}
   const canvas=$('atlas-canvas');
