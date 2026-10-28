@@ -47,3 +47,7 @@
  .app .controlbar{height:86px}
  .app .stage-bottom{bottom:172px}
 }
+
+/* Compact persistent navigation while a non-matching reference is deliberately gated. */
+.app[data-mode="focus"] .masthead{display:none}
+@media(max-width:850px){.app[data-mode="focus"] .topbar{justify-content:space-between}.app[data-mode="focus"] .topactions{margin-left:auto}}
