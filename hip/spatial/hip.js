@@ -587,7 +587,7 @@ window.__HIP_SPATIAL__={
   junctionGapScene:nerveGraph?.junctions?.[follow.branch]?.sourceGap||null,
   kneeBridgeVerified:bridgeEvidence?.verifiedWithinSourceRounding||false,
   sourceLoaded:state.sourceLoaded,sourceLabel:state.sourceLabel,sourceCount:meshes?.length||0,nerveSourceLoaded:!!nerveTruth,nerveSegments:nerveMeshes.length,nerveEvidenceOpen,compositeFitMedian:nerveTruth?.registration?.fit?.median_scene_units||null,lesson:lesson.phase,
-  yaw:state.yaw,pitch:state.pitch,zoom:state.zoom,viewport:{w:state.width,h:state.height},hitCount:hits.length}),
+  yaw:state.yaw,pitch:state.pitch,zoom:state.zoom,frameSpan:state.frameSpan,anchorY:state.anchorY,viewport:{w:state.width,h:state.height},hitCount:hits.length}),
  transformFemur,select,depth,pose,axis,reset,startFollow,setFollowProgress,setNerveFrame
 };
 syncDepth();inspector();resize();load().then(loadNerveTruth);
