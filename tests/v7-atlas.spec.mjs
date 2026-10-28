@@ -26,9 +26,7 @@ for(const [region,expected] of Object.entries(regions)){
   expect(state.renderer.expandedMeshes).toBeGreaterThanOrEqual(expected.parts);
   expect(await page.locator('#region-frame').getAttribute('src')).toBe(null);
   await expect(page.locator('#layer-output')).toHaveText(/All/);
-  await expect(page.locator('#joint-motion')).toBeHidden({timeout:1500}).catch(async e=>{
-   if(!expected.animated)throw e;
-  });
+  if(!expected.animated)await expect(page.locator('#joint-motion')).toBeHidden();
   await page.locator('#layer-slider').evaluate(el=>{el.value='1';el.dispatchEvent(new Event('input',{bubbles:true}));});
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().layer)).toBe(1);
   await page.locator('#layer-slider').evaluate(el=>{el.value='2';el.dispatchEvent(new Event('input',{bubbles:true}));});
@@ -38,7 +36,7 @@ for(const [region,expected] of Object.entries(regions)){
    await expect(page.locator('#joint-motion')).toBeVisible();
    const rest=await page.locator('#atlas-canvas').screenshot();
    await page.locator('#joint-motion-slider').evaluate(el=>{el.value=String(Math.min(Number(el.max),40));el.dispatchEvent(new Event('input',{bubbles:true}));});
-   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(Math.min(expected.animated?Number(await page.locator('#joint-motion-slider').getAttribute('max')):40,40));
+   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(40);
    const bent=await page.locator('#atlas-canvas').screenshot();
    expect(bent.equals(rest)).toBe(false);
   }else await expect(page.locator('#joint-motion')).toBeHidden();
