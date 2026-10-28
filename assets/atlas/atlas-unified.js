@@ -57,7 +57,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   scapula:['Right scapula','The shoulder blade supports the glenoid socket and rotator-cuff origins. It remains static during the illustrative movement.'],
   humerus:['Right humerus','Upper-arm bone articulating with the glenoid. Abduction here uses an estimated single pivot, not validated scapulohumeral rhythm.'],
   supraspinatus:['Supraspinatus','Rotator-cuff muscle passing above the scapular spine toward the greater tubercle; source-pose anatomy.'],
-  infraspinatus:['Infraspinatus','Posterior rotator-cuff muscle on the infraspinous fossa. Its surface remains static during motion.'],
+  infraspinatus:['Infraspinatus','Posterior rotator-cuff muscle on the infraspinous fossa. Its mesh now bends toward the moving humerus using inferred attachments; not a validated tendon simulation.'],
   subscapularis:['Subscapularis','Anterior rotator-cuff muscle from the subscapular fossa toward the lesser tubercle.'],
   teresMinor:['Teres minor','Posterior rotator-cuff muscle contributing to external rotation and joint stability.'],
   teresMajor:['Teres major','Posterior shoulder muscle participating in adduction and internal rotation, not a rotator-cuff muscle.'],
