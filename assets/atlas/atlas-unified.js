@@ -15,10 +15,18 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   cancelAnimationFrame(animation);
   const camera=state.data.camera;
   const from={yaw:camera.yaw,pitch:camera.pitch,zoom:camera.zoom,frameSpan:camera.frameSpan,target:{...camera.target}};
+  const canvas=$('atlas-canvas'),w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);
+  const base=span=>Math.min(w/3.25,h/Math.max(.2,span));
+  // WebGL uses min(width-bound,height-bound). Naive frameSpan lerp hits that
+  // threshold and visibly stalls/accelerates the perceived camera distance.
+  // Interpolate projected scale continuously instead of interpolating zoom alone.
+  const aScale=Math.max(.001,base(from.frameSpan)*from.zoom);
+  const bScale=Math.max(.001,base(to.frameSpan)*to.zoom);
   const start=performance.now();
   const tick=now=>{
    const u=ms===0?1:clamp((now-start)/ms,0,1),v=easing(u);
-   for(const key of ['yaw','pitch','zoom','frameSpan'])camera[key]=from[key]+(to[key]-from[key])*v;
+   for(const key of ['yaw','pitch','frameSpan'])camera[key]=from[key]+(to[key]-from[key])*v;
+   camera.zoom=Math.exp(Math.log(aScale)+(Math.log(bScale)-Math.log(aScale))*v)/base(camera.frameSpan);
    camera.target={x:from.target.x+(to.target.x-from.target.x)*v,y:from.target.y+(to.target.y-from.target.y)*v,z:from.target.z+(to.target.z-from.target.z)*v};
    progress(v);render();
    if(u<1)animation=requestAnimationFrame(tick);else{animation=0;done();}
