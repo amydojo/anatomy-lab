@@ -571,7 +571,7 @@ function prepareAtlasEntry(camera){
  if(follow.active)stopFollow();
  stop();state.pose={flexion:0,abduction:0,rotation:0};state.depth=0;state.trace=false;
  state.selected=null;state.isolate=false;state.focus='joint';
- state.target=null;state.anchorY=.5;
+ state.target=null;state.anchorY=Number.isFinite(camera.anchorY)?camera.anchorY:.5;
  state.yaw=camera.yaw;state.pitch=camera.pitch;state.zoom=camera.zoom;
  state.frameSpan=camera.frameSpan||3.35;atlasTravelMix=0;
  syncDepth();inspector();draw();return true;
