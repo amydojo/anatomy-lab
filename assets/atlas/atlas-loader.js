@@ -1,6 +1,6 @@
 /* V6 abortable lazy geometry/provenance loader. Fixed, audited same-origin paths. */
 (function(){'use strict';
-const FIXED={atlas:'/atlas/assets/body-skeleton.json',provenance:'/atlas/assets/provenance.json',hip:'/hip/spatial/assets/provenance.json',nerve:'/hip/spatial/assets/sciatic-provenance.json',hipGeometry:'/hip/spatial/assets/hip-source.json',kneeGeometry:'/knee/spatial/assets/bp3d-right-knee-4.0.json',shoulderGeometry:'/shoulder/spatial/assets/shoulder-source.json',shoulderProof:'/shoulder/spatial/assets/provenance.json'};
+const FIXED={atlas:'/atlas/assets/body-skeleton.json',provenance:'/atlas/assets/provenance.json',hip:'/hip/spatial/assets/provenance.json',nerve:'/hip/spatial/assets/sciatic-provenance.json',hipGeometry:'/hip/spatial/assets/hip-source.json',kneeGeometry:'/knee/spatial/assets/bp3d-right-knee-4.0.json',shoulderGeometry:'/shoulder/spatial/assets/shoulder-source.json',shoulderProof:'/shoulder/spatial/assets/provenance.json',kneeMuscles:'/knee/spatial/assets/knee-muscles-source.json',kneeMuscleProof:'/knee/spatial/assets/knee-muscles-provenance.json'};
 const cache=new Map(),pending=new Map(),hashes=new Map();
 async function sha256(text){
  if(!globalThis.crypto?.subtle||typeof TextEncoder==='undefined')throw Error('Secure browser digest unavailable; refusing unverified geometry');
@@ -26,7 +26,7 @@ async function load(key,{refresh=false}={}){
   if(!response.ok)throw Error('Asset '+key+': HTTP '+response.status);
   const body=await response.text();
   const json=JSON.parse(body);
-  if(key==='atlas'||key==='shoulderGeometry')hashes.set(key,await sha256(body));
+  if(key==='atlas'||key==='shoulderGeometry'||key==='kneeMuscles')hashes.set(key,await sha256(body));
   if(key==='atlas'){
    if(json.schema!=='body-live/atlas-skeleton-v1'||json.license!=='CC BY 4.0'||json.parts?.length<60)throw Error('Invalid Atlas source');
    for(const part of json.parts){
@@ -45,6 +45,16 @@ async function load(key,{refresh=false}={}){
     const required=hip?['hipBone','femur','sacrum','maximus','medius','minimus','piriformis','obturator','gemellusSuperior','gemellusInferior','quadratus']:['femur','tibia','fibula','patella'];
     if(!parts||required.some(k=>!parts[k]?.vertices?.length||!parts[k]?.faces?.length))throw Error('Incomplete licensed source geometry');
   }
+  if(key==='kneeMuscles'){
+    if(json.schema!=='body-live/knee-muscles-v1'||json.license!=='CC BY 4.0'||json.source_commit!=='1c38bf35c254a891200d3cedecfd57abebe83d8d')throw Error('Invalid pinned knee muscle source');
+    if(json.source_frame?.scale!==7.5||JSON.stringify(json.source_frame?.origin_metres)!=='[-0.09092915,0.4491462,-0.01654605]')throw Error('Knee muscle frame mismatch');
+    const required=['popliteus','vastusMedialis','vastusLateralis','vastusIntermedius','bicepsShort'];
+    for(const id of required){
+      const p=json.parts?.[id];if(!p||p.system!=='muscle'||p.vertices?.length<35||p.faces?.length<60)throw Error('Missing sourced knee muscle: '+id);
+      if(p.faces.some(face=>face.length!==3||face.some(v=>!Number.isInteger(v)||v<0||v>=p.vertices.length)))throw Error('Knee muscle topology error: '+id);
+    }
+  }
+  if(key==='kneeMuscleProof'&&(json.schema!=='body-live/knee-muscles-provenance-v1'||json.pinned_commit!=='1c38bf35c254a891200d3cedecfd57abebe83d8d'||json.anatomist_reviewed!==false))throw Error('Knee muscle provenance mismatch');
   if(key==='shoulderGeometry'){
     if(json.schema!=='body-live/shoulder-sourced-v1'||json.license!=='CC BY 4.0'||json.source_commit!=='1c38bf35c254a891200d3cedecfd57abebe83d8d')throw Error('Shoulder source identity mismatch');
     if(json.source_frame?.scale!==5||JSON.stringify(json.source_frame?.origin_metres)!=='[0,0.9,0]')throw Error('Shoulder source coordinate frame does not match skeleton');
@@ -71,5 +81,14 @@ function verifyShoulder(asset,proof){
  }
  return true;
 }
-window.BodyAtlasLoader=Object.freeze({load,cancel,verifyAtlas,verifyShoulder,knownAssets:Object.keys(FIXED)});
+function verifyKneeMuscles(asset,proof){
+ if(asset?.schema!=='body-live/knee-muscles-v1'||proof?.schema!=='body-live/knee-muscles-provenance-v1')throw Error('Knee muscle source/provenance mismatch');
+ if(asset.source_commit!==proof.pinned_commit||proof.anatomist_reviewed!==false||proof.kinematics_validated!==false)throw Error('Knee muscle source truth flags mismatch');
+ if(!/^[a-f0-9]{64}$/i.test(proof.asset_sha256)||hashes.get('kneeMuscles')!==proof.asset_sha256)throw Error('Knee muscle SHA-256 mismatch');
+ for(const [id,p] of Object.entries(asset.parts)){
+  if(proof.models?.[id]?.fma!==p.fma||proof.models?.[id]?.triangles!==p.faces.length)throw Error('Knee source structure mismatch: '+id);
+ }
+ return true;
+}
+window.BodyAtlasLoader=Object.freeze({load,cancel,verifyAtlas,verifyShoulder,verifyKneeMuscles,knownAssets:Object.keys(FIXED)});
 })();
