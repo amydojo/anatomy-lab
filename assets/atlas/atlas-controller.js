@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const state=window.BodyAtlasState.create();
 const loader=window.BodyAtlasLoader,model=window.BodyAtlasRenderer.create($('atlas-canvas'),reason=>fallback(reason));
 const E=window.BodyAtlasEvidence;let source=null,proof=null,hipProof=null,nerveProof=null;
-let lastFocus=null,activeFrameRoute=null,motionFrame=0,travelMixFrame=0,frameTimeout=0,entryTimer=0,exitTimer=0,seq=0,previousFocus=null,pins=[],loaded=false,pendingEntry=null;
+let lastFocus=null,activeFrameRoute=null,motionFrame=0,travelMixFrame=0,frameTimeout=0,entryTimer=0,exitTimer=0,seq=0,previousFocus=null,pins=[],loaded=false,pendingEntry=null,sourceSeamPending=false;
 const reduce=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const HERE={hip:'/hip/spatial/',nerve:'/hip/spatial/',knee:'/knee/spatial/',shoulder:'/shoulder/'};
 const LABEL={hip:'RIGHT HIP',nerve:'SCIATIC NERVE',knee:'RIGHT KNEE',shoulder:'SHOULDER'};
@@ -160,13 +160,14 @@ function choose(region){
  $('panel-kicker').textContent='REGION / '+LABEL[region]+' · EDUCATIONAL PREVIEW';
  $('sidebar-short').textContent=LABEL[region];
  $('stage-title').textContent=LABEL[region]+' · APPROACH';
- $('stage-caveat').textContent=NOTE[region];
+ $('stage-caveat').textContent=region==='knee'&&sourceSeamPending?'Reference change · sciatic nerve not reconstructed continuously':NOTE[region];
+ sourceSeamPending=false;
  $('scene-status').textContent='TRAVELING INTO '+LABEL[region];
  $('enter-region').disabled=true;$('enter-region').textContent='Entering '+LABEL[region]+'…';
  $('back-body').hidden=false;$('top-enter-region').hidden=true;
  document.querySelectorAll('[data-region]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.region===region)));
  if(window.innerWidth<=850)setExpanded(false);
- $('atlas-app').dataset.mode='overview';
+ $('atlas-app').dataset.mode=isSourceAligned(region)?'overview':'focus';
  $('hotspots').hidden=true;updateURL();render();
  const aligned=isSourceAligned(region);
  const portal=$('portal'),frame=$('region-frame');
@@ -385,6 +386,7 @@ function seam(){
 }
 function toKnee(){
  if(!state.completeTransfer())return;
+ sourceSeamPending=true;
  $('seam').hidden=true;
  // First dissolve back onto the actual shared-frame bones. Then travel from hip
  // to knee, preserving the explicit nerve reference-boundary disclosure.
