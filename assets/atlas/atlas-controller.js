@@ -3,7 +3,7 @@
 const $=id=>document.getElementById(id);
 const state=window.BodyAtlasState.create();
 const loader=window.BodyAtlasLoader,model=window.BodyAtlasRenderer.create($('atlas-canvas'),reason=>fallback(reason));
-const E=window.BodyAtlasEvidence;let source=null,proof=null,hipProof=null,nerveProof=null,shoulderProof=null,kneeMuscleProof=null,extendedProof=null;
+const E=window.BodyAtlasEvidence;let source=null,proof=null,hipProof=null,nerveProof=null,shoulderProof=null,kneeMuscleProof=null,extendedProof=null,overviewProof=null;
 let lastFocus=null,activeFrameRoute=null,motionFrame=0,travelMixFrame=0,frameTimeout=0,entryTimer=0,exitTimer=0,seq=0,previousFocus=null,pins=[],loaded=false,overviewLoaded=false,pendingEntry=null,sourceSeamPending=false;
 const reduce=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const HERE={hip:'/hip/spatial/',nerve:'/hip/spatial/',knee:'/knee/spatial/',shoulder:'/shoulder/'};
@@ -480,7 +480,7 @@ async function renderEvidence(){
  for(const [name,obj] of collected){if(name==='provenance')proof=obj;if(name==='hip')hipProof=obj;if(name==='nerve')nerveProof=obj;if(name==='shoulderProof')shoulderProof=obj;if(name==='kneeMuscleProof')kneeMuscleProof=obj;if(name==='extendedProof')extendedProof=obj;}
  if(!state.data.evidence)return;
  $('evidence-intro').textContent='Origin and expert review are separate. Neither a licensed atlas nor a smooth camera transition is medical validation.';
- const list=E.records(state.data.region||'overview',proof,hipProof,nerveProof,shoulderProof,kneeMuscleProof,extendedProof);
+ const list=E.records(state.data.region||'overview',proof,hipProof,nerveProof,shoulderProof,kneeMuscleProof,extendedProof,overviewProof);
  $('evidence-records').replaceChildren();
  for(const entry of list){
   const box=document.createElement('article');box.className='evidence-record';
@@ -566,7 +566,7 @@ function setup(){
   Promise.all([loader.load('overviewV8'),loader.load('overviewV8Proof')])
    .then(([asset,manifest])=>{
     loader.verifyOverview(asset,manifest,source);
-    model.loadOverview(asset);overviewLoaded=true;
+    model.loadOverview(asset);overviewProof=manifest;overviewLoaded=true;
     const counts=model.stats();
     $('overview-coverage').textContent=(counts.partCount+counts.overviewBones)+' BONES · '+counts.overviewMuscles+' MUSCLES';
     if(state.data.view==='overview'&&!U.isActive())
