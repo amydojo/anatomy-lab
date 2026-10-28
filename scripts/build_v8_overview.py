@@ -97,6 +97,8 @@ def main():
         binraw,binmeta=source_load(f"body-{chunk}.bin")
         if len(binraw)!=upstream["chunks"][chunk]["bytes"]:raise ValueError("Source chunk length mismatch")
         chunk_data[chunk]=binraw;chunk_hashes[f"body-{chunk}.bin"]=binmeta["sha256"]
+    left_upper={n.replace("Right","Left").replace("right","left") for n in
+      list(WRIST)+list(MUSCLES["elbow"])+list(MUSCLES["wrist"])}
     bilateral={"bones":0,"muscles":0}
     for name,info in requests.items():
         isMuscle=name in extra_muscles
@@ -109,7 +111,7 @@ def main():
            "vertices":[[round((p[i]-(.9 if i==1 else 0))*5,5) for i in range(3)] for p in vertices],
            "faces":faces}
         item=mesh_lod(part,300 if isMuscle else 390)
-        item["region"]="left-wrist" if any(t in name.lower() for t in ("carpal","metacarpal","trapezium","trapezoid","scaphoid","lunate","pisiform","triquetral","capitate","hamate","pronator","supinator","brachialis","brachioradialis","triceps","biceps","flexor carpi","extensor carpi","abductor pollicis","opponens pollicis","palmaris","flexor digitorum profundus","extensor digitorum")) else "left-ankle"
+        item["region"]="left-wrist" if name in left_upper else "left-ankle"
         item["group"]="upper" if item["region"]=="left-wrist" else "lower"
         target[key]=item
         bilateral["muscles" if isMuscle else "bones"]+=1
