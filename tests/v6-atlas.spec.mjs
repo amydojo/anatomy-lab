@@ -310,6 +310,8 @@ test('V6.8 rig diagnostic markers follow connected bones and cuff attachment pat
  await page.locator('#joint-motion-slider').evaluate(e=>{e.value='90';e.dispatchEvent(new Event('input',{bubbles:true}));});
  const after=await page.locator('#shoulder-rig-overlay circle').evaluateAll(elements=>elements.slice(-3).map(e=>[e.getAttribute('cx'),e.getAttribute('cy')]));
  expect(after).not.toEqual(before);
+ await expect(page.locator('#shoulder-rig-readout')).toContainText('SCAP 24°');
+ await page.screenshot({path:'artifacts/v6-shoulder-kinematics-'+test.info().project.name+'.png',fullPage:true});
  const mesh=await page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer);
  expect(mesh.riggedShoulderMuscles).toBe(11);
  const box=await page.locator('#atlas-canvas').boundingBox();
