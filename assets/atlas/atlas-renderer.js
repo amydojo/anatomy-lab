@@ -119,7 +119,7 @@ function create(canvas,onContextLost=()=>{}){
   if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
   return {width:w,height:h,dpr};
  }
- function render(camera,selected,mode='clean',layer=0,reveal=0,flex=0){
+ function render(camera,selected,mode='clean',layer=0,reveal=0,flex=0,highlight=null){
   const size=resize();if(!gl||status!=='ready')return size;
   gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(0,0,0,0);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   gl.useProgram(program);const uni=name=>gl.getUniformLocation(program,name);
@@ -134,7 +134,7 @@ function create(canvas,onContextLost=()=>{}){
    gl.uniform1f(uni('uMotion'),moving?1:0);
    gl.uniform1f(uni('uFlex'),Number(flex)*Math.PI/180);
    gl.uniform3fv(uni('uPivot'),pivot);
-   gl.uniform3fv(uni('uColor'),item.color);gl.uniform1f(uni('uDim'),dim);gl.uniform1f(uni('uAlpha'),alpha);
+   gl.uniform3fv(uni('uColor'),item.id===highlight?[1,.81,.48]:item.color);gl.uniform1f(uni('uDim'),dim);gl.uniform1f(uni('uAlpha'),alpha);
    gl.bindBuffer(gl.ARRAY_BUFFER,item.buffer);
    gl.enableVertexAttribArray(locP);gl.vertexAttribPointer(locP,3,gl.FLOAT,false,24,0);
    gl.enableVertexAttribArray(locN);gl.vertexAttribPointer(locN,3,gl.FLOAT,false,24,12);
@@ -175,7 +175,7 @@ function create(canvas,onContextLost=()=>{}){
     if(region==='knee'&&chosen&&!chosen.has(bone.id))a*=.12;
     if(a<.02)continue;
     gl.depthMask(a>.98);
-    draw(bone,1,a);
+    draw(bone,highlight&&highlight!==bone.id?.52:1,a);
    }
    gl.depthMask(true);
    if(region==='hip'&&r>0&&layer<3){
@@ -183,7 +183,7 @@ function create(canvas,onContextLost=()=>{}){
     gl.depthMask(false);
     for(const mesh of meshes.filter(p=>p.tissue)){
      const a=(levels[mesh.id]||0)*r;
-     if(a>.002)draw(mesh,1,a);
+     if(a>.002)draw(mesh,highlight&&highlight!==mesh.id?.48:1,a);
     }
     gl.depthMask(true);
    }
