@@ -67,9 +67,12 @@
    }
    function cancel(e){pointers.delete(e.pointerId);origin=null}
    function wheel(e){
-     if(e.ctrlKey||e.shiftKey){
-       onInteract();e.preventDefault();state.zoom=clamp(state.zoom*(e.deltaY<0?1.09:.91),minZoom,maxZoom);render();
-     }
+     // The specimen is a dedicated scroll-free canvas: wheel should zoom
+     // directly, without requiring an undiscoverable Ctrl/Shift modifier.
+     if(!Number.isFinite(e.deltaY)||!e.deltaY)return;
+     onInteract();e.preventDefault();
+     state.zoom=clamp(state.zoom*(e.deltaY<0?1.09:.91),minZoom,maxZoom);
+     render();
    }
    canvas.addEventListener('pointerdown',start);
    canvas.addEventListener('pointermove',move);
