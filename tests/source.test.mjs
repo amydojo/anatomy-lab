@@ -284,3 +284,38 @@ test('V6.3 single-scene detail anchors share the original atlas anatomical world
  assert.ok(controller.includes('return U.choose(region)'));
  assert.ok(controller.includes('return U.back()'));
 });
+
+test('V6.6 real right shoulder meshes are pinned, source-frame aligned and anatomically scoped',()=>{
+ const atlas=JSON.parse(read('atlas/assets/body-skeleton.json'));
+ const shoulder=JSON.parse(read('shoulder/spatial/assets/shoulder-source.json'));
+ const proof=JSON.parse(read('shoulder/spatial/assets/provenance.json'));
+ assert.equal(shoulder.schema,'body-live/shoulder-sourced-v1');
+ assert.equal(shoulder.source_commit,atlas.source_commit);
+ assert.equal(proof.pinned_commit,atlas.source_commit);
+ assert.equal(proof.anatomist_reviewed,false);
+ assert.equal(proof.kinematics_validated,false);
+ assert.deepEqual(shoulder.source_frame.origin_metres,[0,.9,0]);
+ assert.equal(shoulder.source_frame.scale,5);
+ const needed=['clavicle','scapula','humerus','supraspinatus','infraspinatus','subscapularis','teresMinor'];
+ for(const id of needed){
+  const part=shoulder.parts[id];
+  assert.ok(part,'missing required source geometry: '+id);
+  assert.ok(part.vertices.length>100&&part.faces.length>200,id);
+  assert.equal(proof.models[id].fma,part.fma);
+  assert.equal(proof.models[id].triangles,part.faces.length);
+  assert.ok(part.vertices.every(v=>v.every(Number.isFinite)),id);
+  assert.ok(part.faces.every(f=>f.length===3&&f.every(i=>Number.isInteger(i)&&i>=0&&i<part.vertices.length)),id);
+ }
+ const box=verts=>[0,1,2].map(i=>[Math.min(...verts.map(v=>v[i])),Math.max(...verts.map(v=>v[i]))]);
+ for(const id of ['clavicle','scapula','humerus']){
+  const original=atlas.parts.find(x=>x.id==='right-'+id);
+  const lhs=box(original.vertices),rhs=box(shoulder.parts[id].vertices);
+  for(let i=0;i<3;i++)for(let k=0;k<2;k++)
+   assert.ok(Math.abs(lhs[i][k]-rhs[i][k])<.015,id+' must occupy identical source world');
+ }
+ for(const path of ['assets/atlas/atlas-renderer.js','assets/atlas/atlas-unified.js','assets/atlas/atlas-controller.js','assets/atlas/atlas-loader.js'])
+  assert.doesNotThrow(()=>new Function(read(path)),path);
+ const controller=read('assets/atlas/atlas-controller.js');
+ assert.ok(controller.includes("return region==='hip'||region==='knee'||region==='shoulder'"));
+ assert.ok(read('assets/atlas/atlas-unified.js').includes('shoulderGeometry'));
+});
