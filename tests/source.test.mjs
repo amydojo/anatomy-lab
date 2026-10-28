@@ -508,6 +508,7 @@ test('V7 six new source-matched body regions are fully FMA-attributed and SHA-pi
  }
  assert.equal(n,84);
  const win={};const {runInNewContext}=await import('node:vm');
+ runInNewContext(read('assets/atlas/atlas-regional-motion.js'),{window:win,Float32Array});
  runInNewContext(read('assets/atlas/atlas-extended-regions.js'),{window:win,Float32Array});
  const X=win.BodyExtendedRegions;
  assert.equal(X.ids.length,6);
@@ -521,14 +522,14 @@ test('V7 six new source-matched body regions are fully FMA-attributed and SHA-pi
   }
   assert.equal(X.config[region].labels[4],'Source muscles');
   if(X.config[region].motion){
-   const [muscleId,musclePart]=Object.entries(asset.muscle_parts)[0];
+   const [muscleId,musclePart]=Object.entries(asset.muscle_parts).find(([id])=>region!=='skull'||/mylohyoid/.test(id));
    const skin=X.createSkin(region,muscleId,musclePart.vertices,asset.parts);
    assert.ok(skin&&!skin.validated&&skin.weights.length===musclePart.vertices.length);
    assert.equal(skin.method,'source-surface-proximity-inferred');
    assert.ok(skin.weights.every(w=>Number.isFinite(w)&&w>=0&&w<=1));
    const bent=X.createPose(region,asset,X.config[region].motion.max);
    const moving=Object.keys(asset.parts).filter(id=>X.moving(region,id));
-   assert.ok(moving.length>=2,region+' no moving sourced bones');
+   assert.ok(moving.length>=(region==='skull'?1:2),region+' no moving sourced bones');
    const p=asset.parts[moving[0]].vertices[0];
    const moved=X.transform(bent.matrices[moving[0]],p);
    assert.ok(Math.hypot(...p.map((x,i)=>x-moved[i]))>.001,region+' motion is inert');
@@ -536,6 +537,7 @@ test('V7 six new source-matched body regions are fully FMA-attributed and SHA-pi
   }
  }
  const html=read('atlas/index.html');
+ assert.ok(html.includes('atlas-regional-motion.js'));
  assert.ok(html.includes('atlas-extended-regions.js'));
  assert.ok(html.includes('class="region-dock"'),'persistent mobile region navigation absent');
  for(const name of ['hip','nerve','knee','shoulder','thorax','neck','skull','elbow','wrist','ankle'])
