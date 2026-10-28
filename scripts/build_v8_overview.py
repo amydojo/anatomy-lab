@@ -10,6 +10,7 @@ import hashlib, json, math
 from pathlib import Path
 import numpy as np
 import fast_simplification
+from import_bp3d_whole_body import load as source_load, decode as source_decode, id_of, MUSCLES, WRIST, ANKLE
 
 ROOT=Path(__file__).resolve().parents[1]
 REGIONS=("skull","neck","thorax","elbow","wrist","ankle")
@@ -70,6 +71,48 @@ def main():
                 item["group"]={"skull":"head","neck":"spine","thorax":"thorax",
                     "elbow":"upper","wrist":"upper","ankle":"lower"}[region]
                 category[name]=item
+    # Bilateral completeness for the HOME specimen only. The focused wrist
+    # and ankle labs remain explicitly right-sided. These left-side meshes
+    # are fetched from the pinned upstream atlas (no mirroring/invention).
+    raw,atlas_proof=source_load("atlas.json")
+    upstream=json.loads(raw)
+    if upstream["version"]!="BodyParts3D 4.0":raise ValueError("Unexpected dataset")
+    index={}
+    for info in upstream["parts"]:index.setdefault(info["name"],[]).append(info)
+    extra_bones=[]
+    for name in list(WRIST)+list(ANKLE):
+        left=name.replace("Right","Left").replace("right","left")
+        if left not in extra_bones:extra_bones.append(left)
+    extra_muscles=[]
+    for region in ("elbow","wrist","ankle"):
+        for name in MUSCLES[region]:
+            left=name.replace("Right","Left").replace("right","left")
+            if left not in extra_muscles:extra_muscles.append(left)
+    requests={}
+    for name in extra_bones+extra_muscles:
+        if len(index.get(name,[]))!=1:raise ValueError("Left-side source name ambiguous "+name)
+        requests[name]=index[name][0]
+    chunk_data={};chunk_hashes={}
+    for chunk in sorted({x["chunk"] for x in requests.values()}):
+        binraw,binmeta=source_load(f"body-{chunk}.bin")
+        if len(binraw)!=upstream["chunks"][chunk]["bytes"]:raise ValueError("Source chunk length mismatch")
+        chunk_data[chunk]=binraw;chunk_hashes[f"body-{chunk}.bin"]=binmeta["sha256"]
+    bilateral={"bones":0,"muscles":0}
+    for name,info in requests.items():
+        isMuscle=name in extra_muscles
+        target=muscles if isMuscle else bones
+        key=id_of(name)
+        if key in target or key in base:continue
+        vertices,faces=source_decode(chunk_data[info["chunk"]],info)
+        part={"name":name,"fma":info["conceptId"],
+           "system":"muscle" if isMuscle else "bone",
+           "vertices":[[round((p[i]-(.9 if i==1 else 0))*5,5) for i in range(3)] for p in vertices],
+           "faces":faces}
+        item=mesh_lod(part,300 if isMuscle else 390)
+        item["region"]="left-wrist" if any(t in name.lower() for t in ("carpal","metacarpal","trapezium","trapezoid","scaphoid","lunate","pisiform","triquetral","capitate","hamate","pronator","supinator","brachialis","brachioradialis","triceps","biceps","flexor carpi","extensor carpi","abductor pollicis","opponens pollicis","palmaris","flexor digitorum profundus","extensor digitorum")) else "left-ankle"
+        item["group"]="upper" if item["region"]=="left-wrist" else "lower"
+        target[key]=item
+        bilateral["muscles" if isMuscle else "bones"]+=1
     asset={"schema":"body-live/overview-v8-v1","dataset":"BodyParts3D 4.0",
       "source_commit":original["source_commit"],"source_frame":original["source_frame"],
       "license":"CC BY 4.0","bones":bones,"muscles":muscles}
@@ -77,10 +120,12 @@ def main():
     manifest={"schema":"body-live/overview-v8-provenance-v1","source_commit":original["source_commit"],
       "license":"CC BY 4.0","anatomist_reviewed":False,"kinematics_validated":False,
       "original_bones":len(original["parts"]),"additional_bones":len(bones),
-      "unique_muscles":len(muscles),"region_counts":counts,"detail_sha256":input_hashes,
+      "unique_muscles":len(muscles),"bilateral_added":bilateral,
+      "bilateral_source_sha256":{"atlas.json":atlas_proof["sha256"],**chunk_hashes},
+      "region_counts":counts,"detail_sha256":input_hashes,
       "overview_sha256":digest(DEST.read_bytes()),"reused_region_parts":reused,
       "geometry":"exact source frame; simplification only; no mirroring or synthesized meshes",
-      "incomplete":["Unrepresented left hand and foot bones","Unrepresented facial/jaw muscles",
+      "incomplete":["Limited bilateral hand/foot anatomy: no finger or toe phalanges yet","Unrepresented facial/jaw muscles",
          "Missing tendons and ligaments","No anatomist-reviewed muscle attachments",
          "Reference-source sciatic nerve not spatially verified across these meshes"]}
     MANIFEST.write_text(json.dumps(manifest,indent=2)+"\n")
