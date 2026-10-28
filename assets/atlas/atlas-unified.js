@@ -45,8 +45,8 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   hipBone:['Right hip bone','Sourced pelvis bone forming the acetabulum, or hip socket.'],
   femur:['Right femur','The thigh bone transfers load between the hip and knee; movement shown here uses a simplified teaching pivot.'],
   sacrum:['Sacrum','Source-derived fused vertebral bone at the base of the spine.'],
-  maximus:['Gluteus maximus','Large superficial hip extensor. Surface is from the source reference pose, not a deforming muscle simulation.'],
-  medius:['Gluteus medius','Abductor muscle contributing to pelvis stability during single-leg stance.'],
+  maximus:['Gluteus maximus','Sourced hip extensor muscle. Reference surface now deforms between estimated pelvic attachment and moving femoral insertion; attachments and muscle mechanics are not independently validated.'],
+  medius:['Gluteus medius','Sourced hip abductor with anchored pelvis origin and inferred femoral insertion. Tendon mechanics are not validated.'],
   minimus:['Gluteus minimus','Deep hip abductor beneath gluteus medius.'],
   piriformis:['Piriformis','Deep posterior hip rotator. Sciatic nerve position is not verified in this model.'],
   obturator:['Obturator internus','Deep hip rotator with a tendon curving around the lesser sciatic notch.'],
@@ -69,6 +69,11 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   bicepsShort:['Biceps brachii · short head','Short head arises from the coracoid process alongside coracobrachialis in the source pose.'],
   pectoralisClavicular:['Pectoralis major · clavicular','Clavicular part of pectoralis major, a shoulder flexor/adductor. The displayed muscle shape bends between inferred clavicular and humeral attachments, not a validated shortening simulation.'],
 
+  popliteus:['Popliteus','Deep posterior knee muscle from lateral femur to posterior tibia. Its source mesh bends through inferred attachment weights; not a validated tendon model.'],
+  vastusMedialis:['Vastus medialis','Medial quadriceps muscle from femur toward the patella. Moves with the simplified patellar geometry, not verified quadriceps tendon mechanics.'],
+  vastusLateralis:['Vastus lateralis','Lateral quadriceps muscle from femur toward the patella. Inferred attachment weights are not independently anatomist-reviewed.'],
+  vastusIntermedius:['Vastus intermedius','Deep quadriceps muscle between femoral origin and extensor insertion. Displayed deformation is not modeled contraction.'],
+  bicepsShort:['Biceps femoris · short head','Hamstring short head arising on the femur and attaching near the fibular head. Moves with the illustrative knee hinge.'],
   tibia:['Right tibia','Primary weight-bearing shin bone; its movement is a schematic fixed-axis demonstration.'],
   fibula:['Right fibula','Lateral lower-leg bone.'],
   patella:['Right patella','Kneecap located anterior to the distal femur. Its tracking here is an approximation.']
@@ -135,7 +140,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   $('panel-kicker').textContent='SAME SOURCE / '+LABEL[name];
   $('stage-title').textContent=LABEL[name]+' · SPATIAL APPROACH';
   $('stage-caveat').textContent=NOTE[name];
-  $('context-note').textContent='Bones share pinned BodyParts3D geometry. Shoulder bone coordination and tissue deformation use explicit estimated pivots and inferred attachments; they are not medically validated.';
+  $('context-note').textContent='Licensed bone and muscle surfaces share a pinned reference. Joint pivots and muscle attachments are inferred teaching approximations, not anatomist-validated biomechanics.';
   $('enter-region').disabled=true;$('enter-region').textContent='Exploring '+LABEL[name];
   $('back-body').hidden=false;$('top-enter-region').hidden=true;
   $('hotspots').hidden=true;$('portal').hidden=true;
@@ -154,12 +159,20 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
    if(!model.hasDetail(name)){
     const data=await loader.load(name==='hip'?'hipGeometry':name==='shoulder'?'shoulderGeometry':'kneeGeometry');
     if(id!==token)return;
+    let complete=data;
+    if(name==='knee'){
+     const muscles=await loader.load('kneeMuscles');
+     const provenance=await loader.load('kneeMuscleProof');
+     if(id!==token)return;
+     loader.verifyKneeMuscles(muscles,provenance);
+     complete={...data,muscle_meshes:muscles.parts};
+    }
     if(name==='shoulder'){
      const provenance=await loader.load('shoulderProof');
      if(id!==token)return;
      loader.verifyShoulder(data,provenance);
     }
-    model.loadDetail(name,data);
+    model.loadDetail(name,complete);
    }
    if(id!==token)return;
    region=name;reveal=0;pending=false;
@@ -233,7 +246,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   trace.title='A continuous nerve path is not verified in this source-derived scene';
   peel.textContent=name==='knee'?'Isolate':name==='shoulder'?'Layers':'Peel';
   $('joint-motion-label').textContent=name==='hip'?'Hip flexion':name==='shoulder'?'Shoulder abduction':'Knee flexion';
-  $('motion-description').textContent=name==='shoulder'?'INFERRED ATTACHMENTS':'ILLUSTRATIVE MOVEMENT';
+  $('motion-description').textContent='INFERRED ATTACHMENTS';
   $('joint-motion-slider').max=name==='hip'?'65':name==='shoulder'?'110':'105';
   $('joint-motion-slider').value='0';$('joint-motion-value').textContent='0°';
   $('layer-slider').max='3';
