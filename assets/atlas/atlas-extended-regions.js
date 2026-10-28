@@ -6,24 +6,24 @@
 const IDS=['skull','neck','thorax','elbow','wrist','ankle'];
 const REGIONS={
  skull:{title:'Skull & Jaw',summary:'14 sourced bones · cranium and face',
-   labels:['All source bones','Cranial vault','Facial bones','Mandible only'],
+   labels:['All source bones + muscles','Cranial vault','Facial bones','Mandible only','Source muscles'],
    anchor:'frontal-bone',yaw:.2,zoom:1.46,span:1.75,delta:[0,-.12,0],group:'head'},
  neck:{title:'Cervical Spine',summary:'Atlas · axis · C3–C7 · hyoid',
-   labels:['All neck bones','Atlas / axis','C3 through C7','Hyoid'],
+   labels:['All neck bones + muscles','Atlas / axis','C3 through C7','Hyoid','Source muscles'],
    anchor:'atlas',yaw:.35,zoom:1.52,span:1.25,delta:[0,-.29,0],group:'spine'},
  thorax:{title:'Ribs & Thorax',summary:'24 ribs · sternum · thoracic spine',
-   labels:['All thoracic bones','24 ribs','Sternum parts','Thoracic vertebrae'],
+   labels:['All thoracic bones + muscles','24 ribs','Sternum parts','Thoracic vertebrae','Source muscles'],
    anchor:'body-of-sternum',yaw:-.18,zoom:1.13,span:3.9,delta:[0,-.03,0],group:'thorax'},
  elbow:{title:'Right Elbow',summary:'Humerus · radius · ulna',
-   labels:['All elbow bones','Humerus','Radius / ulna','Articulating bones'],
+   labels:['All elbow bones + muscles','Humerus','Radius / ulna','Articulating bones','Source muscles'],
    anchor:'right-ulna',anchorMode:'proximal',yaw:.55,zoom:1.18,span:1.65,delta:[0,-.13,0],group:'upper',
    motion:{label:'Elbow flexion',max:130,axis:'x',sign:1}},
  wrist:{title:'Right Wrist',summary:'8 carpals · 5 metacarpals · forearm',
-   labels:['All wrist bones','Eight carpals','Metacarpals','Radius / ulna'],
+   labels:['All wrist bones + muscles','Eight carpals','Metacarpals','Radius / ulna','Source muscles'],
    anchor:'right-radius',anchorMode:'distal',yaw:.42,zoom:1.27,span:1.08,delta:[0,-.24,0],group:'upper',
    motion:{label:'Wrist flexion',max:65,axis:'x',sign:-1}},
  ankle:{title:'Right Ankle',summary:'Talus · heel · tarsals · metatarsals',
-   labels:['All ankle/foot bones','Talus / heel','Midfoot / metatarsals','Tibia / fibula'],
+   labels:['All ankle/foot bones + muscles','Talus / heel','Midfoot / metatarsals','Tibia / fibula','Source muscles'],
    anchor:'right-tibia',anchorMode:'distal',yaw:.5,zoom:1.30,span:1.42,delta:[0,-.31,0],group:'lower',
    motion:{label:'Ankle dorsiflexion',max:30,axis:'x',sign:-1}}
 };
@@ -60,6 +60,9 @@ function moving(region,id){
 }
 function layers(region,ids,layer){
  if(layer<=0)return true;
+ // Sourced muscles receive priority at the fourth depth stop. Keep faint
+ // bone context visible, but let the user inspect actual muscle surfaces.
+ if(layer===4)return true;
  if(region==='skull')return layer===1? /^(frontal-bone|occipital-bone|sphenoid-bone|.*parietal-bone|.*temporal-bone)$/.test(ids):
    layer===2?/^(mandible|.*maxilla|.*nasal-bone|.*zygomatic-bone)$/.test(ids):ids==='mandible';
  if(region==='neck')return layer===1?['atlas','axis'].includes(ids):
@@ -87,6 +90,31 @@ const transform=(m,p)=>[
  m[0]*p[0]+m[4]*p[1]+m[8]*p[2]+m[12],
  m[1]*p[0]+m[5]*p[1]+m[9]*p[2]+m[13],
  m[2]*p[0]+m[6]*p[1]+m[10]*p[2]+m[14]];
+// For moving regions, attachment influence is estimated from distances to
+// source bone surfaces. These are NOT anatomical origin/insertion claims.
+const MUSCLE_ATTACHMENTS={
+ elbow:['right-humerus','right-ulna'],
+ wrist:['right-radius','right-first-metacarpal-bone'],
+ ankle:['right-tibia','right-talus']
+};
+function createSkin(region,id,vertices,bones){
+ const pair=MUSCLE_ATTACHMENTS[region];if(!pair)return null;
+ const [fixedId,targetId]=pair;
+ const fixed=bones[fixedId]?.vertices,mobile=bones[targetId]?.vertices;
+ if(!fixed||!mobile)throw Error('Missing movement anchor bone for '+region+'/'+id);
+ const sample=ps=>ps.filter((_,i)=>i%Math.max(1,Math.ceil(ps.length/180))===0);
+ const fixedSamples=sample(fixed),mobileSamples=sample(mobile);
+ const nearest=(v,ps)=>{let best=Infinity;for(const p of ps){
+  const d=(v[0]-p[0])**2+(v[1]-p[1])**2+(v[2]-p[2])**2;
+  if(d<best)best=d;
+ }return Math.sqrt(best);};
+ const weights=vertices.map(v=>{
+  const df=nearest(v,fixedSamples),dm=nearest(v,mobileSamples);
+  const t=clamp(df/Math.max(.0001,df+dm),0,1);
+  return t*t*(3-2*t);
+ });
+ return {fixedId,targetId,weights,method:'source-surface-proximity-inferred',validated:false};
+}
 function createPose(region,asset,flex){
  const spec=REGIONS[region];if(!spec)throw Error('Unknown anatomy region: '+region);
  const degrees=clamp(Number(flex)||0,0,spec.motion?.max||0);
@@ -100,5 +128,5 @@ const deformPoint=(p,a,b,weight)=>{
  return x.map((v,i)=>v*(1-w)+y[i]*w);
 };
 const has=name=>IDS.includes(name);
-window.BodyExtendedRegions=Object.freeze({ids:IDS,config:REGIONS,has,createPose,layers,moving,identity:I,transform,deformPoint});
+window.BodyExtendedRegions=Object.freeze({ids:IDS,config:REGIONS,has,createPose,createSkin,layers,moving,identity:I,transform,deformPoint});
 })();
