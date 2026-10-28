@@ -150,6 +150,11 @@ function setExpanded(next){
 // One continuous world-space travel. The matched lab never shows its own
 // default camera; the hip/knee source-frame pose is sent before revealing it.
 function choose(region){
+ if(isSourceAligned(region)&&model.getStatus()!=='ready'){
+  // WebGL is a prerequisite for spatial continuity. Preserve functional
+  // semantic navigation rather than silently ignoring region taps.
+  location.assign(HERE[region]);return;
+ }
  if(isSourceAligned(region))return U.choose(region);
  if(state.data.view==='detail'||!window.BodyAtlasState.regions.includes(region))return;
  ++seq;const token=seq;
