@@ -21,7 +21,7 @@ test('Pinned 78-part sourced skeleton loads in one WebGL canvas',async({page})=>
  const st=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
  expect(st.renderer.partCount).toBe(78);
  expect(st.renderer.webgl).toBe(true);
- expect(st.pins).toBe(4);
+ expect(st.pins).toBe(10);
  await expect(page.locator('#hotspots [data-region="hip"]')).toBeVisible();
  await expect(page.locator('a[href="/atlas/sources/"]')).toHaveCount(2);
  expect(errors).toEqual([]);
