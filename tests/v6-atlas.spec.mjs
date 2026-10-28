@@ -71,6 +71,15 @@ test('Back to Body reverses spatial travel without changing the document',async(
  const state=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
  expect(state.view).toBe('overview');
  expect(state.region).toBe(null);
+ // The same camera object must still be wired to canvas gestures after reset.
+ const yawDelta=await page.evaluate(()=>{
+  const canvas=document.querySelector('#atlas-canvas');
+  const before=window.__BODY_ATLAS__.getState().camera.yaw;
+  const evt=(type,x)=>canvas.dispatchEvent(new PointerEvent(type,{bubbles:true,pointerId:41,clientX:x,clientY:220}));
+  evt('pointerdown',90);evt('pointermove',200);evt('pointerup',200);
+  return window.__BODY_ATLAS__.getState().camera.yaw-before;
+ });
+ expect(yawDelta).toBeGreaterThan(.5);
  expect(new URL(page.url()).pathname).toBe('/atlas/');
  expect(errors).toEqual([]);
 });
