@@ -3,7 +3,7 @@
 const $=id=>document.getElementById(id);
 const state=window.BodyAtlasState.create();
 const loader=window.BodyAtlasLoader,model=window.BodyAtlasRenderer.create($('atlas-canvas'),reason=>fallback(reason));
-const E=window.BodyAtlasEvidence;let source=null,proof=null,hipProof=null,nerveProof=null;
+const E=window.BodyAtlasEvidence;let source=null,proof=null,hipProof=null,nerveProof=null,shoulderProof=null;
 let lastFocus=null,activeFrameRoute=null,motionFrame=0,travelMixFrame=0,frameTimeout=0,entryTimer=0,exitTimer=0,seq=0,previousFocus=null,pins=[],loaded=false,pendingEntry=null,sourceSeamPending=false;
 const reduce=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const HERE={hip:'/hip/spatial/',nerve:'/hip/spatial/',knee:'/knee/spatial/',shoulder:'/shoulder/'};
@@ -454,11 +454,12 @@ function showEvidence(){
 async function renderEvidence(){
  let names=['provenance'];if(['hip','nerve'].includes(state.data.region))names.push('hip');
  if(state.data.region==='nerve')names.push('nerve');
+ if(state.data.region==='shoulder')names.push('shoulderProof');
  const collected=await Promise.all(names.map(async key=>{try{return [key,await loader.load(key)];}catch{return [key,null];}}));
- for(const [name,obj] of collected){if(name==='provenance')proof=obj;if(name==='hip')hipProof=obj;if(name==='nerve')nerveProof=obj;}
+ for(const [name,obj] of collected){if(name==='provenance')proof=obj;if(name==='hip')hipProof=obj;if(name==='nerve')nerveProof=obj;if(name==='shoulderProof')shoulderProof=obj;}
  if(!state.data.evidence)return;
  $('evidence-intro').textContent='Origin and expert review are separate. Neither a licensed atlas nor a smooth camera transition is medical validation.';
- const list=E.records(state.data.region||'overview',proof,hipProof,nerveProof);
+ const list=E.records(state.data.region||'overview',proof,hipProof,nerveProof,shoulderProof);
  $('evidence-records').replaceChildren();
  for(const entry of list){
   const box=document.createElement('article');box.className='evidence-record';
