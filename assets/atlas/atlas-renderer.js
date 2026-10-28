@@ -28,9 +28,9 @@ function create(canvas,onContextLost=()=>{}){
   gl=canvas.getContext('webgl2',{alpha:true,antialias:true,depth:true,premultipliedAlpha:false,powerPreference:'low-power'});
   if(!gl){status='fallback';return false;}
   const vert=[
-   '#version 300 es','precision highp float;','in vec3 aPosition;','in vec3 aNormal;',
-   'uniform vec2 uViewport;','uniform float uYaw;','uniform float uPitch;','uniform float uFrameSpan;','uniform float uZoom;','uniform vec3 uTarget;','uniform float uMotion;','uniform float uFlex;','uniform vec3 uPivot;','uniform float uMotionAxis;','out vec3 vNormal;',
-   'void main(){','vec3 bone=aPosition;','vec3 n=aNormal;','if(uMotion>.5){vec3 d=bone-uPivot;float ca=cos(uFlex),sa=sin(uFlex);bone=uPivot+(uMotionAxis>.5?vec3(d.x*ca-d.y*sa,d.x*sa+d.y*ca,d.z):vec3(d.x,d.y*ca-d.z*sa,d.y*sa+d.z*ca));n=uMotionAxis>.5?vec3(n.x*ca-n.y*sa,n.x*sa+n.y*ca,n.z):vec3(n.x,n.y*ca-n.z*sa,n.y*sa+n.z*ca);}','vec3 p=bone-uTarget;','float cy=cos(uYaw),sy=sin(uYaw),cp=cos(uPitch),sp=sin(uPitch);',
+   '#version 300 es','precision highp float;','in vec3 aPosition;','in vec3 aNormal;','in float aSkinWeight;',
+   'uniform vec2 uViewport;','uniform float uYaw;','uniform float uPitch;','uniform float uFrameSpan;','uniform float uZoom;','uniform vec3 uTarget;','uniform float uMotion;','uniform float uFlex;','uniform vec3 uPivot;','uniform float uMotionAxis;','uniform float uSoftSkin;','out vec3 vNormal;',
+   'void main(){','vec3 bone=aPosition;','vec3 n=aNormal;','float influence=uMotion>.5?1.:(uSoftSkin>.5?aSkinWeight:0.);','if(influence>.00001){vec3 d=bone-uPivot;float ca=cos(uFlex*influence),sa=sin(uFlex*influence);bone=uPivot+(uMotionAxis>.5?vec3(d.x*ca-d.y*sa,d.x*sa+d.y*ca,d.z):vec3(d.x,d.y*ca-d.z*sa,d.y*sa+d.z*ca));n=uMotionAxis>.5?vec3(n.x*ca-n.y*sa,n.x*sa+n.y*ca,n.z):vec3(n.x,n.y*ca-n.z*sa,n.y*sa+n.z*ca);}','vec3 p=bone-uTarget;','float cy=cos(uYaw),sy=sin(uYaw),cp=cos(uPitch),sp=sin(uPitch);',
    'float x=p.x*cy+p.z*sy;','float z=p.z*cy-p.x*sy;','float y=p.y*cp-z*sp;','float z2=p.y*sp+z*cp;',
    'float scale=min(uViewport.x/3.25,uViewport.y/uFrameSpan)*uZoom;',
    'float w=max(.10,(7.4-z2)/7.4);',
@@ -68,17 +68,20 @@ function create(canvas,onContextLost=()=>{}){
    const off=i*3,l=Math.hypot(normal[off],normal[off+1],normal[off+2])||1;
    for(let j=0;j<3;j++)normal[off+j]/=l;
   }
-  const flat=new Float32Array(part.faces.length*18);let cursor=0;
+  const weights=part.skinWeights||null;
+  if(weights&&(weights.length!==vs.length||weights.some(w=>!Number.isFinite(w)||w<0||w>1)))throw Error('Invalid shoulder vertex weights: '+id);
+  const flat=new Float32Array(part.faces.length*21);let cursor=0;
   for(const tri of part.faces){
    for(const i of tri){
     flat.set(vs[i],cursor);
     flat.set(normal.subarray(i*3,i*3+3),cursor+3);
-    cursor+=6;
+    flat[cursor+6]=weights?weights[i]:0;
+    cursor+=7;
    }
   }
   const buffer=gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,flat,gl.STATIC_DRAW);
-  return {id,group,color,tissue,buffer,verts:part.vertices,faces:part.faces,count:part.faces.length*3};
+  return {id,group,color,tissue,buffer,verts:part.vertices,faces:part.faces,skinWeights:weights,rig:part.rig||null,count:part.faces.length*3};
  }
  function load(asset){
   if(asset.schema!=='body-live/atlas-skeleton-v1')throw Error('Unexpected skeleton schema');
@@ -113,6 +116,11 @@ function create(canvas,onContextLost=()=>{}){
     const converted={vertices:part.vertices.map(p=>p.map((v,i)=>(v/factor+origin[i]-[0,.9,0][i])*5)),faces:part.faces};
     const color=tissue?(shoulder?SHOULDER_COLORS[id]:HIP_COLORS[id]):(shoulder?COLORS.upper:COLORS.lower);
     if(!color)throw Error('Unidentified tissue geometry: '+id);
+    if(shoulder&&tissue){
+      if(!window.BodyShoulderRig)throw Error('Shoulder attachment engine unavailable');
+      const rig=window.BodyShoulderRig.createSkin(id,converted.vertices,asset.parts);
+      converted.skinWeights=rig.weights;converted.rig=rig;
+    }
     next.push(makeBuffer(converted,id,tissue?'tissue':'lower',color,tissue));
    }
    if(next.filter(p=>!p.tissue).length!==(hip||shoulder?3:4))throw Error('Incomplete detailed bone registration');
@@ -141,17 +149,18 @@ function create(canvas,onContextLost=()=>{}){
   gl.uniform1f(uni('uYaw'),camera.yaw);gl.uniform1f(uni('uPitch'),camera.pitch);
   gl.uniform1f(uni('uZoom'),camera.zoom);gl.uniform1f(uni('uFrameSpan'),camera.frameSpan);
   gl.uniform3f(uni('uTarget'),camera.target.x,camera.target.y,camera.target.z);
-  const locP=gl.getAttribLocation(program,'aPosition'),locN=gl.getAttribLocation(program,'aNormal');
+  const locP=gl.getAttribLocation(program,'aPosition'),locN=gl.getAttribLocation(program,'aNormal'),locW=gl.getAttribLocation(program,'aSkinWeight');
   const draw=(item,dim=1,alpha=1)=>{
    const moving=(selected==='hip'&&item.id==='femur')||(selected==='knee'&&['tibia','fibula','patella'].includes(item.id))||(selected==='shoulder'&&item.id==='humerus');
    const pivot=selected==='hip'?[-.057*5,(.895-.9)*5,-.045*5]:selected==='shoulder'?shoulderPivot:[-.09092915*5,(.4491462+.08/7.5-.9)*5,-.01654605*5];
-   gl.uniform1f(uni('uMotion'),moving?1:0);gl.uniform1f(uni('uMotionAxis'),selected==='shoulder'?1:0);
+   gl.uniform1f(uni('uMotion'),moving?1:0);gl.uniform1f(uni('uSoftSkin'),selected==='shoulder'&&item.skinWeights?1:0);gl.uniform1f(uni('uMotionAxis'),selected==='shoulder'?1:0);
    gl.uniform1f(uni('uFlex'),(selected==='shoulder'?-1:1)*Number(flex)*Math.PI/180);
    gl.uniform3fv(uni('uPivot'),pivot);
    gl.uniform3fv(uni('uColor'),item.id===highlight?[1,.81,.48]:item.color);gl.uniform1f(uni('uDim'),dim);gl.uniform1f(uni('uAlpha'),alpha);
    gl.bindBuffer(gl.ARRAY_BUFFER,item.buffer);
-   gl.enableVertexAttribArray(locP);gl.vertexAttribPointer(locP,3,gl.FLOAT,false,24,0);
-   gl.enableVertexAttribArray(locN);gl.vertexAttribPointer(locN,3,gl.FLOAT,false,24,12);
+   gl.enableVertexAttribArray(locP);gl.vertexAttribPointer(locP,3,gl.FLOAT,false,28,0);
+   gl.enableVertexAttribArray(locN);gl.vertexAttribPointer(locN,3,gl.FLOAT,false,28,12);
+   gl.enableVertexAttribArray(locW);gl.vertexAttribPointer(locW,1,gl.FLOAT,false,28,24);
    gl.drawArrays(gl.TRIANGLES,0,item.count);
   };
   const region=detail.has(selected)?selected:null;
@@ -227,8 +236,12 @@ function create(canvas,onContextLost=()=>{}){
    if(mesh.tissue){
     if(!['hip','shoulder'].includes(region)||layer>=3||!(hipLayers[mesh.id]>.15))continue;
    }else if(chosen&&!chosen.has(mesh.id))continue;
-   const mapped=mesh.verts.map(v=>{
+   const mapped=mesh.verts.map((v,index)=>{
     let p={x:v[0],y:v[1],z:v[2]};
+    if(region==='shoulder'&&(moveIds.has(mesh.id)||mesh.skinWeights)&&Math.abs(angle)>.0001){
+      const influence=moveIds.has(mesh.id)?1:mesh.skinWeights[index];
+      return core.project(window.BodyShoulderRig.deformVertex(v,influence,pivot,flex),projection);
+    }
     if(moveIds.has(mesh.id)&&Math.abs(angle)>.0001){
      const dy=p.y-pivot[1],dz=p.z-pivot[2];
      p=region==='shoulder'?{x:pivot[0]+(p.x-pivot[0])*ca+dy*sa,y:pivot[1]-(p.x-pivot[0])*sa+dy*ca,z:p.z}:{x:p.x,y:pivot[1]+dy*ca-dz*sa,z:pivot[2]+dy*sa+dz*ca};
@@ -245,7 +258,7 @@ function create(canvas,onContextLost=()=>{}){
   return nearest;
  }
  function dispose(){cleanup();model=null;detailData.clear();}
- return Object.freeze({load,loadDetail,hasDetail:region=>detail.has(region),render,hitTest,resize,getStatus:()=>status,dispose,stats:()=>({partCount:buffers.length,triangles:buffers.reduce((n,b)=>n+b.count/3,0),webgl:status==='ready',detailRegions:[...detail.keys()],detailMeshes:[...detail.values()].reduce((n,items)=>n+items.length,0)})});
+ return Object.freeze({load,loadDetail,hasDetail:region=>detail.has(region),render,hitTest,resize,getStatus:()=>status,dispose,stats:()=>({partCount:buffers.length,triangles:buffers.reduce((n,b)=>n+b.count/3,0),webgl:status==='ready',detailRegions:[...detail.keys()],detailMeshes:[...detail.values()].reduce((n,items)=>n+items.length,0),riggedShoulderMuscles:(detail.get('shoulder')||[]).filter(p=>p.skinWeights).length})});
 }
 window.BodyAtlasRenderer=Object.freeze({create});
 })();
