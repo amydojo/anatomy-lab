@@ -7,13 +7,16 @@ const IDS=['skull','neck','thorax','elbow','wrist','ankle'];
 const REGIONS={
  skull:{title:'Skull & Jaw',summary:'14 sourced bones · cranium and face',
    labels:['All source bones + muscles','Cranial vault','Facial bones','Mandible only','Source muscles'],
-   anchor:'frontal-bone',yaw:.2,zoom:1.46,span:1.75,delta:[0,-.12,0],group:'head'},
+   anchor:'frontal-bone',yaw:.2,zoom:1.46,span:1.75,delta:[0,-.12,0],group:'head',
+   motion:{label:'Mandible · opening',max:24,axis:'x',sign:-1}},
  neck:{title:'Cervical Spine',summary:'Atlas · axis · C3–C7 · hyoid',
    labels:['All neck bones + muscles','Atlas / axis','C3 through C7','Hyoid','Source muscles'],
-   anchor:'atlas',yaw:.35,zoom:1.52,span:1.25,delta:[0,-.29,0],group:'spine'},
+   anchor:'atlas',yaw:.35,zoom:1.52,span:1.25,delta:[0,-.29,0],group:'spine',
+   motion:{label:'Cervical · flexion',max:24,axis:'x',sign:1}},
  thorax:{title:'Ribs & Thorax',summary:'24 ribs · sternum · thoracic spine',
    labels:['All thoracic bones + muscles','24 ribs','Sternum parts','Thoracic vertebrae','Source muscles'],
-   anchor:'body-of-sternum',yaw:-.18,zoom:1.13,span:3.9,delta:[0,-.03,0],group:'thorax'},
+   anchor:'body-of-sternum',yaw:-.18,zoom:1.13,span:3.9,delta:[0,-.03,0],group:'thorax',
+   motion:{label:'Thorax · inspiration',max:100,axis:'z',sign:1}},
  elbow:{title:'Right Elbow',summary:'Humerus · radius · ulna',
    labels:['All elbow bones + muscles','Humerus','Radius / ulna','Articulating bones','Source muscles'],
    anchor:'right-ulna',anchorMode:'proximal',yaw:.55,zoom:1.18,span:1.65,delta:[0,-.13,0],group:'upper',
@@ -93,13 +96,21 @@ const transform=(m,p)=>[
 // For moving regions, attachment influence is estimated from distances to
 // source bone surfaces. These are NOT anatomical origin/insertion claims.
 const MUSCLE_ATTACHMENTS={
+ skull:['left-temporal-bone','mandible'],
+ neck:['seventh-cervical-vertebra','atlas'],
+ thorax:['seventh-thoracic-vertebra','body-of-sternum'],
  elbow:['right-humerus','right-ulna'],
  wrist:['right-radius','right-first-metacarpal-bone'],
  ankle:['right-tibia','right-talus']
 };
 function createSkin(region,id,vertices,bones){
  const pair=MUSCLE_ATTACHMENTS[region];if(!pair)return null;
- const [fixedId,targetId]=pair;
+ // Eye muscles are not connected to the mandible. Only floor-of-mouth
+ // muscles receive an educational jaw attachment gradient.
+ if(region==='skull'&&!/mylohyoid|geniohyoid/.test(id))return null;
+ const adjusted=(region==='elbow'&&/biceps|brachioradialis|supinator|pronator/.test(id))
+  ?['right-humerus','right-radius']:pair;
+ const [fixedId,targetId]=adjusted;
  const fixed=bones[fixedId]?.vertices,mobile=bones[targetId]?.vertices;
  if(!fixed||!mobile)throw Error('Missing movement anchor bone for '+region+'/'+id);
  const sample=ps=>ps.filter((_,i)=>i%Math.max(1,Math.ceil(ps.length/180))===0);
@@ -115,7 +126,8 @@ function createSkin(region,id,vertices,bones){
  });
  return {fixedId,targetId,weights,method:'source-surface-proximity-inferred',validated:false};
 }
-function createPose(region,asset,flex){
+function createPose(region,asset,flex,mode){
+ if(window.BodyRegionalMotion)return window.BodyRegionalMotion.pose(region,asset.parts,flex,mode);
  const spec=REGIONS[region];if(!spec)throw Error('Unknown anatomy region: '+region);
  const degrees=clamp(Number(flex)||0,0,spec.motion?.max||0);
  const pivot=spec.motion?hingeOrigin(region,asset.parts):null;
