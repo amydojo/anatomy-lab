@@ -123,6 +123,66 @@ test('Reset view restores the selected anatomical region, not just the slider',a
  await expect(page.locator('#layer-output')).toHaveText('Surface');
  expect(errors).toEqual([]);
 });
+test('Unified Hip motion slider drives real specimen pose and Back restores controls',async({page})=>{
+ const errors=await atlas(page);await choose(page,'hip');
+ await expect(page.locator('#joint-motion')).toBeVisible();
+ await expect(page.locator('#joint-motion-label')).toHaveText('Hip flexion');
+ await page.locator('#joint-motion-slider').evaluate(e=>{e.value='40';e.dispatchEvent(new Event('input',{bubbles:true}));});
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(40);
+ await expect(page.locator('#joint-motion-value')).toHaveText('40°');
+ await page.locator('#back-body').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:5000}).toBe(null);
+ await expect(page.locator('#joint-motion')).toBeHidden();
+ await expect(page.locator('#mode-trace')).toBeEnabled();
+ expect(errors).toEqual([]);
+});
+test('Knee flexion remains operative across isolated source bone depth states',async({page})=>{
+ const errors=await atlas(page);await choose(page,'knee');
+ await expect(page.locator('#joint-motion-label')).toHaveText('Knee flexion');
+ await page.locator('#joint-motion-slider').evaluate(e=>{e.value='85';e.dispatchEvent(new Event('input',{bubbles:true}));});
+ await page.locator('#layer-slider').evaluate(e=>{e.value='2';e.dispatchEvent(new Event('input',{bubbles:true}));});
+ const st=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
+ expect(st.unified.motion).toBe(85);
+ expect(st.layer).toBe(2);
+ await page.locator('#reset-view').click();
+ const after=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
+ expect(after.unified.motion).toBe(0);
+ expect(after.layer).toBe(0);
+ expect(errors).toEqual([]);
+});
+test('Direct selection inside unified specimen produces meaningful structure inspector',async({page})=>{
+ const errors=await atlas(page);await choose(page,'knee');
+ const selected=await page.evaluate(()=>{
+  const a=window.__BODY_ATLAS__,c=document.querySelector('#atlas-canvas');
+  for(let j=3;j<=7;j++)for(let i=2;i<=8;i++){
+   const hit=a.pickAt(c.clientWidth*i/10,c.clientHeight*j/10);
+   if(hit)return hit;
+  }
+  return null;
+ });
+ expect(selected).not.toBe(null);
+ await expect(page.locator('#structure-chip')).toBeVisible();
+ await page.locator('#structure-chip-more').click();
+ await expect(page.locator('#structure-details')).toBeVisible();
+ await expect(page.locator('#atlas-sidebar')).toHaveAttribute('data-expanded','true');
+ await page.locator('#structure-chip-close').click();
+ await expect(page.locator('#structure-chip')).toBeHidden();
+ expect(errors).toEqual([]);
+});
+test('Changing regions and interrupting camera travel cannot leave controls stuck',async({page})=>{
+ const errors=await atlas(page);await choose(page,'hip');
+ await page.evaluate(()=>window.__BODY_ATLAS__.choose('knee'));
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:14000}).toBe('knee');
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:14000}).toBe('detail');
+ await page.locator('#back-body').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:6000}).toBe('overview');
+ await page.evaluate(()=>window.__BODY_ATLAS__.choose('hip'));
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:6000}).toBe('hip');
+ await page.locator('#atlas-canvas').dispatchEvent('pointerdown',{pointerId:73,clientX:130,clientY:240});
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:3500}).toBe('detail');
+ await page.locator('#atlas-canvas').dispatchEvent('pointerup',{pointerId:73,clientX:130,clientY:240});
+ expect(errors).toEqual([]);
+});
 test('Direct mapped-bone tap moves toward the anatomy; empty canvas does not invent selection',async({page})=>{
  const errors=await atlas(page);
  const tap=await page.evaluate(()=>{
