@@ -1,0 +1,28 @@
+name: Hip and knee muscle QA
+on:
+  push:
+    branches: [feat/v6-9-hip-knee-muscle-motion]
+permissions:
+  contents: read
+jobs:
+  shoulder:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npm test
+      - run: npx playwright install chromium webkit
+      - name: Hip and Knee sourced muscle regression
+        run: npx playwright test tests/v6-atlas.spec.mjs --grep "sourced muscles move" --reporter=line
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v6-hip-knee-muscle-screens
+          path: artifacts/v6-hip-muscle-pose-*.png\n            artifacts/v6-knee-muscle-pose-*.png
+          if-no-files-found: warn
