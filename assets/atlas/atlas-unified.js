@@ -135,7 +135,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   $('panel-kicker').textContent='SAME SOURCE / '+LABEL[name];
   $('stage-title').textContent=LABEL[name]+' · SPATIAL APPROACH';
   $('stage-caveat').textContent=NOTE[name];
-  $('context-note').textContent='Bones share the pinned BodyParts3D source frame. Tissue peeling is illustrative, not independently anatomist-approved.';
+  $('context-note').textContent='Bones share pinned BodyParts3D geometry. Shoulder bone coordination and tissue deformation use explicit estimated pivots and inferred attachments; they are not medically validated.';
   $('enter-region').disabled=true;$('enter-region').textContent='Exploring '+LABEL[name];
   $('back-body').hidden=false;$('top-enter-region').hidden=true;
   $('hotspots').hidden=true;$('portal').hidden=true;
