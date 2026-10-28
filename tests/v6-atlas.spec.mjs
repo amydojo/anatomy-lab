@@ -275,6 +275,26 @@ test('Shoulder cuff layers expose true source surfaces and abduction updates the
  await expect(page.locator('#layer-output')).toHaveText('Surface · partial');
  expect(errors).toEqual([]);
 });
+test('Shoulder muscle attachments actually follow humerus without changing source mesh or canvas',async({page})=>{
+ const errors=await atlas(page);await choose(page,'shoulder');
+ const before=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
+ expect(before.renderer.riggedShoulderMuscles).toBe(11);
+ const canvas=page.locator('#atlas-canvas');
+ const ref=await canvas.evaluate(el=>({w:el.width,h:el.height}));
+ await page.locator('#mode-peel').click();
+ const atRest=await canvas.screenshot();
+ await page.locator('#joint-motion-slider').evaluate(el=>{el.value='75';el.dispatchEvent(new Event('input',{bubbles:true}));});
+ const after=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
+ expect(after.unified.motion).toBe(75);
+ expect(after.renderer.riggedShoulderMuscles).toBe(11);
+ const bent=await canvas.screenshot();
+ expect(atRest.equals(bent)).toBe(false);
+ expect(await canvas.evaluate(el=>({w:el.width,h:el.height}))).toEqual(ref);
+ await expect(page.locator('#motion-description')).toHaveText('INFERRED ATTACHMENTS');
+ await page.locator('#reset-view').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(0);
+ expect(errors).toEqual([]);
+});
 test('Shoulder source preserves Evidence provenance and missing ligament/nerve disclosures',async({page})=>{
  const errors=await atlas(page);await choose(page,'shoulder');
  await page.locator('#evidence-toggle').click();
