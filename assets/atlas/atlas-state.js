@@ -1,6 +1,6 @@
 /* V6 serializable atlas state, no DOM assumptions. */
 (function(){'use strict';
-const AVAILABLE=['hip','nerve','knee','shoulder'];
+const AVAILABLE=['hip','nerve','knee','shoulder','thorax','neck','skull','elbow','wrist','ankle'];
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 function create(){
  const s={view:'overview',region:null,selection:null,evidence:false,evidenceMode:'clean',camera:{yaw:-.20,pitch:-.07,zoom:1.03,frameSpan:10.8,target:{x:0,y:-.12,z:0}},previous:null,layer:0,mode:'explore',seam:false,frameReady:false,failed:false};
