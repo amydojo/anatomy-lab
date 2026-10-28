@@ -125,7 +125,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
    state.enter();state.data.frameReady=true;
    reveal=1;$('atlas-app').dataset.mode='immersive';
    enableControls(region);syncControls(region);
-   $('joint-motion').hidden=false;$('back-body').hidden=false;
+   $('joint-motion').hidden=window.BodyExtendedRegions.has(region)&&!window.BodyExtendedRegions.config[region].motion;$('back-body').hidden=false;
    $('hotspots').hidden=true;updateURL();render();
   }
  }
@@ -255,7 +255,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   const trace=$('mode-trace'),peel=$('mode-peel'),output=$('layer-output');
   trace.disabled=true;
   trace.title='A continuous nerve path is not verified in this source-derived scene';
-  peel.textContent=name==='knee'?'Isolate':name==='shoulder'?'Layers':'Peel';
+  peel.textContent=window.BodyExtendedRegions.has(name)?'Isolate':name==='knee'?'Isolate':name==='shoulder'?'Layers':'Peel';
   $('joint-motion-label').textContent=window.BodyExtendedRegions.config[name]?.motion?.label|| (name==='hip'?'Hip flexion':name==='shoulder'?'Shoulder abduction':'Knee flexion');
   $('motion-description').textContent=window.BodyExtendedRegions.has(name)?'ILLUSTRATIVE HINGE · UNVALIDATED':'INFERRED ATTACHMENTS';
   $('joint-motion-slider').max=String(window.BodyExtendedRegions.config[name]?.motion?.max||(name==='hip'?65:name==='shoulder'?110:105));
