@@ -224,6 +224,13 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  function setMode(mode){
   if(mode==='trace')return;
   if(!state.mode(mode))return;
+  // Mode buttons are actions, not mere labels. Explore restores all available
+  // sourced surfaces; Peel/Isolate enters a meaningful first depth stage.
+  if(mode==='peel'&&state.data.layer===0)state.setDepth(1);
+  if(mode==='explore')state.setDepth(0);
+  $('layer-slider').value=String(state.data.layer);
+  $('layer-output').textContent=region==='hip'?['Surface','Stabilizers','Deep rotators','Skeleton'][state.data.layer]:['Complete joint','Femur focus','Tibia / fibula','Patella focus'][Math.min(state.data.layer,3)];
+  clearSelection();
   document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-'+mode)));
   $('context-note').textContent=mode==='trace'?'Sciatic nerve geometry comes from a separately registered atlas. Open the labeled Sciatic lab from the body overview; no continuous pathway is invented here.':mode==='peel'?'Peel through sourced hip muscles (or use the knee standalone lab for illustrative tissues). This is not a biomechanics simulation.':NOTE[region]||'Source-derived skeletal geometry.';
   render();
