@@ -175,7 +175,7 @@ function create(canvas,onContextLost=()=>{}){
     if(region==='knee'&&chosen&&!chosen.has(bone.id))a*=.12;
     if(a<.02)continue;
     gl.depthMask(a>.98);
-    draw(bone,highlight&&highlight!==bone.id?.52:1,a);
+    draw(bone,(highlight&&highlight!==bone.id)?0.52:1,a);
    }
    gl.depthMask(true);
    if(region==='hip'&&r>0&&layer<3){
@@ -183,7 +183,7 @@ function create(canvas,onContextLost=()=>{}){
     gl.depthMask(false);
     for(const mesh of meshes.filter(p=>p.tissue)){
      const a=(levels[mesh.id]||0)*r;
-     if(a>.002)draw(mesh,highlight&&highlight!==mesh.id?.48:1,a);
+     if(a>.002)draw(mesh,(highlight&&highlight!==mesh.id)?0.48:1,a);
     }
     gl.depthMask(true);
    }
