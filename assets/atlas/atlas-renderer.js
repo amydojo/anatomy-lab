@@ -289,7 +289,11 @@ function create(canvas,onContextLost=()=>{}){
       const kin=shoulderPose?window.BodyShoulderKinematics:extendedPose?window.BodyExtendedRegions:window.BodyLowerLimbRig;
       const root=jointPose.matrices[mesh.rig?.fixedId||mesh.id]||kin.identity();
       const insert=mesh.rig?jointPose.matrices[mesh.rig.targetId||'humerus']||kin.identity():root;
-      return core.project(kin.deformPoint(v,root,insert,mesh.skinWeights?.[index]||0),projection);
+      // Rig deformation returns XYZ arrays; the shared projector requires
+      // named coordinates. Passing the array directly produced NaNs and made
+      // ALL knee/hip/shoulder structure taps silently miss across browsers.
+      const moved=kin.deformPoint(v,root,insert,mesh.skinWeights?.[index]||0);
+      return core.project({x:moved[0],y:moved[1],z:moved[2]},projection);
     }
     if(moveIds.has(mesh.id)&&Math.abs(angle)>.0001){
      const dy=p.y-pivot[1],dz=p.z-pivot[2];
