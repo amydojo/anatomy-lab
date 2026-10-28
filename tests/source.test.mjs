@@ -357,3 +357,57 @@ test('V6.7 every imported shoulder muscle is attachment-rigged and the source po
  const html=read('atlas/index.html');
  assert.ok(html.indexOf('atlas-shoulder-rig.js')<html.indexOf('atlas-renderer.js'),'rig must initialize before renderer');
 });
+
+test('V6.8 coordinated shoulder transforms keep AC and GH connections closed through elevation',async()=>{
+ const {runInNewContext}=await import('node:vm');
+ const win={};
+ runInNewContext(read('assets/atlas/atlas-shoulder-kinematics.js'),{window:win,Float32Array});
+ runInNewContext(read('assets/atlas/atlas-shoulder-rig.js'),{window:win});
+ const kin=win.BodyShoulderKinematics,rig=win.BodyShoulderRig;
+ const source=JSON.parse(read('shoulder/spatial/assets/shoulder-source.json')).parts;
+ const original=JSON.stringify(source),solver=kin.create(source);
+ const dist=(a,b)=>Math.hypot(...Array.from(a,(v,i)=>v-b[i]));
+ let last=null;
+ for(const angle of [0,1,15,30,45,60,75,90,100,110]){
+  const pose=solver.pose(angle),m=pose.matrices;
+  for(const key of ['clavicle','scapula','humerus']){
+   const matrix=m[key];
+   assert.equal(matrix.length,16);
+   assert.ok([...matrix].every(Number.isFinite),'non-finite pose '+angle+' '+key);
+  }
+  const sc=solver.rest.sternoclavicular,ac=solver.rest.acromioclavicular,gh=solver.rest.glenohumeral;
+  assert.ok(dist(kin.transform(m.clavicle,sc),sc)<.00001,'SC must be fixed');
+  assert.ok(dist(kin.transform(m.clavicle,ac),kin.transform(m.scapula,ac))<.00001,'AC joint gap');
+  assert.ok(dist(kin.transform(m.scapula,gh),kin.transform(m.humerus,gh))<.00001,'GH joint gap');
+  if(angle===0){
+   for(const bone of ['clavicle','scapula','humerus']){
+    const sourcePoint=source[bone].vertices[0];
+    assert.ok(dist(kin.transform(m[bone],sourcePoint),sourcePoint)<.00001,'rest pose not identity');
+   }
+  }
+  if(last){
+   assert.ok(pose.degrees.scapulaUpward>=last.degrees.scapulaUpward);
+   assert.ok(pose.degrees.clavicleElevation>=last.degrees.clavicleElevation);
+   assert.ok(dist(kin.transform(m.humerus,gh),kin.transform(last.matrices.humerus,gh))<.3,
+    'GH center discontinuity');
+  }
+  for(const [id,muscle] of Object.entries(source)){
+   if(muscle.system!=='muscle')continue;
+   const skin=rig.createSkin(id,muscle.vertices,source);
+   const origin=kin.deformPoint(skin.origin,m[skin.fixedId],m.humerus,0);
+   const insertion=kin.deformPoint(skin.insertion,m[skin.fixedId],m.humerus,1);
+   assert.ok(dist(origin,kin.transform(m[skin.fixedId],skin.origin))<.000001,id+' origin mismatch');
+   assert.ok(dist(insertion,kin.transform(m.humerus,skin.insertion))<.000001,id+' insertion mismatch');
+   assert.ok(origin.every(Number.isFinite)&&insertion.every(Number.isFinite));
+  }
+  last=pose;
+ }
+ assert.equal(solver.validated,false);
+ assert.equal(JSON.stringify(source),original,'source meshes and attribution must stay unchanged');
+ const shader=read('assets/atlas/atlas-renderer.js');
+ for(const term of ['uShoulderGraph','uOriginPose','uInsertionPose','shoulderDiagnostics','BodyShoulderKinematics.deformPoint'])
+  assert.ok(shader.includes(term),'missing shared WebGL/CPU rig support: '+term);
+ const html=read('atlas/index.html');
+ assert.ok(html.indexOf('atlas-shoulder-kinematics.js')<html.indexOf('atlas-renderer.js'));
+ assert.ok(html.includes('shoulder-rig-toggle'));
+});
