@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const state=window.BodyAtlasState.create();
 const loader=window.BodyAtlasLoader,model=window.BodyAtlasRenderer.create($('atlas-canvas'),reason=>fallback(reason));
 const E=window.BodyAtlasEvidence;let source=null,proof=null,hipProof=null,nerveProof=null;
-let lastFocus=null,activeFrameRoute=null,motionFrame=0,frameTimeout=0,seq=0,previousFocus=null,pins=[],loaded=false;
+let lastFocus=null,activeFrameRoute=null,motionFrame=0,frameTimeout=0,entryTimer=0,exitTimer=0,seq=0,previousFocus=null,pins=[],loaded=false,pendingEntry=null;
 const reduce=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const HERE={hip:'/hip/spatial/',nerve:'/hip/spatial/',knee:'/knee/spatial/',shoulder:'/shoulder/'};
 const LABEL={hip:'RIGHT HIP',nerve:'SCIATIC NERVE',knee:'RIGHT KNEE',shoulder:'SHOULDER'};
@@ -66,6 +66,23 @@ function drawPins(){
   el.setAttribute('aria-pressed',String(el.dataset.region===state.data.region));
  }
 }
+// Tapping the actual source-backed skeleton should work like tapping a hotspot,
+ // without claiming we have reconstructed unlabeled or missing anatomy.
+function pickAt(x,y){
+ if(state.data.view!=='overview'||!source||model.getStatus()!=='ready')return null;
+ const canvas=$('atlas-canvas'),w=canvas.clientWidth,h=canvas.clientHeight;
+ if(!w||!h)return null;
+ const c={...state.data.camera,width:w,height:h};
+ let best=null,distance=Infinity;
+ for(const region of ['hip','knee','shoulder']){
+  const p=window.BodySpatialCore.project(centerPoint(region),c);
+  const d=Math.hypot(x-p.x,y-p.y);
+  if(d<distance){distance=d;best=region;}
+ }
+ const radius=Math.max(45,Math.min(82,w*.18));
+ if(distance>radius)return null;
+ choose(best);return best;
+}
 function buildPins(){
  const targets=[['shoulder','Shoulder'],['hip','Hip'],['nerve','Sciatic'],['knee','Knee']];
  $('hotspots').replaceChildren();pins=[];
@@ -93,22 +110,80 @@ function setExpanded(next){
  $('sidebar-icon').textContent=e?'⌄':'⌃';
  requestAnimationFrame(resize);
 }
+// A region selection is a camera journey. The destination lab preloads invisibly;
+ // no iframe or loading screen may replace the atlas until travel and load finish.
 function choose(region){
- if(!state.select(region))return;const token=++seq;
+ if(state.data.view==='detail'||!window.BodyAtlasState.regions.includes(region))return;
+ ++seq;const token=seq;
+ clearTimeout(frameTimeout);clearTimeout(entryTimer);clearTimeout(exitTimer);
+ cancelAnimationFrame(motionFrame);motionFrame=0;pendingEntry=null;
+ if(!state.select(region))return;
  state.data.previous=lastFocus;lastFocus=region;
  $('panel-title').textContent=region==='nerve'?'Follow a living network.':region==='hip'?'Into the deep hip.':region==='knee'?'Inside the knee.':'The shoulder.';
  $('panel-description').textContent=NOTE[region];
  $('panel-kicker').textContent='REGION / '+LABEL[region]+' · EDUCATIONAL PREVIEW';
  $('sidebar-short').textContent=LABEL[region];
- $('stage-title').textContent=LABEL[region]+' · SOURCE FRAME';
+ $('stage-title').textContent=LABEL[region]+' · APPROACH';
  $('stage-caveat').textContent=NOTE[region];
- $('enter-region').disabled=false;$('enter-region').textContent='Enter '+LABEL[region]+' →';
+ $('scene-status').textContent='TRAVELING INTO '+LABEL[region];
+ $('enter-region').disabled=true;$('enter-region').textContent='Entering '+LABEL[region]+'…';
+ $('back-body').hidden=false;
  document.querySelectorAll('[data-region]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.region===region)));
  if(window.innerWidth<=850)setExpanded(false);
- updateURL();render();
- const q=centerPoint(region);const camera={yaw:region==='nerve'?Math.PI+.24:-.2,pitch:-.07,zoom:region==='nerve'?1.28:1.07,frameSpan:region==='shoulder'?5.3:region==='knee'?4.4:region==='nerve'?4.6:4.7,target:q};
- animateCamera(camera,reduce()?0:480,()=>{if(seq!==token)return;enter(region);});
+ $('atlas-app').dataset.mode='overview';
+ $('hotspots').hidden=true;updateURL();render();
+ const portal=$('portal'),frame=$('region-frame');
+ portal.hidden=false;portal.dataset.phase='preload';
+ portal.setAttribute('inert','');portal.setAttribute('aria-hidden','true');
+ $('portal-mask').hidden=true;frame.title=LABEL[region]+' detailed anatomy demonstration';
+ pendingEntry={region,token,ready:false,traveled:false};
+ frame.onload=()=>{
+  if(seq!==token||!pendingEntry||pendingEntry.region!==region)return;
+  try{if(frame.contentWindow.location.pathname!==HERE[region])return;}catch{return;}
+  adaptEmbeddedFrame(frame,region);pendingEntry.ready=true;clearTimeout(entryTimer);
+  finishEntry(token);
+ };
+ frame.src=HERE[region];
+ entryTimer=setTimeout(()=>{
+  if(seq!==token||!pendingEntry||pendingEntry.ready)return;
+  $('scene-status').textContent='DETAIL TAKING LONGER · RETRY OR RETURN';
+  $('enter-region').disabled=false;$('enter-region').textContent='Retry '+LABEL[region];
+ },12000);
+ const target=centerPoint(region);
+ const first={yaw:region==='nerve'?Math.PI+.24:-.20,pitch:-.07,zoom:1.10,
+  frameSpan:region==='shoulder'?5.0:region==='knee'?4.5:4.6,target};
+ const close={...first,zoom:1.35,frameSpan:region==='shoulder'?2.85:2.25,
+  pitch:region==='nerve'?-.13:-.095,target:{...target}};
+ animateCamera(first,reduce()?0:440,()=>{
+  if(seq!==token)return;
+  $('stage-title').textContent=LABEL[region]+' · CLOSE VIEW';
+  animateCamera(close,reduce()?0:480,()=>{
+   if(seq!==token||!pendingEntry)return;
+   pendingEntry.traveled=true;
+   if(!pendingEntry.ready)$('scene-status').textContent='PREPARING '+LABEL[region]+' DETAIL';
+   finishEntry(token);
+  });
+ });
 }
+function finishEntry(token){
+ const journey=pendingEntry;
+ if(!journey||token!==seq||!journey.ready||!journey.traveled)return;
+ if(!state.enter())return;
+ const region=journey.region,portal=$('portal');
+ state.data.frameReady=true;
+ $('atlas-app').dataset.mode='detail';
+ $('stage-title').textContent=LABEL[region]+' · DETAIL';
+ $('scene-status').textContent='DETAIL / SOURCE WARNINGS APPLY';
+ $('panel-kicker').textContent='EDUCATIONAL VIEW · NOT CLINICALLY VALIDATED';
+ $('context-note').textContent=region==='nerve'?'Sciatic-to-knee continuity is NOT anatomically reconstructed. Use Continue toward Knee to view the explicit seam.':NOTE[region];
+ $('portal-mask').hidden=true;
+ portal.removeAttribute('inert');portal.setAttribute('aria-hidden','false');
+ portal.dataset.phase='entering';activeFrameRoute=HERE[region];
+ enableControls(region);updateURL();
+ if(region==='nerve')initNerve(token);
+ requestAnimationFrame(()=>{if(seq===token)portal.dataset.phase='active';});
+}
+
 function adaptEmbeddedFrame(frame,region){
  if(region==='shoulder')return;
  try{
@@ -130,26 +205,13 @@ function enableControls(region){
  $('top-continue-knee').hidden=!detail||!['hip','nerve'].includes(region);
 }
 function enter(region=state.data.region){
- if(!state.enter())return;const route=HERE[region];if(!route)return;
- const frame=$('region-frame');
- $('atlas-app').dataset.mode='detail';
- $('portal').hidden=false;$('hotspots').hidden=true;$('canvas-fallback').hidden=true;
- frame.title=LABEL[region]+' detailed anatomy demonstration';
- $('stage-title').textContent=LABEL[region]+' · DETAIL';
- $('scene-status').textContent='DETAIL / SOURCE WARNINGS APPLY';
- $('panel-kicker').textContent='EDUCATIONAL VIEW · NOT CLINICALLY VALIDATED';
- $('context-note').textContent=region==='nerve'?'Sciatic-to-knee continuity is NOT anatomically reconstructed. Use Continue toward Knee to view the explicit seam.':NOTE[region];
- enableControls(region);updateURL();
- activeFrameRoute=route;const token=++seq;
- const onLoad=()=>{
-  if(seq!==token||state.data.view!=='detail')return;
-  state.data.frameReady=true;adaptEmbeddedFrame(frame,region);$('portal-mask').hidden=true;
-  if(region==='nerve')initNerve(token);
- };
- frame.onload=onLoad;
- $('portal-mask').hidden=false;
- frame.src=route;
+ if(!region||state.data.view==='detail')return;
+ if(pendingEntry?.region===region){
+  if(pendingEntry.ready&&pendingEntry.traveled)finishEntry(pendingEntry.token);
+  else if(!pendingEntry.ready)choose(region); // Explicit retry of a stalled destination.
+ }else choose(region);
 }
+
 function initNerve(token,attempt=0){
  if(token!==seq||state.data.view!=='detail'||state.data.region!=='nerve')return;
  const api=getFrameApi();
@@ -158,10 +220,22 @@ function initNerve(token,attempt=0){
  else $('scene-status').textContent='NERVE ASSET UNAVAILABLE · VIEW MAY BE SCHEMATIC';
 }
 function body(){
- ++seq;clearTimeout(frameTimeout);cancelAnimationFrame(motionFrame);motionFrame=0;
- const old=state.data.region;state.body();
- $('atlas-app').dataset.mode='overview';$('portal').hidden=true;$('portal-mask').hidden=true;
- $('region-frame').removeAttribute('src');$('region-frame').onload=null;
+ ++seq;clearTimeout(frameTimeout);clearTimeout(entryTimer);clearTimeout(exitTimer);
+ cancelAnimationFrame(motionFrame);motionFrame=0;pendingEntry=null;
+ const old=state.data.region;
+ const cam=state.data.camera;
+ const from={yaw:cam.yaw,pitch:cam.pitch,zoom:cam.zoom,frameSpan:cam.frameSpan,target:{...cam.target}};
+ state.body();
+ const home={...state.data.camera,target:{...state.data.camera.target}};
+ // Return along the same viewing direction; flipping to a default front view
+ // mid-flight would break the user's sense of where they are in the body.
+ home.yaw=from.yaw;home.pitch=from.pitch;
+ Object.assign(state.data.camera,from);
+ // Preserve the destination viewport until it has faded; resizing an active
+ // embedded lab would look like another page jump on mobile.
+ const portal=$('portal');portal.dataset.phase='leaving';
+ portal.setAttribute('inert','');portal.setAttribute('aria-hidden','true');
+ $('portal-mask').hidden=true;
  $('hotspots').hidden=false;$('back-body').hidden=true;$('seam').hidden=true;
  $('panel-kicker').textContent='SOURCE-DERIVED REFERENCE';$('panel-title').textContent='The body, connected.';
  $('panel-description').textContent='Choose a region to inspect bones, muscles and nerves in spatial context. Reference anatomy is not one patient scan or a clinically validated reconstruction.';
@@ -173,26 +247,39 @@ function body(){
  enableControls(null);if(window.innerWidth<=850)setExpanded(false);updateURL();
  if(model.getStatus()!=='ready')$('canvas-fallback').hidden=false;
  render();
+ const token=seq;
+ animateCamera(home,reduce()?0:740,()=>{if(seq===token)render();});
+ exitTimer=setTimeout(()=>{
+  if(seq!==token)return;
+  $('atlas-app').dataset.mode='overview';
+  portal.hidden=true;portal.dataset.phase='preload';
+  $('region-frame').onload=null;$('region-frame').removeAttribute('src');
+ },reduce()?0:490);
  if(old)lastFocus=old;
 }
+
 function seam(){
  if(!state.transfer())return;previousFocus=document.activeElement;$('seam').hidden=false;$('seam-cancel').focus();
 }
 function toKnee(){
  if(!state.completeTransfer())return;
- $('seam').hidden=true;state.data.region='knee';lastFocus='knee';
- $('panel-title').textContent='Inside the knee.';$('panel-description').textContent=NOTE.knee;
- $('panel-kicker').textContent='REGION / RIGHT KNEE · EDUCATIONAL PREVIEW';
- $('sidebar-short').textContent='RIGHT KNEE';
- $('stage-caveat').textContent='Reference change · sciatic nerve not reconstructed continuously';
- $('stage-title').textContent='RIGHT KNEE · SOURCE CONTEXT';
- $('context-note').textContent='Hip and Knee bones correspond to the same source frame, but the nerve is not reconstructed through this transition.';
- document.querySelectorAll('[data-region]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.region==='knee')));
- enableControls('knee');updateURL();const token=++seq;
- const frame=$('region-frame');$('portal-mask').hidden=false;
- frame.onload=()=>{if(token===seq){state.data.frameReady=true;adaptEmbeddedFrame(frame,'knee');$('portal-mask').hidden=true;}};
- frame.src=HERE.knee;
+ $('seam').hidden=true;
+ // First dissolve back onto the actual shared-frame bones. Then travel from hip
+ // to knee, preserving the explicit nerve reference-boundary disclosure.
+ const token=++seq,portal=$('portal');
+ clearTimeout(frameTimeout);clearTimeout(entryTimer);clearTimeout(exitTimer);
+ portal.dataset.phase='leaving';portal.setAttribute('inert','');portal.setAttribute('aria-hidden','true');
+ $('portal-mask').hidden=true;
+ state.select('knee');$('hotspots').hidden=true;render();
+ exitTimer=setTimeout(()=>{
+  if(seq!==token)return;
+  portal.hidden=true;
+  $('atlas-app').dataset.mode='overview';
+  $('region-frame').onload=null;$('region-frame').removeAttribute('src');
+  choose('knee');
+ },reduce()?0:420);
 }
+
 function setMode(mode){
  if(!state.mode(mode))return;
  document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-'+mode)));
@@ -249,11 +336,11 @@ function reset(){
 }
 function setup(){
  const canvas=$('atlas-canvas');
- window.BodySpatialCore.attachOrbit(canvas,{state:state.data.camera,render,pick:()=>{}});
+ window.BodySpatialCore.attachOrbit(canvas,{state:state.data.camera,render,pick:pickAt});
  window.addEventListener('resize',resize,{passive:true});
  if(typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe($('atlas-stage'));
  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(motionFrame);motionFrame=0;clearTimeout(frameTimeout);}else render();});
- window.addEventListener('pagehide',()=>{loader.cancel();model.dispose();clearTimeout(frameTimeout);cancelAnimationFrame(motionFrame);});
+ window.addEventListener('pagehide',()=>{loader.cancel();model.dispose();clearTimeout(frameTimeout);clearTimeout(entryTimer);clearTimeout(exitTimer);cancelAnimationFrame(motionFrame);});
  $('sidebar-toggle').onclick=()=>setExpanded($('atlas-sidebar').dataset.expanded!=='true');
  document.querySelectorAll('[data-region]').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.region)));
  $('enter-region').onclick=()=>enter();
@@ -295,6 +382,6 @@ function setup(){
   if(new URLSearchParams(location.search).get('evidence')==='1'){setEvidence('evidence');showEvidence();}
  }).catch(err=>fallback(err.message));
 }
-window.__BODY_ATLAS__={getState:()=>({...state.snapshot(),renderer:model.stats(),assetsLoaded:loaded,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,enter,body,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode};
+window.__BODY_ATLAS__={getState:()=>({...state.snapshot(),renderer:model.stats(),assetsLoaded:loaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode};
 setup();
 })();
