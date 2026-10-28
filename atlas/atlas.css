@@ -109,6 +109,15 @@
  .joint-motion{bottom:150px}.structure-chip{top:54px}
 }
 
+/* V7.0: expanded source atlas still uses a single viewport. The sidebar scrolls
+   independently; mobile exploration never requires adding another canvas. */
+.region-list{max-height:min(47vh,570px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+@media(max-width:850px){
+ .region-list{max-height:none;overflow:visible}
+ .hotspots [data-region="skull"],.hotspots [data-region="neck"],
+ .hotspots [data-region="thorax"],.hotspots [data-region="elbow"],
+ .hotspots [data-region="wrist"],.hotspots [data-region="ankle"]{display:none}
+}
 /* V6.8 diagnostic shoulder anchors — separate SVG overlay, same canvas/camera. */
 .shoulder-rig-tools{position:absolute;top:98px;right:351px;z-index:5;
  display:flex;flex-direction:column;gap:5px;align-items:flex-end;pointer-events:auto}
