@@ -58,7 +58,7 @@ test('V7 wrist and skull are reachable from mobile sidebar and return on same 3D
  await page.goto('/atlas/');
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().assetsLoaded||false)).toBe(true);
  await page.locator('#sidebar-toggle').click();
- await expect(page.locator('[data-region="wrist"]')).toBeVisible();
+ await expect(page.locator('#region-list [data-region="wrist"]')).toBeVisible();
  await page.locator('#region-list [data-region="wrist"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:25000}).toBe('detail');
  await expect(page.locator('#atlas-canvas')).toBeVisible();
