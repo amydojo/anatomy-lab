@@ -5,6 +5,12 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  const $=id=>document.getElementById(id);
  let region=null,reveal=0,animation=0,token=0,returning=false,pending=false,motion=0,selected=null,navigation=null;
  const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+ const LAYERS={
+  hip:['Surface','Stabilizers','Deep rotators','Skeleton'],
+  knee:['Complete joint','Femur focus','Tibia / fibula','Patella focus'],
+  shoulder:['Surface · partial','Rotator cuff','Cuff only','Bones only']
+ };
+ const layerText=()=>LAYERS[region]?.[Math.min(3,state.data.layer)]||'Surface';
  const snapshot=()=>({region,reveal,returning,pending,motion,selected:selected?.id||null});
  const isActive=()=>!!region||pending;
  const getRegion=()=>region;
@@ -47,6 +53,19 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   gemellusSuperior:['Superior gemellus','Small deep external rotator near obturator internus.'],
   gemellusInferior:['Inferior gemellus','Small deep external rotator below obturator internus.'],
   quadratus:['Quadratus femoris','Deep posterior hip muscle associated with rotation.'],
+  clavicle:['Right clavicle','Source-derived collarbone linking shoulder girdle to thorax. Sternoclavicular mechanics are not simulated.'],
+  scapula:['Right scapula','The shoulder blade supports the glenoid socket and rotator-cuff origins. It remains static during the illustrative movement.'],
+  humerus:['Right humerus','Upper-arm bone articulating with the glenoid. Abduction here uses an estimated single pivot, not validated scapulohumeral rhythm.'],
+  supraspinatus:['Supraspinatus','Rotator-cuff muscle passing above the scapular spine toward the greater tubercle; source-pose anatomy.'],
+  infraspinatus:['Infraspinatus','Posterior rotator-cuff muscle on the infraspinous fossa. Its surface remains static during motion.'],
+  subscapularis:['Subscapularis','Anterior rotator-cuff muscle from the subscapular fossa toward the lesser tubercle.'],
+  teresMinor:['Teres minor','Posterior rotator-cuff muscle contributing to external rotation and joint stability.'],
+  teresMajor:['Teres major','Posterior shoulder muscle participating in adduction and internal rotation, not a rotator-cuff muscle.'],
+  coracobrachialis:['Coracobrachialis','Shoulder flexor/adductor running from coracoid process to humerus.'],
+  deltoidClavicular:['Deltoid · anterior','Clavicular deltoid portion. Only displayed if present in the verified source.'],
+  deltoidAcromial:['Deltoid · middle','Acromial deltoid portion. Only displayed if present in the verified source.'],
+  deltoidSpinal:['Deltoid · posterior','Scapular-spine deltoid portion. Only displayed if present in the verified source.'],
+
   tibia:['Right tibia','Primary weight-bearing shin bone; its movement is a schematic fixed-axis demonstration.'],
   fibula:['Right fibula','Lateral lower-leg bone.'],
   patella:['Right patella','Kneecap located anterior to the distal femur. Its tracking here is an approximation.']
@@ -74,7 +93,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  }
  function setMotion(value){
   if(!region||state.data.view!=='detail')return;
-  const max=region==='hip'?65:105;
+  const max=region==='hip'?65:region==='shoulder'?110:105;
   motion=clamp(Math.round(Number(value)||0),0,max);
   $('joint-motion-value').textContent=motion+'°';
   render();
@@ -108,7 +127,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  }
  function headline(name){
   $('sidebar-short').textContent=LABEL[name];
-  $('panel-title').textContent=name==='hip'?'Inside the right hip.':'Explore the right knee.';
+  $('panel-title').textContent=name==='hip'?'Inside the right hip.':name==='shoulder'?'Inside the right shoulder.':'Explore the right knee.';
   $('panel-description').textContent=NOTE[name];
   $('panel-kicker').textContent='SAME SOURCE / '+LABEL[name];
   $('stage-title').textContent=LABEL[name]+' · SPATIAL APPROACH';
@@ -121,7 +140,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   if(window.innerWidth<=850)setExpanded(false);
  }
  async function choose(name){
-  if(!['hip','knee'].includes(name))return;
+  if(!['hip','knee','shoulder'].includes(name))return;
   if(isActive()&&state.data.view==='detail')return nextRegion(name);
   const id=++token;cancelAnimationFrame(animation);returning=false;pending=true;motion=0;clearSelection();
   if(!state.select(name))return;
@@ -130,7 +149,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   updateURL();render();
   try{
    if(!model.hasDetail(name)){
-    const data=await loader.load(name==='hip'?'hipGeometry':'kneeGeometry');
+    const data=await loader.load(name==='hip'?'hipGeometry':name==='shoulder'?'shoulderGeometry':'kneeGeometry');
     if(id!==token)return;
     model.loadDetail(name,data);
    }
@@ -138,8 +157,8 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
    region=name;reveal=0;pending=false;
    setStatus('TRAVELING IN ONE ANATOMICAL SCENE');
    const c=state.data.camera;
-   const to={yaw:shortestYaw(c.yaw,name==='hip'?Math.PI+.28:.47),
-     pitch:-.11,zoom:name==='hip'?1.05:1.10,frameSpan:name==='hip'?3.4:3.2,target:centerPoint(name)};
+   const to={yaw:shortestYaw(c.yaw,name==='hip'?Math.PI+.28:name==='shoulder'?.48:.47),
+     pitch:-.11,zoom:name==='hip'?1.05:1.10,frameSpan:name==='hip'?3.4:name==='shoulder'?3.15:3.2,target:centerPoint(name)};
    travel(to,reduce()?0:1150,v=>{reveal=clamp((v-.46)/.54,0,1);},()=>{
     if(id!==token)return;
     state.enter();state.data.frameReady=true;reveal=1;
@@ -204,18 +223,18 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   const trace=$('mode-trace'),peel=$('mode-peel'),output=$('layer-output');
   trace.disabled=true;
   trace.title='A continuous nerve path is not verified in this source-derived scene';
-  peel.textContent=name==='knee'?'Isolate':'Peel';
-  $('joint-motion-label').textContent=name==='hip'?'Hip flexion':'Knee flexion';
-  $('joint-motion-slider').max=name==='hip'?'65':'105';
+  peel.textContent=name==='knee'?'Isolate':name==='shoulder'?'Layers':'Peel';
+  $('joint-motion-label').textContent=name==='hip'?'Hip flexion':name==='shoulder'?'Shoulder abduction':'Knee flexion';
+  $('joint-motion-slider').max=name==='hip'?'65':name==='shoulder'?'110':'105';
   $('joint-motion-slider').value='0';$('joint-motion-value').textContent='0°';
   $('layer-slider').max='3';
   $('layer-slider').disabled=false;
-  output.textContent=name==='hip'?'Surface':'Complete joint';
+  output.textContent=LAYERS[name][0];
  }
  function depthChange(value){
   state.setDepth(value);
   const v=state.data.layer;clearSelection();
-  $('layer-output').textContent=region==='hip'?['Surface','Stabilizers','Deep rotators','Skeleton'][v]:['Complete joint','Femur focus','Tibia / fibula','Patella focus'][Math.min(v,3)];
+  $('layer-output').textContent=layerText();
   if(v>0){
    state.mode('peel');
    document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-peel')));
@@ -230,21 +249,24 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   if(mode==='peel'&&state.data.layer===0)state.setDepth(1);
   if(mode==='explore')state.setDepth(0);
   $('layer-slider').value=String(state.data.layer);
-  $('layer-output').textContent=region==='hip'?['Surface','Stabilizers','Deep rotators','Skeleton'][state.data.layer]:['Complete joint','Femur focus','Tibia / fibula','Patella focus'][Math.min(state.data.layer,3)];
+  $('layer-output').textContent=layerText();
   clearSelection();
   document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-'+mode)));
-  $('context-note').textContent=mode==='trace'?'Sciatic nerve geometry comes from a separately registered atlas. Open the labeled Sciatic lab from the body overview; no continuous pathway is invented here.':mode==='peel'?'Peel through sourced hip muscles (or use the knee standalone lab for illustrative tissues). This is not a biomechanics simulation.':NOTE[region]||'Source-derived skeletal geometry.';
+  $('context-note').textContent=mode==='peel'&&region==='shoulder'
+   ?'Four rotator-cuff muscle surfaces from the same pinned source. Deltoid, labrum, ligaments and nerve geometry are not yet verified in this layer.'
+   :mode==='peel'?'Selected layers come from their attributed sources. Motion remains an illustrative pivot, not clinical biomechanics.'
+   :NOTE[region]||'Source-derived skeletal geometry.';
   render();
  }
  function reset(){
   if(!region)return;
   state.setDepth(0);motion=0;clearSelection();$('joint-motion-slider').value='0';$('joint-motion-value').textContent='0°';$('layer-slider').value='0';
-  $('layer-output').textContent=region==='hip'?'Surface':'Complete joint';
+  $('layer-output').textContent=LAYERS[region][0];
   state.mode('explore');
   document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-explore')));
   const c=state.data.camera;
-  const home={yaw:shortestYaw(c.yaw,region==='hip'?Math.PI+.28:.47),pitch:-.11,
-   zoom:region==='hip'?1.05:1.10,frameSpan:region==='hip'?3.4:3.2,target:centerPoint(region)};
+  const home={yaw:shortestYaw(c.yaw,region==='hip'?Math.PI+.28:region==='shoulder'?.48:.47),pitch:-.11,
+   zoom:region==='hip'?1.05:1.10,frameSpan:region==='hip'?3.4:region==='shoulder'?3.15:3.2,target:centerPoint(region)};
   const id=++token;
   travel(home,reduce()?0:480,()=>{},()=>{if(id===token)render();});
  }
