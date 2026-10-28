@@ -227,6 +227,9 @@ function body(){
  const from={yaw:cam.yaw,pitch:cam.pitch,zoom:cam.zoom,frameSpan:cam.frameSpan,target:{...cam.target}};
  state.body();
  const home={...state.data.camera,target:{...state.data.camera.target}};
+ // Return along the same viewing direction; flipping to a default front view
+ // mid-flight would break the user's sense of where they are in the body.
+ home.yaw=from.yaw;home.pitch=from.pitch;
  Object.assign(state.data.camera,from);
  // Preserve the destination viewport until it has faded; resizing an active
  // embedded lab would look like another page jump on mobile.
