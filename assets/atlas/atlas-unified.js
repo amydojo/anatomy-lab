@@ -10,6 +10,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  const getRegion=()=>region;
  const getReveal=()=>reveal;
  const getMotion=()=>motion;
+ const getSelected=()=>selected?.id||null;
  const easing=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
  const setStatus=text=>{$('scene-status').textContent=text;};
  function travel(to,ms,progress,done){
@@ -64,7 +65,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   $('structure-details-name').textContent=name;
   $('structure-details-description').textContent=desc;
   $('structure-details').hidden=false;
-  return hit.id;
+  render();return hit.id;
  }
  function showSelected(){
   if(!selected)return;
@@ -247,7 +248,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   const id=++token;
   travel(home,reduce()?0:480,()=>{},()=>{if(id===token)render();});
  }
- return Object.freeze({choose,back,travelKnee,isActive,getRegion,getReveal,getMotion,snapshot,depthChange,setMode,reset,setMotion,pickAt,clearSelection,showSelected,nextRegion,interrupt});
+ return Object.freeze({choose,back,travelKnee,isActive,getRegion,getReveal,getMotion,getSelected,snapshot,depthChange,setMode,reset,setMotion,pickAt,clearSelection,showSelected,nextRegion,interrupt});
 }
 window.BodyAtlasUnified=Object.freeze({create});
 })();
