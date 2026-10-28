@@ -1,0 +1,605 @@
+{
+  "schema": "body-live/extended-regions-provenance-v1",
+  "dataset": "BodyParts3D 4.0",
+  "attribution": "BodyParts3D \u00a9 Database Center for Life Science",
+  "license": "CC BY 4.0",
+  "license_url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html",
+  "upstream": "https://github.com/ashemag/human-atlas",
+  "pinned_commit": "1c38bf35c254a891200d3cedecfd57abebe83d8d",
+  "source_frame": {
+    "origin_metres": [
+      0,
+      0.9,
+      0
+    ],
+    "scale": 5,
+    "axes": "Y-up source metres"
+  },
+  "anatomist_reviewed": false,
+  "kinematics_validated": false,
+  "inputs": {
+    "atlas.json": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/atlas.json",
+      "git_blob_sha1": "0f81b5621479a0c0548f4683c316f33bd4d6545b",
+      "sha256": "c359f4bcd2cba90b7411d66d5e9fc04dc81294d46cd5c1e8b212c824f2e5bbee",
+      "bytes": 1335285
+    },
+    "body-11.bin": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-11.bin",
+      "git_blob_sha1": "f437a61bfd8c976108abf3e3a607784af3eb3575",
+      "sha256": "e8c1afe7f30fe710ad164ec9cd2287a32881606e7eb590af47d76b3f84405027",
+      "bytes": 4037528
+    },
+    "body-12.bin": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-12.bin",
+      "git_blob_sha1": "88e823456d067922f9c27c2405a69fe983eef68b",
+      "sha256": "61a6c8da89bb20df50c575964ac81aa4090eabfc2cb27ad2155aea325f31c6c0",
+      "bytes": 4000292
+    },
+    "body-13.bin": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-13.bin",
+      "git_blob_sha1": "24a9953b6677cf07cd6beea9f221a0690c6efa44",
+      "sha256": "4c51b6be85d5b705d2b52b79b9ad1cdae0b65ad03c9402a2f2673c7633fd94f3",
+      "bytes": 4004548
+    }
+  },
+  "regions": {
+    "skull": {
+      "asset_sha256": "9fa556b68e568a1c21b2937bbc13f62f5fd812719d8b5cfd472b230020d7c97a",
+      "structures": {
+        "frontal-bone": {
+          "name": "Frontal bone",
+          "fma": "FMA52734",
+          "vertices": 3315,
+          "triangles": 5112
+        },
+        "occipital-bone": {
+          "name": "Occipital bone",
+          "fma": "FMA52735",
+          "vertices": 2938,
+          "triangles": 4912
+        },
+        "sphenoid-bone": {
+          "name": "Sphenoid bone",
+          "fma": "FMA52736",
+          "vertices": 2791,
+          "triangles": 4238
+        },
+        "mandible": {
+          "name": "Mandible",
+          "fma": "FMA52748",
+          "vertices": 1207,
+          "triangles": 2348
+        },
+        "left-parietal-bone": {
+          "name": "Left parietal bone",
+          "fma": "FMA52789",
+          "vertices": 2927,
+          "triangles": 3732
+        },
+        "left-temporal-bone": {
+          "name": "Left temporal bone",
+          "fma": "FMA52739",
+          "vertices": 1835,
+          "triangles": 2828
+        },
+        "left-maxilla": {
+          "name": "Left maxilla",
+          "fma": "FMA53650",
+          "vertices": 2678,
+          "triangles": 3598
+        },
+        "left-nasal-bone": {
+          "name": "Left nasal bone",
+          "fma": "FMA53648",
+          "vertices": 236,
+          "triangles": 388
+        },
+        "left-zygomatic-bone": {
+          "name": "Left zygomatic bone",
+          "fma": "FMA52893",
+          "vertices": 721,
+          "triangles": 1056
+        },
+        "right-parietal-bone": {
+          "name": "Right parietal bone",
+          "fma": "FMA52788",
+          "vertices": 2734,
+          "triangles": 3694
+        },
+        "right-temporal-bone": {
+          "name": "Right temporal bone",
+          "fma": "FMA52738",
+          "vertices": 1976,
+          "triangles": 2906
+        },
+        "right-maxilla": {
+          "name": "Right maxilla",
+          "fma": "FMA53649",
+          "vertices": 2591,
+          "triangles": 3660
+        },
+        "right-nasal-bone": {
+          "name": "Right nasal bone",
+          "fma": "FMA53647",
+          "vertices": 253,
+          "triangles": 392
+        },
+        "right-zygomatic-bone": {
+          "name": "Right zygomatic bone",
+          "fma": "FMA52892",
+          "vertices": 717,
+          "triangles": 1146
+        }
+      },
+      "source_parts": 14,
+      "triangles": 40010,
+      "movement": "source-reference-pose; no measured biomechanics"
+    },
+    "neck": {
+      "asset_sha256": "3108c8ca90913987cbb715276437ba442f890ebb2e4618ae31dafc349e7ff8a3",
+      "structures": {
+        "atlas": {
+          "name": "Atlas",
+          "fma": "FMA12519",
+          "vertices": 1114,
+          "triangles": 1514
+        },
+        "axis": {
+          "name": "Axis",
+          "fma": "FMA12520",
+          "vertices": 1408,
+          "triangles": 2028
+        },
+        "third-cervical-vertebra": {
+          "name": "Third cervical vertebra",
+          "fma": "FMA12521",
+          "vertices": 1184,
+          "triangles": 1766
+        },
+        "fourth-cervical-vertebra": {
+          "name": "Fourth cervical vertebra",
+          "fma": "FMA12522",
+          "vertices": 1288,
+          "triangles": 2062
+        },
+        "fifth-cervical-vertebra": {
+          "name": "Fifth cervical vertebra",
+          "fma": "FMA12523",
+          "vertices": 1396,
+          "triangles": 1934
+        },
+        "sixth-cervical-vertebra": {
+          "name": "Sixth cervical vertebra",
+          "fma": "FMA12524",
+          "vertices": 1257,
+          "triangles": 1928
+        },
+        "seventh-cervical-vertebra": {
+          "name": "Seventh cervical vertebra",
+          "fma": "FMA12525",
+          "vertices": 1162,
+          "triangles": 1520
+        },
+        "hyoid-bone": {
+          "name": "Hyoid bone",
+          "fma": "FMA52749",
+          "vertices": 604,
+          "triangles": 1036
+        }
+      },
+      "source_parts": 8,
+      "triangles": 13788,
+      "movement": "source-reference-pose; no measured biomechanics"
+    },
+    "thorax": {
+      "asset_sha256": "6083f84d695b67aea2329eaa8e3fd0203459474785d569ff18b5d4703508509e",
+      "structures": {
+        "left-first-rib": {
+          "name": "Left first rib",
+          "fma": "FMA7987",
+          "vertices": 507,
+          "triangles": 1010
+        },
+        "left-second-rib": {
+          "name": "Left second rib",
+          "fma": "FMA8012",
+          "vertices": 656,
+          "triangles": 1230
+        },
+        "left-third-rib": {
+          "name": "Left third rib",
+          "fma": "FMA8039",
+          "vertices": 802,
+          "triangles": 1594
+        },
+        "left-fourth-rib": {
+          "name": "Left fourth rib",
+          "fma": "FMA8148",
+          "vertices": 981,
+          "triangles": 1946
+        },
+        "left-fifth-rib": {
+          "name": "Left fifth rib",
+          "fma": "FMA8093",
+          "vertices": 1095,
+          "triangles": 2136
+        },
+        "left-sixth-rib": {
+          "name": "Left sixth rib",
+          "fma": "FMA8202",
+          "vertices": 1147,
+          "triangles": 2258
+        },
+        "left-seventh-rib": {
+          "name": "Left seventh rib",
+          "fma": "FMA8256",
+          "vertices": 1122,
+          "triangles": 2206
+        },
+        "left-eighth-rib": {
+          "name": "Left eighth rib",
+          "fma": "FMA8310",
+          "vertices": 936,
+          "triangles": 1832
+        },
+        "left-ninth-rib": {
+          "name": "Left ninth rib",
+          "fma": "FMA8391",
+          "vertices": 843,
+          "triangles": 1666
+        },
+        "left-tenth-rib": {
+          "name": "Left tenth rib",
+          "fma": "FMA8472",
+          "vertices": 754,
+          "triangles": 1500
+        },
+        "left-eleventh-rib": {
+          "name": "Left eleventh rib",
+          "fma": "FMA8532",
+          "vertices": 537,
+          "triangles": 1070
+        },
+        "left-twelfth-rib": {
+          "name": "Left twelfth rib",
+          "fma": "FMA8534",
+          "vertices": 367,
+          "triangles": 730
+        },
+        "right-first-rib": {
+          "name": "Right first rib",
+          "fma": "FMA7857",
+          "vertices": 519,
+          "triangles": 1032
+        },
+        "right-second-rib": {
+          "name": "Right second rib",
+          "fma": "FMA7882",
+          "vertices": 648,
+          "triangles": 1230
+        },
+        "right-third-rib": {
+          "name": "Right third rib",
+          "fma": "FMA7909",
+          "vertices": 800,
+          "triangles": 1594
+        },
+        "right-fourth-rib": {
+          "name": "Right fourth rib",
+          "fma": "FMA7957",
+          "vertices": 979,
+          "triangles": 1942
+        },
+        "right-fifth-rib": {
+          "name": "Right fifth rib",
+          "fma": "FMA8066",
+          "vertices": 1093,
+          "triangles": 2136
+        },
+        "right-sixth-rib": {
+          "name": "Right sixth rib",
+          "fma": "FMA8175",
+          "vertices": 1147,
+          "triangles": 2254
+        },
+        "right-seventh-rib": {
+          "name": "Right seventh rib",
+          "fma": "FMA8229",
+          "vertices": 1122,
+          "triangles": 2206
+        },
+        "right-eighth-rib": {
+          "name": "Right eighth rib",
+          "fma": "FMA8283",
+          "vertices": 928,
+          "triangles": 1832
+        },
+        "right-ninth-rib": {
+          "name": "Right ninth rib",
+          "fma": "FMA8364",
+          "vertices": 842,
+          "triangles": 1666
+        },
+        "right-tenth-rib": {
+          "name": "Right tenth rib",
+          "fma": "FMA8445",
+          "vertices": 754,
+          "triangles": 1500
+        },
+        "right-eleventh-rib": {
+          "name": "Right eleventh rib",
+          "fma": "FMA8531",
+          "vertices": 538,
+          "triangles": 1070
+        },
+        "right-twelfth-rib": {
+          "name": "Right twelfth rib",
+          "fma": "FMA8533",
+          "vertices": 372,
+          "triangles": 740
+        },
+        "manubrium": {
+          "name": "Manubrium",
+          "fma": "FMA7486",
+          "vertices": 1094,
+          "triangles": 1892
+        },
+        "body-of-sternum": {
+          "name": "Body of sternum",
+          "fma": "FMA7487",
+          "vertices": 2511,
+          "triangles": 2810
+        },
+        "xiphoid-process": {
+          "name": "Xiphoid process",
+          "fma": "FMA7488",
+          "vertices": 464,
+          "triangles": 864
+        },
+        "third-thoracic-vertebra": {
+          "name": "Third thoracic vertebra",
+          "fma": "FMA9209",
+          "vertices": 997,
+          "triangles": 1696
+        },
+        "fifth-thoracic-vertebra": {
+          "name": "Fifth thoracic vertebra",
+          "fma": "FMA9922",
+          "vertices": 1089,
+          "triangles": 1832
+        },
+        "seventh-thoracic-vertebra": {
+          "name": "Seventh thoracic vertebra",
+          "fma": "FMA9968",
+          "vertices": 1223,
+          "triangles": 2094
+        }
+      },
+      "source_parts": 30,
+      "triangles": 49568,
+      "movement": "source-reference-pose; no measured biomechanics"
+    },
+    "elbow": {
+      "asset_sha256": "7980a35c894d1db6e62ca6f545c853957efe3dc3b4cc93bef29ba17d27a0ca2e",
+      "structures": {
+        "right-humerus": {
+          "name": "Right humerus",
+          "fma": "FMA23130",
+          "vertices": 794,
+          "triangles": 1070
+        },
+        "right-radius": {
+          "name": "Right radius",
+          "fma": "FMA23464",
+          "vertices": 249,
+          "triangles": 408
+        },
+        "right-ulna": {
+          "name": "Right ulna",
+          "fma": "FMA23467",
+          "vertices": 305,
+          "triangles": 482
+        }
+      },
+      "source_parts": 3,
+      "triangles": 1960,
+      "movement": "source-reference-pose; no measured biomechanics"
+    },
+    "wrist": {
+      "asset_sha256": "e14f9e463d1601755cf51549959e0762862e06f93ee779d0a4dfbf917c9581e8",
+      "structures": {
+        "right-radius": {
+          "name": "Right radius",
+          "fma": "FMA23464",
+          "vertices": 249,
+          "triangles": 408
+        },
+        "right-ulna": {
+          "name": "Right ulna",
+          "fma": "FMA23467",
+          "vertices": 305,
+          "triangles": 482
+        },
+        "right-scaphoid": {
+          "name": "Right scaphoid",
+          "fma": "FMA24435",
+          "vertices": 185,
+          "triangles": 302
+        },
+        "right-lunate": {
+          "name": "Right lunate",
+          "fma": "FMA24437",
+          "vertices": 191,
+          "triangles": 324
+        },
+        "right-triquetral": {
+          "name": "Right triquetral",
+          "fma": "FMA24439",
+          "vertices": 139,
+          "triangles": 170
+        },
+        "right-pisiform": {
+          "name": "Right pisiform",
+          "fma": "FMA24441",
+          "vertices": 110,
+          "triangles": 190
+        },
+        "right-trapezium": {
+          "name": "Right trapezium",
+          "fma": "FMA24443",
+          "vertices": 272,
+          "triangles": 424
+        },
+        "right-trapezoid": {
+          "name": "Right trapezoid",
+          "fma": "FMA23725",
+          "vertices": 267,
+          "triangles": 354
+        },
+        "right-capitate": {
+          "name": "Right capitate",
+          "fma": "FMA24446",
+          "vertices": 245,
+          "triangles": 406
+        },
+        "right-hamate": {
+          "name": "Right hamate",
+          "fma": "FMA24448",
+          "vertices": 316,
+          "triangles": 490
+        },
+        "right-first-metacarpal-bone": {
+          "name": "Right first metacarpal bone",
+          "fma": "FMA24464",
+          "vertices": 287,
+          "triangles": 526
+        },
+        "right-second-metacarpal-bone": {
+          "name": "Right second metacarpal bone",
+          "fma": "FMA24466",
+          "vertices": 347,
+          "triangles": 610
+        },
+        "right-third-metacarpal-bone": {
+          "name": "Right third metacarpal bone",
+          "fma": "FMA24468",
+          "vertices": 345,
+          "triangles": 586
+        },
+        "right-fourth-metacarpal-bone": {
+          "name": "Right fourth metacarpal bone",
+          "fma": "FMA24470",
+          "vertices": 280,
+          "triangles": 422
+        },
+        "right-fifth-metacarpal-bone": {
+          "name": "Right fifth metacarpal bone",
+          "fma": "FMA24472",
+          "vertices": 236,
+          "triangles": 428
+        }
+      },
+      "source_parts": 15,
+      "triangles": 6122,
+      "movement": "source-reference-pose; no measured biomechanics"
+    },
+    "ankle": {
+      "asset_sha256": "11f9b029bf9bd2880154659fbce6ec645863211d974fd02e7e263ff2617b453f",
+      "structures": {
+        "right-tibia": {
+          "name": "Right tibia",
+          "fma": "FMA24477",
+          "vertices": 334,
+          "triangles": 634
+        },
+        "right-fibula": {
+          "name": "Right fibula",
+          "fma": "FMA24480",
+          "vertices": 162,
+          "triangles": 298
+        },
+        "right-talus": {
+          "name": "Right talus",
+          "fma": "FMA24482",
+          "vertices": 709,
+          "triangles": 1184
+        },
+        "right-calcaneus": {
+          "name": "Right calcaneus",
+          "fma": "FMA24497",
+          "vertices": 641,
+          "triangles": 1076
+        },
+        "navicular-bone-of-right-foot": {
+          "name": "Navicular bone of right foot",
+          "fma": "FMA24500",
+          "vertices": 404,
+          "triangles": 618
+        },
+        "right-cuboid-bone": {
+          "name": "Right cuboid bone",
+          "fma": "FMA24528",
+          "vertices": 488,
+          "triangles": 822
+        },
+        "right-medial-cuneiform-bone": {
+          "name": "Right medial cuneiform bone",
+          "fma": "FMA24521",
+          "vertices": 553,
+          "triangles": 838
+        },
+        "right-intermediate-cuneiform-bone": {
+          "name": "Right intermediate cuneiform bone",
+          "fma": "FMA24523",
+          "vertices": 278,
+          "triangles": 430
+        },
+        "right-lateral-cuneiform-bone": {
+          "name": "Right lateral cuneiform bone",
+          "fma": "FMA24525",
+          "vertices": 380,
+          "triangles": 600
+        },
+        "right-first-metatarsal-bone": {
+          "name": "Right first metatarsal bone",
+          "fma": "FMA24507",
+          "vertices": 492,
+          "triangles": 908
+        },
+        "right-second-metatarsal-bone": {
+          "name": "Right second metatarsal bone",
+          "fma": "FMA24509",
+          "vertices": 434,
+          "triangles": 612
+        },
+        "right-third-metatarsal-bone": {
+          "name": "Right third metatarsal bone",
+          "fma": "FMA24511",
+          "vertices": 381,
+          "triangles": 620
+        },
+        "right-fourth-metatarsal-bone": {
+          "name": "Right fourth metatarsal bone",
+          "fma": "FMA24513",
+          "vertices": 333,
+          "triangles": 554
+        },
+        "right-fifth-metatarsal-bone": {
+          "name": "Right fifth metatarsal bone",
+          "fma": "FMA24515",
+          "vertices": 371,
+          "triangles": 670
+        }
+      },
+      "source_parts": 14,
+      "triangles": 9864,
+      "movement": "source-reference-pose; no measured biomechanics"
+    }
+  },
+  "unsupported": [
+    "Tendons, cartilage, ligaments, nerve geometry, and connective tissue not reconstructed by this import",
+    "No measured elbow, radiocarpal, ankle, craniocervical, or temporomandibular motion",
+    "A source mesh's presence does not certify clinical accuracy or patient-specific anatomy"
+  ]
+}
