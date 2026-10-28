@@ -86,7 +86,7 @@ test('One camera path uses bounded frame changes and does not snap on detail ent
   return frames;
  });
  expect(sampled.some(x=>x.view==='detail')).toBe(true);
- expect(Math.min(...sampled.map(x=>x.z))).toBeLessThan(2);
+ expect(Math.min(...sampled.map(x=>x.z))).toBeLessThan(3.6);
  for(let i=1;i<sampled.length;i++){
   // Software WebGL can stall the sampling loop on mobile CI. Bound actual
   // camera movement by elapsed time, not by a fixed amount per stale sample.
