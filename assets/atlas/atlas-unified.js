@@ -281,7 +281,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   $('joint-motion-label').textContent=current?.label||'Illustrative motion';
   $('joint-motion-slider').setAttribute('aria-label',(current?.label||'Illustrative motion')+' · educational model');
   $('joint-motion-slider').max=String(current?.max||65);
-  $('joint-motion-slider').value='0';$('joint-motion-value').textContent='0°';
+  $('joint-motion-slider').value='0';$('joint-motion-value').textContent='0'+(current?.unit||'°');
   $('layer-slider').max=extended?'4':'3';
   $('layer-slider').disabled=false;
   output.textContent=LAYERS[name][0];
