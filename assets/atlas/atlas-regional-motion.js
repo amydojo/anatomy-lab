@@ -77,7 +77,7 @@ function pose(region,parts,value,mode){
   const chain=['seventh-cervical-vertebra','sixth-cervical-vertebra',
    'fifth-cervical-vertebra','fourth-cervical-vertebra',
    'third-cervical-vertebra','axis','atlas'];
-  const factors=spec.id==='neck-rotate'?[0,.07,.08,.10,.10,.36,.29]:
+  const factors=spec.id==='neck-rotate'?[0,.03,.04,.05,.06,.09,.73]:
    [0,.13,.17,.18,.19,.18,.15];
   let cumulative=I();
   for(let i=1;i<chain.length;i++){
