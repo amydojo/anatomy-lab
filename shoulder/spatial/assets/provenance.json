@@ -1,0 +1,122 @@
+{
+  "schema": "body-live/shoulder-provenance-v1",
+  "attribution": "BodyParts3D, \u00a9 The Database Center for Life Science licensed under CC Attribution 4.0 International",
+  "license": "CC BY 4.0",
+  "license_url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html",
+  "original_release": "4.0 99% reduced IS-A tree",
+  "distribution": "https://github.com/ashemag/human-atlas",
+  "pinned_commit": "1c38bf35c254a891200d3cedecfd57abebe83d8d",
+  "input_hashes": {
+    "atlas.json": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/atlas.json",
+      "git_blob_sha1": "0f81b5621479a0c0548f4683c316f33bd4d6545b",
+      "sha256": "c359f4bcd2cba90b7411d66d5e9fc04dc81294d46cd5c1e8b212c824f2e5bbee",
+      "bytes": 1335285
+    },
+    "body-3.bin": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-3.bin",
+      "git_blob_sha1": "368a55dd62c761caf2aee044439e9563b500f276",
+      "sha256": "6febb76b50423331f66802a63bb43f04f99ce08129837015910eed43d0719268",
+      "bytes": 4041436
+    },
+    "body-4.bin": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-4.bin",
+      "git_blob_sha1": "92dad79d99d03d5bd0778203259a43e1f5583097",
+      "sha256": "0509e6c996fe5b935ace770a5dbf2d83a474330b7e541a844052a080bbf814bb",
+      "bytes": 4020544
+    },
+    "body-13.bin": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-13.bin",
+      "git_blob_sha1": "24a9953b6677cf07cd6beea9f221a0690c6efa44",
+      "sha256": "4c51b6be85d5b705d2b52b79b9ad1cdae0b65ad03c9402a2f2673c7633fd94f3",
+      "bytes": 4004548
+    }
+  },
+  "models": {
+    "clavicle": {
+      "fma": "FMA13322",
+      "name": "Right clavicle",
+      "chunk": 13,
+      "vertices": 420,
+      "triangles": 820
+    },
+    "scapula": {
+      "fma": "FMA13395",
+      "name": "Right scapula",
+      "chunk": 13,
+      "vertices": 2896,
+      "triangles": 5756
+    },
+    "humerus": {
+      "fma": "FMA23130",
+      "name": "Right humerus",
+      "chunk": 13,
+      "vertices": 794,
+      "triangles": 1070
+    },
+    "supraspinatus": {
+      "fma": "FMA32544",
+      "name": "Right supraspinatus",
+      "chunk": 4,
+      "vertices": 622,
+      "triangles": 564
+    },
+    "infraspinatus": {
+      "fma": "FMA32547",
+      "name": "Right infraspinatus muscle",
+      "chunk": 3,
+      "vertices": 528,
+      "triangles": 536
+    },
+    "subscapularis": {
+      "fma": "FMA13414",
+      "name": "Right subscapularis",
+      "chunk": 4,
+      "vertices": 2368,
+      "triangles": 1524
+    },
+    "teresMinor": {
+      "fma": "FMA32553",
+      "name": "Right teres minor",
+      "chunk": 4,
+      "vertices": 316,
+      "triangles": 372
+    },
+    "teresMajor": {
+      "fma": "FMA32551",
+      "name": "Right teres major",
+      "chunk": 4,
+      "vertices": 775,
+      "triangles": 700
+    },
+    "coracobrachialis": {
+      "fma": "FMA37665",
+      "name": "Right coracobrachialis",
+      "chunk": 3,
+      "vertices": 329,
+      "triangles": 280
+    }
+  },
+  "asset_sha256": "995a943ab1f1bbf3fe38045669427cdb11dd7ff1bda63f44a922c9e0bfd5e3e2",
+  "anatomist_reviewed": false,
+  "kinematics_validated": false,
+  "missing": [
+    "Right deltoid clavicular part",
+    "Right deltoid acromial part",
+    "Right deltoid spinal part",
+    "Right biceps brachii long head",
+    "Right biceps brachii short head",
+    "Right pectoralis major clavicular part"
+  ],
+  "unsupported": [
+    "ligament models not imported",
+    "glenoid labrum not imported",
+    "axillary/suprascapular nerves not imported",
+    "tendons not independently validated"
+  ],
+  "notes": [
+    "Reference-pose source geometry; source meshes share atlas coordinate frame.",
+    "A single humeral teaching pivot is not validated glenohumeral/scapulothoracic kinematics.",
+    "Muscles stay in source pose during movement; do not infer tendon deformation."
+  ]
+}
