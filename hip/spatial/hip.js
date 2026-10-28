@@ -45,6 +45,7 @@ const state={yaw:Math.PI+.28,pitch:-.11,zoom:1.08,frameSpan:4.5,width:0,height:0
 const lesson={phase:'idle',guess:null,oldDepth:0,oldAxis:'flexion'};
 let meshes=null,nerveMeshes=[],nerveTruth=null,nerveGraph=null,nerveAssetError='',nerveEvidenceOpen=false,rendering=false,hits=[];
 let hipSourceData=null,bridgeEvidence=null;
+let atlasTravelMix=1; // source-frame travel: bones first, then sourced muscles and nerve overlays
 const follow={active:false,branch:'sciatic',progress:0,frame:'composite',savedZoom:1.08,raf:0};
 function toLocal(x,y,z){const o=[-.057,.895,-.045],s=10;return V((x-o[0])*s,(y-o[1])*s,(z-o[2])*s);}
 const routeSource=[[-.039,.949,-.088],[-.066,.918,-.091],[-.082,.891,-.099],[-.098,.843,-.104],[-.108,.792,-.097],[-.114,.733,-.084]];
@@ -120,6 +121,9 @@ function alphaFor(id){
  if(state.selected&&state.selected!==id)opacity*=state.isolate?.12:.45;
  if(state.selected===id)opacity=Math.min(1,opacity+.07);
  if(state.trace&&NERVES.includes(id))opacity=1;
+ if(atlasTravelMix<1){
+  opacity=BONES.includes(id)?opacity*atlasTravelMix+.95*(1-atlasTravelMix):opacity*atlasTravelMix;
+ }
  if(follow.active&&!NERVES.includes(id))opacity*=id==='piriformis'?.35:BONES.includes(id)?.23:.12;
  return opacity;
 }
@@ -560,7 +564,23 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
 window.addEventListener('pagehide',stop);
 window.addEventListener('resize',resize,{passive:true});
 if('ResizeObserver' in window)new ResizeObserver(resize).observe(document.querySelector('.stage'));
+// The Atlas passes in a source-frame camera. This is a visual alignment bridge,
+// NOT evidence that separately sourced nerves align to this pelvis.
+function prepareAtlasEntry(camera){
+ if(!state.sourceLoaded||!camera||!Number.isFinite(camera.zoom)||camera.zoom<=0)return false;
+ if(follow.active)stopFollow();
+ stop();state.pose={flexion:0,abduction:0,rotation:0};state.depth=0;state.trace=false;
+ state.selected=null;state.isolate=false;state.focus='joint';
+ state.target=null;state.anchorY=.5;
+ state.yaw=camera.yaw;state.pitch=camera.pitch;state.zoom=camera.zoom;
+ state.frameSpan=camera.frameSpan||3.35;atlasTravelMix=0;
+ syncDepth();inspector();draw();return true;
+}
+function setAtlasEntryMix(value){
+ atlasTravelMix=clamp(Number(value)||0,0,1);draw();
+}
 window.__HIP_SPATIAL__={
+ prepareAtlasEntry,setAtlasEntryMix,
  getState:()=>({depth:state.depth,pose:{...state.pose},axis:state.axis,selected:state.selected,trace:state.trace,
   followActive:follow.active,followBranch:follow.branch,followProgress:follow.progress,displaySourceFrame:follow.frame,
   cameraTarget:state.target?{...state.target}:null,cameraAnchorY:state.anchorY??.5,graphTopology:nerveGraph?.topology||null,
