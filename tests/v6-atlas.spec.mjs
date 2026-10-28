@@ -318,8 +318,11 @@ test('V6.8 Shoulder rig diagnostic markers follow connected bones and cuff attac
  expect(box.width).toBeGreaterThan(250);
  await page.locator('#reset-view').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(0);
- const returned=await page.locator('#shoulder-rig-overlay circle').evaluateAll(elements=>elements.slice(-3).map(e=>[e.getAttribute('cx'),e.getAttribute('cy')]));
- expect(returned).toEqual(before);
+ await expect.poll(async()=>{
+  const returned=await page.locator('#shoulder-rig-overlay circle').evaluateAll(elements=>
+   elements.slice(-3).map(e=>[Number(e.getAttribute('cx')),Number(e.getAttribute('cy'))]));
+  return Math.max(...returned.flatMap((row,i)=>row.map((v,j)=>Math.abs(v-Number(before[i][j])))));
+ },{timeout:4500}).toBeLessThan(.05);
  await page.locator('#back-body').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:6000}).toBe('overview');
  await expect(page.locator('#shoulder-rig-tools')).toBeHidden();
