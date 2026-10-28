@@ -32,18 +32,18 @@ const MOTIONS=Object.freeze({
          {id:'rib-tilt',label:'Rib cage · tilt',max:12,unit:'°',note:'Illustrative costovertebral excursion, not a clinical chest-wall model'}],
  elbow:[{id:'elbow-flex',label:'Elbow · flexion',max:125,unit:'°',note:'Humeroulnar approximation; no cartilage, olecranon or capsule contact'},
         {id:'forearm-turn',label:'Forearm · rotation',max:65,unit:'°',note:'Radius motion around forearm axis; radioulnar joints not coupled accurately'}],
- wrist:[{id:'wrist-flex',label:'Wrist · flexion',max:65,unit:'°',note:'Carpal and metacarpal motion distributed heuristically'},
+ wrist:[{id:'wrist-flex',label:'Wrist · flexion',max:65,unit:'°',note:'Heuristic carpal and metacarpal coupling, not measured kinematics'},
         {id:'wrist-deviate',label:'Wrist · radial deviation',max:22,unit:'°',note:'No measured scaphoid-lunate or intercarpal constraints'}],
- ankle:[{id:'ankle-dorsi',label:'Ankle · dorsiflexion',max:28,unit:'°',note:'Foot articulation around estimated talocrural pivot'},
+ ankle:[{id:'ankle-dorsi',label:'Ankle · dorsiflexion',max:28,unit:'°',note:'Foot motion around an estimated talocrural pivot, without validated contacts'},
         {id:'subtalar-invert',label:'Hindfoot · inversion',max:24,unit:'°',note:'Subtalar and midfoot approximation without ligament/tendon mechanics'}],
- hip:[{id:'hip-flex',label:'Hip · flexion',max:65,unit:'°',note:'Previously established attachment-guided teaching hinge'},
-      {id:'hip-abduct',label:'Hip · abduction',max:38,unit:'°',note:'Femoral rotation about an estimated hip center'},
+ hip:[{id:'hip-flex',label:'Hip · flexion',max:65,unit:'°',note:'Previously established inferred attachment-guided teaching hinge'},
+      {id:'hip-abduct',label:'Hip · abduction',max:38,unit:'°',note:'Femoral rotation about an estimated hip center, no capsule simulation'},
       {id:'hip-rotate',label:'Hip · axial rotation',max:35,unit:'°',note:'Illustrative femoral axial rotation, no capsular limits'}],
  knee:[{id:'knee-flex',label:'Knee · flexion',max:105,unit:'°',note:'Previously established teaching hinge and inferred muscle weights'},
        {id:'knee-rotate',label:'Knee · tibial rotation',max:18,unit:'°',note:'No coupled screw-home mechanics or soft-tissue constraint'}],
- shoulder:[{id:'shoulder-abduct',label:'Shoulder · abduction',max:110,unit:'°',note:'Existing connected clavicle/scapula/humerus teaching model'},
+ shoulder:[{id:'shoulder-abduct',label:'Shoulder · abduction',max:110,unit:'°',note:'Existing connected shoulder-girdle teaching model, not measured mechanics'},
            {id:'shoulder-flex',label:'Shoulder · flexion',max:95,unit:'°',note:'Simple humeral flexion with resting scapula, not full rhythm'},
-           {id:'shoulder-rotate',label:'Shoulder · rotation',max:50,unit:'°',note:'Estimated GH axial rotation with fixed source scapula'}]
+           {id:'shoulder-rotate',label:'Shoulder · rotation',max:50,unit:'°',note:'Estimated GH axial rotation with fixed scapula; no ligament constraints'}]
 });
 const config=region=>MOTIONS[region]||[];
 const selected=(region,id)=>config(region).find(m=>m.id===id)||config(region)[0]||null;
