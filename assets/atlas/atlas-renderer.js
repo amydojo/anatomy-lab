@@ -6,10 +6,10 @@ const HIP_COLORS={maximus:[.68,.39,.36],medius:[.82,.54,.47],minimus:[.78,.52,.4
 const HIP_HIDDEN={hipBone:'right-hip-bone',femur:'right-femur',sacrum:'sacrum'};
 const KNEE_HIDDEN={femur:'right-femur',tibia:'right-tibia',fibula:'right-fibula',patella:'right-patella'};
 const DEPTH_HIP={
-  0:{maximus:.82,medius:.34},
-  1:{medius:.91,minimus:.58},
-  2:{minimus:.34,piriformis:.93,obturator:.92,gemellusSuperior:.91,gemellusInferior:.91,quadratus:.9},
-  3:{},4:{}
+  0:{maximus:.79,medius:.24},
+  1:{medius:.88,minimus:.48},
+  2:{minimus:.16,piriformis:.90,obturator:.86,gemellusSuperior:.88,gemellusInferior:.88,quadratus:.86},
+  3:{}
 };
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function create(canvas,onContextLost=()=>{}){
@@ -46,16 +46,31 @@ function create(canvas,onContextLost=()=>{}){
  try{setup();}catch(e){status='fallback';onContextLost(e.message);}
  function makeBuffer(part,id,group,color,tissue=false){
   if(!Array.isArray(part.vertices)||!Array.isArray(part.faces)||part.vertices.length<50||part.faces.length<50)throw Error('Incomplete sourced mesh: '+id);
+  const vs=part.vertices,normal=new Float32Array(vs.length*3);
+  for(const tri of part.faces){
+   if(tri.length!==3||tri.some(i=>!Number.isInteger(i)||i<0||i>=vs.length))throw Error('Invalid sourced triangle: '+id);
+   const [ia,ib,ic]=tri,a=vs[ia],b=vs[ib],c=vs[ic];
+   if([a,b,c].some(p=>!Array.isArray(p)||p.length!==3||p.some(v=>!Number.isFinite(v))))throw Error('Nonfinite coordinate: '+id);
+   const u=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],v=[c[0]-a[0],c[1]-a[1],c[2]-a[2]];
+   // Area-weighted shared-vertex normals: render polish only; original source
+   // positions/topology and anatomical correspondence are never modified.
+   const n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];
+   for(const index of tri)for(let j=0;j<3;j++)normal[index*3+j]+=n[j];
+  }
+  for(let i=0;i<vs.length;i++){
+   const off=i*3,l=Math.hypot(normal[off],normal[off+1],normal[off+2])||1;
+   for(let j=0;j<3;j++)normal[off+j]/=l;
+  }
   const flat=new Float32Array(part.faces.length*18);let cursor=0;
   for(const tri of part.faces){
-   if(tri.length!==3||tri.some(i=>!Number.isInteger(i)||i<0||i>=part.vertices.length))throw Error('Invalid sourced triangle: '+id);
-   const a=part.vertices[tri[0]],b=part.vertices[tri[1]],c=part.vertices[tri[2]];
-   const v=[b[0]-a[0],b[1]-a[1],b[2]-a[2]],w=[c[0]-a[0],c[1]-a[1],c[2]-a[2]];
-   let n=[v[1]*w[2]-v[2]*w[1],v[2]*w[0]-v[0]*w[2],v[0]*w[1]-v[1]*w[0]];
-   const ln=Math.hypot(...n)||1;n=n.map(x=>x/ln);
-   for(const p of [a,b,c]){if(p.some(q=>!Number.isFinite(q)))throw Error('Nonfinite coordinate: '+id);flat.set([p[0],p[1],p[2],...n],cursor);cursor+=6;}
+   for(const i of tri){
+    flat.set(vs[i],cursor);
+    flat.set(normal.subarray(i*3,i*3+3),cursor+3);
+    cursor+=6;
+   }
   }
-  const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,flat,gl.STATIC_DRAW);
+  const buffer=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,flat,gl.STATIC_DRAW);
   return {id,group,color,tissue,buffer,count:part.faces.length*3};
  }
  function load(asset){
@@ -121,24 +136,48 @@ function create(canvas,onContextLost=()=>{}){
    gl.drawArrays(gl.TRIANGLES,0,item.count);
   };
   const region=detail.has(selected)?selected:null;
-  const replaced=region?new Set(Object.values(region==='hip'?HIP_HIDDEN:KNEE_HIDDEN)) :new Set();
-  gl.depthMask(true);
+  const r=clamp(Number(reveal)||0,0,1);
+  const replaced=region?new Set(Object.values(region==='hip'?HIP_HIDDEN:KNEE_HIDDEN)):new Set();
+  const showFocus=region&&r>.001;
+  // Context is only an orientation cue; do not paint an entire second knee
+  // over the selected right knee or occlude its sourced surfaces.
   for(const item of buffers){
-   if(replaced.has(item.id))continue;
-   let dim=1;
-   if(selected){const group=['hip','knee','nerve'].includes(selected)?'lower':selected==='shoulder'?'upper':null;dim=item.group===group?1:1-.7*clamp(reveal,0,1);}
-   if(mode==='evidence'&&selected)dim=item.group==='lower'?.95:.37;
-   draw(item,dim,1);
+   let opacity=1;
+   if(region){
+    if(replaced.has(item.id))opacity=1-r;
+    else if(region==='hip'&&item.id==='left-hip-bone')opacity=1-r*.90;
+    else opacity=1-r;
+   }else if(selected){
+    const group=['hip','knee','nerve'].includes(selected)?'lower':selected==='shoulder'?'upper':null;
+    opacity=1;const dim=item.group===group?1:1-.7*r;
+    if(mode==='evidence')draw(item,item.group==='lower'?.95:.37,1);
+    else draw(item,dim,1);
+    continue;
+   }
+   if(opacity<.015)continue;
+   gl.depthMask(opacity>.98);
+   draw(item,1,opacity);
   }
-  if(region){
+  gl.depthMask(true);
+  if(showFocus){
    const meshes=detail.get(region);
-   for(const mesh of meshes.filter(p=>!p.tissue))draw(mesh,1,1);
-   if(region==='hip'&&reveal>0&&layer<4){
-    // Tissue opacity is a *visual explanation*; no dynamic deformation is claimed.
-    const levels=DEPTH_HIP[clamp(Number(layer)||0,0,4)]||{};
+   const bones=meshes.filter(p=>!p.tissue);
+   // Meaningful knee depth states: isolate actual sourced components. Menisci
+   // and ligaments are NOT silently fabricated just because a slider moved.
+   const chosen=layer===1?new Set(['femur']):layer===2?new Set(['tibia','fibula']):layer===3?new Set(['patella']):null;
+   for(const bone of bones){
+    let a=r;
+    if(region==='knee'&&chosen&&!chosen.has(bone.id))a*=.12;
+    if(a<.02)continue;
+    gl.depthMask(a>.98);
+    draw(bone,1,a);
+   }
+   gl.depthMask(true);
+   if(region==='hip'&&r>0&&layer<3){
+    const levels=DEPTH_HIP[clamp(Number(layer)||0,0,3)]||{};
     gl.depthMask(false);
     for(const mesh of meshes.filter(p=>p.tissue)){
-     const a=(levels[mesh.id]||0)*clamp(reveal,0,1);
+     const a=(levels[mesh.id]||0)*r;
      if(a>.002)draw(mesh,1,a);
     }
     gl.depthMask(true);

@@ -15,10 +15,18 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   cancelAnimationFrame(animation);
   const camera=state.data.camera;
   const from={yaw:camera.yaw,pitch:camera.pitch,zoom:camera.zoom,frameSpan:camera.frameSpan,target:{...camera.target}};
+  const canvas=$('atlas-canvas'),w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);
+  const base=span=>Math.min(w/3.25,h/Math.max(.2,span));
+  // WebGL uses min(width-bound,height-bound). Naive frameSpan lerp hits that
+  // threshold and visibly stalls/accelerates the perceived camera distance.
+  // Interpolate projected scale continuously instead of interpolating zoom alone.
+  const aScale=Math.max(.001,base(from.frameSpan)*from.zoom);
+  const bScale=Math.max(.001,base(to.frameSpan)*to.zoom);
   const start=performance.now();
   const tick=now=>{
    const u=ms===0?1:clamp((now-start)/ms,0,1),v=easing(u);
-   for(const key of ['yaw','pitch','zoom','frameSpan'])camera[key]=from[key]+(to[key]-from[key])*v;
+   for(const key of ['yaw','pitch','frameSpan'])camera[key]=from[key]+(to[key]-from[key])*v;
+   camera.zoom=Math.exp(Math.log(aScale)+(Math.log(bScale)-Math.log(aScale))*v)/base(camera.frameSpan);
    camera.target={x:from.target.x+(to.target.x-from.target.x)*v,y:from.target.y+(to.target.y-from.target.y)*v,z:from.target.z+(to.target.z-from.target.z)*v};
    progress(v);render();
    if(u<1)animation=requestAnimationFrame(tick);else{animation=0;done();}
@@ -57,14 +65,14 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
    setStatus('TRAVELING IN ONE ANATOMICAL SCENE');
    const c=state.data.camera;
    const to={yaw:shortestYaw(c.yaw,name==='hip'?Math.PI+.28:.47),
-     pitch:-.11,zoom:1.36,frameSpan:name==='hip'?1.85:1.65,target:centerPoint(name)};
+     pitch:-.11,zoom:name==='hip'?1.05:1.10,frameSpan:name==='hip'?3.4:3.2,target:centerPoint(name)};
    travel(to,reduce()?0:1150,v=>{reveal=clamp((v-.46)/.54,0,1);},()=>{
     if(id!==token)return;
     state.enter();state.data.frameReady=true;reveal=1;
     $('atlas-app').dataset.mode='immersive';
     $('stage-title').textContent=LABEL[name]+' · IN PLACE';
     setStatus('ONE SCENE · SOURCE GEOMETRY UNREVIEWED');
-    enableControls(name);$('back-body').hidden=false;
+    enableControls(name);syncControls(name);$('back-body').hidden=false;
     $('top-continue-knee').hidden=name!=='hip';
     updateURL();render();
    });
@@ -98,7 +106,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   $('stage-caveat').textContent='BodyParts3D 4.0 · CC BY 4.0 · expert review pending';
   $('context-note').textContent='Source-derived skeleton. Nerve registration and biomechanics remain unverified.';
   document.querySelectorAll('[data-region]').forEach(b=>b.setAttribute('aria-pressed','false'));
-  enableControls(null);if(window.innerWidth<=850)setExpanded(false);
+  enableControls(null);$('mode-trace').disabled=false;$('mode-peel').textContent='Peel';if(window.innerWidth<=850)setExpanded(false);
   setStatus('RETURNING THROUGH THE BODY');updateURL();
   travel(home,reduce()?0:850,v=>{reveal=1-v;},()=>{
    if(id!==token)return;
@@ -114,19 +122,44 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   state.body();Object.assign(state.data.camera,saved);
   choose('knee');return true;
  }
+ function syncControls(name){
+  const trace=$('mode-trace'),peel=$('mode-peel'),output=$('layer-output');
+  trace.disabled=true;
+  trace.title='A continuous nerve path is not verified in this source-derived scene';
+  peel.textContent=name==='knee'?'Isolate':'Peel';
+  $('layer-slider').max='3';
+  $('layer-slider').disabled=false;
+  output.textContent=name==='hip'?'Surface':'Complete joint';
+ }
  function depthChange(value){
   state.setDepth(value);
   const v=state.data.layer;
-  $('layer-output').textContent=region==='hip'?['Superficial','Stabilizers','Deep rotators','Skeleton','Bone only'][v]:['Bone + context','Deeper','Ligaments (separate lab)','Bone only'][Math.min(v,3)];
+  $('layer-output').textContent=region==='hip'?['Surface','Stabilizers','Deep rotators','Skeleton'][v]:['Complete joint','Femur focus','Tibia / fibula','Patella focus'][Math.min(v,3)];
+  if(v>0){
+   state.mode('peel');
+   document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-peel')));
+  }
   render();
  }
  function setMode(mode){
+  if(mode==='trace')return;
   if(!state.mode(mode))return;
   document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-'+mode)));
   $('context-note').textContent=mode==='trace'?'Sciatic nerve geometry comes from a separately registered atlas. Open the labeled Sciatic lab from the body overview; no continuous pathway is invented here.':mode==='peel'?'Peel through sourced hip muscles (or use the knee standalone lab for illustrative tissues). This is not a biomechanics simulation.':NOTE[region]||'Source-derived skeletal geometry.';
   render();
  }
- function reset(){state.setDepth(0);$('layer-slider').value='0';$('layer-output').textContent='Surface';render();}
+ function reset(){
+  if(!region)return;
+  state.setDepth(0);$('layer-slider').value='0';
+  $('layer-output').textContent=region==='hip'?'Surface':'Complete joint';
+  state.mode('explore');
+  document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-explore')));
+  const c=state.data.camera;
+  const home={yaw:shortestYaw(c.yaw,region==='hip'?Math.PI+.28:.47),pitch:-.11,
+   zoom:region==='hip'?1.05:1.10,frameSpan:region==='hip'?3.4:3.2,target:centerPoint(region)};
+  const id=++token;
+  travel(home,reduce()?0:480,()=>{},()=>{if(id===token)render();});
+ }
  return Object.freeze({choose,back,travelKnee,isActive,getRegion,getReveal,snapshot,depthChange,setMode,reset});
 }
 window.BodyAtlasUnified=Object.freeze({create});

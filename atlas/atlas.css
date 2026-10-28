@@ -51,3 +51,30 @@
 /* Compact persistent navigation while a non-matching reference is deliberately gated. */
 .app[data-mode="focus"] .masthead{display:none}
 @media(max-width:850px){.app[data-mode="focus"] .topbar{justify-content:space-between}.app[data-mode="focus"] .topactions{margin-left:auto}}
+
+/* V6.4 | Keep close-up anatomy readable on phones.
+   Reduce the collapsed inspector/control chrome, never the specimen viewport. */
+.app[data-mode="immersive"] #mode-trace:disabled{
+  opacity:.32;cursor:not-allowed;filter:grayscale(1);
+}
+@media(max-width:850px){
+ .app[data-mode="immersive"] .sidebar{
+   height:55px;bottom:80px;border-radius:13px 13px 0 0;
+ }
+ .app[data-mode="immersive"] .sidebar-handle{
+   height:52px;min-height:48px;padding:5px 16px;
+ }
+ .app[data-mode="immersive"] .controlbar{
+   height:80px;bottom:0;gap:5px;padding:7px 8px max(8px,env(safe-area-inset-bottom));
+ }
+ .app[data-mode="immersive"] .stage-bottom{bottom:145px}
+ .app[data-mode="immersive"] .sidebar[data-expanded=true]{
+   height:min(46dvh,360px);
+ }
+}
+@media(max-width:850px) and (max-height:680px){
+ .app[data-mode="immersive"] .sidebar{bottom:78px}
+ .app[data-mode="immersive"] .controlbar{height:78px}
+ .app[data-mode="immersive"] .stage-bottom{bottom:143px}
+ .app[data-mode="immersive"] .sidebar[data-expanded=true]{height:min(39dvh,245px)}
+}
