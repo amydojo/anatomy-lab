@@ -3,7 +3,7 @@
 (function(){'use strict';
 function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,centerPoint,shortestYaw,enableControls,NOTE,LABEL,navigate}){
  const $=id=>document.getElementById(id);
- let region=null,reveal=0,animation=0,token=0,returning=false,pending=false,motion=0,selected=null,navigation=null;
+ let region=null,reveal=0,animation=0,token=0,returning=false,pending=false,motion=0,motionMode=null,selected=null,navigation=null;
  const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
  const LAYERS={
   hip:['Surface','Stabilizers','Deep rotators','Skeleton'],
@@ -12,11 +12,12 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   ...Object.fromEntries(Object.entries(window.BodyExtendedRegions.config).map(([id,c])=>[id,c.labels]))
  };
  const layerText=()=>LAYERS[region]?.[Math.min(window.BodyExtendedRegions.has(region)?4:3,state.data.layer)]||'Surface';
- const snapshot=()=>({region,reveal,returning,pending,motion,selected:selected?.id||null});
+ const snapshot=()=>({region,reveal,returning,pending,motion,motionMode,selected:selected?.id||null});
  const isActive=()=>!!region||pending;
  const getRegion=()=>region;
  const getReveal=()=>reveal;
  const getMotion=()=>motion;
+ const getMotionMode=()=>motionMode;
  const getSelected=()=>selected?.id||null;
  const easing=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
  const setStatus=text=>{$('scene-status').textContent=text;};
@@ -84,7 +85,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  }
  function pickAt(x,y){
   if(state.data.view!=='detail'||!region||returning)return null;
-  const hit=model.hitTest(state.data.camera,region,state.data.layer,motion,x,y);
+  const hit=model.hitTest(state.data.camera,region,state.data.layer,motion,x,y,motionMode);
   // A miss must not redraw the full WebGL scene unless it clears an existing
   // highlight. Repeated empty taps (including mobile hit probing) otherwise
   // force synchronous GPU work and can stall the inspector interaction.
@@ -112,9 +113,10 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  }
  function setMotion(value){
   if(!region||state.data.view!=='detail'||window.BodyExtendedRegions.has(region)&&!window.BodyExtendedRegions.config[region].motion)return;
-  const max=window.BodyExtendedRegions.config[region]?.motion?.max|| (region==='hip'?65:region==='shoulder'?110:105);
+  const spec=window.BodyRegionalMotion.selected(region,motionMode);
+  const max=spec?.max||window.BodyExtendedRegions.config[region]?.motion?.max|| (region==='hip'?65:region==='shoulder'?110:105);
   motion=clamp(Math.round(Number(value)||0),0,max);
-  $('joint-motion-value').textContent=motion+'°';
+  $('joint-motion-value').textContent=motion+(spec?.unit||'°');
   render();
  }
  function interrupt(){
@@ -132,7 +134,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
    state.enter();state.data.frameReady=true;
    reveal=1;$('atlas-app').dataset.mode='immersive';
    enableControls(region);syncControls(region);
-   $('joint-motion').hidden=window.BodyExtendedRegions.has(region)&&!window.BodyExtendedRegions.config[region].motion;$('back-body').hidden=false;
+   $('joint-motion').hidden=!window.BodyRegionalMotion.config(region).length;$('back-body').hidden=false;
    $('hotspots').hidden=true;updateURL();render();
   }
  }
@@ -161,7 +163,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  async function choose(name){
   if(!['hip','knee','shoulder',...window.BodyExtendedRegions.ids].includes(name))return;
   if(isActive()&&state.data.view==='detail')return nextRegion(name);
-  const id=++token;cancelAnimationFrame(animation);returning=false;pending=true;motion=0;clearSelection();
+  const id=++token;cancelAnimationFrame(animation);returning=false;pending=true;motion=0;motionMode=null;clearSelection();
   if(!state.select(name))return;
   headline(name);$('atlas-app').dataset.mode='approach';
   setStatus('LOADING LICENSED SOURCE GEOMETRY');
@@ -205,7 +207,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
     $('stage-title').textContent=LABEL[name]+' · IN PLACE';
     setStatus('ONE SCENE · SOURCE GEOMETRY UNREVIEWED');
     enableControls(name);syncControls(name);$('back-body').hidden=false;
-    $('joint-motion').hidden=window.BodyExtendedRegions.has(name)&&!window.BodyExtendedRegions.config[name].motion;
+    $('joint-motion').hidden=!window.BodyRegionalMotion.config(name).length;
     $('top-continue-knee').hidden=name!=='hip';
     updateURL();render();
    });
@@ -261,14 +263,24 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  }
  function syncControls(name){
   const trace=$('mode-trace'),peel=$('mode-peel'),output=$('layer-output');
+  const motionSelect=$('joint-motion-kind');
+  const options=window.BodyRegionalMotion.config(name);
+  motionSelect.replaceChildren(...options.map(spec=>{
+   const el=document.createElement('option');el.value=spec.id;el.textContent=spec.label;return el;
+  }));
+  motionMode=motionMode&&options.some(x=>x.id===motionMode)?motionMode:options[0]?.id||null;
+  motionSelect.value=motionMode||'';
+  const current=window.BodyRegionalMotion.selected(name,motionMode);
+  motionSelect.hidden=options.length<2;
+  $('motion-description').textContent=current?.note||'SOURCE-DERIVED / UNVALIDATED';
   const extended=window.BodyExtendedRegions.has(name);
   trace.disabled=!extended;
   trace.textContent=extended?'Muscles':'Trace';
   trace.title=extended?'Show licensed source muscle meshes with faint bone context':'A continuous nerve path is not verified in this source-derived scene';
   peel.textContent=window.BodyExtendedRegions.has(name)?'Isolate':name==='knee'?'Isolate':name==='shoulder'?'Layers':'Peel';
-  $('joint-motion-label').textContent=window.BodyExtendedRegions.config[name]?.motion?.label|| (name==='hip'?'Hip flexion':name==='shoulder'?'Shoulder abduction':'Knee flexion');
-  $('motion-description').textContent=window.BodyExtendedRegions.has(name)?'ILLUSTRATIVE HINGE · UNVALIDATED':'INFERRED ATTACHMENTS';
-  $('joint-motion-slider').max=String(window.BodyExtendedRegions.config[name]?.motion?.max||(name==='hip'?65:name==='shoulder'?110:105));
+  $('joint-motion-label').textContent=current?.label||'Illustrative motion';
+  $('joint-motion-slider').setAttribute('aria-label',(current?.label||'Illustrative motion')+' · educational model');
+  $('joint-motion-slider').max=String(current?.max||65);
   $('joint-motion-slider').value='0';$('joint-motion-value').textContent='0°';
   $('layer-slider').max=extended?'4':'3';
   $('layer-slider').disabled=false;
@@ -305,7 +317,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  }
  function reset(){
   if(!region)return;
-  state.setDepth(0);motion=0;clearSelection();$('joint-motion-slider').value='0';$('joint-motion-value').textContent='0°';$('layer-slider').value='0';
+  state.setDepth(0);motion=0;clearSelection();$('joint-motion-slider').value='0';$('joint-motion-value').textContent='0'+(window.BodyRegionalMotion.selected(region,motionMode)?.unit||'°');$('layer-slider').value='0';
   $('layer-output').textContent=LAYERS[region][0];
   state.mode('explore');
   document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-explore')));
@@ -317,7 +329,21 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   const id=++token;
   travel(home,reduce()?0:480,()=>{},()=>{if(id===token)render();});
  }
- return Object.freeze({choose,back,travelKnee,isActive,getRegion,getReveal,getMotion,getSelected,snapshot,depthChange,setMode,reset,setMotion,pickAt,clearSelection,showSelected,nextRegion,interrupt});
+ function setMotionMode(mode){
+  if(!region||state.data.view!=='detail')return false;
+  const spec=window.BodyRegionalMotion.config(region).find(x=>x.id===mode);
+  if(!spec)return false;
+  motionMode=spec.id;motion=0;clearSelection();
+  $('joint-motion-kind').value=mode;
+  $('joint-motion-slider').max=String(spec.max);
+  $('joint-motion-slider').value='0';
+  $('joint-motion-label').textContent=spec.label;
+  $('joint-motion-slider').setAttribute('aria-label',spec.label+' · illustrative, unreviewed');
+  $('joint-motion-value').textContent='0'+spec.unit;
+  $('motion-description').textContent=spec.note;
+  render();return true;
+ }
+ return Object.freeze({choose,back,travelKnee,isActive,getRegion,getReveal,getMotion,getMotionMode,getSelected,snapshot,depthChange,setMode,reset,setMotion,setMotionMode,pickAt,clearSelection,showSelected,nextRegion,interrupt});
 }
 window.BodyAtlasUnified=Object.freeze({create});
 })();
