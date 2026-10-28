@@ -295,7 +295,7 @@ test('Shoulder muscle attachments actually follow humerus without changing sourc
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(0);
  expect(errors).toEqual([]);
 });
-test('V6.8 rig diagnostic markers follow connected bones and cuff attachment paths on mobile and desktop',async({page})=>{
+test('V6.8 Shoulder rig diagnostic markers follow connected bones and cuff attachment paths on mobile and desktop',async({page})=>{
  const errors=await atlas(page);
  await expect(page.locator('#shoulder-rig-tools')).toBeHidden();
  await choose(page,'shoulder');
