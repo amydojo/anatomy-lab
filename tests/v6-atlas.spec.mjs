@@ -88,9 +88,39 @@ test('One camera path uses bounded frame changes and does not snap on detail ent
  expect(sampled.some(x=>x.view==='detail')).toBe(true);
  expect(Math.min(...sampled.map(x=>x.z))).toBeLessThan(2);
  for(let i=1;i<sampled.length;i++){
-  expect(Math.abs(sampled[i].z-sampled[i-1].z)).toBeLessThan(2.5);
-  expect(Math.abs(sampled[i].yaw-sampled[i-1].yaw)).toBeLessThan(.75);
+  // Software WebGL can stall the sampling loop on mobile CI. Bound actual
+  // camera movement by elapsed time, not by a fixed amount per stale sample.
+  const dt=sampled[i].t-sampled[i-1].t;
+  expect(Math.abs(sampled[i].z-sampled[i-1].z)).toBeLessThan(.03*dt+.35);
+  expect(Math.abs(sampled[i].yaw-sampled[i-1].yaw)).toBeLessThan(.012*dt+.25);
  }
+ expect(errors).toEqual([]);
+});
+test('Focused knee can isolate sourced femur, tibia/fibula and patella, not pretend to show ligaments',async({page})=>{
+ const errors=await atlas(page);await choose(page,'knee');
+ await expect(page.locator('#mode-peel')).toContainText('Isolate');
+ await expect(page.locator('#mode-trace')).toBeDisabled();
+ for(const [value,label] of [['1','Femur focus'],['2','Tibia / fibula'],['3','Patella focus']]){
+  await page.locator('#layer-slider').evaluate((el,v)=>{el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));},value);
+  await expect(page.locator('#layer-output')).toContainText(label);
+  expect((await page.evaluate(()=>window.__BODY_ATLAS__.getState())).layer).toBe(Number(value));
+ }
+ await page.locator('#reset-view').click();
+ await expect(page.locator('#layer-output')).toHaveText('Complete joint');
+ expect((await page.evaluate(()=>window.__BODY_ATLAS__.getState())).layer).toBe(0);
+ expect(errors).toEqual([]);
+});
+test('Reset view restores the selected anatomical region, not just the slider',async({page})=>{
+ const errors=await atlas(page);await choose(page,'hip');
+ await page.evaluate(()=>{
+  const canvas=document.querySelector('#atlas-canvas');
+  const evt=(name,x)=>canvas.dispatchEvent(new PointerEvent(name,{bubbles:true,pointerId:77,clientX:x,clientY:220}));
+  evt('pointerdown',95);evt('pointermove',230);evt('pointerup',230);
+ });
+ const yawBefore=await page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.yaw);
+ await page.locator('#reset-view').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.yaw),{timeout:3000}).toBeGreaterThan(yawBefore+.25);
+ await expect(page.locator('#layer-output')).toHaveText('Surface');
  expect(errors).toEqual([]);
 });
 test('Direct mapped-bone tap moves toward the anatomy; empty canvas does not invent selection',async({page})=>{
