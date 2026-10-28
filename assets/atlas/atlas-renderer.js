@@ -6,10 +6,10 @@ const HIP_COLORS={maximus:[.68,.39,.36],medius:[.82,.54,.47],minimus:[.78,.52,.4
 const HIP_HIDDEN={hipBone:'right-hip-bone',femur:'right-femur',sacrum:'sacrum'};
 const KNEE_HIDDEN={femur:'right-femur',tibia:'right-tibia',fibula:'right-fibula',patella:'right-patella'};
 const DEPTH_HIP={
-  0:{maximus:.82,medius:.34},
-  1:{medius:.91,minimus:.58},
-  2:{minimus:.34,piriformis:.93,obturator:.92,gemellusSuperior:.91,gemellusInferior:.91,quadratus:.9},
-  3:{},4:{}
+  0:{maximus:.79,medius:.24},
+  1:{medius:.88,minimus:.48},
+  2:{minimus:.16,piriformis:.90,obturator:.86,gemellusSuperior:.88,gemellusInferior:.88,quadratus:.86},
+  3:{}
 };
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function create(canvas,onContextLost=()=>{}){
@@ -121,24 +121,48 @@ function create(canvas,onContextLost=()=>{}){
    gl.drawArrays(gl.TRIANGLES,0,item.count);
   };
   const region=detail.has(selected)?selected:null;
-  const replaced=region?new Set(Object.values(region==='hip'?HIP_HIDDEN:KNEE_HIDDEN)) :new Set();
-  gl.depthMask(true);
+  const r=clamp(Number(reveal)||0,0,1);
+  const replaced=region?new Set(Object.values(region==='hip'?HIP_HIDDEN:KNEE_HIDDEN)):new Set();
+  const showFocus=region&&r>.001;
+  // Context is only an orientation cue; do not paint an entire second knee
+  // over the selected right knee or occlude its sourced surfaces.
   for(const item of buffers){
-   if(replaced.has(item.id))continue;
-   let dim=1;
-   if(selected){const group=['hip','knee','nerve'].includes(selected)?'lower':selected==='shoulder'?'upper':null;dim=item.group===group?1:1-.7*clamp(reveal,0,1);}
-   if(mode==='evidence'&&selected)dim=item.group==='lower'?.95:.37;
-   draw(item,dim,1);
+   let opacity=1;
+   if(region){
+    if(replaced.has(item.id))opacity=1-r;
+    else if(region==='hip'&&item.id==='left-hip-bone')opacity=1-r*.90;
+    else opacity=1-r;
+   }else if(selected){
+    const group=['hip','knee','nerve'].includes(selected)?'lower':selected==='shoulder'?'upper':null;
+    opacity=1;const dim=item.group===group?1:1-.7*r;
+    if(mode==='evidence')draw(item,item.group==='lower'?.95:.37,1);
+    else draw(item,dim,1);
+    continue;
+   }
+   if(opacity<.015)continue;
+   gl.depthMask(opacity>.98);
+   draw(item,1,opacity);
   }
-  if(region){
+  gl.depthMask(true);
+  if(showFocus){
    const meshes=detail.get(region);
-   for(const mesh of meshes.filter(p=>!p.tissue))draw(mesh,1,1);
-   if(region==='hip'&&reveal>0&&layer<4){
-    // Tissue opacity is a *visual explanation*; no dynamic deformation is claimed.
-    const levels=DEPTH_HIP[clamp(Number(layer)||0,0,4)]||{};
+   const bones=meshes.filter(p=>!p.tissue);
+   // Meaningful knee depth states: isolate actual sourced components. Menisci
+   // and ligaments are NOT silently fabricated just because a slider moved.
+   const chosen=layer===1?new Set(['femur']):layer===2?new Set(['tibia','fibula']):layer===3?new Set(['patella']):null;
+   for(const bone of bones){
+    let a=r;
+    if(region==='knee'&&chosen&&!chosen.has(bone.id))a*=.12;
+    if(a<.02)continue;
+    gl.depthMask(a>.98);
+    draw(bone,1,a);
+   }
+   gl.depthMask(true);
+   if(region==='hip'&&r>0&&layer<3){
+    const levels=DEPTH_HIP[clamp(Number(layer)||0,0,3)]||{};
     gl.depthMask(false);
     for(const mesh of meshes.filter(p=>p.tissue)){
-     const a=(levels[mesh.id]||0)*clamp(reveal,0,1);
+     const a=(levels[mesh.id]||0)*r;
      if(a>.002)draw(mesh,1,a);
     }
     gl.depthMask(true);
