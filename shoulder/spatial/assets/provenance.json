@@ -13,6 +13,12 @@
       "sha256": "c359f4bcd2cba90b7411d66d5e9fc04dc81294d46cd5c1e8b212c824f2e5bbee",
       "bytes": 1335285
     },
+    "body-1.bin": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-1.bin",
+      "git_blob_sha1": "b2a0a781478031ca966f57d73d6bd0b8652edcf7",
+      "sha256": "aa077a4675f0d0dd3c9b0af39dc8cf6bcb348c3bf7d283478d4206ce30a5a0de",
+      "bytes": 4526484
+    },
     "body-3.bin": {
       "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-3.bin",
       "git_blob_sha1": "368a55dd62c761caf2aee044439e9563b500f276",
@@ -89,24 +95,54 @@
       "vertices": 775,
       "triangles": 700
     },
+    "deltoidClavicular": {
+      "fma": "FMA34680",
+      "name": "Clavicular part of right deltoid",
+      "chunk": 3,
+      "vertices": 2121,
+      "triangles": 1486
+    },
+    "deltoidSpinal": {
+      "fma": "FMA34684",
+      "name": "Spinal part of right deltoid",
+      "chunk": 4,
+      "vertices": 1063,
+      "triangles": 1028
+    },
+    "bicepsLong": {
+      "fma": "FMA37686",
+      "name": "Long head of right biceps brachii",
+      "chunk": 3,
+      "vertices": 466,
+      "triangles": 492
+    },
+    "bicepsShort": {
+      "fma": "FMA37684",
+      "name": "Short head of right biceps brachii",
+      "chunk": 4,
+      "vertices": 1035,
+      "triangles": 804
+    },
     "coracobrachialis": {
       "fma": "FMA37665",
       "name": "Right coracobrachialis",
       "chunk": 3,
       "vertices": 329,
       "triangles": 280
+    },
+    "pectoralisClavicular": {
+      "fma": "FMA34690",
+      "name": "Clavicular part of right pectoralis major",
+      "chunk": 1,
+      "vertices": 917,
+      "triangles": 998
     }
   },
-  "asset_sha256": "995a943ab1f1bbf3fe38045669427cdb11dd7ff1bda63f44a922c9e0bfd5e3e2",
+  "asset_sha256": "46929c912b4323ffa1622201dd67237eb7161e9dff696904d4361e34cf6b3fbc",
   "anatomist_reviewed": false,
   "kinematics_validated": false,
   "missing": [
-    "Right deltoid clavicular part",
-    "Right deltoid acromial part",
-    "Right deltoid spinal part",
-    "Right biceps brachii long head",
-    "Right biceps brachii short head",
-    "Right pectoralis major clavicular part"
+    "Right deltoid acromial part"
   ],
   "unsupported": [
     "ligament models not imported",
