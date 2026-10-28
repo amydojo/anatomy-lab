@@ -184,7 +184,17 @@ function create(canvas,onContextLost=()=>{}){
     const high=Math.max(...vs.map(p=>p[1])),proximal=vs.filter(p=>p[1]>=high-.26);
     shoulderPivot=[0,1,2].map(i=>proximal.reduce((n,p)=>n+p[i],0)/proximal.length);
   }
+  // Keep at most three full-resolution labs resident on mobile. Source JSON
+  // remains checksum-validated in the loader cache; evicted GPU buffers and
+  // scene resources are destroyed before a different lab is allocated.
+  detail.delete(region);detailData.delete(region);
   detail.set(region,next);detailData.set(region,asset);
+  while(detail.size>3){
+   const expired=detail.keys().next().value;
+   const meshes=detail.get(expired)||[];
+   for(const part of meshes)gl.deleteBuffer(part.buffer);
+   detail.delete(expired);detailData.delete(expired);
+  }
   if(extended)registry.detail(region,asset);
   return true;
  }
