@@ -92,6 +92,26 @@ def main():
     for name in extra_bones+extra_muscles:
         if len(index.get(name,[]))!=1:raise ValueError("Left-side source name ambiguous "+name)
         requests[name]=index[name][0]
+    # Extend the overview with existing source-verified Hip, Knee and Shoulder
+    # muscles; these use different local unit scales but the same pinned
+    # BodyParts3D anatomical frame. Add their real left-sided counterparts.
+    lab_files={"hip":"hip/spatial/assets/hip-source.json",
+       "shoulder":"shoulder/spatial/assets/shoulder-source.json",
+       "knee":"knee/spatial/assets/knee-muscles-source.json"}
+    labs={};lab_hashes={};left_lab_region={}
+    for region,filename in lab_files.items():
+        data=(ROOT/filename).read_bytes()
+        lab=json.loads(data)
+        if lab["source_commit"]!=original["source_commit"] or lab["license"]!="CC BY 4.0":
+            raise ValueError("Source mismatch for "+region)
+        labs[region]=lab
+        lab_hashes[region]=digest(data)
+        for info in lab["parts"].values():
+            if info.get("system")!="muscle":continue
+            name=info["name"].replace("Right","Left").replace("right","left")
+            if len(index.get(name,[]))!=1:raise ValueError("Missing source counterpart "+name)
+            requests[name]=index[name][0]
+            left_lab_region[name]=region
     chunk_data={};chunk_hashes={}
     for chunk in sorted({x["chunk"] for x in requests.values()}):
         binraw,binmeta=source_load(f"body-{chunk}.bin")
@@ -101,7 +121,7 @@ def main():
       list(WRIST)+list(MUSCLES["elbow"])+list(MUSCLES["wrist"])}
     bilateral={"bones":0,"muscles":0}
     for name,info in requests.items():
-        isMuscle=name in extra_muscles
+        isMuscle=name in extra_muscles or name in left_lab_region
         target=muscles if isMuscle else bones
         key=id_of(name)
         if key in target or key in base:continue
@@ -111,10 +131,32 @@ def main():
            "vertices":[[round((p[i]-(.9 if i==1 else 0))*5,5) for i in range(3)] for p in vertices],
            "faces":faces}
         item=mesh_lod(part,300 if isMuscle else 390)
-        item["region"]="left-wrist" if name in left_upper else "left-ankle"
-        item["group"]="upper" if item["region"]=="left-wrist" else "lower"
+        item["region"]=("left-"+left_lab_region[name]) if name in left_lab_region else (
+           "left-wrist" if name in left_upper else "left-ankle")
+        item["group"]="upper" if item["region"] in ("left-wrist","left-shoulder") else "lower"
         target[key]=item
         bilateral["muscles" if isMuscle else "bones"]+=1
+    lab_added={}
+    existing_fmas={p["fma"] for p in muscles.values()}
+    for region,lab in labs.items():
+        srcframe=lab.get("shared_transform") or lab.get("source_frame")
+        scale=srcframe["scale"]
+        origin=srcframe["origin_metres"]
+        added=0
+        for part in lab["parts"].values():
+            if part.get("system")!="muscle" or part["fma"] in existing_fmas:continue
+            id=id_of(part["name"])
+            if id in muscles or id in bones:raise ValueError("Conflicting anatomical identity "+id)
+            # Exact inverse lab display transform, followed by the canonical
+            # overview world transform. Never move individual vertices by eye.
+            vertices=[[round(((v/scale)+origin[i]-(.9 if i==1 else 0))*5,5)
+               for i,v in enumerate(vertex)] for vertex in part["vertices"]]
+            source={"name":part["name"],"fma":part["fma"],"system":"muscle",
+                "vertices":vertices,"faces":part["faces"]}
+            item=mesh_lod(source,360 if region=="shoulder" else 320)
+            item["region"]=region;item["group"]="upper" if region=="shoulder" else "lower"
+            muscles[id]=item;existing_fmas.add(part["fma"]);added+=1
+        lab_added[region]=added
     asset={"schema":"body-live/overview-v8-v1","dataset":"BodyParts3D 4.0",
       "source_commit":original["source_commit"],"source_frame":original["source_frame"],
       "license":"CC BY 4.0","bones":bones,"muscles":muscles}
@@ -124,6 +166,7 @@ def main():
       "original_bones":len(original["parts"]),"additional_bones":len(bones),
       "unique_muscles":len(muscles),"bilateral_added":bilateral,
       "bilateral_source_sha256":{"atlas.json":atlas_proof["sha256"],**chunk_hashes},
+      "additional_lab_muscles":lab_added,"source_lab_sha256":lab_hashes,
       "region_counts":counts,"detail_sha256":input_hashes,
       "overview_sha256":digest(DEST.read_bytes()),"reused_region_parts":reused,
       "geometry":"exact source frame; simplification only; no mirroring or synthesized meshes",
@@ -131,7 +174,7 @@ def main():
          "Missing tendons and ligaments","No anatomist-reviewed muscle attachments",
          "Reference-source sciatic nerve not spatially verified across these meshes"]}
     MANIFEST.write_text(json.dumps(manifest,indent=2)+"\n")
-    print(json.dumps({"additional_bones":len(bones),"unique_muscles":len(muscles),
+    print(json.dumps({"additional_bones":len(bones),"unique_muscles":len(muscles),"additional_lab_muscles":lab_added,
         "triangles":sum(len(p["faces"]) for p in list(bones.values())+list(muscles.values())),
         "bytes":DEST.stat().st_size,"source":original["source_commit"]},indent=2))
 
