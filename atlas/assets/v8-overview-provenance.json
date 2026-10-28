@@ -1,0 +1,201 @@
+{
+  "schema": "body-live/overview-v8-provenance-v1",
+  "source_commit": "1c38bf35c254a891200d3cedecfd57abebe83d8d",
+  "license": "CC BY 4.0",
+  "anatomist_reviewed": false,
+  "kinematics_validated": false,
+  "original_bones": 78,
+  "additional_bones": 34,
+  "unique_muscles": 73,
+  "region_counts": {
+    "skull": {
+      "bones": 14,
+      "muscles": 16
+    },
+    "neck": {
+      "bones": 8,
+      "muscles": 14
+    },
+    "thorax": {
+      "bones": 30,
+      "muscles": 11
+    },
+    "elbow": {
+      "bones": 3,
+      "muscles": 10
+    },
+    "wrist": {
+      "bones": 15,
+      "muscles": 10
+    },
+    "ankle": {
+      "bones": 14,
+      "muscles": 12
+    }
+  },
+  "detail_sha256": {
+    "skull": "db163e067391b0d736d47e3e472402d5432b87a81d143f2da4860e06a25800a5",
+    "neck": "bb0c6e2aabbee322995f340656e1bc83aeb7510b7a5d1b898d054d65f2aa67c6",
+    "thorax": "ab2a4d8ef8c32cecc33428fcf712a19ae43ac94209881f9c084c3eb84ef40f18",
+    "elbow": "b95077904da9ff164ce483b0a54113a920bad36369805a576b3e313a217cd5c4",
+    "wrist": "261844080e58237a139cd724c8cfb793caab2d58a9783174d82d267ecb1e8324",
+    "ankle": "6431d766c671a80af1a9cc15a740c4195b8ae909fc32850a2b2db34e2d8f2653"
+  },
+  "overview_sha256": "efe55085333e67789b42fe12f22a8a57d18db36c83d017cd500726677550d4a8",
+  "reused_region_parts": {
+    "frontal-bone": [
+      "skull"
+    ],
+    "occipital-bone": [
+      "skull"
+    ],
+    "sphenoid-bone": [
+      "skull"
+    ],
+    "mandible": [
+      "skull"
+    ],
+    "left-parietal-bone": [
+      "skull"
+    ],
+    "left-temporal-bone": [
+      "skull"
+    ],
+    "right-parietal-bone": [
+      "skull"
+    ],
+    "right-temporal-bone": [
+      "skull"
+    ],
+    "atlas": [
+      "neck"
+    ],
+    "axis": [
+      "neck"
+    ],
+    "third-cervical-vertebra": [
+      "neck"
+    ],
+    "fourth-cervical-vertebra": [
+      "neck"
+    ],
+    "fifth-cervical-vertebra": [
+      "neck"
+    ],
+    "sixth-cervical-vertebra": [
+      "neck"
+    ],
+    "seventh-cervical-vertebra": [
+      "neck"
+    ],
+    "left-first-rib": [
+      "thorax"
+    ],
+    "left-second-rib": [
+      "thorax"
+    ],
+    "left-third-rib": [
+      "thorax"
+    ],
+    "left-fourth-rib": [
+      "thorax"
+    ],
+    "left-fifth-rib": [
+      "thorax"
+    ],
+    "left-sixth-rib": [
+      "thorax"
+    ],
+    "left-seventh-rib": [
+      "thorax"
+    ],
+    "left-eighth-rib": [
+      "thorax"
+    ],
+    "left-ninth-rib": [
+      "thorax"
+    ],
+    "left-tenth-rib": [
+      "thorax"
+    ],
+    "left-eleventh-rib": [
+      "thorax"
+    ],
+    "left-twelfth-rib": [
+      "thorax"
+    ],
+    "right-first-rib": [
+      "thorax"
+    ],
+    "right-second-rib": [
+      "thorax"
+    ],
+    "right-third-rib": [
+      "thorax"
+    ],
+    "right-fourth-rib": [
+      "thorax"
+    ],
+    "right-fifth-rib": [
+      "thorax"
+    ],
+    "right-sixth-rib": [
+      "thorax"
+    ],
+    "right-seventh-rib": [
+      "thorax"
+    ],
+    "right-eighth-rib": [
+      "thorax"
+    ],
+    "right-ninth-rib": [
+      "thorax"
+    ],
+    "right-tenth-rib": [
+      "thorax"
+    ],
+    "right-eleventh-rib": [
+      "thorax"
+    ],
+    "right-twelfth-rib": [
+      "thorax"
+    ],
+    "body-of-sternum": [
+      "thorax"
+    ],
+    "third-thoracic-vertebra": [
+      "thorax"
+    ],
+    "fifth-thoracic-vertebra": [
+      "thorax"
+    ],
+    "seventh-thoracic-vertebra": [
+      "thorax"
+    ],
+    "right-humerus": [
+      "elbow"
+    ],
+    "right-radius": [
+      "elbow",
+      "wrist"
+    ],
+    "right-ulna": [
+      "elbow",
+      "wrist"
+    ],
+    "right-tibia": [
+      "ankle"
+    ],
+    "right-fibula": [
+      "ankle"
+    ]
+  },
+  "geometry": "exact source frame; simplification only; no mirroring or synthesized meshes",
+  "incomplete": [
+    "Unrepresented left hand and foot bones",
+    "Unrepresented facial/jaw muscles",
+    "Missing tendons and ligaments",
+    "No anatomist-reviewed muscle attachments",
+    "Reference-source sciatic nerve not spatially verified across these meshes"
+  ]
+}
