@@ -110,7 +110,7 @@ def main():
   "notes":["Pinned right knee muscle geometry using the same global source reference as the existing knee bones.",
            "Vasti inserted toward patella, popliteus toward tibia, and biceps short toward fibula in a bounded teaching rig; proximity-derived correspondence is not anatomist reviewed.",
            "The source meshes are not changed during runtime deformation; no anatomical tendon/capsule model is inferred."]}
- (OUTPUT/"provenance.json").write_text(json.dumps(proof,indent=2)+"\n")
+ (OUTPUT/"knee-muscles-provenance.json").write_text(json.dumps(proof,indent=2)+"\n")
  print(json.dumps({"parts":list(selected),"triangles":sum(len(x["faces"]) for x in asset["parts"].values()),
                    "bytes":assetpath.stat().st_size,"chunks":list(chunks)}))
 if __name__=="__main__":main()
