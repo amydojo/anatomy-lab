@@ -32,6 +32,8 @@ function resize(){
 function render(){
  if(document.hidden||(state.data.view==='detail'&&!U.isActive()))return;
  model.render(state.data.camera,U.getRegion()||state.data.region,state.data.evidenceMode,state.data.layer,U.getReveal(),U.getMotion(),U.getSelected());
+ window.BodyShoulderDebug?.draw(state.data.camera,
+  state.data.view==='detail'&&U.getRegion()==='shoulder'?model.shoulderDiagnostics(U.getMotion()):null);
  if(state.data.view==='overview'&&!U.isActive())drawPins();
 }
 function fallback(reason){
@@ -499,6 +501,7 @@ function setup(){
  $('seam-continue').onclick=toKnee;
  $('back-body').onclick=body;
  $('reset-view').onclick=reset;
+ $('shoulder-rig-toggle').onclick=()=>{window.BodyShoulderDebug.toggle();render();};
  $('open-original').onclick=()=>{const route=HERE[state.data.region];if(route)window.open(route,'_blank','noopener,noreferrer');};
  $('evidence-toggle').onclick=showEvidence;$('evidence-close').onclick=closeEvidence;
 
