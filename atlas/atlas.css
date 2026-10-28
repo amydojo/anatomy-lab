@@ -78,3 +78,33 @@
  .app[data-mode="immersive"] .stage-bottom{bottom:143px}
  .app[data-mode="immersive"] .sidebar[data-expanded=true]{height:min(39dvh,245px)}
 }
+
+/* V6.5 functional controls — responsive overlays; atlas canvas never resizes. */
+.joint-motion,.structure-chip{position:absolute;z-index:5;left:18px;right:350px;
+ max-width:490px;border:1px solid #9b7355;border-radius:14px;
+ background:#241811e8;box-shadow:0 8px 24px #100a0670;backdrop-filter:blur(12px)}
+.joint-motion{bottom:122px;display:flex;align-items:center;gap:12px;padding:9px 13px}
+.joint-motion label{display:flex;flex-direction:column;gap:1px;white-space:nowrap;min-width:122px}
+.joint-motion label span{font-size:8px;color:#d6af91;letter-spacing:.13em}
+.joint-motion label strong{font-size:12px;font-weight:600}
+.joint-motion input{flex:1;min-width:45px;accent-color:#dca276;touch-action:pan-x}
+.joint-motion output{min-width:34px;text-align:right;font:15px Georgia,serif;color:#f5d0b4}
+.structure-chip{top:56px;max-width:340px;display:flex;align-items:center;gap:8px;padding:8px 10px;
+ font-size:12px;color:#f4dec7}
+.structure-chip span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.structure-chip button{border:1px solid #856147;background:#3d2a1e;border-radius:9px;padding:6px 9px}
+.structure-chip button:last-child{font-size:18px;line-height:1;padding:4px 9px}
+.structure-details{border:1px solid #886449;padding:14px;border-radius:12px;background:#39261b}
+.structure-details h2{font:400 23px Georgia,serif;margin:5px 0}
+.structure-details p{margin:8px 0 5px}.structure-details small{font-size:10px;color:#cbb4a1}
+.joint-motion[hidden],.structure-chip[hidden],.structure-details[hidden]{display:none!important}
+.app[data-mode="immersive"] .seg-control button:disabled{opacity:.35;cursor:not-allowed}
+@media(max-width:850px){
+ .joint-motion{left:10px;right:10px;max-width:none;bottom:162px;padding:7px 10px;gap:8px}
+ .joint-motion label{min-width:106px}.joint-motion label span{font-size:7px}
+ .structure-chip{left:10px;right:10px;top:58px;max-width:none}
+ .app[data-mode="immersive"] .stage-bottom{display:none}
+}
+@media(max-width:850px) and (max-height:680px){
+ .joint-motion{bottom:150px}.structure-chip{top:54px}
+}
