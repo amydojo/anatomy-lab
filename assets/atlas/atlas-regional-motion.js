@@ -106,7 +106,7 @@ function pose(region,parts,value,mode){
   });
   // The diaphragm is a real pinned muscle surface, not manufactured mesh.
   // This small downward excursion is an explicit educational approximation.
-  matrices.diaphragm=shift([0,-.11*u,0]);
+  matrices.diaphragm=spec.id==='breath-in'?shift([0,-.11*u,0]):I();
  } else if(region==='elbow'){
   pivot=mean([proximal(parts['right-radius']),proximal(parts['right-ulna'])]);
   if(spec.id==='elbow-flex'){
