@@ -54,10 +54,10 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   gemellusInferior:['Inferior gemellus','Small deep external rotator below obturator internus.'],
   quadratus:['Quadratus femoris','Deep posterior hip muscle associated with rotation.'],
   clavicle:['Right clavicle','Source-derived collarbone linking shoulder girdle to thorax. Sternoclavicular mechanics are not simulated.'],
-  scapula:['Right scapula','The shoulder blade supports the glenoid socket and rotator-cuff origins. It remains static during the illustrative movement.'],
-  humerus:['Right humerus','Upper-arm bone articulating with the glenoid. Abduction here uses an estimated single pivot, not validated scapulohumeral rhythm.'],
-  supraspinatus:['Supraspinatus','Rotator-cuff muscle passing above the scapular spine toward the greater tubercle; source-pose anatomy.'],
-  infraspinatus:['Infraspinatus','Posterior rotator-cuff muscle on the infraspinous fossa. Its surface remains static during motion.'],
+  scapula:['Right scapula','The shoulder blade supports the glenoid socket and rotator-cuff origins. It stays static in this first-pass animation; real scapular rotation is not yet simulated.'],
+  humerus:['Right humerus','Upper-arm bone articulating with the glenoid. Abduction moves the humerus and bends attached muscles via inferred skinning weights; joint rhythm and tissue mechanics are not validated.'],
+  supraspinatus:['Supraspinatus','Rotator-cuff muscle passing above the scapular spine toward the greater tubercle. Mesh deformation is attachment-guided, not anatomist-validated.'],
+  infraspinatus:['Infraspinatus','Posterior rotator-cuff muscle on the infraspinous fossa. Its mesh now bends toward the moving humerus using inferred attachments; not a validated tendon simulation.'],
   subscapularis:['Subscapularis','Anterior rotator-cuff muscle from the subscapular fossa toward the lesser tubercle.'],
   teresMinor:['Teres minor','Posterior rotator-cuff muscle contributing to external rotation and joint stability.'],
   teresMajor:['Teres major','Posterior shoulder muscle participating in adduction and internal rotation, not a rotator-cuff muscle.'],
@@ -67,7 +67,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   deltoidSpinal:['Deltoid · posterior','Scapular-spine deltoid portion, positioned on the same pinned source reference pose.'],
   bicepsLong:['Biceps brachii · long head','Long head originates at the supraglenoid region; its tendon and dynamic glenoid-labrum relationship are not independently reconstructed here.'],
   bicepsShort:['Biceps brachii · short head','Short head arises from the coracoid process alongside coracobrachialis in the source pose.'],
-  pectoralisClavicular:['Pectoralis major · clavicular','Clavicular part of the pectoralis major; a shoulder flexor and adductor. Muscle stays in the source pose during humeral abduction.'],
+  pectoralisClavicular:['Pectoralis major · clavicular','Clavicular part of pectoralis major, a shoulder flexor/adductor. The displayed muscle shape bends between inferred clavicular and humeral attachments, not a validated shortening simulation.'],
 
   tibia:['Right tibia','Primary weight-bearing shin bone; its movement is a schematic fixed-axis demonstration.'],
   fibula:['Right fibula','Lateral lower-leg bone.'],
@@ -233,6 +233,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   trace.title='A continuous nerve path is not verified in this source-derived scene';
   peel.textContent=name==='knee'?'Isolate':name==='shoulder'?'Layers':'Peel';
   $('joint-motion-label').textContent=name==='hip'?'Hip flexion':name==='shoulder'?'Shoulder abduction':'Knee flexion';
+  $('motion-description').textContent=name==='shoulder'?'INFERRED ATTACHMENTS':'ILLUSTRATIVE MOVEMENT';
   $('joint-motion-slider').max=name==='hip'?'65':name==='shoulder'?'110':'105';
   $('joint-motion-slider').value='0';$('joint-motion-value').textContent='0°';
   $('layer-slider').max='3';

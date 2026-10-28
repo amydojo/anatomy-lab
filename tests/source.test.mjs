@@ -319,3 +319,41 @@ test('V6.6 real right shoulder meshes are pinned, source-frame aligned and anato
  assert.ok(controller.includes("return region==='hip'||region==='knee'||region==='shoulder'"));
  assert.ok(read('assets/atlas/atlas-unified.js').includes('shoulderGeometry'));
 });
+
+test('V6.7 every imported shoulder muscle is attachment-rigged and the source pose is preserved',async()=>{
+ const {runInNewContext}=await import('node:vm');
+ const win={};
+ runInNewContext(read('assets/atlas/atlas-shoulder-rig.js'),{window:win});
+ const rig=win.BodyShoulderRig;
+ const shoulder=JSON.parse(read('shoulder/spatial/assets/shoulder-source.json'));
+ const parts=shoulder.parts;
+ const rest=JSON.stringify(parts);
+ const muscles=Object.entries(parts).filter(([key,p])=>p.system==='muscle');
+ assert.equal(muscles.length,11);
+ const pivot=[-.80,2.4,-.1];
+ const length=(a,b)=>Math.hypot(...a.map((v,i)=>v-b[i]));
+ for(const [id,mesh] of muscles){
+  const skin=rig.createSkin(id,mesh.vertices,parts);
+  assert.equal(skin.muscleId,id);
+  assert.equal(skin.validated,false);
+  assert.equal(skin.weights.length,mesh.vertices.length);
+  assert.ok(skin.weights.every(v=>Number.isFinite(v)&&v>=0&&v<=1),id+' invalid weight');
+  assert.ok(Math.min(...skin.weights)<.001&&Math.max(...skin.weights)>.999,id+' must have two distinct attachment zones');
+  const home=rig.deformVertex(skin.insertion,1,pivot,0);
+  assert.ok(length(home,skin.insertion)<1e-10,id+' reference pose must stay unchanged');
+  const origin=rig.deformVertex(skin.origin,0,pivot,95);
+  assert.ok(length(origin,skin.origin)<1e-10,id+' fixed origin must not drift');
+  const destination=rig.deformVertex(skin.insertion,1,pivot,95);
+  assert.ok(length(destination,skin.insertion)>.005,id+' humeral insertion must move');
+  for(const t of [0,15,30,45,60,90,110]){
+   const mid=rig.deformVertex(mesh.vertices[Math.floor(mesh.vertices.length/2)],skin.weights[Math.floor(skin.weights.length/2)],pivot,t);
+   assert.ok(mid.every(Number.isFinite),id+' invalid moving muscle vertex');
+  }
+ }
+ assert.equal(JSON.stringify(parts),rest,'rig must never rewrite the licensed source geometry');
+ const shader=read('assets/atlas/atlas-renderer.js');
+ for(const term of ['aSkinWeight','uSoftSkin','skinWeights:weights','BodyShoulderRig.createSkin','BodyShoulderRig.deformVertex'])
+  assert.ok(shader.includes(term),'GPU/CPU anatomy drift: '+term);
+ const html=read('atlas/index.html');
+ assert.ok(html.indexOf('atlas-shoulder-rig.js')<html.indexOf('atlas-renderer.js'),'rig must initialize before renderer');
+});

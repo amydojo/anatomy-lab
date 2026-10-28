@@ -116,7 +116,7 @@ def main():
   "unsupported":["ligament models not imported","glenoid labrum not imported","axillary/suprascapular nerves not imported","tendons not independently validated"],
   "notes":["Reference-pose source geometry; source meshes share atlas coordinate frame.",
            "A single humeral teaching pivot is not validated glenohumeral/scapulothoracic kinematics.",
-           "Muscles stay in source pose during movement; do not infer tendon deformation."]}
+           "At runtime, muscle surfaces deform using inferred scapula/clavicle-to-humerus skin weights. Rest-pose meshes are unchanged; origin/insertion correspondence and tissue motion have not been independently validated."]}
  (OUTPUT/"provenance.json").write_text(json.dumps(proof,indent=2)+"\n")
  print(json.dumps({"parts":list(selected),"triangles":sum(len(x["faces"]) for x in asset["parts"].values()),
                    "bytes":assetpath.stat().st_size,"chunks":list(chunks)}))
