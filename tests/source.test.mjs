@@ -254,3 +254,33 @@ test('V6 whole-body Atlas has evidence-safe source assets and interactive naviga
   assert.doesNotThrow(()=>new Function(read(path)));
  }
 });
+
+test('V6.3 single-scene detail anchors share the original atlas anatomical world',()=>{
+ const atlas=JSON.parse(read('atlas/assets/body-skeleton.json'));
+ const hip=JSON.parse(read('hip/spatial/assets/hip-source.json'));
+ const knee=JSON.parse(read('knee/spatial/assets/bp3d-right-knee-4.0.json'));
+ const bounds=vs=>[0,1,2].map(i=>[Math.min(...vs.map(v=>v[i])),Math.max(...vs.map(v=>v[i]))]);
+ const transform=(part,origin,scale)=>part.vertices.map(v=>v.map((x,i)=>(x/scale+origin[i]-[0,.9,0][i])*5));
+ for(const [name,part,origin,scale] of [
+  ['right-hip-bone',hip.parts.hipBone,[-.057,.895,-.045],10],
+  ['right-femur',hip.parts.femur,[-.057,.895,-.045],10],
+  ['right-femur',knee.bone_meshes.femur,[-.09092915,.4491462,-.01654605],7.5],
+  ['right-tibia',knee.bone_meshes.tibia,[-.09092915,.4491462,-.01654605],7.5]
+ ]){
+  const native=atlas.parts.find(p=>p.id===name);
+  assert.ok(native,'missing atlas '+name);
+  const a=bounds(native.vertices),b=bounds(transform(part,origin,scale));
+  for(let i=0;i<3;i++)for(let j=0;j<2;j++)assert.ok(Math.abs(a[i][j]-b[i][j])<.012,name+' world-bounds mismatch');
+ }
+ const html=read('atlas/index.html');
+ assert.ok(html.includes('/assets/atlas/atlas-unified.js'));
+ for(const path of ['assets/atlas/atlas-unified.js','assets/atlas/atlas-renderer.js','assets/atlas/atlas-controller.js'])
+  assert.doesNotThrow(()=>new Function(read(path)),path);
+ const renderer=read('assets/atlas/atlas-renderer.js');
+ assert.ok(renderer.includes('gl.drawArrays'));
+ assert.ok(renderer.includes('loadDetail(region,asset)'));
+ assert.ok(!renderer.includes('window.location'));
+ const controller=read('assets/atlas/atlas-controller.js');
+ assert.ok(controller.includes('return U.choose(region)'));
+ assert.ok(controller.includes('return U.back()'));
+});
