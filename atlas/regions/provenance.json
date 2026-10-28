@@ -24,6 +24,36 @@
       "sha256": "c359f4bcd2cba90b7411d66d5e9fc04dc81294d46cd5c1e8b212c824f2e5bbee",
       "bytes": 1335285
     },
+    "body-0.bin": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-0.bin",
+      "git_blob_sha1": "21d12e12e04dd9bae99abf337fab82470e40bd78",
+      "sha256": "b33b2b5aac20f35fbf6871f916607bf3c4d386321c8c0fdadcca6b5d24e3641e",
+      "bytes": 4019496
+    },
+    "body-1.bin": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-1.bin",
+      "git_blob_sha1": "b2a0a781478031ca966f57d73d6bd0b8652edcf7",
+      "sha256": "aa077a4675f0d0dd3c9b0af39dc8cf6bcb348c3bf7d283478d4206ce30a5a0de",
+      "bytes": 4526484
+    },
+    "body-3.bin": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-3.bin",
+      "git_blob_sha1": "368a55dd62c761caf2aee044439e9563b500f276",
+      "sha256": "6febb76b50423331f66802a63bb43f04f99ce08129837015910eed43d0719268",
+      "bytes": 4041436
+    },
+    "body-4.bin": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-4.bin",
+      "git_blob_sha1": "92dad79d99d03d5bd0778203259a43e1f5583097",
+      "sha256": "0509e6c996fe5b935ace770a5dbf2d83a474330b7e541a844052a080bbf814bb",
+      "bytes": 4020544
+    },
+    "body-5.bin": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-5.bin",
+      "git_blob_sha1": "833e5cd9852f995db00382b4b582fb177da13e5f",
+      "sha256": "32a967198ffed45839968228898f3d246c67f86fb26892c3ae270be30e2f1149",
+      "bytes": 4022564
+    },
     "body-11.bin": {
       "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-11.bin",
       "git_blob_sha1": "f437a61bfd8c976108abf3e3a607784af3eb3575",
@@ -45,7 +75,7 @@
   },
   "regions": {
     "skull": {
-      "asset_sha256": "9fa556b68e568a1c21b2937bbc13f62f5fd812719d8b5cfd472b230020d7c97a",
+      "asset_sha256": "db163e067391b0d736d47e3e472402d5432b87a81d143f2da4860e06a25800a5",
       "structures": {
         "frontal-bone": {
           "name": "Frontal bone",
@@ -133,11 +163,126 @@
         }
       },
       "source_parts": 14,
-      "triangles": 40010,
+      "muscle_source_parts": 16,
+      "muscles": {
+        "right-inferior-rectus": {
+          "name": "Right inferior rectus",
+          "fma": "FMA49046",
+          "source_system": "muscular",
+          "vertices": 438,
+          "triangles": 778
+        },
+        "right-lateral-rectus": {
+          "name": "Right lateral rectus",
+          "fma": "FMA49054",
+          "source_system": "muscular",
+          "vertices": 398,
+          "triangles": 720
+        },
+        "right-medial-rectus": {
+          "name": "Right medial rectus",
+          "fma": "FMA49056",
+          "source_system": "muscular",
+          "vertices": 335,
+          "triangles": 560
+        },
+        "right-superior-rectus": {
+          "name": "Right superior rectus",
+          "fma": "FMA49044",
+          "source_system": "muscular",
+          "vertices": 366,
+          "triangles": 618
+        },
+        "right-superior-oblique": {
+          "name": "Right superior oblique",
+          "fma": "FMA49052",
+          "source_system": "muscular",
+          "vertices": 459,
+          "triangles": 812
+        },
+        "right-inferior-oblique": {
+          "name": "Right inferior oblique",
+          "fma": "FMA49050",
+          "source_system": "muscular",
+          "vertices": 507,
+          "triangles": 922
+        },
+        "left-inferior-rectus": {
+          "name": "Left inferior rectus",
+          "fma": "FMA49047",
+          "source_system": "muscular",
+          "vertices": 444,
+          "triangles": 782
+        },
+        "left-lateral-rectus": {
+          "name": "Left lateral rectus",
+          "fma": "FMA49055",
+          "source_system": "muscular",
+          "vertices": 407,
+          "triangles": 728
+        },
+        "left-medial-rectus": {
+          "name": "Left medial rectus",
+          "fma": "FMA49057",
+          "source_system": "muscular",
+          "vertices": 319,
+          "triangles": 566
+        },
+        "left-superior-rectus": {
+          "name": "Left superior rectus",
+          "fma": "FMA49045",
+          "source_system": "muscular",
+          "vertices": 362,
+          "triangles": 622
+        },
+        "left-superior-oblique": {
+          "name": "Left superior oblique",
+          "fma": "FMA49053",
+          "source_system": "muscular",
+          "vertices": 436,
+          "triangles": 792
+        },
+        "left-inferior-oblique": {
+          "name": "Left inferior oblique",
+          "fma": "FMA49051",
+          "source_system": "muscular",
+          "vertices": 469,
+          "triangles": 890
+        },
+        "right-mylohyoid": {
+          "name": "Right mylohyoid",
+          "fma": "FMA46321",
+          "source_system": "muscular",
+          "vertices": 923,
+          "triangles": 1334
+        },
+        "left-mylohyoid": {
+          "name": "Left mylohyoid",
+          "fma": "FMA46322",
+          "source_system": "muscular",
+          "vertices": 896,
+          "triangles": 1278
+        },
+        "right-geniohyoid": {
+          "name": "Right geniohyoid",
+          "fma": "FMA46326",
+          "source_system": "muscular",
+          "vertices": 255,
+          "triangles": 452
+        },
+        "left-geniohyoid": {
+          "name": "Left geniohyoid",
+          "fma": "FMA46327",
+          "source_system": "muscular",
+          "vertices": 277,
+          "triangles": 470
+        }
+      },
+      "triangles": 52334,
       "movement": "source-reference-pose; no measured biomechanics"
     },
     "neck": {
-      "asset_sha256": "3108c8ca90913987cbb715276437ba442f890ebb2e4618ae31dafc349e7ff8a3",
+      "asset_sha256": "bb0c6e2aabbee322995f340656e1bc83aeb7510b7a5d1b898d054d65f2aa67c6",
       "structures": {
         "atlas": {
           "name": "Atlas",
@@ -189,11 +334,112 @@
         }
       },
       "source_parts": 8,
-      "triangles": 13788,
+      "muscle_source_parts": 14,
+      "muscles": {
+        "left-sternocleidomastoid": {
+          "name": "Left sternocleidomastoid",
+          "fma": "FMA13409",
+          "source_system": "muscular",
+          "vertices": 1825,
+          "triangles": 2248
+        },
+        "right-sternocleidomastoid": {
+          "name": "Right sternocleidomastoid",
+          "fma": "FMA13408",
+          "source_system": "muscular",
+          "vertices": 2166,
+          "triangles": 2274
+        },
+        "left-scalenus-anterior": {
+          "name": "Left scalenus anterior",
+          "fma": "FMA13393",
+          "source_system": "muscular",
+          "vertices": 663,
+          "triangles": 784
+        },
+        "right-scalenus-anterior": {
+          "name": "Right scalenus anterior",
+          "fma": "FMA13392",
+          "source_system": "muscular",
+          "vertices": 665,
+          "triangles": 792
+        },
+        "left-scalenus-medius": {
+          "name": "Left scalenus medius",
+          "fma": "FMA13391",
+          "source_system": "muscular",
+          "vertices": 1288,
+          "triangles": 1266
+        },
+        "right-scalenus-medius": {
+          "name": "Right scalenus medius",
+          "fma": "FMA13390",
+          "source_system": "muscular",
+          "vertices": 1376,
+          "triangles": 1332
+        },
+        "left-scalenus-posterior": {
+          "name": "Left scalenus posterior",
+          "fma": "FMA13389",
+          "source_system": "muscular",
+          "vertices": 985,
+          "triangles": 1170
+        },
+        "right-scalenus-posterior": {
+          "name": "Right scalenus posterior",
+          "fma": "FMA13388",
+          "source_system": "muscular",
+          "vertices": 1056,
+          "triangles": 1204
+        },
+        "left-splenius-capitis": {
+          "name": "Left splenius capitis",
+          "fma": "FMA22729",
+          "source_system": "muscular",
+          "vertices": 1432,
+          "triangles": 1716
+        },
+        "right-splenius-capitis": {
+          "name": "Right splenius capitis",
+          "fma": "FMA22728",
+          "source_system": "muscular",
+          "vertices": 1448,
+          "triangles": 1716
+        },
+        "left-longus-capitis": {
+          "name": "Left longus capitis",
+          "fma": "FMA46310",
+          "source_system": "muscular",
+          "vertices": 629,
+          "triangles": 856
+        },
+        "right-longus-capitis": {
+          "name": "Right longus capitis",
+          "fma": "FMA46309",
+          "source_system": "muscular",
+          "vertices": 777,
+          "triangles": 938
+        },
+        "left-platysma": {
+          "name": "Left platysma",
+          "fma": "FMA45740",
+          "source_system": "muscular",
+          "vertices": 2097,
+          "triangles": 3500
+        },
+        "right-platysma": {
+          "name": "Right platysma",
+          "fma": "FMA45739",
+          "source_system": "muscular",
+          "vertices": 2504,
+          "triangles": 3914
+        }
+      },
+      "triangles": 37498,
       "movement": "source-reference-pose; no measured biomechanics"
     },
     "thorax": {
-      "asset_sha256": "6083f84d695b67aea2329eaa8e3fd0203459474785d569ff18b5d4703508509e",
+      "asset_sha256": "ab2a4d8ef8c32cecc33428fcf712a19ae43ac94209881f9c084c3eb84ef40f18",
       "structures": {
         "left-first-rib": {
           "name": "Left first rib",
@@ -377,11 +623,91 @@
         }
       },
       "source_parts": 30,
-      "triangles": 49568,
+      "muscle_source_parts": 11,
+      "muscles": {
+        "right-serratus-anterior": {
+          "name": "Right serratus anterior",
+          "fma": "FMA13398",
+          "source_system": "muscular",
+          "vertices": 7818,
+          "triangles": 10826
+        },
+        "left-serratus-anterior": {
+          "name": "Left serratus anterior",
+          "fma": "FMA13399",
+          "source_system": "muscular",
+          "vertices": 7810,
+          "triangles": 10826
+        },
+        "right-pectoralis-minor": {
+          "name": "Right pectoralis minor",
+          "fma": "FMA13375",
+          "source_system": "muscular",
+          "vertices": 2726,
+          "triangles": 2612
+        },
+        "left-pectoralis-minor": {
+          "name": "Left pectoralis minor",
+          "fma": "FMA13376",
+          "source_system": "muscular",
+          "vertices": 2729,
+          "triangles": 2590
+        },
+        "sternocostal-part-of-right-pectoralis-major": {
+          "name": "Sternocostal part of right pectoralis major",
+          "fma": "FMA79979",
+          "source_system": "muscular",
+          "vertices": 3278,
+          "triangles": 3480
+        },
+        "sternocostal-part-of-left-pectoralis-major": {
+          "name": "Sternocostal part of left pectoralis major",
+          "fma": "FMA79980",
+          "source_system": "muscular",
+          "vertices": 3271,
+          "triangles": 3490
+        },
+        "right-transversus-thoracis": {
+          "name": "Right transversus thoracis",
+          "fma": "FMA9761",
+          "source_system": "muscular",
+          "vertices": 3482,
+          "triangles": 2458
+        },
+        "left-transversus-thoracis": {
+          "name": "Left transversus thoracis",
+          "fma": "FMA9762",
+          "source_system": "muscular",
+          "vertices": 3482,
+          "triangles": 2448
+        },
+        "diaphragm": {
+          "name": "Diaphragm",
+          "fma": "FMA13295",
+          "source_system": "muscular",
+          "vertices": 8469,
+          "triangles": 15074
+        },
+        "external-intercostal-muscle": {
+          "name": "external intercostal muscle",
+          "fma": "FMA9756",
+          "source_system": "muscular",
+          "vertices": 36746,
+          "triangles": 26416
+        },
+        "internal-intercostal-muscle": {
+          "name": "Internal intercostal muscle",
+          "fma": "FMA9757",
+          "source_system": "muscular",
+          "vertices": 25053,
+          "triangles": 19898
+        }
+      },
+      "triangles": 149686,
       "movement": "source-reference-pose; no measured biomechanics"
     },
     "elbow": {
-      "asset_sha256": "7980a35c894d1db6e62ca6f545c853957efe3dc3b4cc93bef29ba17d27a0ca2e",
+      "asset_sha256": "b95077904da9ff164ce483b0a54113a920bad36369805a576b3e313a217cd5c4",
       "structures": {
         "right-humerus": {
           "name": "Right humerus",
@@ -403,11 +729,84 @@
         }
       },
       "source_parts": 3,
-      "triangles": 1960,
+      "muscle_source_parts": 10,
+      "muscles": {
+        "right-brachialis": {
+          "name": "Right brachialis",
+          "fma": "FMA37668",
+          "source_system": "muscular",
+          "vertices": 630,
+          "triangles": 712
+        },
+        "right-brachioradialis": {
+          "name": "Right brachioradialis",
+          "fma": "FMA38486",
+          "source_system": "muscular",
+          "vertices": 1012,
+          "triangles": 1072
+        },
+        "long-head-of-right-biceps-brachii": {
+          "name": "Long head of right biceps brachii",
+          "fma": "FMA37686",
+          "source_system": "muscular",
+          "vertices": 466,
+          "triangles": 492
+        },
+        "short-head-of-right-biceps-brachii": {
+          "name": "Short head of right biceps brachii",
+          "fma": "FMA37684",
+          "source_system": "muscular",
+          "vertices": 1035,
+          "triangles": 804
+        },
+        "lateral-head-of-right-triceps-brachii": {
+          "name": "Lateral head of right triceps brachii",
+          "fma": "FMA37697",
+          "source_system": "muscular",
+          "vertices": 656,
+          "triangles": 838
+        },
+        "long-head-of-right-triceps-brachii": {
+          "name": "Long head of right triceps brachii",
+          "fma": "FMA37699",
+          "source_system": "muscular",
+          "vertices": 504,
+          "triangles": 560
+        },
+        "medial-head-of-right-triceps-brachii": {
+          "name": "Medial head of right triceps brachii",
+          "fma": "FMA37695",
+          "source_system": "muscular",
+          "vertices": 325,
+          "triangles": 372
+        },
+        "right-supinator": {
+          "name": "Right supinator",
+          "fma": "FMA38513",
+          "source_system": "muscular",
+          "vertices": 1229,
+          "triangles": 1266
+        },
+        "humeral-head-of-right-pronator-teres": {
+          "name": "Humeral head of right pronator teres",
+          "fma": "FMA38560",
+          "source_system": "muscular",
+          "vertices": 984,
+          "triangles": 856
+        },
+        "ulnar-head-of-right-pronator-teres": {
+          "name": "Ulnar head of right pronator teres",
+          "fma": "FMA38562",
+          "source_system": "muscular",
+          "vertices": 486,
+          "triangles": 542
+        }
+      },
+      "triangles": 9474,
       "movement": "source-reference-pose; no measured biomechanics"
     },
     "wrist": {
-      "asset_sha256": "e14f9e463d1601755cf51549959e0762862e06f93ee779d0a4dfbf917c9581e8",
+      "asset_sha256": "261844080e58237a139cd724c8cfb793caab2d58a9783174d82d267ecb1e8324",
       "structures": {
         "right-radius": {
           "name": "Right radius",
@@ -501,11 +900,84 @@
         }
       },
       "source_parts": 15,
-      "triangles": 6122,
+      "muscle_source_parts": 10,
+      "muscles": {
+        "right-flexor-carpi-radialis": {
+          "name": "Right flexor carpi radialis",
+          "fma": "FMA38460",
+          "source_system": "muscular",
+          "vertices": 299,
+          "triangles": 310
+        },
+        "right-palmaris-longus": {
+          "name": "Right palmaris longus",
+          "fma": "FMA38463",
+          "source_system": "muscular",
+          "vertices": 2090,
+          "triangles": 1500
+        },
+        "right-extensor-carpi-radialis-brevis": {
+          "name": "Right extensor carpi radialis brevis",
+          "fma": "FMA38498",
+          "source_system": "muscular",
+          "vertices": 585,
+          "triangles": 522
+        },
+        "right-extensor-carpi-radialis-longus": {
+          "name": "Right extensor carpi radialis longus",
+          "fma": "FMA38495",
+          "source_system": "muscular",
+          "vertices": 528,
+          "triangles": 544
+        },
+        "right-flexor-digitorum-profundus": {
+          "name": "Right flexor digitorum profundus",
+          "fma": "FMA38479",
+          "source_system": "muscular",
+          "vertices": 1520,
+          "triangles": 1304
+        },
+        "right-extensor-digitorum": {
+          "name": "Right extensor digitorum",
+          "fma": "FMA38501",
+          "source_system": "muscular",
+          "vertices": 1313,
+          "triangles": 1054
+        },
+        "right-opponens-pollicis": {
+          "name": "Right opponens pollicis",
+          "fma": "FMA37390",
+          "source_system": "muscular",
+          "vertices": 769,
+          "triangles": 680
+        },
+        "right-abductor-pollicis-brevis": {
+          "name": "Right abductor pollicis brevis",
+          "fma": "FMA37386",
+          "source_system": "muscular",
+          "vertices": 610,
+          "triangles": 576
+        },
+        "right-abductor-pollicis-longus": {
+          "name": "Right abductor pollicis longus",
+          "fma": "FMA38516",
+          "source_system": "muscular",
+          "vertices": 655,
+          "triangles": 592
+        },
+        "humeral-head-of-right-flexor-carpi-ulnaris": {
+          "name": "Humeral head of right flexor carpi ulnaris",
+          "fma": "FMA38617",
+          "source_system": "muscular",
+          "vertices": 694,
+          "triangles": 680
+        }
+      },
+      "triangles": 13884,
       "movement": "source-reference-pose; no measured biomechanics"
     },
     "ankle": {
-      "asset_sha256": "11f9b029bf9bd2880154659fbce6ec645863211d974fd02e7e263ff2617b453f",
+      "asset_sha256": "6431d766c671a80af1a9cc15a740c4195b8ae909fc32850a2b2db34e2d8f2653",
       "structures": {
         "right-tibia": {
           "name": "Right tibia",
@@ -593,12 +1065,100 @@
         }
       },
       "source_parts": 14,
-      "triangles": 9864,
+      "muscle_source_parts": 12,
+      "muscles": {
+        "right-tibialis-anterior": {
+          "name": "Right tibialis anterior",
+          "fma": "FMA22544",
+          "source_system": "skeletal",
+          "vertices": 1116,
+          "triangles": 766
+        },
+        "right-tibialis-posterior": {
+          "name": "Right tibialis posterior",
+          "fma": "FMA65018",
+          "source_system": "skeletal",
+          "vertices": 2920,
+          "triangles": 1944
+        },
+        "right-fibularis-longus": {
+          "name": "Right fibularis longus",
+          "fma": "FMA22552",
+          "source_system": "skeletal",
+          "vertices": 1083,
+          "triangles": 892
+        },
+        "right-fibularis-brevis": {
+          "name": "Right fibularis brevis",
+          "fma": "FMA22554",
+          "source_system": "skeletal",
+          "vertices": 802,
+          "triangles": 632
+        },
+        "lateral-head-of-right-gastrocnemius": {
+          "name": "Lateral head of right gastrocnemius",
+          "fma": "FMA45960",
+          "source_system": "muscular",
+          "vertices": 482,
+          "triangles": 738
+        },
+        "medial-head-of-right-gastrocnemius": {
+          "name": "Medial head of right gastrocnemius",
+          "fma": "FMA45957",
+          "source_system": "muscular",
+          "vertices": 647,
+          "triangles": 882
+        },
+        "right-soleus": {
+          "name": "Right soleus",
+          "fma": "FMA22558",
+          "source_system": "muscular",
+          "vertices": 792,
+          "triangles": 1004
+        },
+        "right-flexor-hallucis-longus": {
+          "name": "Right flexor hallucis longus",
+          "fma": "FMA65014",
+          "source_system": "muscular",
+          "vertices": 605,
+          "triangles": 660
+        },
+        "right-extensor-hallucis-longus": {
+          "name": "Right extensor hallucis longus",
+          "fma": "FMA22546",
+          "source_system": "muscular",
+          "vertices": 618,
+          "triangles": 526
+        },
+        "right-flexor-digitorum-longus": {
+          "name": "Right flexor digitorum longus",
+          "fma": "FMA65016",
+          "source_system": "muscular",
+          "vertices": 1081,
+          "triangles": 1006
+        },
+        "right-extensor-digitorum-longus": {
+          "name": "Right extensor digitorum longus",
+          "fma": "FMA22548",
+          "source_system": "muscular",
+          "vertices": 1859,
+          "triangles": 1326
+        },
+        "right-flexor-digitorum-brevis": {
+          "name": "Right flexor digitorum brevis",
+          "fma": "FMA37461",
+          "source_system": "muscular",
+          "vertices": 1662,
+          "triangles": 1254
+        }
+      },
+      "triangles": 21494,
       "movement": "source-reference-pose; no measured biomechanics"
     }
   },
   "unsupported": [
     "Tendons, cartilage, ligaments, nerve geometry, and connective tissue not reconstructed by this import",
+    "Muscle meshes are licensed reference-pose anatomy; named subsets are not exhaustive, attachments are not experimentally verified",
     "No measured elbow, radiocarpal, ankle, craniocervical, or temporomandibular motion",
     "A source mesh's presence does not certify clinical accuracy or patient-specific anatomy"
   ]
