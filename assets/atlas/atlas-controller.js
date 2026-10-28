@@ -3,7 +3,7 @@
 const $=id=>document.getElementById(id);
 const state=window.BodyAtlasState.create();
 const loader=window.BodyAtlasLoader,model=window.BodyAtlasRenderer.create($('atlas-canvas'),reason=>fallback(reason));
-const E=window.BodyAtlasEvidence;let source=null,proof=null,hipProof=null,nerveProof=null,shoulderProof=null;
+const E=window.BodyAtlasEvidence;let source=null,proof=null,hipProof=null,nerveProof=null,shoulderProof=null,kneeMuscleProof=null;
 let lastFocus=null,activeFrameRoute=null,motionFrame=0,travelMixFrame=0,frameTimeout=0,entryTimer=0,exitTimer=0,seq=0,previousFocus=null,pins=[],loaded=false,pendingEntry=null,sourceSeamPending=false;
 const reduce=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const HERE={hip:'/hip/spatial/',nerve:'/hip/spatial/',knee:'/knee/spatial/',shoulder:'/shoulder/'};
@@ -11,7 +11,7 @@ const LABEL={hip:'RIGHT HIP',nerve:'SCIATIC NERVE',knee:'RIGHT KNEE',shoulder:'S
 const NOTE={
 hip:'Source hip bones and muscles; muscle layer and joint movement remain illustrative, pending expert review.',
 nerve:'Atlas-derived nerve registered to a separate skeletal source; nerve continuity is not independently imaged or reviewed.',
-knee:'Source-matched right knee bones and illustrative soft tissues. Sciatic nerve does not continue through this scene.',
+knee:'Source-matched right knee bones and five real imported muscle surfaces with inferred attachment-guided flexion. Missing ligaments, menisci and nerve geometry are not fabricated.',
 shoulder:'Source-matched scapula, clavicle and humerus with four sourced rotator-cuff muscle surfaces. Deltoid/ligament/labrum/nerve coverage is incomplete; abduction is illustrative.'};
 const MODE_TEXT={explore:'Explore',peel:'Peel',trace:'Trace'};
 function updateURL(){
@@ -457,11 +457,12 @@ async function renderEvidence(){
  let names=['provenance'];if(['hip','nerve'].includes(state.data.region))names.push('hip');
  if(state.data.region==='nerve')names.push('nerve');
  if(state.data.region==='shoulder')names.push('shoulderProof');
+ if(state.data.region==='knee')names.push('kneeMuscleProof');
  const collected=await Promise.all(names.map(async key=>{try{return [key,await loader.load(key)];}catch{return [key,null];}}));
- for(const [name,obj] of collected){if(name==='provenance')proof=obj;if(name==='hip')hipProof=obj;if(name==='nerve')nerveProof=obj;if(name==='shoulderProof')shoulderProof=obj;}
+ for(const [name,obj] of collected){if(name==='provenance')proof=obj;if(name==='hip')hipProof=obj;if(name==='nerve')nerveProof=obj;if(name==='shoulderProof')shoulderProof=obj;if(name==='kneeMuscleProof')kneeMuscleProof=obj;}
  if(!state.data.evidence)return;
  $('evidence-intro').textContent='Origin and expert review are separate. Neither a licensed atlas nor a smooth camera transition is medical validation.';
- const list=E.records(state.data.region||'overview',proof,hipProof,nerveProof,shoulderProof);
+ const list=E.records(state.data.region||'overview',proof,hipProof,nerveProof,shoulderProof,kneeMuscleProof);
  $('evidence-records').replaceChildren();
  for(const entry of list){
   const box=document.createElement('article');box.className='evidence-record';
