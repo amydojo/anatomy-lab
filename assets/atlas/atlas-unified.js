@@ -55,7 +55,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   quadratus:['Quadratus femoris','Deep posterior hip muscle associated with rotation.'],
   clavicle:['Right clavicle','Source-derived collarbone linking the shoulder girdle to the thorax. An estimated sternoclavicular pivot drives bounded elevation; real joint mechanics are not validated.'],
   scapula:['Right scapula','The shoulder blade supports the glenoid socket and rotator-cuff origins. It now moves with the clavicle and humerus using an approximate educational motion curve, not measured scapular kinematics.'],
-  humerus:['Right humerus','Upper-arm bone articulating with the glenoid. Abduction moves the humerus and bends attached muscles via inferred skinning weights; joint rhythm and tissue mechanics are not validated.'],
+  humerus:['Right humerus','The upper-arm bone follows an estimated glenoid center during abduction, while the scapula and clavicle move along bounded illustrative curves. Muscle attachment weights and tissue mechanics are not validated.'],
   supraspinatus:['Supraspinatus','Rotator-cuff muscle passing above the scapular spine toward the greater tubercle. Mesh deformation is attachment-guided, not anatomist-validated.'],
   infraspinatus:['Infraspinatus','Posterior rotator-cuff muscle on the infraspinous fossa. Its mesh now bends toward the moving humerus using inferred attachments; not a validated tendon simulation.'],
   subscapularis:['Subscapularis','Anterior rotator-cuff muscle from the subscapular fossa toward the lesser tubercle.'],
