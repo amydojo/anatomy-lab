@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const state=window.BodyAtlasState.create();
 const loader=window.BodyAtlasLoader,model=window.BodyAtlasRenderer.create($('atlas-canvas'),reason=>fallback(reason));
 const E=window.BodyAtlasEvidence;let source=null,proof=null,hipProof=null,nerveProof=null;
-let lastFocus=null,activeFrameRoute=null,motionFrame=0,frameTimeout=0,entryTimer=0,exitTimer=0,seq=0,previousFocus=null,pins=[],loaded=false,pendingEntry=null;
+let lastFocus=null,activeFrameRoute=null,motionFrame=0,travelMixFrame=0,frameTimeout=0,entryTimer=0,exitTimer=0,seq=0,previousFocus=null,pins=[],loaded=false,pendingEntry=null,sourceSeamPending=false;
 const reduce=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const HERE={hip:'/hip/spatial/',nerve:'/hip/spatial/',knee:'/knee/spatial/',shoulder:'/shoulder/'};
 const LABEL={hip:'RIGHT HIP',nerve:'SCIATIC NERVE',knee:'RIGHT KNEE',shoulder:'SHOULDER'};
@@ -46,11 +46,44 @@ function sourceAnchor(id,kind='mean'){
  for(let i=0;i<vs.length;i+=stride){for(let j=0;j<3;j++)sum[j]+=vs[i][j];n++;}
  return sum.map(v=>v/n);
 }
+// Both skeletal lab datasets come from the same pinned BodyParts3D 4.0 frame.
+// Their display origins are different; these anchors are exact source-frame
+// conversions, NOT estimated screen-space positions or nerve registration.
+const SOURCE_PIVOT={
+ hip:{x:-.057*5,y:(.895-.9)*5,z:-.045*5},
+ knee:{x:-.09092915*5,y:(.4491462-.9)*5,z:-.01654605*5}
+};
 function centerPoint(region){
- let a=sourceAnchor(region==='knee'?'right-tibia':region==='shoulder'?'right-humerus':region==='thorax'?'body-of-sternum':'right-hip-bone',region==='knee'?'proximal':'mean');
- if(!a)a={hip:[-.7,-.6,0],nerve:[-.8,-1,0],knee:[-.8,-2.4,0],shoulder:[-1,2.2,0]}[region]||[0,0,0];
- if(region==='nerve')a=[a[0]-.10,a[1]-.25,a[2]-.17];
+ if(region==='hip'||region==='knee')return {...SOURCE_PIVOT[region]};
+ if(region==='nerve')return {...SOURCE_PIVOT.hip};
+ let a=sourceAnchor(region==='shoulder'?'right-humerus':'body-of-sternum','mean');
+ if(!a)a={shoulder:[-1,2.2,0],thorax:[0,1.3,0]}[region]||[0,0,0];
  return {x:a[0],y:a[1],z:a[2]};
+}
+function shortestYaw(from,to){
+ return from+Math.atan2(Math.sin(to-from),Math.cos(to-from));
+}
+function isSourceAligned(region){return region==='hip'||region==='knee';}
+function labAPI(region){
+ const w=$('region-frame').contentWindow;
+ try{return region==='knee'?w.__BODY_SPATIAL__:w.__HIP_SPATIAL__;}catch{return null;}
+}
+function sourceCameraFor(region){
+ const parent=$('atlas-canvas'),child=$('region-frame').contentDocument;
+ const specimen=child?.getElementById(region==='knee'?'knee-canvas':'hip-canvas');
+ const aw=parent.clientWidth,ah=parent.clientHeight;
+ const dw=specimen?.clientWidth||0,dh=specimen?.clientHeight||0;
+ if(!aw||!ah||!dw||!dh)return null;
+ const cam=state.data.camera;
+ const frameSpan=region==='hip'?(window.innerWidth<=850?3.35:4.5):2.65;
+ const atlasPx=Math.min(aw/3.25,ah/cam.frameSpan)*cam.zoom;
+ const labPx=Math.min(dw/3.25,dh/frameSpan);
+ // Parent coordinates are (metres - [0,.9,0])*5. Detail coordinates
+ // are (metres - regionSourceOrigin)*10 (Hip) or *7.5 (Knee).
+ const units=region==='hip'?10:7.5;
+ const zoom=atlasPx*(5/units)/labPx;
+ if(!Number.isFinite(zoom)||zoom<=0)return null;
+ return {yaw:cam.yaw,pitch:cam.pitch,zoom,frameSpan,anchorY:.5-(.04*labPx*zoom)/dh,sourceOrigin:region};
 }
 function drawPins(){
  const canvas=$('atlas-canvas'),w=canvas.clientWidth,h=canvas.clientHeight;
@@ -112,86 +145,175 @@ function setExpanded(next){
 }
 // A region selection is a camera journey. The destination lab preloads invisibly;
  // no iframe or loading screen may replace the atlas until travel and load finish.
+// One continuous world-space travel. The matched lab never shows its own
+// default camera; the hip/knee source-frame pose is sent before revealing it.
 function choose(region){
  if(state.data.view==='detail'||!window.BodyAtlasState.regions.includes(region))return;
  ++seq;const token=seq;
  clearTimeout(frameTimeout);clearTimeout(entryTimer);clearTimeout(exitTimer);
- cancelAnimationFrame(motionFrame);motionFrame=0;pendingEntry=null;
+ cancelAnimationFrame(motionFrame);cancelAnimationFrame(travelMixFrame);
+ motionFrame=travelMixFrame=0;pendingEntry=null;
  if(!state.select(region))return;
  state.data.previous=lastFocus;lastFocus=region;
- $('panel-title').textContent=region==='nerve'?'Follow a living network.':region==='hip'?'Into the deep hip.':region==='knee'?'Inside the knee.':'The shoulder.';
+ $('panel-title').textContent=region==='nerve'?'Follow a separately registered nerve.':region==='hip'?'Into the deep hip.':region==='knee'?'Inside the knee.':'The shoulder.';
  $('panel-description').textContent=NOTE[region];
  $('panel-kicker').textContent='REGION / '+LABEL[region]+' · EDUCATIONAL PREVIEW';
  $('sidebar-short').textContent=LABEL[region];
  $('stage-title').textContent=LABEL[region]+' · APPROACH';
- $('stage-caveat').textContent=NOTE[region];
+ $('stage-caveat').textContent=region==='knee'&&sourceSeamPending?'Reference change · sciatic nerve not reconstructed continuously':NOTE[region];
+ sourceSeamPending=false;
  $('scene-status').textContent='TRAVELING INTO '+LABEL[region];
  $('enter-region').disabled=true;$('enter-region').textContent='Entering '+LABEL[region]+'…';
- $('back-body').hidden=false;
+ $('back-body').hidden=false;$('top-enter-region').hidden=true;
  document.querySelectorAll('[data-region]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.region===region)));
  if(window.innerWidth<=850)setExpanded(false);
- $('atlas-app').dataset.mode='overview';
+ $('atlas-app').dataset.mode=isSourceAligned(region)?'overview':'focus';
  $('hotspots').hidden=true;updateURL();render();
+ const aligned=isSourceAligned(region);
  const portal=$('portal'),frame=$('region-frame');
- portal.hidden=false;portal.dataset.phase='preload';
+ portal.hidden=!aligned;portal.dataset.phase='preload';
  portal.setAttribute('inert','');portal.setAttribute('aria-hidden','true');
- $('portal-mask').hidden=true;frame.title=LABEL[region]+' detailed anatomy demonstration';
- pendingEntry={region,token,ready:false,traveled:false};
- frame.onload=()=>{
-  if(seq!==token||!pendingEntry||pendingEntry.region!==region)return;
-  try{if(frame.contentWindow.location.pathname!==HERE[region])return;}catch{return;}
-  adaptEmbeddedFrame(frame,region);pendingEntry.ready=true;clearTimeout(entryTimer);
-  finishEntry(token);
- };
- frame.src=HERE[region];
- entryTimer=setTimeout(()=>{
-  if(seq!==token||!pendingEntry||pendingEntry.ready)return;
-  $('scene-status').textContent='DETAIL TAKING LONGER · RETRY OR RETURN';
-  $('enter-region').disabled=false;$('enter-region').textContent='Retry '+LABEL[region];
- },12000);
- const target=centerPoint(region);
- const first={yaw:region==='nerve'?Math.PI+.24:-.20,pitch:-.07,zoom:1.10,
-  frameSpan:region==='shoulder'?5.0:region==='knee'?4.5:4.6,target};
- const close={...first,zoom:1.35,frameSpan:region==='shoulder'?2.85:2.25,
-  pitch:region==='nerve'?-.13:-.095,target:{...target}};
- animateCamera(first,reduce()?0:440,()=>{
-  if(seq!==token)return;
+ $('portal-mask').hidden=true;
+ pendingEntry={region,token,ready:false,traveled:false,matched:aligned};
+ if(aligned){
+  frame.title=LABEL[region]+' detailed anatomy demonstration';
+  frame.onload=()=>{
+   if(seq!==token||pendingEntry?.region!==region)return;
+   try{if(frame.contentWindow.location.pathname!==HERE[region])return;}catch{return;}
+   adaptEmbeddedFrame(frame,region);
+   checkSourceReady(token);
+  };
+  frame.src=HERE[region];
+  entryTimer=setTimeout(()=>{
+   if(token!==seq||pendingEntry?.ready)return;
+   $('scene-status').textContent='SOURCE VIEW UNAVAILABLE · REMAINING IN ATLAS';
+   $('enter-region').disabled=false;
+   $('enter-region').textContent='Try detail again ↗';
+   $('top-enter-region').hidden=false;
+   $('top-enter-region').textContent='Try detail ↗';
+  },15000);
+ }else{
+  // This branch has no camera-compatible 3D model. Never pretend the
+  // independent nerve composite or 2D shoulder is continuous source geometry.
+  frame.onload=null;frame.removeAttribute('src');
+ }
+ const toYaw=region==='hip'||region==='nerve'?Math.PI+.28:region==='knee'?.47:Math.PI+.32;
+ const close={yaw:shortestYaw(state.data.camera.yaw,toYaw),pitch:-.11,
+  zoom:1.36,frameSpan:region==='knee'?1.65:region==='shoulder'?2.15:1.85,
+  target:centerPoint(region)};
+ animateCamera(close,reduce()?0:1150,()=>{
+  if(seq!==token||!pendingEntry)return;
+  pendingEntry.traveled=true;
   $('stage-title').textContent=LABEL[region]+' · CLOSE VIEW';
-  animateCamera(close,reduce()?0:480,()=>{
-   if(seq!==token||!pendingEntry)return;
-   pendingEntry.traveled=true;
-   if(!pendingEntry.ready)$('scene-status').textContent='PREPARING '+LABEL[region]+' DETAIL';
+  if(aligned){
+   if(!pendingEntry.ready)$('scene-status').textContent='ALIGNING SOURCE CAMERA';
    finishEntry(token);
-  });
+  }else{
+   $('scene-status').textContent=region==='nerve'?'SEPARATE REGISTERED NERVE REFERENCE':'ILLUSTRATIVE SHOULDER REFERENCE';
+   $('enter-region').disabled=false;
+   $('enter-region').textContent=region==='nerve'?'Open nerve source viewer ↗':'Open shoulder lab ↗';
+   $('top-enter-region').textContent=region==='nerve'?'Follow nerve ↗':'Open shoulder ↗';
+   $('top-enter-region').hidden=false;
+  }
  });
 }
+function checkSourceReady(token,tries=0){
+ const task=pendingEntry;
+ if(!task||token!==seq||!task.matched)return;
+ const api=labAPI(task.region),st=api?.getState?.();
+ const loaded=task.region==='hip'?st?.sourceLoaded:st?.sourcedBoneCount>=4;
+ if(loaded){
+  // Do not lock the child camera while the parent is still traveling.
+  // The final source-camera position is computed exactly at reveal time.
+  task.ready=true;clearTimeout(entryTimer);finishEntry(token);return;
+ }
+ if(tries<150)frameTimeout=setTimeout(()=>checkSourceReady(token,tries+1),90);
+ else $('scene-status').textContent='COULD NOT ALIGN SOURCE VIEW · STAYING IN ATLAS';
+}
 function finishEntry(token){
- const journey=pendingEntry;
- if(!journey||token!==seq||!journey.ready||!journey.traveled)return;
+ const task=pendingEntry;
+ if(!task||task.token!==seq||!task.matched||!task.ready||!task.traveled)return;
+ // The model is now at its FINAL end pose, and both viewports have
+ // their permanent dimensions. Calibrate once, just before cross-dissolve.
+ const match=sourceCameraFor(task.region);
+ if(!match||!labAPI(task.region)?.prepareAtlasEntry?.(match)){
+  $('scene-status').textContent='SOURCE CAMERA UNAVAILABLE · KEEPING ATLAS VIEW';
+  $('enter-region').disabled=false;$('enter-region').textContent='Retry close view ↗';
+  return;
+ }
  if(!state.enter())return;
- const region=journey.region,portal=$('portal');
+ const region=task.region,portal=$('portal');
  state.data.frameReady=true;
  $('atlas-app').dataset.mode='detail';
  $('stage-title').textContent=LABEL[region]+' · DETAIL';
- $('scene-status').textContent='DETAIL / SOURCE WARNINGS APPLY';
+ $('scene-status').textContent='SOURCE-FRAME MATCH · ANATOMY UNREVIEWED';
  $('panel-kicker').textContent='EDUCATIONAL VIEW · NOT CLINICALLY VALIDATED';
- $('context-note').textContent=region==='nerve'?'Sciatic-to-knee continuity is NOT anatomically reconstructed. Use Continue toward Knee to view the explicit seam.':NOTE[region];
+ $('context-note').textContent=NOTE[region];
  $('portal-mask').hidden=true;
  portal.removeAttribute('inert');portal.setAttribute('aria-hidden','false');
  portal.dataset.phase='entering';activeFrameRoute=HERE[region];
  enableControls(region);updateURL();
- if(region==='nerve')initNerve(token);
+ const api=labAPI(region);
+ // First the identical source-frame bones, then the new muscle/schematic
+ // tissue overlays. They must never appear by snapping to a new camera.
+ if(reduce()){api?.setAtlasEntryMix?.(1);}
+ else{
+  const begin=performance.now();
+  function step(now){
+   if(token!==seq)return;
+   const t=Math.min(1,(now-begin)/850);
+   const eased=t*t*(3-2*t);
+   api?.setAtlasEntryMix?.(eased);
+   if(t<1)travelMixFrame=requestAnimationFrame(step);
+  }
+  travelMixFrame=requestAnimationFrame(step);
+ }
  requestAnimationFrame(()=>{if(seq===token)portal.dataset.phase='active';});
 }
-
+function enterUnmatchedRegion(region){
+ if(state.data.view!=='focused'||isSourceAligned(region)||region!==state.data.region)return;
+ if(!state.enter())return;
+ ++seq;clearTimeout(frameTimeout);cancelAnimationFrame(motionFrame);
+ const frame=$('region-frame'),portal=$('portal'),token=seq;
+ frame.title=LABEL[region]+' separate educational laboratory';
+ portal.hidden=false;portal.dataset.phase='preload';
+ portal.setAttribute('aria-hidden','true');portal.setAttribute('inert','');
+ $('atlas-app').dataset.mode='detail';
+ $('hotspots').hidden=true;$('top-enter-region').hidden=true;
+ $('scene-status').textContent='OPENING SEPARATELY SOURCED REFERENCE';
+ $('context-note').textContent=NOTE[region];
+ enableControls(region);updateURL();
+ frame.onload=()=>{
+  if(seq!==token)return;
+  adaptEmbeddedFrame(frame,region);
+  state.data.frameReady=true;
+  portal.removeAttribute('inert');portal.setAttribute('aria-hidden','false');
+  portal.dataset.phase='entering';
+  if(region==='nerve')initNerve(token);
+  requestAnimationFrame(()=>{if(seq===token)portal.dataset.phase='active';});
+ };
+ frame.src=HERE[region];
+}
 function adaptEmbeddedFrame(frame,region){
- if(region==='shoulder')return;
  try{
   const doc=frame.contentDocument;
   if(!doc||doc.getElementById('atlas-embed-style'))return;
   const style=doc.createElement('style');style.id='atlas-embed-style';
-  style.textContent='header.topbar{display:none!important}html,body,#app{height:100%!important}';
+  // On the child page the inspector was a layout column/row, which reduced
+  // canvas dimensions on handoff. Put it above the canvas instead so matching
+  // source bones stay on the exact same screen pixels before/after reveal.
+  style.textContent=[
+   'header.topbar{display:none!important}',
+   'html,body,#app{height:100%!important;min-height:0!important;overflow:hidden!important}',
+   '#app>.workspace,.workspace{display:block!important;position:relative!important;height:100%!important;min-height:0!important}',
+   '.workspace>.stage,.stage{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:0!important}',
+   '.workspace>.inspector,.inspector{position:absolute!important;z-index:5!important;top:0!important;right:0!important;bottom:0!important;left:auto!important;height:100%!important}',
+   '@media(max-width:850px){.workspace>.inspector,.inspector{top:auto!important;bottom:0!important;right:0!important;left:0!important;width:100%!important;height:124px!important}}',
+   '@media(max-width:850px) and (max-height:680px){.workspace>.inspector,.inspector{height:90px!important}}'
+  ].join('');
   doc.head.appendChild(style);
+  // Children need their final viewport before the parent computes the
+  // source-frame camera; ResizeObserver will be followed by the readiness poll.
  }catch(err){console.warn('Atlas lab presentation:',err.message);}
 }
 function enableControls(region){
@@ -202,16 +324,17 @@ function enableControls(region){
  $('enter-region').disabled=true;$('enter-region').textContent=detail?'Inside '+LABEL[region]:'Choose a region';
  document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-explore')));
  $('back-body').hidden=!detail;
+ $('top-enter-region').hidden=true;
  $('top-continue-knee').hidden=!detail||!['hip','nerve'].includes(region);
 }
 function enter(region=state.data.region){
  if(!region||state.data.view==='detail')return;
+ if(!isSourceAligned(region)){enterUnmatchedRegion(region);return;}
  if(pendingEntry?.region===region){
   if(pendingEntry.ready&&pendingEntry.traveled)finishEntry(pendingEntry.token);
-  else if(!pendingEntry.ready)choose(region); // Explicit retry of a stalled destination.
+  else if(!pendingEntry.ready)choose(region);
  }else choose(region);
 }
-
 function initNerve(token,attempt=0){
  if(token!==seq||state.data.view!=='detail'||state.data.region!=='nerve')return;
  const api=getFrameApi();
@@ -221,7 +344,7 @@ function initNerve(token,attempt=0){
 }
 function body(){
  ++seq;clearTimeout(frameTimeout);clearTimeout(entryTimer);clearTimeout(exitTimer);
- cancelAnimationFrame(motionFrame);motionFrame=0;pendingEntry=null;
+ cancelAnimationFrame(motionFrame);cancelAnimationFrame(travelMixFrame);motionFrame=travelMixFrame=0;pendingEntry=null;
  const old=state.data.region;
  const cam=state.data.camera;
  const from={yaw:cam.yaw,pitch:cam.pitch,zoom:cam.zoom,frameSpan:cam.frameSpan,target:{...cam.target}};
@@ -236,7 +359,7 @@ function body(){
  const portal=$('portal');portal.dataset.phase='leaving';
  portal.setAttribute('inert','');portal.setAttribute('aria-hidden','true');
  $('portal-mask').hidden=true;
- $('hotspots').hidden=false;$('back-body').hidden=true;$('seam').hidden=true;
+ $('hotspots').hidden=false;$('back-body').hidden=true;$('top-enter-region').hidden=true;$('seam').hidden=true;
  $('panel-kicker').textContent='SOURCE-DERIVED REFERENCE';$('panel-title').textContent='The body, connected.';
  $('panel-description').textContent='Choose a region to inspect bones, muscles and nerves in spatial context. Reference anatomy is not one patient scan or a clinically validated reconstruction.';
  $('sidebar-short').textContent='Explore the body';$('stage-title').textContent='ONE BODY · MANY SYSTEMS';
@@ -263,6 +386,7 @@ function seam(){
 }
 function toKnee(){
  if(!state.completeTransfer())return;
+ sourceSeamPending=true;
  $('seam').hidden=true;
  // First dissolve back onto the actual shared-frame bones. Then travel from hip
  // to knee, preserving the explicit nerve reference-boundary disclosure.
@@ -340,10 +464,11 @@ function setup(){
  window.addEventListener('resize',resize,{passive:true});
  if(typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe($('atlas-stage'));
  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(motionFrame);motionFrame=0;clearTimeout(frameTimeout);}else render();});
- window.addEventListener('pagehide',()=>{loader.cancel();model.dispose();clearTimeout(frameTimeout);clearTimeout(entryTimer);clearTimeout(exitTimer);cancelAnimationFrame(motionFrame);});
+ window.addEventListener('pagehide',()=>{loader.cancel();model.dispose();clearTimeout(frameTimeout);clearTimeout(entryTimer);clearTimeout(exitTimer);cancelAnimationFrame(motionFrame);cancelAnimationFrame(travelMixFrame);cancelAnimationFrame(travelMixFrame);});
  $('sidebar-toggle').onclick=()=>setExpanded($('atlas-sidebar').dataset.expanded!=='true');
  document.querySelectorAll('[data-region]').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.region)));
  $('enter-region').onclick=()=>enter();
+ $('top-enter-region').onclick=()=>enter();
  $('continue-knee').onclick=seam;
  $('top-continue-knee').onclick=seam;
  $('seam-cancel').onclick=()=>{state.closeSeam();$('seam').hidden=true;previousFocus?.focus?.();};
