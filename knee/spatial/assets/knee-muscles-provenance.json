@@ -1,0 +1,73 @@
+{
+  "schema": "body-live/knee-muscles-provenance-v1",
+  "attribution": "BodyParts3D, \u00a9 The Database Center for Life Science licensed under CC Attribution 4.0 International",
+  "license": "CC BY 4.0",
+  "license_url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html",
+  "original_release": "4.0 99% reduced IS-A tree",
+  "distribution": "https://github.com/ashemag/human-atlas",
+  "pinned_commit": "1c38bf35c254a891200d3cedecfd57abebe83d8d",
+  "input_hashes": {
+    "atlas.json": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/atlas.json",
+      "git_blob_sha1": "0f81b5621479a0c0548f4683c316f33bd4d6545b",
+      "sha256": "c359f4bcd2cba90b7411d66d5e9fc04dc81294d46cd5c1e8b212c824f2e5bbee",
+      "bytes": 1335285
+    },
+    "body-1.bin": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-1.bin",
+      "git_blob_sha1": "b2a0a781478031ca966f57d73d6bd0b8652edcf7",
+      "sha256": "aa077a4675f0d0dd3c9b0af39dc8cf6bcb348c3bf7d283478d4206ce30a5a0de",
+      "bytes": 4526484
+    }
+  },
+  "models": {
+    "popliteus": {
+      "fma": "FMA22591",
+      "name": "Right popliteus",
+      "chunk": 1,
+      "vertices": 357,
+      "triangles": 468
+    },
+    "vastusMedialis": {
+      "fma": "FMA38932",
+      "name": "Right vastus medialis",
+      "chunk": 1,
+      "vertices": 784,
+      "triangles": 1000
+    },
+    "vastusLateralis": {
+      "fma": "FMA38930",
+      "name": "Right vastus lateralis",
+      "chunk": 1,
+      "vertices": 1091,
+      "triangles": 1470
+    },
+    "vastusIntermedius": {
+      "fma": "FMA38934",
+      "name": "Right vastus intermedius",
+      "chunk": 1,
+      "vertices": 840,
+      "triangles": 936
+    },
+    "bicepsShort": {
+      "fma": "FMA45891",
+      "name": "Short head of right biceps femoris",
+      "chunk": 1,
+      "vertices": 456,
+      "triangles": 492
+    }
+  },
+  "asset_sha256": "f86acd81d3c60929caadfece7a5886a573adf40d91de26ad23b628729e14f7bc",
+  "anatomist_reviewed": false,
+  "kinematics_validated": false,
+  "missing": [],
+  "unsupported": [
+    "menisci, ligaments and tendons are not included",
+    "muscle insertion/rig mechanics not anatomist validated"
+  ],
+  "notes": [
+    "Pinned right knee muscle geometry using the same global source reference as the existing knee bones.",
+    "Vasti inserted toward patella, popliteus toward tibia, and biceps short toward fibula in a bounded teaching rig; proximity-derived correspondence is not anatomist reviewed.",
+    "The source meshes are not changed during runtime deformation; no anatomical tendon/capsule model is inferred."
+  ]
+}
