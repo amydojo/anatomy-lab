@@ -405,7 +405,7 @@ test('V6.8 coordinated shoulder transforms keep AC and GH connections closed thr
  assert.equal(solver.validated,false);
  assert.equal(JSON.stringify(source),original,'source meshes and attribution must stay unchanged');
  const shader=read('assets/atlas/atlas-renderer.js');
- for(const term of ['uShoulderGraph','uOriginPose','uInsertionPose','shoulderDiagnostics','BodyShoulderKinematics.deformPoint'])
+ for(const term of ['uShoulderGraph','uOriginPose','uInsertionPose','shoulderDiagnostics','kin.deformPoint'])
   assert.ok(shader.includes(term),'missing shared WebGL/CPU rig support: '+term);
  const html=read('atlas/index.html');
  assert.ok(html.indexOf('atlas-shoulder-kinematics.js')<html.indexOf('atlas-renderer.js'));
