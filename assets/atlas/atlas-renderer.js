@@ -126,7 +126,7 @@ function create(canvas,onContextLost=()=>{}){
   for(const item of buffers){
    if(replaced.has(item.id))continue;
    let dim=1;
-   if(selected){const group=['hip','knee','nerve'].includes(selected)?'lower':selected==='shoulder'?'upper':null;dim=item.group===group?1:.3;}
+   if(selected){const group=['hip','knee','nerve'].includes(selected)?'lower':selected==='shoulder'?'upper':null;dim=item.group===group?1:1-.7*clamp(reveal,0,1);}
    if(mode==='evidence'&&selected)dim=item.group==='lower'?.95:.37;
    draw(item,dim,1);
   }
