@@ -3,8 +3,8 @@
 const INTRO={overview:{title:'Sourced overview',origin:'Source-derived skeletal context',note:'One BodyParts3D 4.0 reference release. Simplified bone surfaces; not a patient scan, complete anatomy or anatomist-reviewed reconstruction.'},hip:{title:'Right Hip',origin:'Sourced bones and muscles',note:'BodyParts3D 4.0 meshes use one reference frame. Joint pivot, muscle responses and movement remain illustrative and unreviewed.'},nerve:{title:'Sciatic nerve',origin:'Registered atlas composite',note:'Z-Anatomy source-derived nerve surface registered against a different BodyParts3D femur. Not medical imaging, not same validated donor, and not an independently validated nerve course.'},knee:{title:'Right Knee',origin:'Source bones and five knee-spanning muscles',note:'Four sourced bones and five licensed muscle surfaces share the pinned BodyParts3D reference. Attachment weights and simplified flexion are inferred, not anatomist-validated; menisci and ligaments are not supplied.'},shoulder:{title:'Right Shoulder',origin:'Sourced bones and four rotator-cuff muscles',note:'Scapula, clavicle, humerus and rotator-cuff meshes use the same pinned BodyParts3D source coordinates. Deltoid, tendon, labrum, ligament and nerves are not comprehensively reconstructed. Movement uses an estimated pivot and is not anatomist-reviewed.'}};
 function records(region,manifest,hip,nerve,shoulder,kneeMuscles,expanded){
  const extra=window.BodyExtendedRegions?.config[region];
- const item=extra?{title:extra.title,origin:'Pinned BodyParts3D 4.0 bones',
-  note:'Reference-pose bone surfaces only. Where a motion control is present it is a schematic hinge, not anatomist-reviewed joint mechanics or sourced ligament, tendon, cartilage or nerve geometry.'}:INTRO[region]||INTRO.overview;
+ const item=extra?{title:extra.title,origin:'Pinned BodyParts3D 4.0 bone + muscle surfaces',
+  note:'Reference-pose source bones and selected muscles, not complete surgical anatomy. Joint pivots and soft-tissue attachment weights are inferred demonstrations, never validated physiology or patient-specific simulation.'}:INTRO[region]||INTRO.overview;
  const output=[{title:item.title,label:item.origin,content:item.note,tag:'UNREVIEWED'}];
  if(!region||region==='overview'){
   output.push({title:'Original skeletal dataset',label:'BodyParts3D 4.0 · CC BY 4.0',
@@ -24,11 +24,13 @@ function records(region,manifest,hip,nerve,shoulder,kneeMuscles,expanded){
  if(extra){
   const record=expanded?.regions?.[region];
   output.push({title:'Source identity & coverage',label:'BodyParts3D 4.0 · CC BY 4.0 · pinned',content:record?
-   record.source_parts+' original verified bone surfaces; '+record.triangles.toLocaleString()+' sourced triangles. Every mesh is traceable by FMA name and immutable release, and independently SHA-256 checked against the provenance manifest.':
+   record.source_parts+' verified bone surfaces and '+(record.muscle_source_parts||0)+' licensed muscle meshes; '+record.triangles.toLocaleString()+' sourced triangles. Every mesh is traceable by FMA name and immutable release, and independently SHA-256 checked against the provenance manifest.':
    'Whole-body region provenance is not available; no sourced geometry should be assumed verified.',tag:'SOURCE / NOT CLINICALLY REVIEWED'});
+  output.push({title:'Muscle model scope',label:'Exact named BodyParts3D meshes; not complete muscle coverage',
+   content:record?(record.muscle_source_parts||0)+' named source muscle surfaces are available in the Muscle layer. Missing source structures are not invented. Jaw muscles, cartilage, tendons, ligaments, nerves and physiological coupling remain incomplete. Some named leg muscles have an upstream “skeletal” system tag, retained in provenance.':'Muscle provenance unavailable.',tag:'LICENSED MESH / NOT REVIEWED'});
   output.push({title:extra.motion?'Illustrative joint hinge':'Reference-pose exploration',label:extra.motion?
    extra.motion.label+' · not measured kinematics':'Static source-aligned structure selection',
-   content:extra.motion?'The bone motion is a one-axis teaching approximation with no validation of ligaments, cartilage, tendons, coupled rotations, contact or patient-specific movement.':
+   content:extra.motion?'Bone hinges and muscle weights are teaching approximations using source-bone proximity. They do not validate physiological attachments, ligaments, cartilage, tendons, coupled rotations, contact or patient-specific movement.':
    'Bones are inspected in their pinned source reference pose. Breathing, cervical movement and jaw articulation are not yet simulated.',
    tag:'LIMITATION / EXPLICIT'});
  }
