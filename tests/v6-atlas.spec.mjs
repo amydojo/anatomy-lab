@@ -200,7 +200,8 @@ test('Explore, Peel and Isolate buttons change actual specimen layers',async({pa
  await expect(page.locator('#layer-output')).toHaveText('Femur focus');
  expect(errors).toEqual([]);
 });
-test('Desktop wheel on specimen directly controls zoom without modifier keys',async({page})=>{
+test('Desktop wheel on specimen directly controls zoom without modifier keys',async({page,isMobile})=>{
+ test.skip(isMobile,'Wheel events are unsupported in mobile WebKit; touch devices use pinch gestures');
  const errors=await atlas(page);await choose(page,'hip');
  const before=await page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.zoom);
  await page.locator('#atlas-canvas').hover({position:{x:90,y:90}});
