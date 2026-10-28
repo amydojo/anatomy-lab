@@ -60,10 +60,11 @@ async function load(key,{refresh=false}={}){
     if(!['skull','neck','thorax','elbow','wrist','ankle'].includes(region)||json.schema!=='body-live/extended-region-v1'||json.region!==region||json.license!=='CC BY 4.0'||json.source_commit!=='1c38bf35c254a891200d3cedecfd57abebe83d8d')throw Error('Invalid extended anatomy identity: '+region);
     if(JSON.stringify(json.source_frame?.origin_metres)!=='[0,0.9,0]'||json.source_frame?.scale!==5)throw Error('Whole-body geometry reference mismatch');
     if(!json.parts||Object.keys(json.parts).length<3)throw Error('Empty sourced region: '+region);
-    for(const [id,part] of Object.entries(json.parts)){
-      if(!part.name||!part.fma||part.system!=='bone'||part.vertices?.length<35||part.faces?.length<50)throw Error('Incomplete source part '+id);
+    for(const [id,part] of [...Object.entries(json.parts),...Object.entries(json.muscle_parts||{})]){
+      if(!part.name||!part.fma||part.system!==(Object.hasOwn(json.parts,id)?'bone':'muscle')||part.vertices?.length<35||part.faces?.length<50)throw Error('Incomplete source part '+id);
       if(part.vertices.some(p=>p.length!==3||p.some(v=>!Number.isFinite(v)))||part.faces.some(face=>face.length!==3||face.some(v=>!Number.isInteger(v)||v<0||v>=part.vertices.length)))throw Error('Invalid sourced anatomy mesh '+id);
     }
+    if(json.muscle_parts&&Object.keys(json.muscle_parts).length<5)throw Error('Incomplete source muscle atlas '+region);
   }
   if(key==='extendedProof'&&(json.schema!=='body-live/extended-regions-provenance-v1'||json.anatomist_reviewed!==false||json.kinematics_validated!==false||json.pinned_commit!=='1c38bf35c254a891200d3cedecfd57abebe83d8d'))throw Error('Whole-body anatomical source proof mismatch');
   if(key==='shoulderGeometry'){
@@ -106,10 +107,14 @@ function verifyExtended(region,asset,proof){
  if(asset.source_commit!==proof.pinned_commit||proof.anatomist_reviewed!==false||proof.kinematics_validated!==false)throw Error('Extended source truth flags mismatch');
  const record=proof.regions?.[region],sha=hashes.get(region+'Region');
  if(!record||!/^[a-f0-9]{64}$/i.test(record.asset_sha256)||sha!==record.asset_sha256)throw Error('Whole-body region SHA-256 mismatch '+region);
- if(Object.keys(asset.parts).length!==record.source_parts)throw Error('Whole-body structure count mismatch '+region);
+ if(Object.keys(asset.parts).length!==record.source_parts || Object.keys(asset.muscle_parts||{}).length!==record.muscle_source_parts)throw Error('Whole-body structure count mismatch '+region);
  for(const [id,part] of Object.entries(asset.parts)){
   const partProof=record.structures?.[id];
   if(!partProof||partProof.fma!==part.fma||partProof.triangles!==part.faces.length||partProof.vertices!==part.vertices.length)throw Error('Whole-body bone topology or identity mismatch '+region+'/'+id);
+ }
+ for(const [id,part] of Object.entries(asset.muscle_parts||{})){
+  const muscleProof=record.muscles?.[id];
+  if(!muscleProof||muscleProof.fma!==part.fma||muscleProof.source_system!==part.source_system||muscleProof.triangles!==part.faces.length||muscleProof.vertices!==part.vertices.length)throw Error('Whole-body muscle topology or identity mismatch '+region+'/'+id);
  }
  return true;
 }
