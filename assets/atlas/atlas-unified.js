@@ -271,7 +271,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-explore')));
   const c=state.data.camera;
   const home={yaw:shortestYaw(c.yaw,region==='hip'?Math.PI+.28:region==='shoulder'?.48:.47),pitch:-.11,
-   zoom:region==='hip'?1.05:1.10,frameSpan:region==='hip'?3.4:region==='shoulder'?3.15:3.2,target:centerPoint(region)};
+   zoom:region==='hip'?1.05:region==='shoulder'?1.18:1.10,frameSpan:region==='hip'?3.4:region==='shoulder'?3.15:3.2,target:centerPoint(region)};
   const id=++token;
   travel(home,reduce()?0:480,()=>{},()=>{if(id===token)render();});
  }
