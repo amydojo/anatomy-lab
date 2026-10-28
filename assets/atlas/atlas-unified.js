@@ -53,9 +53,9 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   gemellusSuperior:['Superior gemellus','Small deep external rotator near obturator internus.'],
   gemellusInferior:['Inferior gemellus','Small deep external rotator below obturator internus.'],
   quadratus:['Quadratus femoris','Deep posterior hip muscle associated with rotation.'],
-  clavicle:['Right clavicle','Source-derived collarbone linking shoulder girdle to thorax. Sternoclavicular mechanics are not simulated.'],
-  scapula:['Right scapula','The shoulder blade supports the glenoid socket and rotator-cuff origins. It stays static in this first-pass animation; real scapular rotation is not yet simulated.'],
-  humerus:['Right humerus','Upper-arm bone articulating with the glenoid. Abduction moves the humerus and bends attached muscles via inferred skinning weights; joint rhythm and tissue mechanics are not validated.'],
+  clavicle:['Right clavicle','Source-derived collarbone linking the shoulder girdle to the thorax. An estimated sternoclavicular pivot drives bounded elevation; real joint mechanics are not validated.'],
+  scapula:['Right scapula','The shoulder blade supports the glenoid socket and rotator-cuff origins. It now moves with the clavicle and humerus using an approximate educational motion curve, not measured scapular kinematics.'],
+  humerus:['Right humerus','The upper-arm bone follows an estimated glenoid center during abduction, while the scapula and clavicle move along bounded illustrative curves. Muscle attachment weights and tissue mechanics are not validated.'],
   supraspinatus:['Supraspinatus','Rotator-cuff muscle passing above the scapular spine toward the greater tubercle. Mesh deformation is attachment-guided, not anatomist-validated.'],
   infraspinatus:['Infraspinatus','Posterior rotator-cuff muscle on the infraspinous fossa. Its mesh now bends toward the moving humerus using inferred attachments; not a validated tendon simulation.'],
   subscapularis:['Subscapularis','Anterior rotator-cuff muscle from the subscapular fossa toward the lesser tubercle.'],
@@ -135,7 +135,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   $('panel-kicker').textContent='SAME SOURCE / '+LABEL[name];
   $('stage-title').textContent=LABEL[name]+' · SPATIAL APPROACH';
   $('stage-caveat').textContent=NOTE[name];
-  $('context-note').textContent='Bones share the pinned BodyParts3D source frame. Tissue peeling is illustrative, not independently anatomist-approved.';
+  $('context-note').textContent='Bones share pinned BodyParts3D geometry. Shoulder bone coordination and tissue deformation use explicit estimated pivots and inferred attachments; they are not medically validated.';
   $('enter-region').disabled=true;$('enter-region').textContent='Exploring '+LABEL[name];
   $('back-body').hidden=false;$('top-enter-region').hidden=true;
   $('hotspots').hidden=true;$('portal').hidden=true;
@@ -166,7 +166,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
    setStatus('TRAVELING IN ONE ANATOMICAL SCENE');
    const c=state.data.camera;
    const to={yaw:shortestYaw(c.yaw,name==='hip'?Math.PI+.28:name==='shoulder'?.48:.47),
-     pitch:-.11,zoom:name==='hip'?1.05:name==='shoulder'?1.18:1.10,frameSpan:name==='hip'?3.4:name==='shoulder'?3.15:3.2,target:centerPoint(name)};
+     pitch:-.11,zoom:name==='hip'?1.05:name==='shoulder'?1.00:1.10,frameSpan:name==='hip'?3.4:name==='shoulder'?3.15:3.2,target:centerPoint(name)};
    travel(to,reduce()?0:1150,v=>{reveal=clamp((v-.46)/.54,0,1);},()=>{
     if(id!==token)return;
     state.enter();state.data.frameReady=true;reveal=1;
@@ -275,7 +275,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-explore')));
   const c=state.data.camera;
   const home={yaw:shortestYaw(c.yaw,region==='hip'?Math.PI+.28:region==='shoulder'?.48:.47),pitch:-.11,
-   zoom:region==='hip'?1.05:region==='shoulder'?1.18:1.10,frameSpan:region==='hip'?3.4:region==='shoulder'?3.15:3.2,target:centerPoint(region)};
+   zoom:region==='hip'?1.05:region==='shoulder'?1.00:1.10,frameSpan:region==='hip'?3.4:region==='shoulder'?3.15:3.2,target:centerPoint(region)};
   const id=++token;
   travel(home,reduce()?0:480,()=>{},()=>{if(id===token)render();});
  }

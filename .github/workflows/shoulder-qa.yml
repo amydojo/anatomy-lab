@@ -1,7 +1,7 @@
 name: Shoulder focused integration QA
 on:
   push:
-    branches: [feat/v6-6-sourced-shoulder, feat/v6-7-shoulder-muscle-rig]
+    branches: [feat/v6-6-sourced-shoulder, feat/v6-7-shoulder-muscle-rig, feat/v6-8-coordinated-shoulder]
 permissions:
   contents: read
 jobs:

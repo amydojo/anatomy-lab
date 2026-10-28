@@ -108,3 +108,20 @@
 @media(max-width:850px) and (max-height:680px){
  .joint-motion{bottom:150px}.structure-chip{top:54px}
 }
+
+/* V6.8 diagnostic shoulder anchors — separate SVG overlay, same canvas/camera. */
+.shoulder-rig-tools{position:absolute;top:98px;right:351px;z-index:5;
+ display:flex;flex-direction:column;gap:5px;align-items:flex-end;pointer-events:auto}
+.shoulder-rig-tools button{padding:7px 10px;border-radius:10px;border:1px solid #b58b6e;
+ background:#1d1410e8;color:#f3ddc8;font:600 11px/1.15 -apple-system,BlinkMacSystemFont,sans-serif;cursor:pointer}
+.shoulder-rig-tools button[aria-pressed="true"]{background:#593625;border-color:#e2ac88}
+.shoulder-rig-tools span{font:9px/1.2 -apple-system,BlinkMacSystemFont,sans-serif;
+ color:#e3ba95;text-shadow:0 1px 4px #19100d}
+.shoulder-rig-overlay{position:absolute;inset:0;width:100%;height:100%;
+ z-index:4;overflow:visible;pointer-events:none;user-select:none}
+.shoulder-rig-tools[hidden],.shoulder-rig-overlay[hidden]{display:none!important}
+@media(max-width:850px){
+ .shoulder-rig-tools{top:97px;right:10px;gap:3px}
+ .shoulder-rig-tools button{font-size:10px;padding:7px 9px}
+ .shoulder-rig-tools span{font-size:8px}
+}

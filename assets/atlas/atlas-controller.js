@@ -32,6 +32,8 @@ function resize(){
 function render(){
  if(document.hidden||(state.data.view==='detail'&&!U.isActive()))return;
  model.render(state.data.camera,U.getRegion()||state.data.region,state.data.evidenceMode,state.data.layer,U.getReveal(),U.getMotion(),U.getSelected());
+ window.BodyShoulderDebug?.draw(state.data.camera,
+  state.data.view==='detail'&&U.getRegion()==='shoulder'?model.shoulderDiagnostics(U.getMotion()):null);
  if(state.data.view==='overview'&&!U.isActive())drawPins();
 }
 function fallback(reason){
@@ -60,7 +62,7 @@ function centerPoint(region){
  if(region==='nerve')return {...SOURCE_PIVOT.hip};
  if(region==='shoulder'){
   const a=sourceAnchor('right-humerus','proximal')||[-1.2,2.1,0];
-  return {x:a[0],y:a[1]-.48,z:a[2]};
+  return {x:a[0]-.13,y:a[1]-.80,z:a[2]};
  }
  let a=sourceAnchor('body-of-sternum','mean');
  if(!a)a={shoulder:[-1,2.2,0],thorax:[0,1.3,0]}[region]||[0,0,0];
@@ -499,6 +501,7 @@ function setup(){
  $('seam-continue').onclick=toKnee;
  $('back-body').onclick=body;
  $('reset-view').onclick=reset;
+ $('shoulder-rig-toggle').onclick=()=>{window.BodyShoulderDebug.toggle();render();};
  $('open-original').onclick=()=>{const route=HERE[state.data.region];if(route)window.open(route,'_blank','noopener,noreferrer');};
  $('evidence-toggle').onclick=showEvidence;$('evidence-close').onclick=closeEvidence;
 

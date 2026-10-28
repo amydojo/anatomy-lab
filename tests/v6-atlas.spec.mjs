@@ -295,6 +295,40 @@ test('Shoulder muscle attachments actually follow humerus without changing sourc
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(0);
  expect(errors).toEqual([]);
 });
+test('V6.8 Shoulder rig diagnostic markers follow connected bones and cuff attachment paths on mobile and desktop',async({page})=>{
+ const errors=await atlas(page);
+ await expect(page.locator('#shoulder-rig-tools')).toBeHidden();
+ await choose(page,'shoulder');
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.coordinatedShoulder)).toBe(true);
+ await expect(page.locator('#shoulder-rig-tools')).toBeVisible();
+ await page.locator('#shoulder-rig-toggle').click();
+ await expect(page.locator('#shoulder-rig-toggle')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('#shoulder-rig-overlay')).toBeVisible();
+ await expect(page.locator('#shoulder-rig-overlay line').first()).toBeVisible();
+ await expect(page.locator('#shoulder-rig-overlay text')).toHaveCount(3);
+ const before=await page.locator('#shoulder-rig-overlay circle').evaluateAll(elements=>elements.slice(-3).map(e=>[e.getAttribute('cx'),e.getAttribute('cy')]));
+ await page.locator('#joint-motion-slider').evaluate(e=>{e.value='90';e.dispatchEvent(new Event('input',{bubbles:true}));});
+ const after=await page.locator('#shoulder-rig-overlay circle').evaluateAll(elements=>elements.slice(-3).map(e=>[e.getAttribute('cx'),e.getAttribute('cy')]));
+ expect(after).not.toEqual(before);
+ await expect(page.locator('#shoulder-rig-readout')).toContainText('SCAP 24°');
+ await page.screenshot({path:'artifacts/v6-shoulder-kinematics-'+test.info().project.name+'.png',fullPage:true});
+ const mesh=await page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer);
+ expect(mesh.riggedShoulderMuscles).toBe(11);
+ const box=await page.locator('#atlas-canvas').boundingBox();
+ expect(box.width).toBeGreaterThan(250);
+ await page.locator('#reset-view').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(0);
+ await expect.poll(async()=>{
+  const returned=await page.locator('#shoulder-rig-overlay circle').evaluateAll(elements=>
+   elements.slice(-3).map(e=>[Number(e.getAttribute('cx')),Number(e.getAttribute('cy'))]));
+  return Math.max(...returned.flatMap((row,i)=>row.map((v,j)=>Math.abs(v-Number(before[i][j])))));
+ },{timeout:4500}).toBeLessThan(.05);
+ await page.locator('#back-body').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:6000}).toBe('overview');
+ await expect(page.locator('#shoulder-rig-tools')).toBeHidden();
+ await expect(page.locator('#shoulder-rig-overlay')).toBeHidden();
+ expect(errors).toEqual([]);
+});
 test('Shoulder source preserves Evidence provenance and missing ligament/nerve disclosures',async({page})=>{
  const errors=await atlas(page);await choose(page,'shoulder');
  await page.locator('#evidence-toggle').click();
