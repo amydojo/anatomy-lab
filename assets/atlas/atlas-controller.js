@@ -83,7 +83,7 @@ function sourceCameraFor(region){
  const units=region==='hip'?10:7.5;
  const zoom=atlasPx*(5/units)/labPx;
  if(!Number.isFinite(zoom)||zoom<=0)return null;
- return {yaw:cam.yaw,pitch:cam.pitch,zoom,frameSpan,sourceOrigin:region};
+ return {yaw:cam.yaw,pitch:cam.pitch,zoom,frameSpan,anchorY:.5-(.04*labPx*zoom)/dh,sourceOrigin:region};
 }
 function drawPins(){
  const canvas=$('atlas-canvas'),w=canvas.clientWidth,h=canvas.clientHeight;
@@ -286,13 +286,25 @@ function enterUnmatchedRegion(region){
  frame.src=HERE[region];
 }
 function adaptEmbeddedFrame(frame,region){
- if(region==='shoulder')return;
  try{
   const doc=frame.contentDocument;
   if(!doc||doc.getElementById('atlas-embed-style'))return;
   const style=doc.createElement('style');style.id='atlas-embed-style';
-  style.textContent='header.topbar{display:none!important}html,body,#app{height:100%!important}';
+  // On the child page the inspector was a layout column/row, which reduced
+  // canvas dimensions on handoff. Put it above the canvas instead so matching
+  // source bones stay on the exact same screen pixels before/after reveal.
+  style.textContent=[
+   'header.topbar{display:none!important}',
+   'html,body,#app{height:100%!important;min-height:0!important;overflow:hidden!important}',
+   '#app>.workspace,.workspace{display:block!important;position:relative!important;height:100%!important;min-height:0!important}',
+   '.workspace>.stage,.stage{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:0!important}',
+   '.workspace>.inspector,.inspector{position:absolute!important;z-index:5!important;top:0!important;right:0!important;bottom:0!important;left:auto!important;height:100%!important}',
+   '@media(max-width:850px){.workspace>.inspector,.inspector{top:auto!important;bottom:0!important;right:0!important;left:0!important;width:100%!important;height:124px!important}}',
+   '@media(max-width:850px) and (max-height:680px){.workspace>.inspector,.inspector{height:90px!important}}'
+  ].join('');
   doc.head.appendChild(style);
+  // Children need their final viewport before the parent computes the
+  // source-frame camera; ResizeObserver will be followed by the readiness poll.
  }catch(err){console.warn('Atlas lab presentation:',err.message);}
 }
 function enableControls(region){
