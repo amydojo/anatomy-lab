@@ -89,7 +89,7 @@ function create(canvas,onContextLost=()=>{}){
   }
   const buffer=gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,flat,gl.STATIC_DRAW);
-  return {id,group,color,tissue,buffer,verts:part.vertices,faces:part.faces,skinWeights:weights,rig:part.rig||null,count:part.faces.length*3};
+  return {id,name:part.name||id,fma:part.fma||null,group,color,tissue,buffer,verts:part.vertices,faces:part.faces,skinWeights:weights,rig:part.rig||null,count:part.faces.length*3};
  }
  function load(asset){
   if(asset.schema!=='body-live/atlas-skeleton-v1')throw Error('Unexpected skeleton schema');
@@ -127,7 +127,7 @@ function create(canvas,onContextLost=()=>{}){
    for(const [id,part] of entries){
     const tissue=(hip||shoulder)&&!Object.hasOwn(allowed,id)||knee&&Object.hasOwn(asset.muscle_meshes||{},id)||extended&&Object.hasOwn(asset.muscle_parts||{},id);
     if(!tissue&&!Object.hasOwn(allowed,id))continue;
-    const converted={vertices:toWorld(part),faces:part.faces};
+    const converted={vertices:toWorld(part),faces:part.faces,name:part.name,fma:part.fma};
     const color=tissue?(extended?EXTENDED_MUSCLE_COLORS[region]:shoulder?SHOULDER_COLORS[id]:hip?HIP_COLORS[id]:KNEE_COLORS[id]):(extended?COLORS[window.BodyExtendedRegions.config[region].group]:(shoulder?COLORS.upper:COLORS.lower));
     if(!color)throw Error('Unidentified tissue geometry: '+id);
     if((hip||knee)&&tissue){
@@ -301,7 +301,7 @@ function create(canvas,onContextLost=()=>{}){
     const a=mapped[face[0]],b=mapped[face[1]],c=mapped[face[2]];
     if(!a||!b||!c||!within(a,b,c))continue;
     const d=(a.z+b.z+c.z)/3;
-    if(d>front){front=d;nearest={id:mesh.id,tissue:mesh.tissue,region};}
+    if(d>front){front=d;nearest={id:mesh.id,name:mesh.name,fma:mesh.fma,tissue:mesh.tissue,region};}
    }
   }
   return nearest;
