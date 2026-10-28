@@ -352,7 +352,7 @@ test('V6.7 every imported shoulder muscle is attachment-rigged and the source po
  }
  assert.equal(JSON.stringify(parts),rest,'rig must never rewrite the licensed source geometry');
  const shader=read('assets/atlas/atlas-renderer.js');
- for(const term of ['aSkinWeight','uSoftSkin','skinWeights:weights','BodyShoulderRig.createSkin','BodyShoulderRig.deformVertex'])
+ for(const term of ['aSkinWeight','uSoftSkin','skinWeights:weights','BodyShoulderRig.createSkin','kin.deformPoint'])
   assert.ok(shader.includes(term),'GPU/CPU anatomy drift: '+term);
  const html=read('atlas/index.html');
  assert.ok(html.indexOf('atlas-shoulder-rig.js')<html.indexOf('atlas-renderer.js'),'rig must initialize before renderer');
