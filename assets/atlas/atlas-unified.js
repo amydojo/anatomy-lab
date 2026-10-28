@@ -57,7 +57,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  function pickAt(x,y){
   if(state.data.view!=='detail'||!region||returning)return null;
   const hit=model.hitTest(state.data.camera,region,state.data.layer,motion,x,y);
-  if(!hit){clearSelection();return null;}
+  if(!hit){clearSelection();render();return null;}
   selected=hit;
   const [name,desc]=INFORMATION[hit.id]||[hit.id,'Sourced anatomical reference, not clinically validated.'];
   $('structure-chip-name').textContent=name;
