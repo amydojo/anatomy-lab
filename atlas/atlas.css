@@ -19,3 +19,31 @@
 
 /* V6 mobile QA: collapsed panel shows only its handle, never clipped body text. */
 @media(max-width:850px){.sidebar[data-expanded="false"] .sidebar-body{visibility:hidden;pointer-events:none;overflow:hidden}.sidebar[data-expanded="true"] .sidebar-body{visibility:visible;pointer-events:auto;overflow-y:auto}}
+
+
+/* V6.2 · Permanent spatial viewport.
+   The anatomical camera must never resize when region chrome is hidden.
+   Controls become overlays rather than consuming layout height or width. */
+.app{position:relative}
+.app .workspace{display:block;position:relative;flex:1;min-height:0}
+.app .stage,.app[data-mode="detail"] .stage{position:absolute;inset:0;height:100%;width:100%;min-height:0}
+.app .sidebar{position:absolute;right:0;top:0;bottom:0;width:328px;height:auto;z-index:6}
+.app .controlbar{position:absolute;bottom:0;left:0;right:328px;width:auto;flex:none;z-index:8}
+.app .stage-bottom{bottom:108px}
+.app[data-mode="detail"] .sidebar,.app[data-mode="detail"] .controlbar{display:none!important}
+@media(max-width:850px){
+ .app .sidebar{top:auto;left:0;right:0;bottom:95px;width:100%;height:88px}
+ .app .sidebar[data-expanded=true]{height:min(46dvh,360px)}
+ .app .controlbar{bottom:0;left:0;right:0;height:95px;flex:none}
+ .app .stage-bottom{bottom:192px}
+ .app[data-mode="detail"] .stage{position:absolute;inset:0;height:100%;width:100%}
+}
+@media(max-width:370px){
+ .app .sidebar[data-expanded=true]{height:min(42dvh,300px)}
+}
+@media(max-width:850px) and (max-height:680px){
+ .app .sidebar{bottom:86px}
+ .app .sidebar[data-expanded=true]{height:min(39dvh,245px)}
+ .app .controlbar{height:86px}
+ .app .stage-bottom{bottom:172px}
+}
