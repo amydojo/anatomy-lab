@@ -61,7 +61,13 @@ def find(manifest,label,required):
  if len(exact)==1:return exact[0]
  # Permit source version's alternate naming of deltoid components, but never
  # silently substitute another-side or an entire muscle for a named part.
- if not required:return None
+ if not required:
+  # BodyParts3D occasionally places the head descriptor before the muscle
+  # ("Clavicular part of right deltoid"). Find only an unambiguous named part.
+  want=set(name.split())-{"part","head","of"}
+  alternatives=[p for p in manifest if want.issubset(set(norm(p["name"]).split()))]
+  if len(alternatives)==1:return alternatives[0]
+  return None
  raise ValueError(f"Required distinct right-shoulder source {label!r}: {len(exact)} exact matches")
 
 def main():
@@ -74,6 +80,7 @@ def main():
  for key,name in OPTIONAL.items():
   p=find(atlas["parts"],name,False)
   if p is not None:selected[key]=p
+ print("SHOULDER_SOURCE_NAMES",json.dumps([p["name"] for p in atlas["parts"] if any(k in p["name"].lower() for k in ("deltoid","biceps brachii","supraspinatus","infraspinatus","subscapularis"))]))
  chunks={}
  proofs={"atlas.json":atlas_proof}
  for chunk in sorted({p["chunk"] for p in selected.values()}):
