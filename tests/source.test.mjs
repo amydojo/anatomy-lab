@@ -464,3 +464,84 @@ test('V6.9 hip and knee muscle skinning follows pinned-source attachment bones w
   assert.ok(shader.includes(id),id);
  assert.ok(read('assets/atlas/atlas-unified.js').includes('verifyKneeMuscles'));
 });
+
+test('V7 six new source-matched body regions are fully FMA-attributed and SHA-pinned',async()=>{
+ const {createHash}=await import('node:crypto');
+ const proof=JSON.parse(read('atlas/regions/provenance.json'));
+ const expected={skull:14,neck:8,thorax:30,elbow:3,wrist:15,ankle:14};
+ const expectedMuscles={skull:16,neck:14,thorax:11,elbow:10,wrist:10,ankle:12};
+ assert.equal(proof.schema,'body-live/extended-regions-provenance-v1');
+ assert.equal(proof.anatomist_reviewed,false);
+ assert.equal(proof.kinematics_validated,false);
+ assert.equal(Object.keys(proof.regions).length,6);
+ const atlas=JSON.parse(read('atlas/assets/body-skeleton.json'));
+ assert.equal(proof.pinned_commit,atlas.source_commit);
+ let n=0;
+ for(const [region,count]of Object.entries(expected)){
+  const raw=read('atlas/regions/'+region+'.json'),obj=JSON.parse(raw),r=proof.regions[region];
+  assert.equal(createHash('sha256').update(raw).digest('hex'),r.asset_sha256,region+' sha changed');
+  assert.equal(obj.schema,'body-live/extended-region-v1');assert.equal(obj.region,region);
+  assert.equal(obj.source_commit,atlas.source_commit);assert.equal(obj.license,'CC BY 4.0');
+  assert.deepEqual(obj.source_frame.origin_metres,[0,.9,0]);assert.equal(obj.source_frame.scale,5);
+  assert.equal(Object.keys(obj.parts).length,count);assert.equal(r.source_parts,count);n+=count;
+  assert.equal(Object.keys(obj.muscle_parts||{}).length,expectedMuscles[region],region+' muscle count');
+  assert.equal(r.muscle_source_parts,expectedMuscles[region],region+' muscle provenance count');
+  for(const [id,p] of Object.entries(obj.muscle_parts)){
+   const entry=r.muscles[id];
+   assert.ok(entry&&p.name&&p.fma&&p.system==='muscle',region+'/'+id+' muscle identity');
+   assert.equal(entry.fma,p.fma);assert.equal(entry.source_system,p.source_system);
+   assert.equal(entry.triangles,p.faces.length);assert.equal(entry.vertices,p.vertices.length);
+   assert.ok(p.vertices.length>=35&&p.faces.length>=50,region+'/'+id+' muscle topology');
+   assert.ok(p.vertices.every(v=>v.length===3&&v.every(Number.isFinite)));
+   assert.ok(p.faces.every(face=>face.length===3&&face.every(i=>Number.isInteger(i)&&i>=0&&i<p.vertices.length)));
+  }
+
+  for(const [id,p] of Object.entries(obj.parts)){
+   const entry=r.structures[id];
+   assert.ok(p.name&&p.fma&&entry);
+   assert.equal(entry.fma,p.fma);assert.equal(entry.triangles,p.faces.length);
+   assert.equal(entry.vertices,p.vertices.length);assert.equal(p.system,'bone');
+   assert.ok(p.vertices.length>35&&p.faces.length>=50);
+   assert.ok(p.vertices.every(v=>v.length===3&&v.every(Number.isFinite)));
+   assert.ok(p.faces.every(tri=>tri.length===3&&tri.every(i=>Number.isInteger(i)&&i>=0&&i<p.vertices.length)));
+  }
+ }
+ assert.equal(n,84);
+ const win={};const {runInNewContext}=await import('node:vm');
+ runInNewContext(read('assets/atlas/atlas-extended-regions.js'),{window:win,Float32Array});
+ const X=win.BodyExtendedRegions;
+ assert.equal(X.ids.length,6);
+ for(const region of X.ids){
+  const asset=JSON.parse(read('atlas/regions/'+region+'.json'));
+  const identity=X.createPose(region,asset,0);
+  for(const [id,part]of Object.entries(asset.parts)){
+   const initial=part.vertices[Math.floor(part.vertices.length/2)];
+   const reset=X.transform(identity.matrices[id],initial);
+   assert.ok(Math.hypot(...reset.map((x,i)=>x-initial[i]))<1e-8,region+'/'+id+' rest pose drift');
+  }
+  assert.equal(X.config[region].labels[4],'Source muscles');
+  if(X.config[region].motion){
+   const [muscleId,musclePart]=Object.entries(asset.muscle_parts)[0];
+   const skin=X.createSkin(region,muscleId,musclePart.vertices,asset.parts);
+   assert.ok(skin&&!skin.validated&&skin.weights.length===musclePart.vertices.length);
+   assert.equal(skin.method,'source-surface-proximity-inferred');
+   assert.ok(skin.weights.every(w=>Number.isFinite(w)&&w>=0&&w<=1));
+   const bent=X.createPose(region,asset,X.config[region].motion.max);
+   const moving=Object.keys(asset.parts).filter(id=>X.moving(region,id));
+   assert.ok(moving.length>=2,region+' no moving sourced bones');
+   const p=asset.parts[moving[0]].vertices[0];
+   const moved=X.transform(bent.matrices[moving[0]],p);
+   assert.ok(Math.hypot(...p.map((x,i)=>x-moved[i]))>.001,region+' motion is inert');
+   assert.equal(bent.validated,false);
+  }
+ }
+ const html=read('atlas/index.html');
+ assert.ok(html.includes('atlas-extended-regions.js'));
+ assert.ok(html.includes('class="region-dock"'),'persistent mobile region navigation absent');
+ for(const name of ['hip','nerve','knee','shoulder','thorax','neck','skull','elbow','wrist','ankle'])
+  assert.ok(html.includes('class="region-dock-grid"')&&html.includes('data-region="'+name+'"'),'missing mobile region '+name);
+
+ for(const id of X.ids)assert.ok(html.includes('data-region="'+id+'"'),id+' missing navigation');
+ const source=read('atlas/sources/index.html');
+ assert.ok(source.includes('/atlas/regions/provenance.json'));
+});

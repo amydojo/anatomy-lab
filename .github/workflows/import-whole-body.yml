@@ -1,0 +1,28 @@
+name: Import pinned whole-body atlas regions
+on:
+  push:
+    branches: [feat/v7-0-whole-body-atlas]
+    paths:
+      - scripts/import_bp3d_whole_body.py
+      - .github/workflows/import-whole-body.yml
+permissions:
+  contents: write
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import real pinned reference-pose anatomy and provenance
+        run: python3 scripts/import_bp3d_whole_body.py
+      - name: Commit SHA-checked source meshes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add atlas/regions/*.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Import 73 pinned muscle meshes alongside six skeletal regions"
+            git fetch origin "refs/heads/${GITHUB_REF_NAME}"
+            git rebase FETCH_HEAD
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi

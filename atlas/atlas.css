@@ -109,6 +109,15 @@
  .joint-motion{bottom:150px}.structure-chip{top:54px}
 }
 
+/* V7.0: expanded source atlas still uses a single viewport. The sidebar scrolls
+   independently; mobile exploration never requires adding another canvas. */
+.region-list{max-height:min(47vh,570px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+@media(max-width:850px){
+ .region-list{max-height:none;overflow:visible}
+ .hotspots [data-region="skull"],.hotspots [data-region="neck"],
+ .hotspots [data-region="thorax"],.hotspots [data-region="elbow"],
+ .hotspots [data-region="wrist"],.hotspots [data-region="ankle"]{display:none}
+}
 /* V6.8 diagnostic shoulder anchors — separate SVG overlay, same canvas/camera. */
 .shoulder-rig-tools{position:absolute;top:98px;right:351px;z-index:5;
  display:flex;flex-direction:column;gap:5px;align-items:flex-end;pointer-events:auto}
@@ -124,4 +133,18 @@
  .shoulder-rig-tools{top:97px;right:10px;gap:3px}
  .shoulder-rig-tools button{font-size:10px;padding:7px 9px}
  .shoulder-rig-tools span{font-size:8px}
+}
+
+
+/* V7.1 mobile anatomy navigator occupies real layout space, never covers the specimen.
+   Two rows show ALL 10 locations without a hidden drawer or sideways swipe. */
+.region-dock{display:none}
+@media(max-width:850px){
+ .region-dock{display:block;flex:0 0 auto;z-index:6;background:#1e1713;border-bottom:1px solid #594336;padding:5px 8px 7px}
+ .region-dock-title{display:flex;justify-content:space-between;align-items:center;padding:0 3px 4px;font-size:9px;letter-spacing:.12em;color:#d6b399;font-weight:700}
+ .region-dock-title span{color:#e8c6ab}
+ .region-dock-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+ .region-dock-grid button{min-width:0;min-height:40px;padding:4px 1px;border:1px solid #60483a;border-radius:7px;background:#30241e;font-size:clamp(8px,2.55vw,10px);font-weight:700;letter-spacing:.015em;text-align:center;white-space:nowrap;color:#e7d5c6}
+ .region-dock-grid button[aria-pressed="true"]{background:#d8ad8e;color:#2b1b13;border-color:#f3cbb0}
+ .region-dock-grid button:focus-visible{outline:2px solid #ffdaa9;outline-offset:1px}
 }

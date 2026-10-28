@@ -3,16 +3,24 @@
 const $=id=>document.getElementById(id);
 const state=window.BodyAtlasState.create();
 const loader=window.BodyAtlasLoader,model=window.BodyAtlasRenderer.create($('atlas-canvas'),reason=>fallback(reason));
-const E=window.BodyAtlasEvidence;let source=null,proof=null,hipProof=null,nerveProof=null,shoulderProof=null,kneeMuscleProof=null;
+const E=window.BodyAtlasEvidence;let source=null,proof=null,hipProof=null,nerveProof=null,shoulderProof=null,kneeMuscleProof=null,extendedProof=null;
 let lastFocus=null,activeFrameRoute=null,motionFrame=0,travelMixFrame=0,frameTimeout=0,entryTimer=0,exitTimer=0,seq=0,previousFocus=null,pins=[],loaded=false,pendingEntry=null,sourceSeamPending=false;
 const reduce=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const HERE={hip:'/hip/spatial/',nerve:'/hip/spatial/',knee:'/knee/spatial/',shoulder:'/shoulder/'};
-const LABEL={hip:'RIGHT HIP',nerve:'SCIATIC NERVE',knee:'RIGHT KNEE',shoulder:'SHOULDER'};
+const LABEL={hip:'RIGHT HIP',nerve:'SCIATIC NERVE',knee:'RIGHT KNEE',shoulder:'SHOULDER',
+ skull:'SKULL & JAW',neck:'CERVICAL SPINE',thorax:'RIBS & THORAX',
+ elbow:'RIGHT ELBOW',wrist:'RIGHT WRIST',ankle:'RIGHT ANKLE'};
 const NOTE={
 hip:'Source hip bones and muscles; muscle layer and joint movement remain illustrative, pending expert review.',
 nerve:'Atlas-derived nerve registered to a separate skeletal source; nerve continuity is not independently imaged or reviewed.',
 knee:'Source-matched right knee bones and five real imported muscle surfaces with inferred attachment-guided flexion. Missing ligaments, menisci and nerve geometry are not fabricated.',
-shoulder:'Source-matched scapula, clavicle and humerus with four sourced rotator-cuff muscle surfaces. Deltoid/ligament/labrum/nerve coverage is incomplete; abduction is illustrative.'};
+shoulder:'Source-matched scapula, clavicle and humerus with four sourced rotator-cuff muscle surfaces. Deltoid/ligament/labrum/nerve coverage is incomplete; abduction is illustrative.',
+ skull:'Fourteen real cranial and facial bones. Sutures, teeth, cartilage and temporomandibular disc mechanics are not reconstructed.',
+ neck:'Atlas, axis, C3–C7 and hyoid. Cervical ligaments, discs and measured neck motion are not yet reconstructed.',
+ thorax:'Twenty-four sourced ribs, sternum parts and thoracic spinal landmarks. Costal cartilage and respiratory mechanics are not modeled.',
+ elbow:'Three real elbow bones with a simple teaching flexion hinge; no ligaments or validated radioulnar rotation.',
+ wrist:'Eight sourced carpals, five metacarpals and forearm bones. The illustrative wrist hinge is not validated intercarpal kinematics.',
+ ankle:'Talus, calcaneus and other real foot/tarsal bones plus the right tibia/fibula. Dorsiflexion is illustrative, without ligament or tendon mechanics.'};
 const MODE_TEXT={explore:'Explore',peel:'Peel',trace:'Trace'};
 function updateURL(){
  const q=new URLSearchParams(location.search);
@@ -46,6 +54,7 @@ function sourceAnchor(id,kind='mean'){
  if(!part)return null;
  const vs=part.vertices;
  if(kind==='proximal')return vs.reduce((a,p)=>p[1]>a[1]?p:a,vs[0]).map(Number);
+ if(kind==='distal')return vs.reduce((a,p)=>p[1]<a[1]?p:a,vs[0]).map(Number);
  const stride=Math.max(1,Math.floor(vs.length/300)),sum=[0,0,0];let n=0;
  for(let i=0;i<vs.length;i+=stride){for(let j=0;j<3;j++)sum[j]+=vs[i][j];n++;}
  return sum.map(v=>v/n);
@@ -58,6 +67,11 @@ const SOURCE_PIVOT={
  knee:{x:-.09092915*5,y:(.4491462-.9)*5,z:-.01654605*5}
 };
 function centerPoint(region){
+ const expanded=window.BodyExtendedRegions?.config[region];
+ if(expanded){
+  const p=sourceAnchor(expanded.anchor,expanded.anchorMode)||[0,0,0];
+  return {x:p[0]+expanded.delta[0],y:p[1]+expanded.delta[1],z:p[2]+expanded.delta[2]};
+ }
  if(region==='hip'||region==='knee')return {...SOURCE_PIVOT[region]};
  if(region==='nerve')return {...SOURCE_PIVOT.hip};
  if(region==='shoulder'){
@@ -71,7 +85,7 @@ function centerPoint(region){
 function shortestYaw(from,to){
  return from+Math.atan2(Math.sin(to-from),Math.cos(to-from));
 }
-function isSourceAligned(region){return region==='hip'||region==='knee'||region==='shoulder';}
+function isSourceAligned(region){return region==='hip'||region==='knee'||region==='shoulder'||!!window.BodyExtendedRegions?.has(region);}
 function labAPI(region){
  const w=$('region-frame').contentWindow;
  try{return region==='knee'?w.__BODY_SPATIAL__:w.__HIP_SPATIAL__;}catch{return null;}
@@ -116,7 +130,7 @@ function pickAt(x,y){
  if(!w||!h)return null;
  const c={...state.data.camera,width:w,height:h};
  let best=null,distance=Infinity;
- for(const region of ['hip','knee','shoulder']){
+ for(const region of ['hip','knee','shoulder','skull','neck','thorax','elbow','wrist','ankle']){
   const p=window.BodySpatialCore.project(centerPoint(region),c);
   const d=Math.hypot(x-p.x,y-p.y);
   if(d<distance){distance=d;best=region;}
@@ -126,7 +140,8 @@ function pickAt(x,y){
  choose(best);return best;
 }
 function buildPins(){
- const targets=[['shoulder','Shoulder'],['hip','Hip'],['nerve','Sciatic'],['knee','Knee']];
+ const targets=[['shoulder','Shoulder'],['hip','Hip'],['nerve','Sciatic'],['knee','Knee'],
+  ['skull','Skull'],['neck','Neck'],['thorax','Ribs'],['elbow','Elbow'],['wrist','Wrist'],['ankle','Ankle']];
  $('hotspots').replaceChildren();pins=[];
  for(const [region,title] of targets){
   const b=document.createElement('button');b.type='button';b.className='hotspot';b.dataset.region=region;
@@ -160,7 +175,9 @@ function choose(region){
  if(isSourceAligned(region)&&model.getStatus()!=='ready'){
   // WebGL is a prerequisite for spatial continuity. Preserve functional
   // semantic navigation rather than silently ignoring region taps.
-  location.assign(HERE[region]);return;
+  if(HERE[region])location.assign(HERE[region]);
+  else fallback('This region requires an available WebGL source viewer');
+  return;
  }
  if(isSourceAligned(region))return U.choose(region);
  if(U.isActive())return U.nextRegion(region);
@@ -337,7 +354,7 @@ function enableControls(region){
  const unified=detail&&U.isActive()&&isSourceAligned(region);
  $('layer-slider').disabled=!detail||region==='shoulder';
  $('layer-slider').max=region==='knee'?'3':'4';$('layer-slider').value='0';$('layer-output').textContent='Surface';
- $('open-original').hidden=!detail;$('continue-knee').hidden=!detail||!['nerve','hip'].includes(region);
+ $('open-original').hidden=!detail||!!window.BodyExtendedRegions?.has(region);$('continue-knee').hidden=!detail||!['nerve','hip'].includes(region);
  $('enter-region').disabled=true;$('enter-region').textContent=detail?'Inside '+LABEL[region]:'Choose a region';
  document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-explore')));
  $('back-body').hidden=!detail;
@@ -458,11 +475,12 @@ async function renderEvidence(){
  if(state.data.region==='nerve')names.push('nerve');
  if(state.data.region==='shoulder')names.push('shoulderProof');
  if(state.data.region==='knee')names.push('kneeMuscleProof');
+ if(window.BodyExtendedRegions?.has(state.data.region))names.push('extendedProof');
  const collected=await Promise.all(names.map(async key=>{try{return [key,await loader.load(key)];}catch{return [key,null];}}));
- for(const [name,obj] of collected){if(name==='provenance')proof=obj;if(name==='hip')hipProof=obj;if(name==='nerve')nerveProof=obj;if(name==='shoulderProof')shoulderProof=obj;if(name==='kneeMuscleProof')kneeMuscleProof=obj;}
+ for(const [name,obj] of collected){if(name==='provenance')proof=obj;if(name==='hip')hipProof=obj;if(name==='nerve')nerveProof=obj;if(name==='shoulderProof')shoulderProof=obj;if(name==='kneeMuscleProof')kneeMuscleProof=obj;if(name==='extendedProof')extendedProof=obj;}
  if(!state.data.evidence)return;
  $('evidence-intro').textContent='Origin and expert review are separate. Neither a licensed atlas nor a smooth camera transition is medical validation.';
- const list=E.records(state.data.region||'overview',proof,hipProof,nerveProof,shoulderProof,kneeMuscleProof);
+ const list=E.records(state.data.region||'overview',proof,hipProof,nerveProof,shoulderProof,kneeMuscleProof,extendedProof);
  $('evidence-records').replaceChildren();
  for(const entry of list){
   const box=document.createElement('article');box.className='evidence-record';
