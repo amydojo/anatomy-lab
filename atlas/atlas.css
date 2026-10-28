@@ -11,3 +11,6 @@
 .app[data-mode="detail"] .stage-meta,.app[data-mode="detail"] .stage-bottom{display:none}
 .app[data-mode="detail"] .stage{background:#17110e}
 @media(max-width:600px){.app[data-mode="detail"] .masthead{display:none}.app[data-mode="detail"] .topbar{justify-content:space-between}.app[data-mode="detail"] .topactions{margin-left:auto}}
+
+/* V6 mobile QA: collapsed panel shows only its handle, never clipped body text. */
+@media(max-width:850px){.sidebar[data-expanded="false"] .sidebar-body{visibility:hidden;pointer-events:none;overflow:hidden}.sidebar[data-expanded="true"] .sidebar-body{visibility:visible;pointer-events:auto;overflow-y:auto}}

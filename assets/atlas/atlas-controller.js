@@ -265,15 +265,29 @@ function setup(){
  $('reset-view').onclick=reset;
  $('open-original').onclick=()=>{const route=HERE[state.data.region];if(route)window.open(route,'_blank','noopener,noreferrer');};
  $('evidence-toggle').onclick=showEvidence;$('evidence-close').onclick=closeEvidence;
+
+ function trapFocus(event){
+  if(event.key!=='Tab')return;
+  const open=!$('seam').hidden?$('seam'):!$('evidence-sheet').hidden?$('evidence-sheet'):null;
+  if(!open)return;
+  const focusables=[...open.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])')]
+    .filter(x=>x.getClientRects().length>0);
+  if(!focusables.length){event.preventDefault();return;}
+  const first=focusables[0],last=focusables[focusables.length-1],active=document.activeElement;
+  if(event.shiftKey&&(active===first||!open.contains(active))){event.preventDefault();last.focus();}
+  else if(!event.shiftKey&&(active===last||!open.contains(active))){event.preventDefault();first.focus();}
+ }
+ document.addEventListener('keydown',trapFocus);
+
  $('evidence-sheet').addEventListener('click',e=>{if(e.target===$('evidence-sheet'))closeEvidence();});
- document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('seam').hidden){state.closeSeam();$('seam').hidden=true;}else if(!$('evidence-sheet').hidden)closeEvidence();else if(state.data.view==='detail')body();}});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('seam').hidden){state.closeSeam();$('seam').hidden=true;previousFocus?.focus?.();}else if(!$('evidence-sheet').hidden)closeEvidence();else if(state.data.view==='detail')body();}});
  document.querySelectorAll('[data-evidence]').forEach(b=>b.onclick=()=>setEvidence(b.dataset.evidence));
  document.querySelectorAll('.seg-control button').forEach(b=>b.onclick=()=>setMode(b.id.replace('mode-','')));
  $('layer-slider').oninput=e=>depthChange(e.target.value);
  buildPins();resize();
  Promise.all([loader.load('atlas'),loader.load('provenance')]).then(([asset,provenance])=>{
+  loader.verifyAtlas(asset,provenance);
   source=asset;proof=provenance;loaded=true;
-  if(provenance.part_count!==asset.parts.length||provenance.pinned_commit!==asset.source_commit)throw Error('Atlas model manifest mismatch');
   model.load(asset);$('scene-status').textContent=model.getStatus()==='ready'?'SOURCED SKELETON · 78 STRUCTURES':'2D FALLBACK';
   if(model.getStatus()!=='ready')fallback('WebGL2 unavailable');
   resize();

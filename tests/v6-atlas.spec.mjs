@@ -107,3 +107,50 @@ test('dedicated source notes are readable and link to independent cited manifest
  await expect(page.locator('body')).toContainText('not a medical-grade');
  await expect(page.locator('a[href="/atlas/assets/provenance.json"]')).toHaveCount(1);
 });
+
+test('source-integrity gate rejects a well-formed but hash-altered skeletal asset',async({page})=>{
+ await page.route('**/atlas/assets/body-skeleton.json',async route=>{
+  const upstream=await route.fetch();
+  const original=await upstream.text();
+  expect(original).toContain('BodyParts3D 4.0');
+  await route.fulfill({response:upstream,body:original.replace('BodyParts3D 4.0','BodyParts3D 4.0 TAMPERED')});
+ });
+ await page.goto('/atlas/');
+ await expect(page.locator('#canvas-fallback')).toBeVisible();
+ await expect(page.locator('#canvas-fallback')).toContainText('SHA-256 mismatch');
+ expect(await page.evaluate(()=>window.__BODY_ATLAS__.getState().assetsLoaded)).toBe(false);
+ await expect(page.locator('#region-list button[data-region="hip"]')).toBeVisible();
+});
+test('mobile collapsed inspector does not expose clipped scroll content',async({page})=>{
+ await page.setViewportSize({width:390,height:780});
+ await atlas(page);
+ await expect(page.locator('#sidebar-toggle')).toBeVisible();
+ await expect(page.locator('#sidebar-body')).toBeHidden();
+ await page.locator('#sidebar-toggle').click();
+ await expect(page.locator('#sidebar-body')).toBeVisible();
+ await page.locator('#sidebar-toggle').click();
+ await expect(page.locator('#sidebar-body')).toBeHidden();
+});
+test('Evidence Lens and source-boundary dialogs trap keyboard focus and restore it',async({page})=>{
+ await atlas(page);
+ await page.locator('#evidence-toggle').focus();
+ await page.keyboard.press('Enter');
+ await expect(page.locator('#evidence-sheet')).toBeVisible();
+ await page.locator('#evidence-close').focus();
+ await page.keyboard.press('Shift+Tab');
+ const before=await page.evaluate(()=>document.activeElement.closest('#evidence-sheet')!==null);
+ expect(before).toBe(true);
+ await page.keyboard.press('Escape');
+ await expect(page.locator('#evidence-sheet')).toBeHidden();
+ await expect(page.locator('#evidence-toggle')).toBeFocused();
+ await choose(page,'nerve');
+ await page.locator('#top-continue-knee').focus();
+ await page.keyboard.press('Enter');
+ await expect(page.locator('#seam')).toBeVisible();
+ await expect(page.locator('#seam-cancel')).toBeFocused();
+ await page.keyboard.press('Shift+Tab');
+ await expect(page.locator('#seam-continue')).toBeFocused();
+ await page.keyboard.press('Escape');
+ await expect(page.locator('#seam')).toBeHidden();
+ await expect(page.locator('#top-continue-knee')).toBeFocused();
+});
