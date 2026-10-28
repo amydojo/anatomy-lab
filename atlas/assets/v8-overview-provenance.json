@@ -6,10 +6,10 @@
   "kinematics_validated": false,
   "original_bones": 78,
   "additional_bones": 59,
-  "unique_muscles": 105,
+  "unique_muscles": 149,
   "bilateral_added": {
     "bones": 25,
-    "muscles": 32
+    "muscles": 54
   },
   "bilateral_source_sha256": {
     "atlas.json": "c359f4bcd2cba90b7411d66d5e9fc04dc81294d46cd5c1e8b212c824f2e5bbee",
@@ -18,6 +18,16 @@
     "body-4.bin": "0509e6c996fe5b935ace770a5dbf2d83a474330b7e541a844052a080bbf814bb",
     "body-12.bin": "61a6c8da89bb20df50c575964ac81aa4090eabfc2cb27ad2155aea325f31c6c0",
     "body-13.bin": "4c51b6be85d5b705d2b52b79b9ad1cdae0b65ad03c9402a2f2673c7633fd94f3"
+  },
+  "additional_lab_muscles": {
+    "hip": 8,
+    "shoulder": 9,
+    "knee": 5
+  },
+  "source_lab_sha256": {
+    "hip": "ee3cfcee35f9c0103705b8093e8625a79548ff912b8abe7369b81b072ffbddc3",
+    "shoulder": "46929c912b4323ffa1622201dd67237eb7161e9dff696904d4361e34cf6b3fbc",
+    "knee": "f86acd81d3c60929caadfece7a5886a573adf40d91de26ad23b628729e14f7bc"
   },
   "region_counts": {
     "skull": {
@@ -53,7 +63,7 @@
     "wrist": "261844080e58237a139cd724c8cfb793caab2d58a9783174d82d267ecb1e8324",
     "ankle": "6431d766c671a80af1a9cc15a740c4195b8ae909fc32850a2b2db34e2d8f2653"
   },
-  "overview_sha256": "56e7511798eb42e07e073b2fe1bb54cf448fe16dac12e223c2cdcc8ac8dfc8df",
+  "overview_sha256": "862f5d29c322d94a918e37519009208cfb2e6e367782d3532a55d55030fdbcab",
   "reused_region_parts": {
     "frontal-bone": [
       "skull"
