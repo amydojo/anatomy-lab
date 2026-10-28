@@ -546,22 +546,22 @@ test('V7 six new source-matched body regions are fully FMA-attributed and SHA-pi
  assert.ok(source.includes('/atlas/regions/provenance.json'));
 });
 
-test('V8 canonical specimen keeps every source bone once and exposes 73 distinct muscles',async()=>{
+test('V8 canonical specimen keeps every source bone once and exposes licensed bilateral muscles',async()=>{
  const {createHash}=await import('node:crypto');
  const root=JSON.parse(read('atlas/assets/body-skeleton.json'));
  const atlas=JSON.parse(read('atlas/assets/v8-overview-detail.json'));
  const proof=JSON.parse(read('atlas/assets/v8-overview-provenance.json'));
- const expectedRegions=['skull','neck','thorax','elbow','wrist','ankle'];
+ const expectedRegions=['skull','neck','thorax','elbow','wrist','ankle','left-wrist','left-ankle'];
  assert.equal(atlas.schema,'body-live/overview-v8-v1');
  assert.equal(proof.schema,'body-live/overview-v8-provenance-v1');
  assert.equal(atlas.source_commit,root.source_commit);
  assert.equal(atlas.source_commit,proof.source_commit);
  assert.deepEqual(atlas.source_frame,root.source_frame);
  assert.equal(proof.original_bones,78);
- assert.equal(Object.keys(atlas.bones).length,34);
- assert.equal(Object.keys(atlas.muscles).length,73);
- assert.equal(proof.additional_bones,34);
- assert.equal(proof.unique_muscles,73);
+ assert.equal(Object.keys(atlas.bones).length,59);
+ assert.equal(Object.keys(atlas.muscles).length,105);
+ assert.equal(proof.additional_bones,59);
+ assert.equal(proof.unique_muscles,105);
  assert.equal(proof.anatomist_reviewed,false);
  assert.equal(proof.kinematics_validated,false);
  assert.equal(createHash('sha256').update(read('atlas/assets/v8-overview-detail.json')).digest('hex'),proof.overview_sha256);
@@ -587,7 +587,9 @@ test('V8 canonical specimen keeps every source bone once and exposes 73 distinct
    assert.equal(overview.fma,part.fma);
   }
  }
- assert.equal(ids.size,78+34+73);
+ assert.equal(ids.size,78+59+105);
+ assert.deepEqual(proof.bilateral_added,{bones:25,muscles:32});
+ assert.equal(Object.keys(proof.bilateral_source_sha256).length,6);
  for(const path of ['assets/atlas/atlas-registry.js','assets/atlas/atlas-renderer.js',
    'assets/atlas/atlas-controller.js','assets/atlas/atlas-loader.js']){
   assert.doesNotThrow(()=>new Function(read(path)),path+' syntax');
