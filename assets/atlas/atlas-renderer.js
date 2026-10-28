@@ -58,7 +58,7 @@ function create(canvas,onContextLost=()=>{}){
   return true;
  }
  canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();status='fallback';onContextLost('WebGL context lost');});
- canvas.addEventListener('webglcontextrestored',()=>{cleanup();try{setup();if(model)load(model);for(const [region,asset] of detailData)loadDetail(region,asset);}catch(e){status='fallback';onContextLost(e.message);}});
+ canvas.addEventListener('webglcontextrestored',()=>{try{status='loading';if(model)load(model);else setup();}catch(e){status='fallback';onContextLost(e.message);}});
  try{setup();}catch(e){status='fallback';onContextLost(e.message);}
  function makeBuffer(part,id,group,color,tissue=false){
   if(!Array.isArray(part.vertices)||!Array.isArray(part.faces)||part.vertices.length<50||part.faces.length<50)throw Error('Incomplete sourced mesh: '+id);
