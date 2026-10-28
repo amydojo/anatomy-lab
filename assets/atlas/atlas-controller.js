@@ -511,7 +511,7 @@ function setup(){
  document.addEventListener('keydown',trapFocus);
 
  $('evidence-sheet').addEventListener('click',e=>{if(e.target===$('evidence-sheet'))closeEvidence();});
- document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('seam').hidden){state.closeSeam();$('seam').hidden=true;previousFocus?.focus?.();}else if(!$('evidence-sheet').hidden)closeEvidence();else if(state.data.view==='detail')body();}});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('seam').hidden){state.closeSeam();$('seam').hidden=true;previousFocus?.focus?.();}else if(!$('evidence-sheet').hidden)closeEvidence();else if(U.getSelected()){U.clearSelection();render();}else if(state.data.view==='detail')body();}});
  document.querySelectorAll('[data-evidence]').forEach(b=>b.onclick=()=>setEvidence(b.dataset.evidence));
  document.querySelectorAll('.seg-control button').forEach(b=>b.onclick=()=>setMode(b.id.replace('mode-','')));
  $('layer-slider').oninput=e=>depthChange(e.target.value);
