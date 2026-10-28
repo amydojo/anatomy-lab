@@ -82,7 +82,8 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   const id=++token;cancelAnimationFrame(animation);pending=false;
   const c=state.data.camera;
   const from={yaw:c.yaw,pitch:c.pitch,zoom:c.zoom,frameSpan:c.frameSpan,target:{...c.target}};
-  state.body();
+  const departingLayer=state.data.layer;
+  state.body();state.data.layer=departingLayer;
   const home={...state.data.camera,target:{...state.data.camera.target},yaw:from.yaw,pitch:from.pitch};
   Object.assign(c,from);
   returning=true;$('atlas-app').dataset.mode='overview';
@@ -101,7 +102,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   setStatus('RETURNING THROUGH THE BODY');updateURL();
   travel(home,reduce()?0:850,v=>{reveal=1-v;},()=>{
    if(id!==token)return;
-   region=null;reveal=0;returning=false;
+   region=null;reveal=0;returning=false;state.data.layer=0;
    $('hotspots').hidden=false;setStatus('SOURCED SKELETON · 78 STRUCTURES');
    render();
   });
