@@ -21,7 +21,7 @@ const DEPTH_HIP={
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function create(canvas,onContextLost=()=>{}){
  let gl=null,program=null,buffers=[],status='loading',model=null;
- const detail=new Map(),detailData=new Map();let shoulderPivot=[-1.1,1.9,0];
+ const detail=new Map(),detailData=new Map();let shoulderPivot=[-1.1,1.9,0],shoulderGraph=null;
  function cleanup(){if(gl){for(const item of [...buffers,...[...detail.values()].flat()])gl.deleteBuffer(item.buffer);if(program)gl.deleteProgram(program);}buffers=[];detail.clear();program=null;}
  function compile(type,source){const sh=gl.createShader(type);gl.shaderSource(sh,source);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(sh));return sh;}
  function setup(){
@@ -29,8 +29,8 @@ function create(canvas,onContextLost=()=>{}){
   if(!gl){status='fallback';return false;}
   const vert=[
    '#version 300 es','precision highp float;','in vec3 aPosition;','in vec3 aNormal;','in float aSkinWeight;',
-   'uniform vec2 uViewport;','uniform float uYaw;','uniform float uPitch;','uniform float uFrameSpan;','uniform float uZoom;','uniform vec3 uTarget;','uniform float uMotion;','uniform float uFlex;','uniform vec3 uPivot;','uniform float uMotionAxis;','uniform float uSoftSkin;','out vec3 vNormal;',
-   'void main(){','vec3 bone=aPosition;','vec3 n=aNormal;','float influence=uMotion>.5?1.:(uSoftSkin>.5?aSkinWeight:0.);','if(influence>.00001){vec3 d=bone-uPivot;float ca=cos(uFlex*influence),sa=sin(uFlex*influence);bone=uPivot+(uMotionAxis>.5?vec3(d.x*ca-d.y*sa,d.x*sa+d.y*ca,d.z):vec3(d.x,d.y*ca-d.z*sa,d.y*sa+d.z*ca));n=uMotionAxis>.5?vec3(n.x*ca-n.y*sa,n.x*sa+n.y*ca,n.z):vec3(n.x,n.y*ca-n.z*sa,n.y*sa+n.z*ca);}','vec3 p=bone-uTarget;','float cy=cos(uYaw),sy=sin(uYaw),cp=cos(uPitch),sp=sin(uPitch);',
+   'uniform vec2 uViewport;','uniform float uYaw;','uniform float uPitch;','uniform float uFrameSpan;','uniform float uZoom;','uniform vec3 uTarget;','uniform float uMotion;','uniform float uFlex;','uniform vec3 uPivot;','uniform float uMotionAxis;','uniform float uSoftSkin;','uniform float uShoulderGraph;','uniform mat4 uOriginPose;','uniform mat4 uInsertionPose;','out vec3 vNormal;',
+   'void main(){','vec3 bone=aPosition;','vec3 n=aNormal;','float influence=uMotion>.5?1.:(uSoftSkin>.5?aSkinWeight:0.);','if(uShoulderGraph>.5){vec4 pt=vec4(aPosition,1.);bone=mix((uOriginPose*pt).xyz,(uInsertionPose*pt).xyz,aSkinWeight);n=normalize(mix(mat3(uOriginPose)*n,mat3(uInsertionPose)*n,aSkinWeight));}else if(influence>.00001){vec3 d=bone-uPivot;float ca=cos(uFlex*influence),sa=sin(uFlex*influence);bone=uPivot+(uMotionAxis>.5?vec3(d.x*ca-d.y*sa,d.x*sa+d.y*ca,d.z):vec3(d.x,d.y*ca-d.z*sa,d.y*sa+d.z*ca));n=uMotionAxis>.5?vec3(n.x*ca-n.y*sa,n.x*sa+n.y*ca,n.z):vec3(n.x,n.y*ca-n.z*sa,n.y*sa+n.z*ca);}','vec3 p=bone-uTarget;','float cy=cos(uYaw),sy=sin(uYaw),cp=cos(uPitch),sp=sin(uPitch);',
    'float x=p.x*cy+p.z*sy;','float z=p.z*cy-p.x*sy;','float y=p.y*cp-z*sp;','float z2=p.y*sp+z*cp;',
    'float scale=min(uViewport.x/3.25,uViewport.y/uFrameSpan)*uZoom;',
    'float w=max(.10,(7.4-z2)/7.4);',
@@ -127,6 +127,8 @@ function create(canvas,onContextLost=()=>{}){
   }catch(error){for(const p of next)gl.deleteBuffer(p.buffer);throw error;}
   for(const old of detail.get(region)||[])gl.deleteBuffer(old.buffer);
   if(shoulder){
+    if(!window.BodyShoulderKinematics)throw Error('Shoulder kinematic graph missing');
+    shoulderGraph=window.BodyShoulderKinematics.create(asset.parts);
     const vs=next.find(p=>p.id==='humerus')?.verts||[];
     if(vs.length<50)throw Error('Sourced humeral pivot unavailable');
     const high=Math.max(...vs.map(p=>p[1])),proximal=vs.filter(p=>p[1]>=high-.26);
@@ -150,9 +152,18 @@ function create(canvas,onContextLost=()=>{}){
   gl.uniform1f(uni('uZoom'),camera.zoom);gl.uniform1f(uni('uFrameSpan'),camera.frameSpan);
   gl.uniform3f(uni('uTarget'),camera.target.x,camera.target.y,camera.target.z);
   const locP=gl.getAttribLocation(program,'aPosition'),locN=gl.getAttribLocation(program,'aNormal'),locW=gl.getAttribLocation(program,'aSkinWeight');
+  const shoulderPose=selected==='shoulder'&&shoulderGraph?shoulderGraph.pose(flex):null;
   const draw=(item,dim=1,alpha=1)=>{
    const moving=(selected==='hip'&&item.id==='femur')||(selected==='knee'&&['tibia','fibula','patella'].includes(item.id))||(selected==='shoulder'&&item.id==='humerus');
    const pivot=selected==='hip'?[-.057*5,(.895-.9)*5,-.045*5]:selected==='shoulder'?shoulderPivot:[-.09092915*5,(.4491462+.08/7.5-.9)*5,-.01654605*5];
+   if(shoulderPose){
+    const kin=window.BodyShoulderKinematics;
+    const origin=kin.boneMatrixFor(item.rig?.fixedId||item.id,shoulderPose);
+    const insert=item.rig?shoulderPose.matrices.humerus:origin;
+    gl.uniform1f(uni('uShoulderGraph'),1);
+    gl.uniformMatrix4fv(uni('uOriginPose'),false,origin);
+    gl.uniformMatrix4fv(uni('uInsertionPose'),false,insert);
+   }else gl.uniform1f(uni('uShoulderGraph'),0);
    gl.uniform1f(uni('uMotion'),moving?1:0);gl.uniform1f(uni('uSoftSkin'),selected==='shoulder'&&item.skinWeights?1:0);gl.uniform1f(uni('uMotionAxis'),selected==='shoulder'?1:0);
    gl.uniform1f(uni('uFlex'),(selected==='shoulder'?-1:1)*Number(flex)*Math.PI/180);
    gl.uniform3fv(uni('uPivot'),pivot);
@@ -223,6 +234,7 @@ function create(canvas,onContextLost=()=>{}){
   const chosen=region==='knee'?(layer===1?new Set(['femur']):layer===2?new Set(['tibia','fibula']):layer===3?new Set(['patella']):null):null;
   const hipLayers=(region==='shoulder'?SHOULDER_LAYERS:DEPTH_HIP)[clamp(Number(layer)||0,0,3)]||{};
   const angle=Number(flex)*Math.PI/180,ca=Math.cos(angle),sa=Math.sin(angle);
+  const shoulderPose=region==='shoulder'&&shoulderGraph?shoulderGraph.pose(flex):null;
   let nearest=null,front=-Infinity;
   const projection={...camera,width,height};
   const within=(a,b,c)=>{
@@ -238,9 +250,12 @@ function create(canvas,onContextLost=()=>{}){
    }else if(chosen&&!chosen.has(mesh.id))continue;
    const mapped=mesh.verts.map((v,index)=>{
     let p={x:v[0],y:v[1],z:v[2]};
-    if(region==='shoulder'&&(moveIds.has(mesh.id)||mesh.skinWeights)&&Math.abs(angle)>.0001){
-      const influence=moveIds.has(mesh.id)?1:mesh.skinWeights[index];
-      return core.project(window.BodyShoulderRig.deformVertex(v,influence,pivot,flex),projection);
+    if(shoulderPose){
+      const kin=window.BodyShoulderKinematics;
+      const world=mesh.rig
+        ?kin.deformPoint(v,shoulderPose.matrices[mesh.rig.fixedId],shoulderPose.matrices.humerus,mesh.skinWeights[index])
+        :kin.transform(kin.boneMatrixFor(mesh.id,shoulderPose),v);
+      return core.project(world,projection);
     }
     if(moveIds.has(mesh.id)&&Math.abs(angle)>.0001){
      const dy=p.y-pivot[1],dz=p.z-pivot[2];
@@ -257,8 +272,23 @@ function create(canvas,onContextLost=()=>{}){
   }
   return nearest;
  }
- function dispose(){cleanup();model=null;detailData.clear();}
- return Object.freeze({load,loadDetail,hasDetail:region=>detail.has(region),render,hitTest,resize,getStatus:()=>status,dispose,stats:()=>({partCount:buffers.length,triangles:buffers.reduce((n,b)=>n+b.count/3,0),webgl:status==='ready',detailRegions:[...detail.keys()],detailMeshes:[...detail.values()].reduce((n,items)=>n+items.length,0),riggedShoulderMuscles:(detail.get('shoulder')||[]).filter(p=>p.skinWeights).length})});
+ function shoulderDiagnostics(flex=0){
+  if(!shoulderGraph||!detail.has('shoulder'))return null;
+  const pose=shoulderGraph.pose(flex),kin=window.BodyShoulderKinematics;
+  const attachments={};
+  for(const mesh of detail.get('shoulder')){
+   if(!mesh.rig)continue;
+   attachments[mesh.id]={
+    origin:kin.transform(pose.matrices[mesh.rig.fixedId],mesh.rig.origin),
+    insertion:kin.transform(pose.matrices.humerus,mesh.rig.insertion),
+    inferred:true
+   };
+  }
+  return {markers:pose.markers,rest:pose.rest,degrees:pose.degrees,
+   elevation:pose.elevation,attachments,validated:false};
+ }
+ function dispose(){cleanup();model=null;shoulderGraph=null;detailData.clear();}
+ return Object.freeze({load,loadDetail,hasDetail:region=>detail.has(region),render,hitTest,shoulderDiagnostics,resize,getStatus:()=>status,dispose,stats:()=>({partCount:buffers.length,triangles:buffers.reduce((n,b)=>n+b.count/3,0),webgl:status==='ready',detailRegions:[...detail.keys()],detailMeshes:[...detail.values()].reduce((n,items)=>n+items.length,0),riggedShoulderMuscles:(detail.get('shoulder')||[]).filter(p=>p.skinWeights).length,coordinatedShoulder:!!shoulderGraph})});
 }
 window.BodyAtlasRenderer=Object.freeze({create});
 })();
