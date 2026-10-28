@@ -61,6 +61,34 @@ for(const region of ['hip','knee','shoulder']){
   expect(errors).toEqual([]);
  });
 }
+for(const region of ['hip','knee']){
+ test(region+' sourced muscles move with the bones on the original WebGL canvas',async({page})=>{
+  const errors=await atlas(page);
+  await choose(page,region);
+  const expected=region==='hip'?8:5;
+  const before=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
+  expect(before.renderer.webgl).toBe(true);
+  expect(before.renderer[region==='hip'?'riggedHipMuscles':'riggedKneeMuscles']).toBe(expected);
+  expect(await page.locator('#region-frame').getAttribute('src')).toBe(null);
+  const canvas=page.locator('#atlas-canvas');
+  const viewport=await canvas.boundingBox();
+  const rest=await canvas.screenshot();
+  await page.locator('#joint-motion-slider').evaluate(el=>{
+   el.value='60';el.dispatchEvent(new Event('input',{bubbles:true}));
+  });
+  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(60);
+  const posed=await canvas.screenshot();
+  expect(rest.equals(posed)).toBe(false);
+  expect(await canvas.boundingBox()).toEqual(viewport);
+  await expect(page.locator('#motion-description')).toHaveText('INFERRED ATTACHMENTS');
+  await page.screenshot({path:'artifacts/v6-'+region+'-muscle-pose-'+test.info().project.name+'.png',fullPage:true});
+  await page.locator('#reset-view').click();
+  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(0);
+  await page.locator('#back-body').click();
+  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:6000}).toBe('overview');
+  expect(errors).toEqual([]);
+ });
+}
 test('Hip layer peel runs on the same canvas and never creates an iframe',async({page})=>{
  const errors=await atlas(page);await choose(page,'hip');
  await page.locator('#layer-slider').evaluate(e=>{e.value='2';e.dispatchEvent(new Event('input',{bubbles:true}));});
