@@ -100,22 +100,22 @@ function create(canvas,onContextLost=()=>{}){
   return true;
  }
  function loadDetail(region,asset){
-  if(!['hip','knee','shoulder'].includes(region)||!model||(asset.source_commit!==model.source_commit&&asset.upstream_commit!==model.source_commit))throw Error('Detail reference does not match pinned Atlas release');
-  const hip=region==='hip',shoulder=region==='shoulder',knee=region==='knee';
-  const allowed=shoulder?SHOULDER_HIDDEN:hip?HIP_HIDDEN:KNEE_HIDDEN;
+  if(!['hip','knee','shoulder'].includes(region)&&!window.BodyExtendedRegions?.has(region)||!model||(asset.source_commit!==model.source_commit&&asset.upstream_commit!==model.source_commit))throw Error('Detail reference does not match pinned Atlas release');
+  const hip=region==='hip',shoulder=region==='shoulder',knee=region==='knee',extended=window.BodyExtendedRegions?.has(region);
+  const allowed=extended?Object.fromEntries(Object.keys(asset.parts||{}).map(id=>[id,id])):shoulder?SHOULDER_HIDDEN:hip?HIP_HIDDEN:KNEE_HIDDEN;
   if(hip&&(asset.schema!=='body-live/hip-sourced-v1'||asset.license!=='CC BY 4.0'))throw Error('Invalid hip source license/schema');
-  if(!hip&&!shoulder&&(asset.schema!=='body-live/sourced-knee-geometry-v1'||asset.license!=='CC BY 4.0'))throw Error('Invalid knee source license/schema');
+  if(knee&&(asset.schema!=='body-live/sourced-knee-geometry-v1'||asset.license!=='CC BY 4.0'))throw Error('Invalid knee source license/schema');
   if(shoulder&&(asset.schema!=='body-live/shoulder-sourced-v1'||asset.license!=='CC BY 4.0'))throw Error('Invalid licensed shoulder source');
-  const origin=shoulder?[0,.9,0]:hip?[-.057,.895,-.045]:[-.09092915,.4491462,-.01654605];
-  const factor=shoulder?5:hip?10:7.5;
-  const transform=shoulder?asset.source_frame:hip?asset.shared_transform:asset.aligned_shared_transform;
+  const origin=shoulder||extended?[0,.9,0]:hip?[-.057,.895,-.045]:[-.09092915,.4491462,-.01654605];
+  const factor=shoulder||extended?5:hip?10:7.5;
+  const transform=shoulder||extended?asset.source_frame:hip?asset.shared_transform:asset.aligned_shared_transform;
   if(!transform)throw Error('Missing detail source transform');
   const actualOrigin=transform.origin_metres;
   const actualFactor=transform.scale||transform.scale_to_scene;
   if(!Array.isArray(actualOrigin)||actualOrigin.some((n,i)=>Math.abs(n-origin[i])>1e-6)||Math.abs(actualFactor-factor)>1e-6)throw Error('Detail model frame not matched to Atlas');
   if(!gl||status!=='ready')return false;
   const next=[];
-  const entries=hip||shoulder?Object.entries(asset.parts):
+  const entries=hip||shoulder||extended?Object.entries(asset.parts):
     [...Object.entries(asset.bone_meshes),...Object.entries(asset.muscle_meshes||{})];
   const toWorld=part=>part.vertices.map(p=>p.map((v,i)=>(v/factor+origin[i]-[0,.9,0][i])*5));
   const worldParts=hip?Object.fromEntries(Object.entries(asset.parts).map(([id,p])=>[id,{vertices:toWorld(p)}])):
@@ -126,7 +126,7 @@ function create(canvas,onContextLost=()=>{}){
     const tissue=(hip||shoulder)&&!Object.hasOwn(allowed,id)||knee&&Object.hasOwn(asset.muscle_meshes||{},id);
     if(!tissue&&!Object.hasOwn(allowed,id))continue;
     const converted={vertices:toWorld(part),faces:part.faces};
-    const color=tissue?(shoulder?SHOULDER_COLORS[id]:hip?HIP_COLORS[id]:KNEE_COLORS[id]):(shoulder?COLORS.upper:COLORS.lower);
+    const color=tissue?(shoulder?SHOULDER_COLORS[id]:hip?HIP_COLORS[id]:KNEE_COLORS[id]):(extended?COLORS[window.BodyExtendedRegions.config[region].group]:(shoulder?COLORS.upper:COLORS.lower));
     if(!color)throw Error('Unidentified tissue geometry: '+id);
     if((hip||knee)&&tissue){
       if(!window.BodyLowerLimbRig)throw Error('Lower limb rig unavailable');
@@ -138,9 +138,9 @@ function create(canvas,onContextLost=()=>{}){
       const rig=window.BodyShoulderRig.createSkin(id,converted.vertices,asset.parts);
       converted.skinWeights=rig.weights;converted.rig=rig;
     }
-    next.push(makeBuffer(converted,id,tissue?'tissue':'lower',color,tissue));
+    next.push(makeBuffer(converted,id,tissue?'tissue':extended?window.BodyExtendedRegions.config[region].group:'lower',color,tissue));
    }
-   if(next.filter(p=>!p.tissue).length!==(hip||shoulder?3:4))throw Error('Incomplete detailed bone registration');
+   if(next.filter(p=>!p.tissue).length!==(extended?entries.length:hip||shoulder?3:4))throw Error('Incomplete detailed bone registration');
   }catch(error){for(const p of next)gl.deleteBuffer(p.buffer);throw error;}
   for(const old of detail.get(region)||[])gl.deleteBuffer(old.buffer);
   if(shoulder){
@@ -171,12 +171,14 @@ function create(canvas,onContextLost=()=>{}){
   const locP=gl.getAttribLocation(program,'aPosition'),locN=gl.getAttribLocation(program,'aNormal'),locW=gl.getAttribLocation(program,'aSkinWeight');
   const shoulderPose=selected==='shoulder'&&shoulderGraph?shoulderGraph.pose(flex):null;
   const lowerPose=(selected==='hip'||selected==='knee')&&detail.has(selected)?window.BodyLowerLimbRig.pose(selected,flex):null;
-  const jointPose=shoulderPose||lowerPose;
+  const extendedPose=window.BodyExtendedRegions?.has(selected)&&detailData.has(selected)
+   ?window.BodyExtendedRegions.createPose(selected,detailData.get(selected),flex):null;
+  const jointPose=shoulderPose||lowerPose||extendedPose;
   const draw=(item,dim=1,alpha=1)=>{
    const moving=(selected==='hip'&&item.id==='femur')||(selected==='knee'&&['tibia','fibula','patella'].includes(item.id))||(selected==='shoulder'&&item.id==='humerus');
    const pivot=selected==='hip'?[-.057*5,(.895-.9)*5,-.045*5]:selected==='shoulder'?shoulderPivot:[-.09092915*5,(.4491462+.08/7.5-.9)*5,-.01654605*5];
    if(jointPose){
-    const kin=shoulderPose?window.BodyShoulderKinematics:window.BodyLowerLimbRig;
+    const kin=shoulderPose?window.BodyShoulderKinematics:extendedPose?window.BodyExtendedRegions:window.BodyLowerLimbRig;
     const root=item.rig?.fixedId||item.id;
     const origin=jointPose.matrices[root]||kin.identity();
     const insert=item.rig?(jointPose.matrices[item.rig.targetId||'humerus']||kin.identity()):origin;
@@ -196,7 +198,7 @@ function create(canvas,onContextLost=()=>{}){
   };
   const region=detail.has(selected)?selected:null;
   const r=clamp(Number(reveal)||0,0,1);
-  const replaced=region?new Set(Object.values(region==='shoulder'?SHOULDER_HIDDEN:region==='hip'?HIP_HIDDEN:KNEE_HIDDEN)):new Set();
+  const replaced=region?new Set(window.BodyExtendedRegions?.has(region)?detail.get(region).map(m=>m.id):Object.values(region==='shoulder'?SHOULDER_HIDDEN:region==='hip'?HIP_HIDDEN:KNEE_HIDDEN)):new Set();
   const showFocus=region&&r>.001;
   // Context is only an orientation cue; do not paint an entire second knee
   // over the selected right knee or occlude its sourced surfaces.
@@ -227,6 +229,7 @@ function create(canvas,onContextLost=()=>{}){
    for(const bone of bones){
     let a=r;
     if(region==='knee'&&chosen&&!chosen.has(bone.id))a*=.12;
+    if(window.BodyExtendedRegions?.has(region)&&!window.BodyExtendedRegions.layers(region,bone.id,layer))a*=.10;
     if(a<.02)continue;
     gl.depthMask(a>.98);
     draw(bone,(highlight&&highlight!==bone.id)?0.52:1,a);
@@ -256,7 +259,9 @@ function create(canvas,onContextLost=()=>{}){
   const angle=Number(flex)*Math.PI/180,ca=Math.cos(angle),sa=Math.sin(angle);
   const shoulderPose=region==='shoulder'&&shoulderGraph?shoulderGraph.pose(flex):null;
   const lowerPose=(region==='hip'||region==='knee')?window.BodyLowerLimbRig.pose(region,flex):null;
-  const jointPose=shoulderPose||lowerPose;
+  const extendedPose=window.BodyExtendedRegions?.has(region)&&detailData.has(region)
+   ?window.BodyExtendedRegions.createPose(region,detailData.get(region),flex):null;
+  const jointPose=shoulderPose||lowerPose||extendedPose;
   let nearest=null,front=-Infinity;
   const projection={...camera,width,height};
   const within=(a,b,c)=>{
@@ -270,10 +275,11 @@ function create(canvas,onContextLost=()=>{}){
    if(mesh.tissue){
     if(!['hip','shoulder','knee'].includes(region)||layer>=3||!(hipLayers[mesh.id]>.15))continue;
    }else if(chosen&&!chosen.has(mesh.id))continue;
+   else if(extendedPose&&!window.BodyExtendedRegions.layers(region,mesh.id,layer))continue;
    const mapped=mesh.verts.map((v,index)=>{
     let p={x:v[0],y:v[1],z:v[2]};
     if(jointPose){
-      const kin=shoulderPose?window.BodyShoulderKinematics:window.BodyLowerLimbRig;
+      const kin=shoulderPose?window.BodyShoulderKinematics:extendedPose?window.BodyExtendedRegions:window.BodyLowerLimbRig;
       const root=jointPose.matrices[mesh.rig?.fixedId||mesh.id]||kin.identity();
       const insert=mesh.rig?jointPose.matrices[mesh.rig.targetId||'humerus']||kin.identity():root;
       return core.project(kin.deformPoint(v,root,insert,mesh.skinWeights?.[index]||0),projection);
@@ -309,7 +315,7 @@ function create(canvas,onContextLost=()=>{}){
    elevation:pose.elevation,attachments,validated:false};
  }
  function dispose(){cleanup();model=null;shoulderGraph=null;detailData.clear();}
- return Object.freeze({load,loadDetail,hasDetail:region=>detail.has(region),render,hitTest,shoulderDiagnostics,resize,getStatus:()=>status,dispose,stats:()=>({partCount:buffers.length,triangles:buffers.reduce((n,b)=>n+b.count/3,0),webgl:status==='ready',detailRegions:[...detail.keys()],detailMeshes:[...detail.values()].reduce((n,items)=>n+items.length,0),riggedShoulderMuscles:(detail.get('shoulder')||[]).filter(p=>p.skinWeights).length,riggedHipMuscles:(detail.get('hip')||[]).filter(p=>p.skinWeights).length,riggedKneeMuscles:(detail.get('knee')||[]).filter(p=>p.skinWeights).length,coordinatedShoulder:!!shoulderGraph})});
+ return Object.freeze({load,loadDetail,hasDetail:region=>detail.has(region),render,hitTest,shoulderDiagnostics,resize,getStatus:()=>status,dispose,stats:()=>({partCount:buffers.length,triangles:buffers.reduce((n,b)=>n+b.count/3,0),webgl:status==='ready',detailRegions:[...detail.keys()],detailMeshes:[...detail.values()].reduce((n,items)=>n+items.length,0),riggedShoulderMuscles:(detail.get('shoulder')||[]).filter(p=>p.skinWeights).length,riggedHipMuscles:(detail.get('hip')||[]).filter(p=>p.skinWeights).length,riggedKneeMuscles:(detail.get('knee')||[]).filter(p=>p.skinWeights).length,coordinatedShoulder:!!shoulderGraph,expandedRegions:[...detail.keys()].filter(id=>window.BodyExtendedRegions?.has(id)),expandedMeshes:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.length,0)})});
 }
 window.BodyAtlasRenderer=Object.freeze({create});
 })();
