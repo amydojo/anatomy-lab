@@ -151,6 +151,11 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
    if(!model.hasDetail(name)){
     const data=await loader.load(name==='hip'?'hipGeometry':name==='shoulder'?'shoulderGeometry':'kneeGeometry');
     if(id!==token)return;
+    if(name==='shoulder'){
+     const provenance=await loader.load('shoulderProof');
+     if(id!==token)return;
+     loader.verifyShoulder(data,provenance);
+    }
     model.loadDetail(name,data);
    }
    if(id!==token)return;
