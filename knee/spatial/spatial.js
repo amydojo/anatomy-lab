@@ -493,6 +493,7 @@ function prepareAtlasEntry(camera){
  if(!sourcedMeshes||!camera||!Number.isFinite(camera.zoom)||camera.zoom<=0)return false;
  stop();state.flex=0;state.depth=0;state.selected=null;state.isolate=false;
  state.focus='joint';state.follow=false;
+ state.anchorY=Number.isFinite(camera.anchorY)?camera.anchorY:.5;
  state.yaw=camera.yaw;state.pitch=camera.pitch;state.zoom=camera.zoom;
  state.frameSpan=camera.frameSpan||2.65;atlasTravelMix=0;
  updateFocusButton();updateInspector();render();return true;
