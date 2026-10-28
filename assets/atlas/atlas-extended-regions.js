@@ -56,6 +56,9 @@ function hingeOrigin(region,parts){
  return null;
 }
 function moving(region,id){
+ if(region==='skull')return id==='mandible';
+ if(region==='neck')return id!=='seventh-cervical-vertebra';
+ if(region==='thorax')return /rib$/.test(id)||['manubrium','body-of-sternum','xiphoid-process'].includes(id);
  if(region==='elbow')return id==='right-radius'||id==='right-ulna';
  if(region==='wrist')return /^(right-(scaphoid|lunate|triquetral|pisiform|trapezium|trapezoid|capitate|hamate)|right-(first|second|third|fourth|fifth)-metacarpal-bone)$/.test(id);
  if(region==='ankle')return !['right-tibia','right-fibula'].includes(id);
