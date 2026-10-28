@@ -67,7 +67,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   deltoidSpinal:['Deltoid · posterior','Scapular-spine deltoid portion, positioned on the same pinned source reference pose.'],
   bicepsLong:['Biceps brachii · long head','Long head originates at the supraglenoid region; its tendon and dynamic glenoid-labrum relationship are not independently reconstructed here.'],
   bicepsShort:['Biceps brachii · short head','Short head arises from the coracoid process alongside coracobrachialis in the source pose.'],
-  pectoralisClavicular:['Pectoralis major · clavicular','Clavicular part of the pectoralis major; a shoulder flexor and adductor. Muscle stays in the source pose during humeral abduction.'],
+  pectoralisClavicular:['Pectoralis major · clavicular','Clavicular part of pectoralis major, a shoulder flexor/adductor. The displayed muscle shape bends between inferred clavicular and humeral attachments, not a validated shortening simulation.'],
 
   tibia:['Right tibia','Primary weight-bearing shin bone; its movement is a schematic fixed-axis demonstration.'],
   fibula:['Right fibula','Lateral lower-leg bone.'],
