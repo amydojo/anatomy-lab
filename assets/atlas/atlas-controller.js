@@ -29,9 +29,11 @@ function resize(){
  const rect=$('atlas-canvas').getBoundingClientRect();state.data.camera.width=rect.width;state.data.camera.height=rect.height;
  render();
 }
-function render(){if(document.hidden||state.data.view==='detail')return;
- model.render(state.data.camera,state.data.region,state.data.evidenceMode);
- drawPins();}
+function render(){
+ if(document.hidden||(state.data.view==='detail'&&!U.isActive()))return;
+ model.render(state.data.camera,U.getRegion()||state.data.region,state.data.evidenceMode,state.data.layer,U.getReveal());
+ if(state.data.view==='overview'&&!U.isActive())drawPins();
+}
 function fallback(reason){
  $('canvas-fallback').hidden=false;$('scene-status').textContent='SEMANTIC FALLBACK';
  $('canvas-fallback').querySelector('p').textContent=(reason||'3D unavailable')+'. Choose a region using the accessible list.';
@@ -148,6 +150,7 @@ function setExpanded(next){
 // One continuous world-space travel. The matched lab never shows its own
 // default camera; the hip/knee source-frame pose is sent before revealing it.
 function choose(region){
+ if(isSourceAligned(region))return U.choose(region);
  if(state.data.view==='detail'||!window.BodyAtlasState.regions.includes(region))return;
  ++seq;const token=seq;
  clearTimeout(frameTimeout);clearTimeout(entryTimer);clearTimeout(exitTimer);
@@ -270,8 +273,8 @@ function finishEntry(token){
  }
  requestAnimationFrame(()=>{if(seq===token)portal.dataset.phase='active';});
 }
-function enterUnmatchedRegion(region){
- if(state.data.view!=='focused'||isSourceAligned(region)||region!==state.data.region)return;
+function enterUnmatchedRegion(region,force=false){
+ if(state.data.view!=='focused'||(!force&&isSourceAligned(region))||region!==state.data.region)return;
  if(!state.enter())return;
  ++seq;clearTimeout(frameTimeout);cancelAnimationFrame(motionFrame);
  const frame=$('region-frame'),portal=$('portal'),token=seq;
@@ -318,6 +321,7 @@ function adaptEmbeddedFrame(frame,region){
 }
 function enableControls(region){
  const detail=state.data.view==='detail';
+ const unified=detail&&U.isActive()&&isSourceAligned(region);
  $('layer-slider').disabled=!detail||region==='shoulder';
  $('layer-slider').max=region==='knee'?'3':'4';$('layer-slider').value='0';$('layer-output').textContent='Surface';
  $('open-original').hidden=!detail;$('continue-knee').hidden=!detail||!['nerve','hip'].includes(region);
@@ -326,9 +330,12 @@ function enableControls(region){
  $('back-body').hidden=!detail;
  $('top-enter-region').hidden=true;
  $('top-continue-knee').hidden=!detail||!['hip','nerve'].includes(region);
+ if(unified){$('layer-slider').disabled=false;$('layer-slider').max=region==='hip'?'4':'3';}
 }
 function enter(region=state.data.region){
  if(!region||state.data.view==='detail')return;
+ if(isSourceAligned(region)&&!U.isActive()){enterUnmatchedRegion(region,true);return;}
+ if(U.isActive())return;
  if(!isSourceAligned(region)){enterUnmatchedRegion(region);return;}
  if(pendingEntry?.region===region){
   if(pendingEntry.ready&&pendingEntry.traveled)finishEntry(pendingEntry.token);
@@ -343,6 +350,7 @@ function initNerve(token,attempt=0){
  else $('scene-status').textContent='NERVE ASSET UNAVAILABLE · VIEW MAY BE SCHEMATIC';
 }
 function body(){
+ if(U.isActive())return U.back();
  ++seq;clearTimeout(frameTimeout);clearTimeout(entryTimer);clearTimeout(exitTimer);
  cancelAnimationFrame(motionFrame);cancelAnimationFrame(travelMixFrame);motionFrame=travelMixFrame=0;pendingEntry=null;
  const old=state.data.region;
@@ -385,6 +393,7 @@ function seam(){
  if(!state.transfer())return;previousFocus=document.activeElement;$('seam').hidden=false;$('seam-cancel').focus();
 }
 function toKnee(){
+ if(U.isActive()&&U.getRegion()==='hip')return U.travelKnee();
  if(!state.completeTransfer())return;
  sourceSeamPending=true;
  $('seam').hidden=true;
@@ -405,6 +414,7 @@ function toKnee(){
 }
 
 function setMode(mode){
+ if(U.isActive())return U.setMode(mode);
  if(!state.mode(mode))return;
  document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-'+mode)));
  if(state.data.view!=='detail'){
@@ -418,6 +428,7 @@ function setMode(mode){
  }else if(mode==='trace')$('context-note').textContent='No sourced continuous sciatic nerve has been reconstructed in this region.';
 }
 function depthChange(value){
+ if(U.isActive())return U.depthChange(value);
  state.setDepth(value);
  const v=state.data.layer;const region=state.data.region;
  $('layer-output').textContent=region==='hip'||region==='nerve'?['Surface','Stabilizers','Deep rotators','Nerve','Skeleton'][v]:['All','Deeper','Ligaments','Bone only'][Math.min(v,3)];
@@ -455,6 +466,7 @@ function setEvidence(mode){
  updateURL();render();
 }
 function reset(){
+ if(U.isActive())return U.reset();
  if(state.data.view==='detail'){getFrameApi()?.reset?.();$('layer-slider').value=0;state.setDepth(0);$('layer-output').textContent='Surface';return;}
  animateCamera({yaw:-.2,pitch:-.07,zoom:1.03,frameSpan:10.8,target:{x:0,y:-.12,z:0}},reduce()?0:320);
 }
@@ -507,6 +519,7 @@ function setup(){
   if(new URLSearchParams(location.search).get('evidence')==='1'){setEvidence('evidence');showEvidence();}
  }).catch(err=>fallback(err.message));
 }
-window.__BODY_ATLAS__={getState:()=>({...state.snapshot(),renderer:model.stats(),assetsLoaded:loaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode};
+const U=window.BodyAtlasUnified.create({state,model,loader,render,updateURL,resize,setExpanded,reduce,centerPoint,shortestYaw,enableControls,NOTE,LABEL});
+window.__BODY_ATLAS__={getState:()=>({...state.snapshot(),renderer:model.stats(),unified:U.snapshot(),assetsLoaded:loaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode};
 setup();
 })();
