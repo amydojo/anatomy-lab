@@ -35,8 +35,9 @@ for(const [region,expected] of Object.entries(regions)){
   if(expected.animated){
    await expect(page.locator('#joint-motion')).toBeVisible();
    const rest=await page.locator('#atlas-canvas').screenshot();
+   const expectedMotion=Math.min(40,Number(await page.locator('#joint-motion-slider').getAttribute('max')));
    await page.locator('#joint-motion-slider').evaluate(el=>{el.value=String(Math.min(Number(el.max),40));el.dispatchEvent(new Event('input',{bubbles:true}));});
-   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(40);
+   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(expectedMotion);
    const bent=await page.locator('#atlas-canvas').screenshot();
    expect(bent.equals(rest)).toBe(false);
   }else await expect(page.locator('#joint-motion')).toBeHidden();
