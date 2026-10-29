@@ -3,7 +3,7 @@ async function ready(page){
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.goto('/atlas/');
- await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().expansionLoaded===true),{timeout:40000}).toBe(true);
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().facialLoaded===true),{timeout:40000}).toBe(true);
  return errors;
 }
 test('V9 renders sourced 199-bone convention, 386 muscle meshes and opt-in connective system',async({page})=>{
@@ -11,13 +11,13 @@ test('V9 renders sourced 199-bone convention, 386 muscle meshes and opt-in conne
  const st=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
  expect(st.renderer.webgl).toBe(true);
  expect(st.renderer.registry.bones).toBe(201);
- expect(st.renderer.registry.muscles).toBe(386);
+ expect(st.renderer.registry.muscles).toBe(433);
  expect(st.renderer.registry.connective).toBe(48);
  expect(st.renderer.expansionBones).toBe(64);
  expect(st.renderer.expansionMuscles).toBe(237);
  expect(st.renderer.expansionConnective).toBe(48);
  await expect(page.locator('#overview-coverage')).toContainText('201 BONE MESHES');
- await expect(page.locator('#overview-coverage')).toContainText('386 MUSCLE MESHES');
+ await expect(page.locator('#overview-coverage')).toContainText('433 MUSCLE MESHES');
  await expect(page.locator('#stage-caveat')).toContainText('199/206 conventional bones');
  const original=await page.locator('#atlas-canvas').screenshot();
  if((await page.viewportSize()).width<=850){
@@ -48,7 +48,7 @@ test('V9 source additions do not block region navigation, real wrist/ankle rigs 
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:25000}).toBe('detail');
  const state=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
  expect(state.renderer.registry.bones).toBe(201);
- expect(state.renderer.registry.muscles).toBe(386);
+ expect(state.renderer.registry.muscles).toBe(433);
  expect(state.unified.motion).toBe(0);
  expect(state.unified.secondary).toBe(0);
  expect(errors).toEqual([]);
