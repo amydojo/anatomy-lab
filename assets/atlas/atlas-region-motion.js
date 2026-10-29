@@ -107,7 +107,22 @@ function skin(region,id,vertices,parts){
   if(!/mylohyoid|geniohyoid/.test(id))return null;
   pair=['sphenoid-bone','mandible'];
  }else if(region==='neck')pair=['seventh-cervical-vertebra','atlas'];
- else if(region==='thorax'){
+ else if(region==='elbow'){
+  // Pronator and supinator tissue acts at the radius; triceps/brachialis
+  // approach the ulna. Muscle landmarks are inferred and NOT verified.
+  pair=['right-humerus',/triceps|brachialis$/.test(id)?'right-ulna':'right-radius'];
+ }else if(region==='wrist'){
+  pair=[/flexor-carpi-ulnaris/.test(id)?'right-ulna':'right-radius',
+   /pollicis|opponens|palmaris/.test(id)?'right-first-metacarpal-bone':'right-third-metacarpal-bone'];
+ }else if(region==='ankle'){
+  const distal=/fibularis/.test(id)?'right-fifth-metatarsal-bone':
+   /tibialis-posterior/.test(id)?'navicular-bone-of-right-foot':
+   /tibialis-anterior/.test(id)?'right-first-metatarsal-bone':
+   /digitorum-brevis/.test(id)?'right-calcaneus':
+   /hallucis|digitorum/.test(id)?'right-second-metatarsal-bone':
+   'right-calcaneus';
+  pair=[/fibularis/.test(id)?'right-fibula':'right-tibia',distal];
+ }else if(region==='thorax'){
   const ribs=Object.entries(parts).filter(([k])=>/rib$/.test(k));
   ribs.sort((a,b)=>Math.hypot(...mean(sample(a[1].vertices)).map((v,i)=>v-center[i]))
                       -Math.hypot(...mean(sample(b[1].vertices)).map((v,i)=>v-center[i])));
