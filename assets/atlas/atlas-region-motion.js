@@ -96,15 +96,38 @@ function poseLegacy(region,sourcePose,secondary=0){
  return {...sourcePose,matrices,secondaryDegrees:s,validated:false};
 }
 function skin(region,id,vertices,parts){
- const pair=region==='thorax'?['body-of-sternum','right-first-rib']:
-  region==='neck'?['seventh-cervical-vertebra','atlas']:null;
- if(!pair)return null;
+ // These are inferred proximity weights, never anatomical insertion landmarks.
+ // The source does not split its diaphragm/intercostal atlas into independently
+ // verified rib-specific units; those surfaces remain in the reference pose.
+ if(region==='thorax'&&/diaphragm|intercostal/.test(id))return null;
+ const sample=a=>a.filter((_,i)=>i%Math.max(1,Math.ceil(a.length/100))===0);
+ const center=mean(sample(vertices));
+ let pair=null;
+ if(region==='skull'){
+  if(!/mylohyoid|geniohyoid/.test(id))return null;
+  pair=['sphenoid-bone','mandible'];
+ }else if(region==='neck')pair=['seventh-cervical-vertebra','atlas'];
+ else if(region==='thorax'){
+  const ribs=Object.entries(parts).filter(([k])=>/rib$/.test(k));
+  ribs.sort((a,b)=>Math.hypot(...mean(sample(a[1].vertices)).map((v,i)=>v-center[i]))
+                      -Math.hypot(...mean(sample(b[1].vertices)).map((v,i)=>v-center[i])));
+  const rib=ribs[0]?.[0];
+  const closestVertebra=Object.entries(parts).filter(([k])=>/thoracic-vertebra/.test(k))
+   .sort((a,b)=>Math.abs(mean(sample(a[1].vertices))[1]-center[1])-
+                 Math.abs(mean(sample(b[1].vertices))[1]-center[1]))[0]?.[0];
+  if(!rib||!closestVertebra)return null;
+  pair=[closestVertebra,rib];
+ }else return null;
  const [fixedId,targetId]=pair;
  const fixed=parts[fixedId]?.vertices,moving=parts[targetId]?.vertices;
  if(!fixed?.length||!moving?.length)return null;
- const sampled=a=>a.filter((_,i)=>i%Math.max(1,Math.ceil(a.length/100))===0);
- const f=sampled(fixed),t=sampled(moving),dist=(p,vs)=>Math.min(...vs.map(q=>(p[0]-q[0])**2+(p[1]-q[1])**2+(p[2]-q[2])**2));
- const weights=vertices.map(p=>{const a=Math.sqrt(dist(p,f)),b=Math.sqrt(dist(p,t)),v=clamp(a/Math.max(.00001,a+b),0,1);return v*v*(3-2*v);});
+ const f=sample(fixed),t=sample(moving);
+ const nearestSq=(p,vs)=>{let best=Infinity;for(const q of vs){
+  const d=(p[0]-q[0])**2+(p[1]-q[1])**2+(p[2]-q[2])**2;
+  if(d<best)best=d;
+ }return best;};
+ const weights=vertices.map(p=>{const a=Math.sqrt(nearestSq(p,f)),b=Math.sqrt(nearestSq(p,t)),
+  v=clamp(a/Math.max(.00001,a+b),0,1);return v*v*(3-2*v);});
  return {fixedId,targetId,weights,method:'source-surface-proximity-inferred',validated:false};
 }
 window.BodyRegionMotion=Object.freeze({profile,safe,poseExtended,poseLegacy,skin,identity:I,about,multiply:mult,transform:X.transform});
