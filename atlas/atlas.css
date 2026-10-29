@@ -198,3 +198,82 @@
  .joint-secondary-control label{min-width:115px}
  .joint-rest{min-height:39px;margin-left:auto}
 }
+
+
+/* V8.3 MOBILE WORKBENCH
+ * The specimen, not a dashboard, owns the viewport. Desktop unchanged.
+ * Only ONE tool context can cover the lower viewport at any moment. */
+.mobile-workbench,.mobile-region-sheet{display:none}
+@media(max-width:850px){
+ .app .topbar{height:52px;flex-basis:52px;padding:0 14px}
+ .app .masthead,.app .topactions #back-body,.app .topactions #top-enter-region,
+ .app .topactions #top-continue-knee{display:none!important}
+ .app .topactions #evidence-toggle{min-height:38px;padding:6px 11px}
+ .app .region-dock,.app .overview-system-switch,
+ .app .sidebar,.app .controlbar{display:none!important}
+ .app .workspace{flex:1;min-height:0;display:block;position:relative}
+ .app .stage,.app[data-mode="detail"] .stage{position:absolute;inset:0;width:100%;height:100%}
+ .app .stage-meta,.app .stage-bottom,.app .shoulder-rig-tools{display:none!important}
+ .app .hotspots{display:none!important}
+ .app .joint-motion,.app .structure-chip{display:none!important}
+ .mobile-workbench{display:block;position:absolute;inset:0;z-index:10;pointer-events:none;color:#efdfcf}
+ .mobile-current-row{position:absolute;top:10px;left:12px;right:12px;display:flex;gap:8px;align-items:center;pointer-events:auto;max-width:calc(100% - 24px)}
+ .mobile-current-row button{background:#241913ec;border:1px solid #725541;border-radius:12px;box-shadow:0 4px 14px #0005;
+  backdrop-filter:blur(14px);color:#f1d9c4;min-height:42px;padding:9px 12px;font-size:12px;font-weight:700}
+ .mobile-current-row #mobile-home[hidden]{display:none}
+ .mobile-current-row #mobile-region{max-width:64vw;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:14px;flex:0 1 auto;letter-spacing:.05em}
+ .mobile-current-row #mobile-region-name{text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+ .mobile-current-row #mobile-frame{margin-left:auto;font-size:11px;font-weight:500;background:#211711c9}
+ .mobile-tool-dock{pointer-events:auto;position:absolute;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;
+  padding:8px 10px max(10px,env(safe-area-inset-bottom));background:#201710f5;border-top:1px solid #6c4f3c;box-shadow:0 -10px 30px #120b0980}
+ .mobile-tool-dock button{color:#d5beac;background:transparent;border:1px solid transparent;border-radius:12px;min-width:0;
+   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:50px;font-size:10px;font-weight:700;letter-spacing:.02em}
+ .mobile-tool-dock button[aria-pressed="true"]{color:#2b1a12;background:#dfb28e;border-color:#efceae}
+ .mobile-tool-dock button:disabled{opacity:.35}
+ .mobile-tool-icon{font:20px/1 Georgia,serif;height:22px}
+ .mobile-panel{pointer-events:auto;position:absolute;bottom:calc(75px + env(safe-area-inset-bottom));left:10px;right:10px;
+  width:auto;max-height:min(40dvh,310px);overflow:auto;overscroll-behavior:contain;padding:12px 14px;
+  border:1px solid #947054;border-radius:16px;background:#241913f5;box-shadow:0 10px 32px #080503a6;
+  backdrop-filter:blur(17px)}
+ .mobile-panel[hidden],.mobile-panel [hidden]{display:none!important}
+ .mobile-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;
+  color:#cda88d;font-size:10px;font-weight:800;letter-spacing:.11em}
+ .mobile-panel-heading button{min-height:35px;padding:5px 12px;border:1px solid #845e45;border-radius:9px;background:#473025;color:#f0d3b8;font-size:11px;letter-spacing:normal}
+ .mobile-choice-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+ .mobile-choice-row button{border:1px solid #74533e;background:#38281e;color:#e0c5ae;border-radius:10px;min-height:43px;font-size:11px;font-weight:700;padding:5px 3px}
+ .mobile-choice-row button[aria-pressed=true]{background:#dcae8b;color:#27170f;border-color:#eec9ab}
+ .mobile-range-row{display:flex;align-items:center;gap:8px;margin-top:11px;font-size:11px;color:#e6cdb8}
+ .mobile-range-row span{min-width:38px}
+ .mobile-range-row output{font:12px Georgia,serif;min-width:75px;text-align:right}
+ .mobile-range-row input{flex:1;min-width:0;height:36px;accent-color:#dfb28e;touch-action:pan-x}
+ .mobile-range-stack{display:grid;grid-template-columns:minmax(0,1fr) 42px;gap:3px 12px;margin:5px 0 10px;align-items:center;font-size:12px;font-weight:700}
+ .mobile-range-stack output{text-align:right;font:17px Georgia,serif;color:#f3d2ae}
+ .mobile-range-stack input{grid-column:1 / -1;width:100%;height:40px;accent-color:#e8b38d;touch-action:pan-x}
+ .mobile-qualifier{margin:2px 0 0;color:#bfa58e;font-size:9px;line-height:1.3}
+ #mobile-inspect-name{display:block;color:#f5dfca;font:400 20px/1.22 Georgia,serif}
+ #mobile-inspect-description{font-size:11px;line-height:1.55;color:#d7b9a4;max-height:105px;overflow:auto;margin:8px 0 2px}
+ .mobile-region-sheet:not([hidden]){display:block;position:fixed;inset:0;z-index:25}
+ .mobile-region-backdrop{position:absolute;inset:0;background:#0b0706bd;backdrop-filter:blur(5px)}
+ .mobile-region-card{position:absolute;left:0;right:0;bottom:0;max-height:min(76dvh,700px);overflow:auto;overscroll-behavior:contain;
+  padding:13px 16px max(20px,env(safe-area-inset-bottom));background:#241913;border-radius:22px 22px 0 0;border-top:1px solid #947257;
+  box-shadow:0 -18px 60px #0009}
+ .mobile-sheet-grab{width:37px;height:4px;border-radius:6px;background:#a48a72;margin:0 auto 14px}
+ .mobile-region-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:16px}
+ .mobile-region-header span{color:#b8967c;font-size:9px;font-weight:750;letter-spacing:.16em}
+ .mobile-region-header h2{font:400 27px/1.1 Georgia,serif;margin:5px 0 0;letter-spacing:-.02em}
+ .mobile-region-header button{border:1px solid #775540;background:#483024;border-radius:50%;width:42px;height:42px;font-size:23px}
+ .mobile-region-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .mobile-region-options button{display:flex;flex-direction:column;align-items:start;text-align:left;justify-content:center;min-height:70px;
+  padding:12px;border:1px solid #6c4e3b;border-radius:12px;background:#35251b}
+ .mobile-region-options button[aria-pressed="true"]{border-color:#e4b48e;background:#583a28}
+ .mobile-region-options strong{font:400 17px Georgia,serif;color:#f3ddca}
+ .mobile-region-options small{font-size:10px;color:#bea38f;margin-top:3px}
+ .mobile-region-note{font-size:10px;color:#ad917c;line-height:1.5;margin:15px 2px 0}
+ .mobile-workbench button:focus-visible,.mobile-region-sheet button:focus-visible{outline:2px solid #f6d5ad;outline-offset:2px}
+}
+@media(max-width:850px) and (max-height:620px){
+ .mobile-current-row{top:5px}
+ .mobile-tool-dock{padding-top:3px;padding-bottom:max(5px,env(safe-area-inset-bottom))}
+ .mobile-panel{max-height:35dvh}
+ .mobile-region-card{max-height:88dvh}
+}
