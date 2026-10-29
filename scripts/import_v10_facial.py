@@ -28,7 +28,7 @@ def download(file,blob):
  req=urllib.request.Request(BASE+file,headers={"User-Agent":"BODY-LIVE-registered-open-anatomy/1.0"})
  with urllib.request.urlopen(req,timeout=95) as resp:
   data=resp.read(20000000)
- if gitsha(data)!=blob:raise RuntimeError("Pinned OMFAtlas Git blob SHA mismatch: "+file)
+ if gitsha(data)!=blob:raise RuntimeError("Pinned OMFAtlas Git blob SHA mismatch: "+file+" expected="+blob+" observed="+gitsha(data)+" bytes="+str(len(data))+" prefix="+repr(data[:32]))
  return data
 def bounds(verts):
  return [[min(v[i] for v in verts),max(v[i] for v in verts)] for i in range(3)]
