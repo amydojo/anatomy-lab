@@ -27,7 +27,10 @@ for(const [region,scenario] of Object.entries(movements)){
   if((await page.viewportSize()).width<=850){
    await page.locator('[data-mobile-tool="move"]').click();
    await expect(page.locator('#mobile-motion-slider')).toBeVisible();
-  }else await expect(page.locator('#joint-motion')).toBeVisible();
+  }else{
+   await page.locator('[data-studio-tool="move"]').click();
+   await expect(page.locator('#studio-motion')).toBeVisible();
+  }
   await expect(page.locator('#joint-motion-slider')).toBeEnabled();
   const neutral=await page.locator('#atlas-canvas').screenshot();
   await page.locator('#joint-motion-slider').evaluate((el,v)=>{
@@ -39,7 +42,7 @@ for(const [region,scenario] of Object.entries(movements)){
   expect(moved.equals(neutral)).toBe(false);
   if(Number.isFinite(scenario.secondary)){
    if((await page.viewportSize()).width<=850)await expect(page.locator('#mobile-secondary-row')).toBeVisible();
-   else await expect(page.locator('#joint-secondary-control')).toBeVisible();
+   else await expect(page.locator('#studio-secondary-wrap')).toBeVisible();
    await page.locator('#joint-secondary-slider').evaluate((el,v)=>{
     el.value=String(v);el.dispatchEvent(new Event('input',{bubbles:true}));
    },scenario.secondary);
