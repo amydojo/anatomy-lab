@@ -32,5 +32,28 @@ const verify=(asset,proof,base,v8)=>{
  }
  return true;
 };
-window.BodyV9Source=Object.freeze({verify});
+function mount(asset){
+ for(const wrapper of document.querySelectorAll('[data-source-links]')){
+  wrapper.hidden=false;
+  const button=wrapper.querySelector('[data-source-links-toggle]');
+  const panel=wrapper.querySelector('[data-source-links-list]');
+  panel.replaceChildren();
+  const format=x=>String(x).replaceAll('-',' ');
+  for(const record of asset.relationships||[]){
+   const article=document.createElement('article');
+   const heading=document.createElement('strong');
+   heading.textContent=format(record.structure);
+   const note=document.createElement('p');
+   note.textContent='Source-associated: '+record.related.map(format).join(', ')+
+    '. Reference geometry only; attachments and mechanics unvalidated.';
+   article.append(heading,note);panel.append(article);
+  }
+  button.onclick=()=>{
+   const opening=panel.hidden;
+   panel.hidden=!opening;
+   button.setAttribute('aria-expanded',String(opening));
+  };
+ }
+}
+window.BodyV9Source=Object.freeze({verify,mount});
 })();
