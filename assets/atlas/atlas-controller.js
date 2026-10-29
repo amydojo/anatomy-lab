@@ -594,6 +594,19 @@ function setup(){
    .then(([asset,manifest])=>{
     loader.verifyOverview(asset,manifest,source);
     model.loadOverview(asset);overviewProof=manifest;overviewLoaded=true;
+    Promise.all([loader.load('expansionV9'),loader.load('expansionV9Proof')])
+     .then(([addition,record])=>{
+      window.BodyV9Source.verify(addition,record,source,asset);
+      model.loadExpansion(addition);expansionLoaded=true;
+      const info=model.stats();
+      $('overview-coverage').textContent=(info.partCount+info.overviewBones+info.expansionBones)+
+       ' BONE MESHES · '+(info.overviewMuscles+info.expansionMuscles)+' MUSCLE MESHES';
+      $('stage-caveat').textContent='199/206 conventional bones · 7 unavailable in source · connective meshes unvalidated';
+      render();
+     })
+     .catch(err=>{
+      $('context-note').textContent='Optional V9 source expansion unavailable: '+err.message;
+     });
     const counts=model.stats();
     $('overview-coverage').textContent=(counts.partCount+counts.overviewBones)+' BONES · '+counts.overviewMuscles+' MUSCLES';
     if(state.data.view==='overview'&&!U.isActive())
