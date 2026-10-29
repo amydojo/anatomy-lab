@@ -33,31 +33,37 @@ test('V8 overview renders 137 canonical bones and 149 muscles with three working
  await expect(page.locator('[data-overview-system="combined"]')).toHaveAttribute('aria-pressed','true');
  expect(errors).toEqual([]);
 });
-test('V8 persistent mobile anatomy modes and ten places do not cover or resize specimen',async({page})=>{
+test('V8 source coverage and ten destinations remain accessible in compact mobile tools',async({page})=>{
  await page.setViewportSize({width:390,height:780});
  const errors=await ready(page);
- await expect(page.locator('.region-dock-grid [data-region]')).toHaveCount(10);
- await expect(page.locator('#overview-system-switch')).toBeVisible();
- const layout=await page.evaluate(()=>{
-  const nav=document.querySelector('#overview-system-switch').getBoundingClientRect();
-  const stage=document.querySelector('#atlas-stage').getBoundingClientRect();
-  return {bottom:nav.bottom,top:stage.top,canvasWidth:document.querySelector('#atlas-canvas').clientWidth,
-    width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth,
-    canvasCount:document.querySelectorAll('#atlas-canvas').length};
- });
- expect(layout.bottom).toBeLessThanOrEqual(layout.top+2);
- expect(layout.scroll).toBeLessThanOrEqual(layout.width+2);
- expect(layout.canvasCount).toBe(1);
- await page.locator('[data-overview-system="muscles"]').click();
- await page.locator('.region-dock-grid [data-region="wrist"]').click();
+ await expect(page.locator('.region-dock')).toBeHidden();
+ await expect(page.locator('#overview-system-switch')).toBeHidden();
+ await page.locator('[data-mobile-tool="layers"]').click();
+ await page.locator('[data-mobile-tissue="muscles"]').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.overviewSystem)).toBe('muscles');
+ await page.locator('#mobile-region').click();
+ await expect(page.locator('[data-mobile-region]')).toHaveCount(10);
+ const before=await page.evaluate(()=>({
+  width:document.querySelector('#atlas-canvas').clientWidth,
+  canvasCount:document.querySelectorAll('#atlas-canvas').length,
+  overflow:document.documentElement.scrollWidth,
+  screen:document.documentElement.clientWidth
+ }));
+ await page.locator('[data-mobile-region="wrist"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:25000}).toBe('wrist');
- await expect(page.locator('#atlas-canvas')).toBeVisible();
- await page.locator('#back-body').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:25000}).toBe('detail');
+ await page.locator('#mobile-home').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:15000}).toBe('overview');
- const after=await page.evaluate(()=>({width:document.querySelector('#atlas-canvas').clientWidth,
-  mode:window.__BODY_ATLAS__.getState().renderer.overviewSystem}));
- expect(after.width).toBe(layout.canvasWidth);
- expect(after.mode).toBe('muscles');
+ const after=await page.evaluate(()=>({
+  width:document.querySelector('#atlas-canvas').clientWidth,
+  canvasCount:document.querySelectorAll('#atlas-canvas').length,
+  system:window.__BODY_ATLAS__.getState().renderer.overviewSystem
+ }));
+ expect(before.width).toBe(after.width);
+ expect(before.canvasCount).toBe(1);
+ expect(after.canvasCount).toBe(1);
+ expect(before.overflow).toBeLessThanOrEqual(before.screen+2);
+ expect(after.system).toBe('muscles');
  expect(errors).toEqual([]);
 });
 test('V8 fails closed on corrupted overview tissue while preserving original skeletal navigation',async({page})=>{
