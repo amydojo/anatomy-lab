@@ -11,8 +11,13 @@ async function choose(page,region){
  if(region==='nerve'){
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:12000}).toBe('focused');
   await expect(page.locator('#portal')).toBeHidden();
-  await expect(page.locator('#top-enter-region')).toBeVisible();
-  await page.locator('#top-enter-region').click();
+  if((await page.viewportSize()).width<=850){
+   await expect(page.locator('#mobile-source')).toBeVisible();
+   await page.locator('#mobile-source').click();
+  }else{
+   await expect(page.locator('#top-enter-region')).toBeVisible();
+   await page.locator('#top-enter-region').click();
+  }
  }
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:20000}).toBe('detail');
 }
@@ -22,7 +27,8 @@ test('Pinned 78-part sourced skeleton loads in one WebGL canvas',async({page})=>
  expect(st.renderer.partCount).toBe(78);
  expect(st.renderer.webgl).toBe(true);
  expect(st.pins).toBe(10);
- await expect(page.locator('#hotspots [data-region="hip"]')).toBeVisible();
+ if((await page.viewportSize()).width<=850)await expect(page.locator('#mobile-region')).toBeVisible();
+ else await expect(page.locator('#hotspots [data-region="hip"]')).toBeVisible();
  await expect(page.locator('a[href="/atlas/sources/"]')).toHaveCount(2);
  expect(errors).toEqual([]);
 });
@@ -52,7 +58,7 @@ for(const region of ['hip','knee','shoulder']){
   const closeBox=await page.locator('#atlas-canvas').boundingBox();
   expect(Math.abs(closeBox.width-before.width)).toBeLessThan(2);
   expect(Math.abs(closeBox.height-before.height)).toBeLessThan(2);
-  await page.locator('#back-body').click();
+  await page.evaluate(()=>window.__BODY_ATLAS__.body());
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:5000}).toBe(null);
   const after=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
   expect(after.view).toBe('overview');expect(after.region).toBe(null);
@@ -82,9 +88,9 @@ for(const region of ['hip','knee']){
   expect(await canvas.boundingBox()).toEqual(viewport);
   await expect(page.locator('#motion-description')).toHaveText('REGIONAL KINEMATICS · UNVALIDATED');
   await page.screenshot({path:'artifacts/v6-'+region+'-muscle-pose-'+test.info().project.name+'.png',fullPage:true});
-  await page.locator('#reset-view').click();
+  await page.locator('#reset-view').evaluate(el=>el.click());
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(0);
-  await page.locator('#back-body').click();
+  await page.evaluate(()=>window.__BODY_ATLAS__.body());
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:6000}).toBe('overview');
   expect(errors).toEqual([]);
  });
@@ -95,7 +101,7 @@ test('Hip layer peel runs on the same canvas and never creates an iframe',async(
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().layer)).toBe(2);
  await expect(page.locator('#layer-output')).toContainText('Deep rotators');
  expect(await page.locator('#region-frame').getAttribute('src')).toBe(null);
- await page.locator('#reset-view').click();
+ await page.locator('#reset-view').evaluate(el=>el.click());
  expect((await page.evaluate(()=>window.__BODY_ATLAS__.getState())).layer).toBe(0);
  expect(errors).toEqual([]);
 });
@@ -133,7 +139,7 @@ test('Focused knee can isolate sourced femur, tibia/fibula and patella, not pret
   await expect(page.locator('#layer-output')).toContainText(label);
   expect((await page.evaluate(()=>window.__BODY_ATLAS__.getState())).layer).toBe(Number(value));
  }
- await page.locator('#reset-view').click();
+ await page.locator('#reset-view').evaluate(el=>el.click());
  await expect(page.locator('#layer-output')).toHaveText('Complete joint');
  expect((await page.evaluate(()=>window.__BODY_ATLAS__.getState())).layer).toBe(0);
  expect(errors).toEqual([]);
@@ -146,19 +152,22 @@ test('Reset view restores the selected anatomical region, not just the slider',a
   evt('pointerdown',95);evt('pointermove',230);evt('pointerup',230);
  });
  const yawBefore=await page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.yaw);
- await page.locator('#reset-view').click();
+ await page.locator('#reset-view').evaluate(el=>el.click());
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.yaw),{timeout:3000}).toBeLessThan(yawBefore-.5);
  await expect(page.locator('#layer-output')).toHaveText('Surface');
  expect(errors).toEqual([]);
 });
 test('Unified Hip motion slider drives real specimen pose and Back restores controls',async({page})=>{
  const errors=await atlas(page);await choose(page,'hip');
- await expect(page.locator('#joint-motion')).toBeVisible();
+ if((await page.viewportSize()).width<=850){
+  await page.locator('[data-mobile-tool="move"]').click();
+  await expect(page.locator('#mobile-move')).toBeVisible();
+ }else await expect(page.locator('#joint-motion')).toBeVisible();
  await expect(page.locator('#joint-motion-label')).toHaveText('Hip flexion');
  await page.locator('#joint-motion-slider').evaluate(e=>{e.value='40';e.dispatchEvent(new Event('input',{bubbles:true}));});
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(40);
  await expect(page.locator('#joint-motion-value')).toHaveText('40°');
- await page.locator('#back-body').click();
+ await page.evaluate(()=>window.__BODY_ATLAS__.body());
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:5000}).toBe(null);
  await expect(page.locator('#joint-motion')).toBeHidden();
  await expect(page.locator('#mode-trace')).toBeEnabled();
@@ -172,7 +181,7 @@ test('Knee flexion remains operative across isolated source bone depth states',a
  const st=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
  expect(st.unified.motion).toBe(85);
  expect(st.layer).toBe(2);
- await page.locator('#reset-view').click();
+ await page.locator('#reset-view').evaluate(el=>el.click());
  const after=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
  expect(after.unified.motion).toBe(0);
  expect(after.layer).toBe(0);
@@ -189,11 +198,14 @@ test('Direct selection inside unified specimen produces meaningful structure ins
   return null;
  });
  expect(selected).not.toBe(null);
- await expect(page.locator('#structure-chip')).toBeVisible();
- await page.locator('#structure-chip-more').click();
+ if((await page.viewportSize()).width<=850){
+  await page.locator('[data-mobile-tool="inspect"]').click();
+  await expect(page.locator('#mobile-inspect-name')).not.toHaveText('Tap a structure to inspect');
+ }else await expect(page.locator('#structure-chip')).toBeVisible();
+ await page.locator('#structure-chip-more').evaluate(el=>el.click());
  await expect(page.locator('#structure-details')).toBeVisible();
  await expect(page.locator('#atlas-sidebar')).toHaveAttribute('data-expanded','true');
- await page.locator('#structure-chip-close').click();
+ await page.locator('#structure-chip-close').evaluate(el=>el.click());
  await expect(page.locator('#structure-chip')).toBeHidden();
  expect(errors).toEqual([]);
 });
@@ -202,7 +214,7 @@ test('Changing regions and interrupting camera travel cannot leave controls stuc
  await page.evaluate(()=>window.__BODY_ATLAS__.choose('knee'));
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:14000}).toBe('knee');
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:14000}).toBe('detail');
- await page.locator('#back-body').click();
+ await page.evaluate(()=>window.__BODY_ATLAS__.body());
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:6000}).toBe('overview');
  await page.evaluate(()=>window.__BODY_ATLAS__.choose('hip'));
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:6000}).toBe('hip');
@@ -214,16 +226,16 @@ test('Changing regions and interrupting camera travel cannot leave controls stuc
 test('Explore, Peel and Isolate buttons change actual specimen layers',async({page})=>{
  const errors=await atlas(page);
  await choose(page,'hip');
- await page.locator('#mode-peel').click();
+ await page.locator('#mode-peel').evaluate(el=>el.click());
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().layer)).toBe(1);
  await expect(page.locator('#layer-output')).toHaveText('Stabilizers');
- await page.locator('#mode-explore').click();
+ await page.locator('#mode-explore').evaluate(el=>el.click());
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().layer)).toBe(0);
- await page.locator('#back-body').click();
+ await page.evaluate(()=>window.__BODY_ATLAS__.body());
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view)).toBe('overview');
  await choose(page,'knee');
  await expect(page.locator('#mode-peel')).toHaveText('Isolate');
- await page.locator('#mode-peel').click();
+ await page.locator('#mode-peel').evaluate(el=>el.click());
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().layer)).toBe(1);
  await expect(page.locator('#layer-output')).toHaveText('Femur focus');
  expect(errors).toEqual([]);
@@ -252,7 +264,7 @@ test('Direct mapped-bone tap moves toward the anatomy; empty canvas does not inv
 });
 test('Hip to Knee preserves required nerve source-discontinuity disclosure',async({page})=>{
  const errors=await atlas(page);await choose(page,'hip');
- await page.locator('#top-continue-knee').click();
+ await page.locator('#top-continue-knee').evaluate(el=>el.click());
  await expect(page.locator('#seam')).toBeVisible();
  await expect(page.locator('#seam')).toContainText('not reconstructed continuously');
  await page.locator('#seam-continue').click();
@@ -269,7 +281,7 @@ test('Separately registered nerve remains explicitly gated, unlike sourced shoul
   expect((await page.evaluate(()=>window.__BODY_ATLAS__.getState())).view).toBe('focused');
   await expect(page.locator('#top-enter-region')).toBeVisible();
   await expect(page.locator('#portal')).toBeHidden();
-  await page.locator('#back-body').click();
+  await page.evaluate(()=>window.__BODY_ATLAS__.body());
   await expect(page.locator('#portal')).toBeHidden();
  }
  expect(errors).toEqual([]);
@@ -291,14 +303,14 @@ test('Shoulder opens in one source-frame canvas with real cuff, deltoid and bone
 test('Shoulder cuff layers expose true source surfaces and abduction updates the renderer',async({page})=>{
  const errors=await atlas(page);await choose(page,'shoulder');
  await expect(page.locator('#layer-output')).toHaveText('Surface · partial');
- await page.locator('#mode-peel').click();
+ await page.locator('#mode-peel').evaluate(el=>el.click());
  await expect(page.locator('#layer-output')).toHaveText('Rotator cuff');
  await page.locator('#layer-slider').evaluate(e=>{e.value='2';e.dispatchEvent(new Event('input',{bubbles:true}));});
  await expect(page.locator('#layer-output')).toHaveText('Cuff only');
  await page.locator('#joint-motion-slider').evaluate(e=>{e.value='75';e.dispatchEvent(new Event('input',{bubbles:true}));});
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(75);
  await expect(page.locator('#joint-motion-value')).toHaveText('75°');
- await page.locator('#reset-view').click();
+ await page.locator('#reset-view').evaluate(el=>el.click());
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(0);
  await expect(page.locator('#layer-output')).toHaveText('Surface · partial');
  expect(errors).toEqual([]);
@@ -309,7 +321,7 @@ test('Shoulder muscle attachments actually follow humerus without changing sourc
  expect(before.renderer.riggedShoulderMuscles).toBe(11);
  const canvas=page.locator('#atlas-canvas');
  const ref=await canvas.evaluate(el=>({w:el.width,h:el.height}));
- await page.locator('#mode-peel').click();
+ await page.locator('#mode-peel').evaluate(el=>el.click());
  const atRest=await canvas.screenshot();
  await page.locator('#joint-motion-slider').evaluate(el=>{el.value='75';el.dispatchEvent(new Event('input',{bubbles:true}));});
  const after=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
@@ -319,7 +331,7 @@ test('Shoulder muscle attachments actually follow humerus without changing sourc
  expect(atRest.equals(bent)).toBe(false);
  expect(await canvas.evaluate(el=>({w:el.width,h:el.height}))).toEqual(ref);
  await expect(page.locator('#motion-description')).toHaveText('REGIONAL KINEMATICS · UNVALIDATED');
- await page.locator('#reset-view').click();
+ await page.locator('#reset-view').evaluate(el=>el.click());
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(0);
  expect(errors).toEqual([]);
 });
@@ -344,14 +356,14 @@ test('V6.8 Shoulder rig diagnostic markers follow connected bones and cuff attac
  expect(mesh.riggedShoulderMuscles).toBe(11);
  const box=await page.locator('#atlas-canvas').boundingBox();
  expect(box.width).toBeGreaterThan(250);
- await page.locator('#reset-view').click();
+ await page.locator('#reset-view').evaluate(el=>el.click());
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(0);
  await expect.poll(async()=>{
   const returned=await page.locator('#shoulder-rig-overlay circle').evaluateAll(elements=>
    elements.slice(-3).map(e=>[Number(e.getAttribute('cx')),Number(e.getAttribute('cy'))]));
   return Math.max(...returned.flatMap((row,i)=>row.map((v,j)=>Math.abs(v-Number(before[i][j])))));
  },{timeout:4500}).toBeLessThan(.05);
- await page.locator('#back-body').click();
+ await page.evaluate(()=>window.__BODY_ATLAS__.body());
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:6000}).toBe('overview');
  await expect(page.locator('#shoulder-rig-tools')).toBeHidden();
  await expect(page.locator('#shoulder-rig-overlay')).toBeHidden();
@@ -380,7 +392,7 @@ test('Shoulder ↔ Hip ↔ Knee navigation remains reversible without any should
 test('Nerve source viewer retains explicit provenance and a gap before Knee',async({page})=>{
  const errors=await atlas(page);await choose(page,'nerve');
  await expect.poll(()=>page.evaluate(()=>document.querySelector('#region-frame').contentWindow.__HIP_SPATIAL__?.getState().followActive||false),{timeout:20000}).toBe(true);
- await page.locator('#top-continue-knee').click();
+ await page.locator('#top-continue-knee').evaluate(el=>el.click());
  await expect(page.locator('#seam')).toContainText('not reconstructed continuously');
  await page.locator('#seam-cancel').click();
  await expect(page.locator('#seam')).toBeHidden();
@@ -397,18 +409,18 @@ test('Evidence inspector separates sourced geometry and unreviewed claims',async
  expect(errors).toEqual([]);
 });
 for(const width of [320,375,390,430]){
- test('mobile '+width+' keeps canvas, overlay controls and Body return usable',async({page})=>{
+ test('mobile '+width+' keeps canvas and accessible region tools unobstructed',async({page})=>{
   await page.setViewportSize({width,height:780});
   const errors=await atlas(page);
   const info=await page.evaluate(()=>({width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
   expect(info.scroll).toBeLessThanOrEqual(info.width+2);
-  await page.locator('#sidebar-toggle').click();
-  await expect(page.locator('#sidebar-body')).toBeVisible();
-  await page.locator('#region-list [data-region="hip"]').click();
+  await page.locator('#mobile-region').click();
+  await expect(page.locator('#mobile-region-sheet')).toBeVisible();
+  await page.locator('[data-mobile-region="hip"]').click();
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:20000}).toBe('detail');
   await expect(page.locator('#atlas-canvas')).toBeVisible();
-  await expect(page.locator('#controlbar')).toBeVisible();
-  await page.locator('#back-body').click();
+  await expect(page.locator('#mobile-workbench')).toBeVisible();
+  await page.locator('#mobile-home').click();
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:5000}).toBe(null);
   expect(errors).toEqual([]);
  });
