@@ -299,7 +299,7 @@ function create(canvas,onContextLost=()=>{}){
     continue;
    }
    if(opacity<.015)continue;
-   if(!region&&overviewSystem==='muscles')opacity*=.13;
+   if(!region&&(overviewSystem==='muscles'||overviewSystem==='connective'))opacity*=.08;
    gl.depthMask(opacity>.98);
    draw(item,1,opacity);
   }
@@ -308,17 +308,28 @@ function create(canvas,onContextLost=()=>{}){
   // The 34 new bones/73 muscles crossfade rather than abruptly unmount.
   if(overviewData){
    const ctxOpacity=from?0:region?1-r:1;
-   const boneOpacity=overviewSystem==='muscles'?.13:1;
+   const boneOpacity=(overviewSystem==='muscles'||overviewSystem==='connective')?.08:1;
    for(const part of overviewBones){
     const a=ctxOpacity*boneOpacity;if(a<.015)continue;
     gl.depthMask(a>.98);draw(part,1,a);
    }
    gl.depthMask(false);
-   const muscleOpacity=overviewSystem==='bones'?0:overviewSystem==='combined'?.42:.88;
+   const muscleOpacity=(overviewSystem==='bones'||overviewSystem==='connective')?0:overviewSystem==='combined'?.42:.88;
    for(const part of overviewMuscles){
     const a=ctxOpacity*muscleOpacity;
     if(a>.015)draw(part,1,a);
    }
+   gl.depthMask(true);
+  }
+  if(expansionData){
+   const ctx=from?0:region?1-r:1;
+   const boneAlpha=(overviewSystem==='muscles'||overviewSystem==='connective')?.08:1;
+   for(const m of expansionBones){const a=ctx*boneAlpha;if(a>.02){gl.depthMask(a>.98);draw(m,1,a);}}
+   gl.depthMask(false);
+   const muscleAlpha=overviewSystem==='muscles'?.82:overviewSystem==='combined'?.30:0;
+   for(const m of expansionMuscles){const a=ctx*muscleAlpha;if(a>.02)draw(m,1,a);}
+   const connectiveAlpha=overviewSystem==='connective'?.93:0;
+   for(const m of expansionConnective){const a=ctx*connectiveAlpha;if(a>.02)draw(m,1,a);}
    gl.depthMask(true);
   }
   // Mobile-only direct transfer: the departing source lab fades as the new
