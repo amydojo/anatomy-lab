@@ -778,3 +778,38 @@ test('V9 199 conventional bones, sourced muscles and connective surfaces remain 
  assert.match(read('atlas/index.html'),/data-studio-tissue="connective"/);
  assert.match(read('atlas/index.html'),/data-mobile-tissue="connective"/);
 });
+
+test('V9 canonical digital bones and external-review release gates are explicit',()=>{
+ const v9=JSON.parse(read('atlas/assets/v9-source-expansion.json'));
+ const status=JSON.parse(read('docs/v9-review-status.json'));
+ const all=Object.values(v9.bones).map(p=>p.name.toLowerCase());
+ const finger=all.filter(n=>n.includes('phalanx of')&&(n.includes('finger')||n.includes('thumb')));
+ const toe=all.filter(n=>n.includes('phalanx of')&&n.includes('toe'));
+ assert.equal(finger.length,28);
+ assert.equal(toe.length,28);
+ for(const side of ['left','right']){
+   assert.equal(finger.filter(n=>n.includes(side)).length,14,side+' hand has 14 bones');
+   assert.equal(toe.filter(n=>n.includes(side)).length,14,side+' foot has 14 bones');
+   for(const digit of ['thumb','big toe']){
+     const group=(digit==='thumb'?finger:toe).filter(n=>n.includes(side)&&n.includes(digit));
+     assert.equal(group.length,2,side+' '+digit+' has two phalanges, no fabricated middle');
+   }
+ }
+ const skull=['ethmoid','vomer','left lacrimal bone','right lacrimal bone',
+ 'left palatine bone','right palatine bone','left inferior nasal concha','right inferior nasal concha'];
+ for(const name of skull)assert.equal(all.filter(n=>n===name).length,1,'source skull bone '+name);
+ assert.equal(status.release_approved,false);
+ assert.equal(status.expert_validated,false);
+ assert.equal(status.clinical_use_approved,false);
+ for(const candidate of Object.values(status.candidate_meshes)){
+   assert.equal(candidate.integrated,false,'external source must not be represented as imported');
+   assert.equal(candidate.frame_registered,false,'coordinate compatibility must not be assumed');
+ }
+ for(const [scope,g] of Object.entries(status.approvals)){
+   if(g.status.startsWith('approved')){
+     assert.ok(g.reviewer?.name&&g.reviewer?.credential&&g.reviewer?.affiliation,scope+' requires independent named reviewer');
+     assert.ok(g.signed_at&&g.evidence?.length,scope+' requires dated evidence');
+   }
+ }
+ assert.equal(status.approvals.whole_application_regression.status,'failed');
+});
