@@ -23,7 +23,7 @@
    const view={x,y:y2,z:z2};
    const perspective=7.4/(7.4-z2);
    const scale=Math.min(camera.width/3.25,camera.height/(camera.frameSpan||6.65))*camera.zoom;
-   return {x:camera.width*.50+x*scale*perspective,
+   return {x:camera.width*(Number.isFinite(camera.anchorX)?camera.anchorX:.50)+x*scale*perspective,
      y:camera.height*(Number.isFinite(camera.anchorY)?camera.anchorY:.50)-(y2-.04)*scale*perspective,z:z2,world:view};
  }
  function attachOrbit(canvas,{state,render,pick,onInteract=()=>{},onDoubleTap=()=>{},minZoom=.7,maxZoom=2.5}){
