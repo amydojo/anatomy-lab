@@ -1,6 +1,6 @@
 /* V6 abortable lazy geometry/provenance loader. Fixed, audited same-origin paths. */
 (function(){'use strict';
-const FIXED={overviewV8:'/atlas/assets/v8-overview-detail.json',overviewV8Proof:'/atlas/assets/v8-overview-provenance.json',atlas:'/atlas/assets/body-skeleton.json',provenance:'/atlas/assets/provenance.json',hip:'/hip/spatial/assets/provenance.json',nerve:'/hip/spatial/assets/sciatic-provenance.json',hipGeometry:'/hip/spatial/assets/hip-source.json',kneeGeometry:'/knee/spatial/assets/bp3d-right-knee-4.0.json',shoulderGeometry:'/shoulder/spatial/assets/shoulder-source.json',shoulderProof:'/shoulder/spatial/assets/provenance.json',extendedProof:'/atlas/regions/provenance.json',skullRegion:'/atlas/regions/skull.json',neckRegion:'/atlas/regions/neck.json',thoraxRegion:'/atlas/regions/thorax.json',elbowRegion:'/atlas/regions/elbow.json',wristRegion:'/atlas/regions/wrist.json',ankleRegion:'/atlas/regions/ankle.json',kneeMuscles:'/knee/spatial/assets/knee-muscles-source.json',kneeMuscleProof:'/knee/spatial/assets/knee-muscles-provenance.json'};
+const FIXED={expansionV9:'/atlas/assets/v9-source-expansion.json',expansionV9Proof:'/atlas/assets/v9-source-provenance.json',overviewV8:'/atlas/assets/v8-overview-detail.json',overviewV8Proof:'/atlas/assets/v8-overview-provenance.json',atlas:'/atlas/assets/body-skeleton.json',provenance:'/atlas/assets/provenance.json',hip:'/hip/spatial/assets/provenance.json',nerve:'/hip/spatial/assets/sciatic-provenance.json',hipGeometry:'/hip/spatial/assets/hip-source.json',kneeGeometry:'/knee/spatial/assets/bp3d-right-knee-4.0.json',shoulderGeometry:'/shoulder/spatial/assets/shoulder-source.json',shoulderProof:'/shoulder/spatial/assets/provenance.json',extendedProof:'/atlas/regions/provenance.json',skullRegion:'/atlas/regions/skull.json',neckRegion:'/atlas/regions/neck.json',thoraxRegion:'/atlas/regions/thorax.json',elbowRegion:'/atlas/regions/elbow.json',wristRegion:'/atlas/regions/wrist.json',ankleRegion:'/atlas/regions/ankle.json',kneeMuscles:'/knee/spatial/assets/knee-muscles-source.json',kneeMuscleProof:'/knee/spatial/assets/knee-muscles-provenance.json'};
 const cache=new Map(),pending=new Map(),hashes=new Map();
 async function sha256(text){
  if(!globalThis.crypto?.subtle||typeof TextEncoder==='undefined')throw Error('Secure browser digest unavailable; refusing unverified geometry');
@@ -26,7 +26,7 @@ async function load(key,{refresh=false}={}){
   if(!response.ok)throw Error('Asset '+key+': HTTP '+response.status);
   const body=await response.text();
   const json=JSON.parse(body);
-  if(key==='atlas'||key==='overviewV8'||key==='shoulderGeometry'||key==='kneeMuscles'||key.endsWith('Region'))hashes.set(key,await sha256(body));
+  if(key==='atlas'||key==='expansionV9'||key==='overviewV8'||key==='shoulderGeometry'||key==='kneeMuscles'||key.endsWith('Region'))hashes.set(key,await sha256(body));
   if(key==='atlas'){
    if(json.schema!=='body-live/atlas-skeleton-v1'||json.license!=='CC BY 4.0'||json.parts?.length<60)throw Error('Invalid Atlas source');
    for(const part of json.parts){
