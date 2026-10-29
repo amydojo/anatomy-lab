@@ -603,3 +603,52 @@ test('V8 canonical specimen keeps every source bone once and exposes licensed mu
  assert.ok(read('assets/atlas/atlas-loader.js').includes('verifyOverview'));
  assert.ok(read('assets/atlas/atlas-renderer.js').includes('loadOverview(asset)'));
 });
+
+test('V8.2 source-registered regional teaching motion has bounded neutral and independent axes',async()=>{
+ const {runInNewContext}=await import('node:vm');
+ const win={};const shared={window:win,Float32Array,Math};
+ runInNewContext(read('assets/atlas/atlas-extended-regions.js'),shared);
+ runInNewContext(read('assets/atlas/atlas-region-motion.js'),shared);
+ const M=win.BodyRegionMotion;
+ const expected={skull:['mandible'],neck:['atlas','axis'],thorax:['left-first-rib','right-first-rib'],
+  elbow:['right-radius','right-ulna'],wrist:['right-lunate'],ankle:['right-calcaneus','right-talus']};
+ assert.equal(M.profile('nerve'),null,'never invent an animated continuous sciatic nerve');
+ for(const [region,moving]of Object.entries(expected)){
+  const asset=JSON.parse(read('atlas/regions/'+region+'.json'));
+  const conf=M.profile(region);assert.ok(conf&&conf.max>0,region);
+  const neutral=M.poseExtended(region,asset,0,0);
+  const rest=M.poseExtended(region,asset,conf.max,conf.other?conf.maxSecondary:0);
+  for(const [id,matrix]of Object.entries(neutral.matrices)){
+   const identity=M.identity();
+   assert.ok([...matrix].every((x,i)=>Math.abs(x-identity[i])<1e-5),region+' neutral drift '+id);
+  }
+  for(const id of moving){
+   assert.ok(rest.matrices[id],region+' missing '+id);
+   assert.ok([...rest.matrices[id]].some((v,i)=>Math.abs(v-neutral.matrices[id][i])>1e-4),region+' motion did not affect '+id);
+  }
+  const zero=M.poseExtended(region,asset,NaN,NaN);
+  assert.ok(Object.values(zero.matrices).every(mat=>[...mat].every(Number.isFinite)),region+' NaN');
+  if(conf.other){
+   const before=M.poseExtended(region,asset,0,0);
+   const secondary=M.poseExtended(region,asset,0,conf.maxSecondary);
+   assert.ok(Object.keys(asset.parts).some(id=>[...secondary.matrices[id]].some((v,i)=>Math.abs(v-before.matrices[id][i])>1e-5)),region+' secondary inert');
+  }
+  assert.equal(rest.validated,false,region+' clinical signoff not supported');
+ }
+ for(const region of ['hip','knee','shoulder']){
+  const spec=M.profile(region);assert.ok(spec?.other);
+  const identity=M.identity();
+  const pose=region==='hip'?{matrices:{femur:identity}}:region==='knee'?
+   {matrices:{tibia:identity,fibula:identity,patella:identity}}:
+   {matrices:{humerus:identity},rest:{glenohumeral:[0,0,0]}};
+  const next=M.poseLegacy(region,pose,spec.maxSecondary);
+  const k=region==='hip'?'femur':region==='knee'?'tibia':'humerus';
+  assert.ok([...next.matrices[k]].some((v,i)=>Math.abs(v-identity[i])>1e-5),region+' secondary axis');
+  assert.equal(next.validated,false);
+ }
+ assert.doesNotThrow(()=>new Function(read('assets/atlas/atlas-region-motion.js')));
+ const html=read('atlas/index.html');
+ assert.ok(html.includes('atlas-region-motion.js'));
+ assert.ok(html.includes('id="joint-secondary-control"'));
+ assert.ok(html.includes('id="joint-rest"'));
+});
