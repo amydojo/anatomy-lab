@@ -598,6 +598,7 @@ function setup(){
      .then(([addition,record])=>{
       window.BodyV9Source.verify(addition,record,source,asset);
       model.loadExpansion(addition);expansionLoaded=true;
+      window.BodyV9Source.mount(addition);
       const info=model.stats();
       $('overview-coverage').textContent=(info.partCount+info.overviewBones+info.expansionBones)+
        ' BONE MESHES · '+(info.overviewMuscles+info.expansionMuscles)+' MUSCLE MESHES';
