@@ -155,6 +155,21 @@ function create(canvas,onContextLost=()=>{}){
   }catch(e){for(const p of created)gl.deleteBuffer(p.buffer);throw e;}
   for(const old of [...expansionBones,...expansionMuscles,...expansionConnective])gl.deleteBuffer(old.buffer);
   expansionBones=parts.bones;expansionMuscles=parts.muscles;expansionConnective=parts.connective;
+  const additions=new Map();
+  for(const region of ['skull','wrist','ankle']){
+   const matches=Object.entries(asset.bones).filter(([id,p])=>
+    region==='skull'?p.subgroup==='face':
+    region==='wrist'?p.subgroup==='hand'&&id.includes('right'):
+     p.subgroup==='foot'&&id.includes('right'));
+   additions.set(region,matches.map(([id,p])=>{
+    const mesh=makeBuffer(p,id,p.group,COLORS[p.group]||COLORS.upper,false);
+    if(region==='wrist')mesh.motionAnchor='right-first-metacarpal-bone';
+    if(region==='ankle')mesh.motionAnchor='right-first-metatarsal-bone';
+    return mesh;
+   }));
+  }
+  for(const m of expansionDetail.values())for(const p of m)gl.deleteBuffer(p.buffer);
+  expansionDetail=additions;
   expansionData=asset;registry.expansion(asset);
   return true;
  }
