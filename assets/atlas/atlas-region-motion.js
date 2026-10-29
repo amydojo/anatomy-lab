@@ -22,6 +22,42 @@ const centroid=(parts,id)=>{const verts=parts[id]?.vertices;if(!verts?.length)th
  const stride=Math.max(1,Math.ceil(verts.length/200));return mean(verts.filter((_,i)=>i%stride===0));};
 const upper=(parts,id)=>{const ps=parts[id]?.vertices;if(!ps?.length)throw Error('Source hinge bone missing '+id);
  const top=Math.max(...ps.map(v=>v[1]));return mean(ps.filter(v=>v[1]>top-.11));};
+const cached=new WeakMap();
+function prepared(region,asset){
+ if(cached.has(asset))return cached.get(asset);
+ const parts=asset.parts||{},data={};
+ if(region==='skull'){
+  const jaw=parts.mandible?.vertices;
+  if(!jaw)throw Error('Mandible source unavailable');
+  const samples=vs=>vs.filter((_,i)=>i%Math.max(1,Math.ceil(vs.length/250))===0);
+  const mandible=samples(jaw);
+  const nearest=(id)=>{
+   const temporal=samples(parts[id]?.vertices||[]);
+   if(!temporal.length)throw Error('Temporal contact surface missing '+id);
+   let best=Infinity,at=mandible[0];
+   for(const j of mandible)for(const p of temporal){
+    const d=(j[0]-p[0])**2+(j[1]-p[1])**2+(j[2]-p[2])**2;
+    if(d<best){best=d;at=j;}
+   }
+   return at;
+  };
+  data.jawPivot=mean([nearest('left-temporal-bone'),nearest('right-temporal-bone')]);
+ }else if(region==='neck'){
+  const ids=['seventh-cervical-vertebra','sixth-cervical-vertebra','fifth-cervical-vertebra',
+   'fourth-cervical-vertebra','third-cervical-vertebra','axis','atlas'];
+  data.segments=ids.map(id=>({id,center:centroid(parts,id)}));
+ }else if(region==='thorax'){
+  data.ribs=Object.entries(parts).filter(([id])=>/rib$/.test(id)).map(([id,p])=>{
+   const ps=p.vertices,ordered=[...ps].sort((a,b)=>Math.abs(a[0])-Math.abs(b[0]));
+   return {id,side:id.startsWith('left-')?-1:1,
+    pivot:mean(ordered.slice(0,Math.max(5,Math.floor(ps.length*.06))))};
+  });
+ }else if(region==='elbow')data.radiusPivot=upper(parts,'right-radius');
+ else if(region==='wrist')data.wristPivot=centroid(parts,'right-lunate');
+ else if(region==='ankle')data.heelPivot=centroid(parts,'right-calcaneus');
+ cached.set(asset,data);return data;
+}
+
 const BOUNDS=Object.freeze({
  hip:{label:'Hip flexion',max:65,other:'Hip abduction / adduction',minSecondary:-25,maxSecondary:30},
  knee:{label:'Knee flexion',max:105,other:'Tibial rotation',minSecondary:-10,maxSecondary:10},
@@ -42,37 +78,37 @@ function poseExtended(region,asset,primary=0,secondary=0){
  if(!X.has(region))throw Error('Unknown extended region');
  const base=X.createPose(region,asset,data.primary);
  const matrices={...base.matrices},m=data.primary,s=data.secondary;
+ const geometry=prepared(region,asset);
  if(region==='skull'){
-  // Condyles are high on the mandible; pivot is an estimated hinge line.
-  matrices.mandible=about(upper(parts,'mandible'),'x',-m);
+  // Bilateral estimated TMJ contact on the actual source temporal surfaces.
+  // No source disc/sliding is present, therefore this is hinge-only.
+  matrices.mandible=about(geometry.jawPivot,'x',-m);
  }else if(region==='neck'){
-  const pivot=centroid(parts,'seventh-cervical-vertebra');
-  const weights={atlas:1,axis:.93,'third-cervical-vertebra':.83,'fourth-cervical-vertebra':.68,
-   'fifth-cervical-vertebra':.49,'sixth-cervical-vertebra':.26,'seventh-cervical-vertebra':.06,'hyoid-bone':.66};
-  for(const [id,w]of Object.entries(weights))if(parts[id]){
-   matrices[id]=mult(about(pivot,'y',s*w),about(pivot,'x',m*w));
+  // Hierarchical intervertebral rotation: upper bones follow the cumulative
+  // transform of each lower neighbor, rather than orbiting a single C7 pivot.
+  // Discs, muscle forces, vertebral contact and actual coupling remain unknown.
+  let chain=I(),previous=geometry.segments[0];
+  matrices[previous.id]=I();
+  for(const current of geometry.segments.slice(1)){
+   const pivot=mean([previous.center,current.center]);
+   chain=mult(chain,mult(about(pivot,'y',s/6),about(pivot,'x',m/6)));
+   matrices[current.id]=chain;
+   previous=current;
   }
+  if(parts['hyoid-bone'])matrices['hyoid-bone']=matrices['third-cervical-vertebra'];
  }else if(region==='thorax'){
-  // Rib raising is a small bilateral rotation around near-spinal surface
-  // landmarks. Cartilage, diaphragm mechanics and breathing volume are NOT modeled.
-  for(const [id,p]of Object.entries(parts)){
-   if(!/rib$/.test(id))continue;
-   const side=id.startsWith('left-')?-1:1;
-   const ps=p.vertices,ordered=[...ps].sort((a,b)=>Math.abs(a[0])-Math.abs(b[0]));
-   const pivot=mean(ordered.slice(0,Math.max(5,Math.floor(ps.length*.06))));
+  // Small, symmetric rib lift. Original source surfaces and sternum remain
+  // unchanged; missing costal cartilage is not invented or stretched.
+  for(const {id,side,pivot}of geometry.ribs)
    matrices[id]=about(pivot,'z',side*m*.65);
-  }
  }else if(region==='elbow'&&s){
-  const pivot=upper(parts,'right-radius');
-  matrices['right-radius']=mult(matrices['right-radius'],about(pivot,'y',s));
+  matrices['right-radius']=mult(matrices['right-radius'],about(geometry.radiusPivot,'y',s));
  }else if(region==='wrist'&&s){
-  const pivot=centroid(parts,'right-lunate');
   for(const id of Object.keys(parts))if(X.moving(region,id))
-   matrices[id]=mult(matrices[id],about(pivot,'z',s));
+   matrices[id]=mult(matrices[id],about(geometry.wristPivot,'z',s));
  }else if(region==='ankle'&&s){
-  const pivot=centroid(parts,'right-calcaneus');
   for(const id of Object.keys(parts))if(X.moving(region,id)&&id!=='right-talus')
-   matrices[id]=mult(matrices[id],about(pivot,'z',s));
+   matrices[id]=mult(matrices[id],about(geometry.heelPivot,'z',s));
  }
  for(const [id,mat]of Object.entries(matrices))if(mat.length!==16||[...mat].some(n=>!Number.isFinite(n)))throw Error('Invalid teaching pose '+region+'/'+id);
  return {degrees:m,secondaryDegrees:s,matrices,validated:false,method:'regional-illustrative-unmeasured-kinematics'};
