@@ -867,3 +867,24 @@ test('V10 registered facial muscles have independent source license, source IDs 
   assert.doesNotThrow(()=>new Function(read(path)),path+' invalid JavaScript');
  assert.match(read('atlas/index.html'),/atlas-v10-facial\.js/);
 });
+
+test('V10 facial bone-fit sanity checks use actual base mandible vertices and verify sides',()=>{
+ const v10=JSON.parse(read('atlas/assets/v10-facial-reference.json'));
+ const base=JSON.parse(read('atlas/assets/body-skeleton.json'));
+ const jaw=base.parts.find(x=>x.name==='Mandible').vertices;
+ assert.ok(jaw.length>200,'registered source jaw control present');
+ const square=(a,b)=>(a[0]-b[0])**2+(a[1]-b[1])**2+(a[2]-b[2])**2;
+ const muscles=Object.values(v10.parts);
+ for(const p of muscles){
+  const meanX=p.vertices.reduce((s,v)=>s+v[0],0)/p.vertices.length;
+  if(/right/i.test(p.name))assert.ok(meanX<.02,p.name+' should remain on right anatomy');
+  if(/left/i.test(p.name))assert.ok(meanX>-.02,p.name+' should remain on left anatomy');
+ }
+ for(const p of muscles.filter(x=>/masseter|pterygoid/i.test(x.name))){
+  const step=Math.max(1,Math.floor(p.vertices.length/180));
+  let nearest=Infinity;
+  for(let i=0;i<p.vertices.length;i+=step)
+   for(const v of jaw)nearest=Math.min(nearest,square(p.vertices[i],v));
+  assert.ok(Math.sqrt(nearest)<.04,'mastication muscle not near source mandible: '+p.name);
+ }
+});
