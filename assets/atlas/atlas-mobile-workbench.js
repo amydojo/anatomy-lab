@@ -115,7 +115,7 @@ $('mobile-region-sheet').querySelector('[data-mobile-close]').addEventListener('
 $('mobile-region-sheet').addEventListener('keydown',e=>{
  if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closePicker();return;}
  if(e.key!=='Tab')return;
- const focusable=[...$('mobile-region-card')?.querySelectorAll('button:not([disabled])')||[]];
+ const focusable=[...document.querySelectorAll('#mobile-region-sheet .mobile-region-card button:not([disabled])')];
  if(!focusable.length)return;
  const first=focusable[0],last=focusable[focusable.length-1];
  if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
@@ -164,6 +164,6 @@ $('mobile-workbench').dataset.mode=$('atlas-app').dataset.mode;
 sync();
 window.BodyMobileWorkbench=Object.freeze({sync,setPanel,openPicker,closePicker,snapshot:()=>({
  tool:activeTool,region:lastRegion,selected:lastSelection,pickerOpen:modalOpen,
- visible:isMobile(),motionEnabled:!$('mobile-tool-dock')?.querySelector('[data-mobile-tool="move"]')?.disabled
+ visible:isMobile(),motionEnabled:!document.querySelector('[data-mobile-tool="move"]')?.disabled
 })});
 })();
