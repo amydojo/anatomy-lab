@@ -3,7 +3,7 @@
 (function(){'use strict';
 function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,centerPoint,shortestYaw,enableControls,NOTE,LABEL,navigate}){
  const $=id=>document.getElementById(id);
- let region=null,reveal=0,animation=0,token=0,returning=false,pending=false,motion=0,secondary=0,selected=null,navigation=null;
+ let region=null,reveal=0,animation=0,token=0,returning=false,pending=false,motion=0,secondary=0,selected=null,navigation=null,transitionFrom=null;
  const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
  const LAYERS={
   hip:['Surface','Stabilizers','Deep rotators','Skeleton'],
@@ -12,13 +12,14 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   ...Object.fromEntries(Object.entries(window.BodyExtendedRegions.config).map(([id,c])=>[id,c.labels]))
  };
  const layerText=()=>LAYERS[region]?.[Math.min(window.BodyExtendedRegions.has(region)?4:3,state.data.layer)]||'Surface';
- const snapshot=()=>({region,reveal,returning,pending,motion,secondary,selected:selected?.id||null});
+ const snapshot=()=>({region,reveal,returning,pending,motion,secondary,selected:selected?.id||null,transitionFrom});
  const isActive=()=>!!region||pending;
  const getRegion=()=>region;
  const getReveal=()=>reveal;
  const getMotion=()=>motion;
  const getSecondaryMotion=()=>secondary;
  const getSelected=()=>selected?.id||null;
+ const getTransitionFrom=()=>transitionFrom;
  const easing=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
  const setStatus=text=>{$('scene-status').textContent=text;};
  function travel(to,ms,progress,done){
@@ -136,7 +137,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   if(!isActive())return;
   cancelAnimationFrame(animation);animation=0;
   if(returning){
-   region=null;reveal=0;returning=false;pending=false;motion=0;secondary=0;navigation=null;
+   region=null;reveal=0;returning=false;pending=false;motion=0;secondary=0;navigation=null;transitionFrom=null;
    state.data.layer=0;$('atlas-app').dataset.mode='overview';
    $('hotspots').hidden=false;
    setStatus((model.stats().overviewBones?'SOURCE-ALIGNED BONES + MUSCLES · V8':'SOURCED SKELETON · 78 STRUCTURES'));
@@ -146,7 +147,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   if(region&&state.data.view==='focused'){
    state.enter();state.data.frameReady=true;
    reveal=1;$('atlas-app').dataset.mode='immersive';
-   enableControls(region);syncControls(region);
+   transitionFrom=null;enableControls(region);syncControls(region);
    $('joint-motion').hidden=!window.BodyRegionMotion.profile(region);$('back-body').hidden=false;
    $('hotspots').hidden=true;updateURL();render();
   }
@@ -155,6 +156,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   if(!['hip','knee','nerve','shoulder',...window.BodyExtendedRegions.ids].includes(name))return false;
   if(!isActive())return choose(name);
   if(region===name)return false;
+  if(window.innerWidth<=850&&name!=='nerve')return choose(name);
   navigation=name;
   back();
   return true;
@@ -175,8 +177,13 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  }
  async function choose(name){
   if(!['hip','knee','shoulder',...window.BodyExtendedRegions.ids].includes(name))return;
-  if(isActive()&&state.data.view==='detail')return nextRegion(name);
-  const id=++token;cancelAnimationFrame(animation);returning=false;pending=true;motion=0;secondary=0;clearSelection();
+  const direct=!!region&&state.data.view==='detail'&&window.innerWidth<=850;
+  if(isActive()&&state.data.view==='detail'&&!direct)return nextRegion(name);
+  if(direct&&region===name)return false;
+  const departing=direct?region:null;
+  const id=++token;cancelAnimationFrame(animation);returning=false;pending=true;
+  if(departing)model.touchDetail?.(departing);
+  motion=0;secondary=0;clearSelection();
   if(!state.select(name))return;
   headline(name);$('atlas-app').dataset.mode='approach';
   setStatus('LOADING LICENSED SOURCE GEOMETRY');
@@ -206,27 +213,29 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
     model.loadDetail(name,complete);
    }
    if(id!==token)return;
-   region=name;reveal=0;pending=false;
-   setStatus('TRAVELING IN ONE ANATOMICAL SCENE');
+   region=name;reveal=0;pending=false;transitionFrom=departing;
+   setStatus(direct?'TRAVELING DIRECTLY BETWEEN REGIONS':'TRAVELING IN ONE ANATOMICAL SCENE');
    const c=state.data.camera;
    const extra=window.BodyExtendedRegions.config[name];
    const to={yaw:shortestYaw(c.yaw,extra?extra.yaw:name==='hip'?Math.PI+.28:name==='shoulder'?.48:.47),
      pitch:-.11,zoom:extra?extra.zoom:name==='hip'?1.05:name==='shoulder'?1.00:1.10,
      frameSpan:extra?extra.span:name==='hip'?3.4:name==='shoulder'?3.15:3.2,target:centerPoint(name)};
-   travel(to,reduce()?0:1150,v=>{reveal=clamp((v-.46)/.54,0,1);},()=>{
+   travel(to,reduce()?0:(direct?620:900),v=>{reveal=direct?v:clamp((v-.35)/.65,0,1);},()=>{
     if(id!==token)return;
-    state.enter();state.data.frameReady=true;reveal=1;
+    state.enter();state.data.frameReady=true;reveal=1;transitionFrom=null;
     $('atlas-app').dataset.mode='immersive';
     $('stage-title').textContent=LABEL[name]+' · IN PLACE';
     setStatus('ONE SCENE · SOURCE GEOMETRY UNREVIEWED');
     enableControls(name);syncControls(name);$('back-body').hidden=false;
     $('joint-motion').hidden=!window.BodyRegionMotion.profile(name);
     $('top-continue-knee').hidden=name!=='hip';
-    updateURL();render();
+    updateURL();render();window.BodyMobileWorkbench?.sync();
    });
   }catch(error){
    if(id!==token)return;
-   pending=false;region=null;reveal=0;
+   pending=false;region=departing;reveal=departing?1:0;transitionFrom=null;
+   if(departing){state.select(departing);state.enter();$('atlas-app').dataset.mode='immersive';}
+   else{state.body();$('atlas-app').dataset.mode='overview';}
    setStatus('SOURCED DETAIL UNAVAILABLE · OVERVIEW RETAINED');
    $('context-note').textContent='The additional source geometry could not be verified: '+error.message;
    $('enter-region').disabled=false;$('enter-region').textContent='Open standalone lab ↗';
@@ -235,7 +244,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   }
  }
  function back(){
-  const id=++token;cancelAnimationFrame(animation);pending=false;
+  const id=++token;cancelAnimationFrame(animation);pending=false;transitionFrom=null;
   $('joint-motion').hidden=true;clearSelection();
   $('mode-trace').textContent='Trace';
   const c=state.data.camera;
@@ -328,7 +337,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  }
  function reset(){
   if(!region)return;
-  state.setDepth(0);motion=0;secondary=0;clearSelection();$('joint-motion-slider').value='0';$('joint-motion-value').textContent='0°';$('joint-secondary-slider').value='0';$('joint-secondary-value').textContent='0°';$('layer-slider').value='0';
+  state.setDepth(0);motion=0;secondary=0;transitionFrom=null;clearSelection();$('joint-motion-slider').value='0';$('joint-motion-value').textContent='0°';$('joint-secondary-slider').value='0';$('joint-secondary-value').textContent='0°';$('layer-slider').value='0';
   $('layer-output').textContent=LAYERS[region][0];
   state.mode('explore');
   document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-explore')));
@@ -340,7 +349,17 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   const id=++token;
   travel(home,reduce()?0:480,()=>{},()=>{if(id===token)render();});
  }
- return Object.freeze({choose,back,travelKnee,isActive,getRegion,getReveal,getMotion,getSecondaryMotion,getSelected,snapshot,depthChange,setMode,reset,neutral,setMotion,setSecondaryMotion,pickAt,clearSelection,showSelected,nextRegion,interrupt});
+ function recenter(){
+  if(!region||state.data.view!=='detail')return false;
+  const c=state.data.camera,extra=window.BodyExtendedRegions.config[region];
+  const target={yaw:shortestYaw(c.yaw,extra?extra.yaw:region==='hip'?Math.PI+.28:region==='shoulder'?.48:.47),
+   pitch:-.11,zoom:extra?extra.zoom:region==='hip'?1.05:region==='shoulder'?1:1.1,
+   frameSpan:extra?extra.span:region==='hip'?3.4:region==='shoulder'?3.15:3.2,target:centerPoint(region)};
+  travel(target,reduce()?0:300,()=>{},()=>render());
+  return true;
+ }
+ return Object.freeze({choose,back,travelKnee,isActive,getRegion,getReveal,getMotion,getSecondaryMotion,getSelected,getTransitionFrom,
+  snapshot,depthChange,setMode,reset,recenter,neutral,setMotion,setSecondaryMotion,pickAt,clearSelection,showSelected,nextRegion,interrupt});
 }
 window.BodyAtlasUnified=Object.freeze({create});
 })();

@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/><meta name="theme-color" content="#14110f"/><title>ATLAS / PORTAL — BODY / LIVE V8</title><meta name="description" content="Explore real source-pinned anatomy across skull, neck, thorax, shoulder, elbow, wrist, hip, knee and ankle in one 3D atlas."/><link rel="stylesheet" href="/atlas/atlas.css"/><script defer src="/assets/spatial-core.js"></script><script defer src="/assets/atlas/atlas-state.js"></script><script defer src="/assets/atlas/atlas-evidence.js"></script><script defer src="/assets/atlas/atlas-shoulder-rig.js"></script><script defer src="/assets/atlas/atlas-shoulder-kinematics.js"></script><script defer src="/assets/atlas/atlas-lower-limb-rig.js"></script><script defer src="/assets/atlas/atlas-extended-regions.js"></script><script defer src="/assets/atlas/atlas-region-motion.js"></script><script defer src="/assets/atlas/atlas-registry.js"></script><script defer src="/assets/atlas/atlas-renderer.js"></script><script defer src="/assets/atlas/atlas-loader.js"></script><script defer src="/assets/atlas/atlas-unified.js"></script><script defer src="/assets/atlas/atlas-shoulder-debug.js"></script><script defer src="/assets/atlas/atlas-controller.js"></script></head><body>
+<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/><meta name="theme-color" content="#14110f"/><title>ATLAS / PORTAL — BODY / LIVE V8</title><meta name="description" content="Explore real source-pinned anatomy across skull, neck, thorax, shoulder, elbow, wrist, hip, knee and ankle in one 3D atlas."/><link rel="stylesheet" href="/atlas/atlas.css"/><script defer src="/assets/spatial-core.js"></script><script defer src="/assets/atlas/atlas-state.js"></script><script defer src="/assets/atlas/atlas-evidence.js"></script><script defer src="/assets/atlas/atlas-shoulder-rig.js"></script><script defer src="/assets/atlas/atlas-shoulder-kinematics.js"></script><script defer src="/assets/atlas/atlas-lower-limb-rig.js"></script><script defer src="/assets/atlas/atlas-extended-regions.js"></script><script defer src="/assets/atlas/atlas-region-motion.js"></script><script defer src="/assets/atlas/atlas-registry.js"></script><script defer src="/assets/atlas/atlas-renderer.js"></script><script defer src="/assets/atlas/atlas-loader.js"></script><script defer src="/assets/atlas/atlas-unified.js"></script><script defer src="/assets/atlas/atlas-shoulder-debug.js"></script><script defer src="/assets/atlas/atlas-controller.js"></script><script defer src="/assets/atlas/atlas-mobile-workbench.js"></script></head><body>
 <div id="atlas-app" class="app" data-mode="overview">
 <header class="topbar"><a href="/" class="brand">BODY <span>/</span> LIVE</a><div class="masthead"><span class="overline">VOL. 08 · UNIFIED SPECIMEN</span><strong>ATLAS / PORTAL</strong></div><div class="topactions"><button id="back-body" class="text-btn" type="button" hidden>← Body</button><button id="top-enter-region" class="text-btn" type="button" hidden>Enter lab ↗</button><button id="top-continue-knee" class="text-btn" type="button" hidden>To knee →</button><button id="evidence-toggle" class="top-pill" type="button" aria-expanded="false" aria-controls="evidence-sheet"><span class="evidence-dot"></span>Evidence</button></div></header>
 <nav class="region-dock" aria-label="Explore all ten anatomical regions"><div class="region-dock-title">EXPLORE ANATOMY <span>10 REGIONS</span></div><div class="region-dock-grid"><button type="button" data-region="hip" aria-label="Explore hip anatomy" aria-pressed="false">HIP</button><button type="button" data-region="nerve" aria-label="Explore sciatic nerve anatomy" aria-pressed="false">SCIATIC</button><button type="button" data-region="knee" aria-label="Explore knee anatomy" aria-pressed="false">KNEE</button><button type="button" data-region="shoulder" aria-label="Explore shoulder anatomy" aria-pressed="false">SHOULDER</button><button type="button" data-region="thorax" aria-label="Explore ribs and thorax anatomy" aria-pressed="false">RIBS</button><button type="button" data-region="neck" aria-label="Explore neck anatomy" aria-pressed="false">NECK</button><button type="button" data-region="skull" aria-label="Explore skull anatomy" aria-pressed="false">SKULL</button><button type="button" data-region="elbow" aria-label="Explore elbow anatomy" aria-pressed="false">ELBOW</button><button type="button" data-region="wrist" aria-label="Explore wrist anatomy" aria-pressed="false">WRIST</button><button type="button" data-region="ankle" aria-label="Explore ankle anatomy" aria-pressed="false">ANKLE</button></div></nav>
@@ -29,6 +29,68 @@
   <output id="joint-secondary-value">0°</output>
  </div>
  <button id="joint-rest" class="joint-rest" type="button" aria-label="Restore neutral anatomical pose">Neutral</button></div>
+ <section id="mobile-workbench" class="mobile-workbench" aria-label="Mobile anatomy controls">
+  <div class="mobile-current-row">
+   <button id="mobile-home" type="button" aria-label="Return to full body" hidden>← Body</button>
+   <button id="mobile-region" type="button" aria-haspopup="dialog" aria-controls="mobile-region-sheet"><span id="mobile-region-name">FULL BODY</span><span aria-hidden="true">⌄</span></button>
+   <button id="mobile-source" type="button" hidden>Open nerve reference ↗</button><button id="mobile-frame" type="button" aria-label="Recenter 3D anatomy">Recenter</button>
+  </div>
+  <div id="mobile-panel" class="mobile-panel" hidden>
+   <div id="mobile-layers" hidden>
+    <div class="mobile-panel-heading"><span>VISIBLE ANATOMY</span><span id="mobile-layer-value">Combined</span></div>
+    <div id="mobile-overview-tissues" class="mobile-choice-row" role="group" aria-label="Whole body tissue selection">
+     <button type="button" data-mobile-tissue="bones" aria-pressed="false">Bones</button>
+     <button type="button" data-mobile-tissue="muscles" aria-pressed="false">Muscles</button>
+     <button type="button" data-mobile-tissue="combined" aria-pressed="true">Both</button>
+    </div>
+    <div id="mobile-region-layers" hidden>
+     <div class="mobile-choice-row" role="group" aria-label="Regional anatomy display">
+      <button type="button" data-mobile-layer-mode="explore" aria-pressed="true">All</button>
+      <button type="button" data-mobile-layer-mode="peel" aria-pressed="false">Isolate</button>
+      <button type="button" data-mobile-layer-mode="trace" aria-pressed="false">Muscles</button>
+     </div>
+     <label class="mobile-range-row" for="mobile-layer-slider"><span>Depth</span><input id="mobile-layer-slider" type="range" min="0" max="4" value="0" step="1"/><output id="mobile-layer-output">All</output></label>
+    </div>
+   </div>
+   <div id="mobile-move" hidden>
+    <div class="mobile-panel-heading"><span>TEACHING MOTION</span><button id="mobile-neutral" type="button">Neutral ↺</button></div>
+    <label class="mobile-range-stack" for="mobile-motion-slider"><span id="mobile-motion-label">Primary motion</span><output id="mobile-motion-value">0°</output><input id="mobile-motion-slider" type="range" min="0" max="90" value="0" step="1"/></label>
+    <label id="mobile-secondary-row" class="mobile-range-stack" for="mobile-secondary-slider" hidden><span id="mobile-secondary-label">Secondary motion</span><output id="mobile-secondary-value">0°</output><input id="mobile-secondary-slider" type="range" min="-20" max="20" value="0" step="1"/></label>
+    <p class="mobile-qualifier">Illustrative motion · not clinically validated</p>
+   </div>
+   <div id="mobile-inspect" hidden aria-live="polite">
+    <div class="mobile-panel-heading"><span>STRUCTURE INSPECTOR</span><button id="mobile-inspect-clear" type="button" hidden>Clear</button></div>
+    <strong id="mobile-inspect-name">Tap a structure to inspect</strong>
+    <p id="mobile-inspect-description">Pinch in to examine smaller structures, then tap a bone or muscle.</p>
+   </div>
+  </div>
+  <nav class="mobile-tool-dock" aria-label="Anatomy tools">
+   <button type="button" data-mobile-tool="explore" aria-pressed="true"><span class="mobile-tool-icon" aria-hidden="true">◎</span>Explore</button>
+   <button type="button" data-mobile-tool="layers" aria-pressed="false"><span class="mobile-tool-icon" aria-hidden="true">▤</span>Layers</button>
+   <button type="button" data-mobile-tool="move" aria-pressed="false"><span class="mobile-tool-icon" aria-hidden="true">↗</span>Move</button>
+   <button type="button" data-mobile-tool="inspect" aria-pressed="false"><span class="mobile-tool-icon" aria-hidden="true">⌖</span>Inspect</button>
+  </nav>
+ </section>
+ <div id="mobile-region-sheet" class="mobile-region-sheet" role="dialog" aria-modal="true" aria-labelledby="mobile-region-title" hidden>
+  <div class="mobile-region-backdrop" data-mobile-close></div>
+  <div class="mobile-region-card">
+   <div class="mobile-sheet-grab" aria-hidden="true"></div>
+   <header class="mobile-region-header"><div><span>ANATOMY / MAP</span><h2 id="mobile-region-title">Choose a region</h2></div><button id="mobile-region-close" type="button" aria-label="Close region picker">×</button></header>
+   <div class="mobile-region-options" role="group" aria-label="Ten anatomical destinations">
+    <button type="button" data-mobile-region="skull"><strong>Skull & Jaw</strong><small>Cranium · mandible</small></button>
+    <button type="button" data-mobile-region="neck"><strong>Neck</strong><small>Cervical spine</small></button>
+    <button type="button" data-mobile-region="thorax"><strong>Ribs</strong><small>Thorax · spine</small></button>
+    <button type="button" data-mobile-region="shoulder"><strong>Shoulder</strong><small>Scapula · cuff</small></button>
+    <button type="button" data-mobile-region="elbow"><strong>Elbow</strong><small>Forearm rotation</small></button>
+    <button type="button" data-mobile-region="wrist"><strong>Wrist & Hand</strong><small>Carpals · hand</small></button>
+    <button type="button" data-mobile-region="hip"><strong>Hip</strong><small>Pelvis · femur</small></button>
+    <button type="button" data-mobile-region="knee"><strong>Knee</strong><small>Femur · tibia</small></button>
+    <button type="button" data-mobile-region="ankle"><strong>Ankle & Foot</strong><small>Tarsals · ankle</small></button>
+    <button type="button" data-mobile-region="nerve"><strong>Sciatic Nerve</strong><small>Registered · static</small></button>
+   </div>
+   <p class="mobile-region-note">All structures use sourced references. Motion is an unvalidated teaching approximation.</p>
+  </div>
+ </div>
  <div class="stage-bottom"><span id="stage-caveat">BodyParts3D 4.0 · licensed skeletal and muscle reference · CC BY 4.0 · unreviewed</span><span class="gesture">DRAG TO ORBIT · PINCH TO ZOOM</span></div>
  <div id="portal" class="portal" hidden aria-label="Detailed anatomy laboratory"><iframe id="region-frame" title="Detailed anatomy laboratory" loading="eager"></iframe><div class="portal-mask" id="portal-mask" hidden></div></div>
  <div id="seam" class="seam" role="dialog" aria-modal="true" aria-labelledby="seam-title" hidden>

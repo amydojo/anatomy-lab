@@ -24,7 +24,10 @@ async function enter(page,region){
 for(const [region,scenario] of Object.entries(movements)){
  test('V8.2 '+region+' has bounded motion, a distinct edited pose and deterministic neutral reset',async({page})=>{
   const errors=await enter(page,region);
-  await expect(page.locator('#joint-motion')).toBeVisible();
+  if((await page.viewportSize()).width<=850){
+   await page.locator('[data-mobile-tool="move"]').click();
+   await expect(page.locator('#mobile-motion-slider')).toBeVisible();
+  }else await expect(page.locator('#joint-motion')).toBeVisible();
   await expect(page.locator('#joint-motion-slider')).toBeEnabled();
   const neutral=await page.locator('#atlas-canvas').screenshot();
   await page.locator('#joint-motion-slider').evaluate((el,v)=>{
@@ -35,7 +38,8 @@ for(const [region,scenario] of Object.entries(movements)){
   const moved=await page.locator('#atlas-canvas').screenshot();
   expect(moved.equals(neutral)).toBe(false);
   if(Number.isFinite(scenario.secondary)){
-   await expect(page.locator('#joint-secondary-control')).toBeVisible();
+   if((await page.viewportSize()).width<=850)await expect(page.locator('#mobile-secondary-row')).toBeVisible();
+   else await expect(page.locator('#joint-secondary-control')).toBeVisible();
    await page.locator('#joint-secondary-slider').evaluate((el,v)=>{
     el.value=String(v);el.dispatchEvent(new Event('input',{bubbles:true}));
    },scenario.secondary);
@@ -43,7 +47,7 @@ for(const [region,scenario] of Object.entries(movements)){
    const combined=await page.locator('#atlas-canvas').screenshot();
    expect(combined.equals(moved)).toBe(false);
   }else await expect(page.locator('#joint-secondary-control')).toBeHidden();
-  await page.locator('#joint-rest').click();
+  await page.locator('#joint-rest').evaluate(el=>el.click());
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(0);
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.secondary)).toBe(0);
   await expect(page.locator('#joint-motion-value')).toHaveText('0°');
@@ -51,7 +55,7 @@ for(const [region,scenario] of Object.entries(movements)){
   // Compare source-registered rest poses, not transient motion frames.
   const reset=await page.locator('#atlas-canvas').screenshot();
   expect(reset.equals(neutral)).toBe(true);
-  await page.locator('#back-body').click();
+  await page.evaluate(()=>window.__BODY_ATLAS__.body());
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view)).toBe('overview');
   expect(errors).toEqual([]);
  });

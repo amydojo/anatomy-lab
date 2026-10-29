@@ -39,7 +39,7 @@ function resize(){
 }
 function render(){
  if(document.hidden||(state.data.view==='detail'&&!U.isActive()))return;
- model.render(state.data.camera,U.getRegion()||state.data.region,state.data.evidenceMode,state.data.layer,U.getReveal(),U.getMotion(),U.getSelected(),U.getSecondaryMotion());
+ model.render(state.data.camera,U.getRegion()||state.data.region,state.data.evidenceMode,state.data.layer,U.getReveal(),U.getMotion(),U.getSelected(),U.getSecondaryMotion(),U.getTransitionFrom());
  window.BodyShoulderDebug?.draw(state.data.camera,
   state.data.view==='detail'&&U.getRegion()==='shoulder'?model.shoulderDiagnostics(U.getMotion()):null);
  if(state.data.view==='overview'&&!U.isActive())drawPins();
@@ -503,9 +503,14 @@ function reset(){
  if(state.data.view==='detail'){getFrameApi()?.reset?.();$('layer-slider').value=0;state.setDepth(0);$('layer-output').textContent='Surface';return;}
  animateCamera({yaw:-.2,pitch:-.07,zoom:1.03,frameSpan:10.8,target:{x:0,y:-.12,z:0}},reduce()?0:320);
 }
+function recenter(){
+ if(U.isActive()&&state.data.view==='detail')return U.recenter();
+ animateCamera({yaw:-.2,pitch:-.07,zoom:1.03,frameSpan:10.8,target:{x:0,y:-.12,z:0}},reduce()?0:280);
+ return true;
+}
 function setup(){
  const canvas=$('atlas-canvas');
- window.BodySpatialCore.attachOrbit(canvas,{state:state.data.camera,render,pick:pickAt,maxZoom:4,onInteract:()=>U.interrupt()});
+ window.BodySpatialCore.attachOrbit(canvas,{state:state.data.camera,render,pick:pickAt,maxZoom:4,onInteract:()=>U.interrupt(),onDoubleTap:recenter});
  window.addEventListener('resize',resize,{passive:true});
  if(typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe($('atlas-stage'));
  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(motionFrame);motionFrame=0;clearTimeout(frameTimeout);}else render();});
@@ -585,6 +590,6 @@ function setup(){
  }).catch(err=>fallback(err.message));
 }
 const U=window.BodyAtlasUnified.create({state,model,loader,render,updateURL,resize,setExpanded,reduce,centerPoint,shortestYaw,enableControls,NOTE,LABEL,navigate:region=>choose(region)});
-window.__BODY_ATLAS__={getState:()=>({...state.snapshot(),renderer:model.stats(),unified:U.snapshot(),assetsLoaded:loaded,overviewLoaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode};
+window.__BODY_ATLAS__={getState:()=>({...state.snapshot(),renderer:model.stats(),unified:U.snapshot(),assetsLoaded:loaded,overviewLoaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,recenter,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode};
 setup();
 })();
