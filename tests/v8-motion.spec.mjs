@@ -33,6 +33,10 @@ for(const [region,scenario] of Object.entries(movements)){
    await expect(page.locator('#studio-motion')).toBeVisible();
   }
   await expect(page.locator('#joint-motion-slider')).toBeEnabled();
+  // Canvas locator screenshots include overlaid UI pixels. Hide studio chrome
+  // for this GPU-only pose equality check; UI is verified separately in V8.4.
+  if((await page.viewportSize()).width>850)
+   await page.locator('#desktop-studio').evaluate(el=>{el.style.visibility='hidden';});
   // Read an explicitly rendered zero-pose frame on the same WebGL context.
   // A screenshot from the first compositing frame is not a stable baseline.
   await page.locator('#joint-motion-slider').evaluate(el=>{
