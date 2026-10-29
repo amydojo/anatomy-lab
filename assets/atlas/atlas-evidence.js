@@ -36,10 +36,11 @@ function records(region,manifest,hip,nerve,shoulder,kneeMuscles,expanded,overvie
    'Whole-body region provenance is not available; no sourced geometry should be assumed verified.',tag:'SOURCE / NOT CLINICALLY REVIEWED'});
   output.push({title:'Muscle model scope',label:'Exact named BodyParts3D meshes; not complete muscle coverage',
    content:record?(record.muscle_source_parts||0)+' named source muscle surfaces are available in the Muscle layer. Missing source structures are not invented. Jaw muscles, cartilage, tendons, ligaments, nerves and physiological coupling remain incomplete. Some named leg muscles have an upstream “skeletal” system tag, retained in provenance.':'Muscle provenance unavailable.',tag:'LICENSED MESH / NOT REVIEWED'});
-  output.push({title:extra.motion?'Illustrative joint hinge':'Reference-pose exploration',label:extra.motion?
-   extra.motion.label+' · not measured kinematics':'Static source-aligned structure selection',
-   content:extra.motion?'Bone hinges and muscle weights are teaching approximations using source-bone proximity. They do not validate physiological attachments, ligaments, cartilage, tendons, coupled rotations, contact or patient-specific movement.':
-   'Bones are inspected in their pinned source reference pose. Breathing, cervical movement and jaw articulation are not yet simulated.',
+  const motion=window.BodyRegionMotion?.profile(region);
+  output.push({title:motion?'V8.2 illustrative regional motion':'Reference-pose exploration',label:motion?
+   motion.label+(motion.other?' + '+motion.other:'')+' · not measured or approved':'Static source-aligned structure selection',
+   content:motion?'V8.2 moves pinned source surfaces using estimated pivots and bounded unvalidated axes. This is a teaching demonstration only: attachments, joint coupling, cartilage, physiology, respiration, tendon paths, soft-tissue collision and patient-specific motion have NOT been validated.':
+   'Sourced structures remain in the atlas reference pose. A continuous moving sciatic nerve is not claimed.',
    tag:'LIMITATION / EXPLICIT'});
  }
   if(region==='shoulder'){
