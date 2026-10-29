@@ -50,8 +50,14 @@
   modalOpen=false;$('studio-region-sheet').hidden=true;
   if(restore){
    const fallback=$('studio-current');
-   const el=previousFocus?.isConnected?previousFocus:fallback;
-   el?.focus({preventScroll:true});
+   const prev=previousFocus;
+   // A keyboard-opened dialog often begins from <body>, which is not
+   // reliably focusable. Always restore to an actual interactive control.
+   const usable=prev&&prev!==document.body&&prev.isConnected&&
+     prev.matches('button,a[href],input,select,textarea,[tabindex]')&&
+     prev.getClientRects().length>0;
+   const el=usable?prev:fallback;
+   el.focus({preventScroll:true});
   }
   previousFocus=null;
  }
