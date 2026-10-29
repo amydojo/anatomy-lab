@@ -275,7 +275,7 @@ function create(canvas,onContextLost=()=>{}){
    const pivot=selected==='hip'?[-.057*5,(.895-.9)*5,-.045*5]:selected==='shoulder'?shoulderPivot:[-.09092915*5,(.4491462+.08/7.5-.9)*5,-.01654605*5];
    if(jointPose&&!unposed){
     const kin=shoulderPose?window.BodyShoulderKinematics:extendedPose?window.BodyExtendedRegions:window.BodyLowerLimbRig;
-    const root=item.rig?.fixedId||item.id;
+    const root=item.rig?.fixedId||item.motionAnchor||item.id;
     const origin=jointPose.matrices[root]||kin.identity();
     const insert=item.rig?(jointPose.matrices[item.rig.targetId||'humerus']||kin.identity()):origin;
     gl.uniform1f(uni('uJointGraph'),1);
@@ -365,7 +365,7 @@ function create(canvas,onContextLost=()=>{}){
    // Meaningful knee depth states: isolate actual sourced components. Menisci
    // and ligaments are NOT silently fabricated just because a slider moved.
    const chosen=region==='knee'?(layer===1?new Set(['femur']):layer===2?new Set(['tibia','fibula']):layer===3?new Set(['patella']):null):null;
-   for(const bone of bones){
+   for(const bone of [...bones,...(expansionDetail.get(region)||[])]){
     let a=r;
     if(region==='knee'&&chosen&&!chosen.has(bone.id))a*=.12;
     if(window.BodyExtendedRegions?.has(region)&&(layer===4||!window.BodyExtendedRegions.layers(region,bone.id,layer)))a*=layer===4?.14:.10;
@@ -398,7 +398,7 @@ function create(canvas,onContextLost=()=>{}){
   const width=canvas.clientWidth,height=canvas.clientHeight;
   if(!width||!height)return null;
   const core=window.BodySpatialCore;if(!core)return null;
-  const pieces=detail.get(region),pivot=region==='hip'?[-.057*5,(.895-.9)*5,-.045*5]:region==='shoulder'?shoulderPivot:[-.09092915*5,(.4491462+.08/7.5-.9)*5,-.01654605*5];
+  const pieces=[...detail.get(region),...(expansionDetail.get(region)||[])],pivot=region==='hip'?[-.057*5,(.895-.9)*5,-.045*5]:region==='shoulder'?shoulderPivot:[-.09092915*5,(.4491462+.08/7.5-.9)*5,-.01654605*5];
   const moveIds=region==='hip'?new Set(['femur']):region==='shoulder'?new Set(['humerus']):new Set(['tibia','fibula','patella']);
   const chosen=region==='knee'?(layer===1?new Set(['femur']):layer===2?new Set(['tibia','fibula']):layer===3?new Set(['patella']):null):null;
   const hipLayers=(region==='shoulder'?SHOULDER_LAYERS:region==='knee'?KNEE_MUSCLE_LAYERS:DEPTH_HIP)[clamp(Number(layer)||0,0,3)]||{};
@@ -428,7 +428,7 @@ function create(canvas,onContextLost=()=>{}){
     let p={x:v[0],y:v[1],z:v[2]};
     if(jointPose){
       const kin=shoulderPose?window.BodyShoulderKinematics:extendedPose?window.BodyExtendedRegions:window.BodyLowerLimbRig;
-      const root=jointPose.matrices[mesh.rig?.fixedId||mesh.id]||kin.identity();
+      const root=jointPose.matrices[mesh.rig?.fixedId||mesh.motionAnchor||mesh.id]||kin.identity();
       const insert=mesh.rig?jointPose.matrices[mesh.rig.targetId||'humerus']||kin.identity():root;
       // Rig deformation returns XYZ arrays; the shared projector requires
       // named coordinates. Passing the array directly produced NaNs and made
