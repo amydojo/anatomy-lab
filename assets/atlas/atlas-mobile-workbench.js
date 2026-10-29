@@ -48,6 +48,7 @@ function renderState(s){
  if(activeTool==='move'&&!eligibleMove(s))activeTool='explore';
  $('mobile-region-name').textContent=region?labels[region]:'FULL BODY';
  $('mobile-home').hidden=!region;
+ $('mobile-source').hidden=!(region==='nerve'&&s.view==='focused');
  $('mobile-region').setAttribute('aria-label',region?'Current region '+labels[region]+'. Choose a different region':'Choose an anatomical region');
  $('mobile-workbench').dataset.tool=activeTool;
  for(const b of document.querySelectorAll('[data-mobile-tool]')){
@@ -132,6 +133,7 @@ for(const b of document.querySelectorAll('[data-mobile-region]'))b.addEventListe
 $('mobile-home').addEventListener('click',()=>{
  closePicker({restore:false});setPanel('explore');atlas.body();requestAnimationFrame(sync);
 });
+$('mobile-source').addEventListener('click',()=>{atlas.enter();requestAnimationFrame(sync);});
 $('mobile-frame').addEventListener('click',()=>{atlas.recenter?.();requestAnimationFrame(sync)});
 document.querySelectorAll('[data-mobile-tissue]').forEach(b=>b.addEventListener('click',()=>{
  const original=document.querySelector('[data-overview-system="'+b.dataset.mobileTissue+'"]');
