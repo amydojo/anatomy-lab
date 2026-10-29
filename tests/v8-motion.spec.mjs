@@ -33,6 +33,11 @@ for(const [region,scenario] of Object.entries(movements)){
    await expect(page.locator('#studio-motion')).toBeVisible();
   }
   await expect(page.locator('#joint-motion-slider')).toBeEnabled();
+  // Read an explicitly rendered zero-pose frame on the same WebGL context.
+  // A screenshot from the first compositing frame is not a stable baseline.
+  await page.locator('#joint-motion-slider').evaluate(el=>{
+   el.value='0';el.dispatchEvent(new Event('input',{bubbles:true}));
+  });
   const neutral=await page.locator('#atlas-canvas').screenshot();
   await page.locator('#joint-motion-slider').evaluate((el,v)=>{
    el.value=String(v);el.dispatchEvent(new Event('input',{bubbles:true}));
@@ -56,7 +61,11 @@ for(const [region,scenario] of Object.entries(movements)){
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.secondary)).toBe(0);
   await expect(page.locator('#joint-motion-value')).toHaveText('0°');
   await expect(page.locator('#joint-secondary-value')).toHaveText('0°');
-  // Compare source-registered rest poses, not transient motion frames.
+  // A second explicit zero-pose render verifies GPU pose restoration,
+  // independent of browser compositing and unrelated inspector overlays.
+  await page.locator('#joint-motion-slider').evaluate(el=>{
+   el.value='0';el.dispatchEvent(new Event('input',{bubbles:true}));
+  });
   const reset=await page.locator('#atlas-canvas').screenshot();
   expect(reset.equals(neutral)).toBe(true);
   await page.evaluate(()=>window.__BODY_ATLAS__.body());
