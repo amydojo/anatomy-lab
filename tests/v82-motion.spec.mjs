@@ -9,6 +9,7 @@ async function open(page,region){
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.goto('/atlas/');
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().assetsLoaded===true),{timeout:30000}).toBe(true);
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().overviewLoaded===true),{timeout:35000}).toBe(true);
  await page.evaluate(r=>window.__BODY_ATLAS__.choose(r),region);
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:30000}).toBe('detail');
  return errors;
