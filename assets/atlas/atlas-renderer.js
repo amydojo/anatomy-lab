@@ -124,6 +124,40 @@ function create(canvas,onContextLost=()=>{}){
   registry.overview(asset);
   return true;
  }
+ function combineV9(parts,name,group,kind){
+  const vertices=[],faces=[];
+  for(const p of parts){const offset=vertices.length;vertices.push(...p.vertices);
+   for(const face of p.faces)faces.push(face.map(i=>i+offset));
+  }
+  return {vertices,faces,name,system:kind};
+ }
+ function loadExpansion(asset){
+  if(!model||!overviewData||asset?.schema!=='body-live/v9-source-expansion-v1'||asset.source_commit!==model.source_commit)
+   throw Error('Unverified V9 source coordinate frame');
+  if(!gl||status!=='ready')return false;
+  const parts={bones:[],muscles:[],connective:[]},created=[];
+  try{
+   for(const kind of ['bones','muscles','connective']){
+    const groups=new Map();
+    for(const p of Object.values(asset[kind])){
+     const group=kind==='muscles'?p.subgroup||'other':p.group||'spine';
+     if(!groups.has(group))groups.set(group,[]);
+     groups.get(group).push(p);
+    }
+    for(const [group,items] of groups){
+     const name='v9-'+kind+'-'+group;
+     const merged=combineV9(items,name,group,kind);
+     const color=kind==='bones'?COLORS[group]||COLORS.spine:kind==='muscles'?[.79,.46,.38]:[.91,.73,.49];
+     const gpu=makeBuffer(merged,name,group,color,kind!=='bones');
+     parts[kind].push(gpu);created.push(gpu);
+    }
+   }
+  }catch(e){for(const p of created)gl.deleteBuffer(p.buffer);throw e;}
+  for(const old of [...expansionBones,...expansionMuscles,...expansionConnective])gl.deleteBuffer(old.buffer);
+  expansionBones=parts.bones;expansionMuscles=parts.muscles;expansionConnective=parts.connective;
+  expansionData=asset;registry.expansion(asset);
+  return true;
+ }
  function setOverviewSystem(system){
   if(!['bones','muscles','combined','connective'].includes(system))return false;
   overviewSystem=system;return true;
