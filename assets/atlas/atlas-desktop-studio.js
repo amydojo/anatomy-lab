@@ -30,6 +30,7 @@
   if(!tools.includes(which)||!isDesktop())return false;
   const s=state();
   if(which==='move'&&!motionFor(s))return false;
+  if(which==='inspect'&&!detail(s))return false;
   active=which;
   sync(s);
   return true;
@@ -71,7 +72,7 @@
  function sync(incoming){
   if(!isDesktop())return;
   const s=incoming||state(),r=regionOf(s),inside=detail(s),profile=motionFor(s);
-  if(active==='move'&&!profile)active='explore';
+  if((active==='move'&&!profile)||(active==='inspect'&&!inside))active='explore';
   if(selected&&selected!==s.unified?.selected&&s.unified?.selected){
    // Selection changed through the original engine; update the inspector
    // immediately rather than requiring a second click on the old chip.
@@ -88,7 +89,7 @@
     'DRAG ORBIT · SCROLL ZOOM · SELECT A REGION · PRESS G TO SEARCH';
   for(const btn of document.querySelectorAll('[data-studio-tool]')){
    const which=btn.dataset.studioTool;
-   btn.disabled=which==='move'&&!profile;
+   btn.disabled=(which==='move'&&!profile)||(which==='inspect'&&!inside);
    btn.setAttribute('aria-pressed',String(active===which));
    btn.title=which==='move'&&!profile?'This region has no sourced teaching motion':which[0].toUpperCase()+which.slice(1);
   }
@@ -228,8 +229,10 @@
  observe.observe($('joint-motion-value'),{childList:true,characterData:true,subtree:true});
  observe.observe($('joint-secondary-value'),{childList:true,characterData:true,subtree:true});
  window.addEventListener('resize',()=>{
-  if(!isDesktop())closePicker({restore:false});
-  else if(!$('studio-inspector').hidden)atlas.setInspectorFrame?.(true,true);
+  if(!isDesktop()){
+   closePicker({restore:false});
+   atlas.setInspectorFrame?.(false,true);
+  }else if(!$('studio-inspector').hidden)atlas.setInspectorFrame?.(true,true);
   sync();
  },{passive:true});
  window.addEventListener('popstate',()=>sync());
