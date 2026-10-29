@@ -46,7 +46,10 @@ for(const [region,expected] of Object.entries(regions)){
     await expect(page.locator('#mobile-workbench')).toBeVisible();
     await page.locator('[data-mobile-tool="move"]').click();
     await expect(page.locator('#mobile-motion-slider')).toBeVisible();
-   }else await expect(page.locator('#joint-motion')).toBeVisible();
+   }else{
+   await page.locator('[data-studio-tool="move"]').click();
+   await expect(page.locator('#studio-motion')).toBeVisible();
+  }
    const rest=await page.locator('#atlas-canvas').screenshot();
    const expectedMotion=Math.min(40,Number(await page.locator('#joint-motion-slider').getAttribute('max')));
    await page.locator('#joint-motion-slider').evaluate(el=>{el.value=String(Math.min(Number(el.max),40));el.dispatchEvent(new Event('input',{bubbles:true}));});
@@ -122,7 +125,7 @@ test('Mobile region picker exposes all 10 destinations without occupying canvas 
 });
 test('Elbow muscle layer identifies a sourced muscle from its projected triangle, not a fabricated label',async({page})=>{
  const errors=await open(page,'elbow');
- await page.locator('#mode-trace').click();
+ await page.locator('#mode-trace').evaluate(el=>el.click());
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().layer)).toBe(4);
  const selected=await page.evaluate(async()=>{
   const asset=await (await fetch('/atlas/regions/elbow.json')).json();
@@ -143,7 +146,8 @@ test('Elbow muscle layer identifies a sourced muscle from its projected triangle
   return null;
  });
  expect(selected).not.toBe(null);
- await expect(page.locator('#structure-chip')).toBeVisible();
+ if((await page.viewportSize()).width<=850)await expect(page.locator('#mobile-inspect')).toBeVisible();
+ else await expect(page.locator('#studio-inspector')).toBeVisible();
  await expect(page.locator('#structure-chip-name')).not.toHaveText('Structure');
  expect(errors).toEqual([]);
 });

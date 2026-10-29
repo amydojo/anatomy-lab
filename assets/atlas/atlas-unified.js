@@ -156,7 +156,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   if(!['hip','knee','nerve','shoulder',...window.BodyExtendedRegions.ids].includes(name))return false;
   if(!isActive())return choose(name);
   if(region===name)return false;
-  if(window.innerWidth<=850&&name!=='nerve')return choose(name);
+  if(name!=='nerve')return choose(name);
   navigation=name;
   back();
   return true;
@@ -177,7 +177,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  }
  async function choose(name){
   if(!['hip','knee','shoulder',...window.BodyExtendedRegions.ids].includes(name))return;
-  const direct=!!region&&state.data.view==='detail'&&window.innerWidth<=850;
+  const direct=!!region&&state.data.view==='detail';
   if(isActive()&&state.data.view==='detail'&&!direct)return nextRegion(name);
   if(direct&&region===name)return false;
   const departing=direct?region:null;

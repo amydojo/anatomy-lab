@@ -23,7 +23,7 @@
    const view={x,y:y2,z:z2};
    const perspective=7.4/(7.4-z2);
    const scale=Math.min(camera.width/3.25,camera.height/(camera.frameSpan||6.65))*camera.zoom;
-   return {x:camera.width*.50+x*scale*perspective,
+   return {x:camera.width*(Number.isFinite(camera.anchorX)?camera.anchorX:.50)+x*scale*perspective,
      y:camera.height*(Number.isFinite(camera.anchorY)?camera.anchorY:.50)-(y2-.04)*scale*perspective,z:z2,world:view};
  }
  function attachOrbit(canvas,{state,render,pick,onInteract=()=>{},onDoubleTap=()=>{},minZoom=.7,maxZoom=2.5}){
@@ -44,7 +44,10 @@
      pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
      if(pointers.size===1){
        travel=false;gestureStarted=false;
-       origin={type:'orbit',x:e.clientX,y:e.clientY,yaw:state.yaw,pitch:state.pitch};
+       const pan=(e.pointerType==='mouse'&&(e.shiftKey||e.button===1));
+       origin={type:pan?'pan':'orbit',x:e.clientX,y:e.clientY,yaw:state.yaw,pitch:state.pitch,
+         target:pan?{...state.target}:null,zoom:state.zoom};
+       if(pan)e.preventDefault();
      }else if(pointers.size===2)dualOrigin();
      try{canvas.setPointerCapture(e.pointerId)}catch{}
    }
@@ -61,13 +64,25 @@
        const oldScale=Math.max(.001,units*origin.zoom),newScale=Math.max(.001,units*zoom);
        const cy=Math.cos(origin.yaw),sy=Math.sin(origin.yaw),cp=Math.cos(origin.pitch),sp=Math.sin(origin.pitch);
        const right=[cy,0,sy],up=[sy*sp,cp,-cy*sp];
-       const focalX=origin.mid.x-(bound.left+bound.width/2),focalY=origin.mid.y-(bound.top+bound.height/2);
+       const focalX=origin.mid.x-(bound.left+bound.width*(Number.isFinite(state.anchorX)?state.anchorX:.5)),focalY=origin.mid.y-(bound.top+bound.height*(Number.isFinite(state.anchorY)?state.anchorY:.5));
        const difference=1/oldScale-1/newScale;
        const panX=(mid.x-origin.mid.x)/newScale,panY=(mid.y-origin.mid.y)/newScale;
        const shiftX=focalX*difference-panX,shiftY=-focalY*difference+panY;
        for(let i=0;i<3;i++)state.target[['x','y','z'][i]]=origin.target[['x','y','z'][i]]+
           right[i]*shiftX+up[i]*shiftY;
        state.zoom=zoom;travel=true;schedule();
+      }else if(pointers.size===1 && origin?.type==='pan'){
+       const dx=e.clientX-origin.x,dy=e.clientY-origin.y;
+       if(Math.abs(dx)+Math.abs(dy)>4){travel=true;beginMove();}
+       if(travel){
+         const bound=canvas.getBoundingClientRect();
+         const scale=Math.max(.001,Math.min(bound.width/3.25,bound.height/Math.max(.2,state.frameSpan))*origin.zoom);
+         const cy=Math.cos(origin.yaw),sy=Math.sin(origin.yaw),cp=Math.cos(origin.pitch),sp=Math.sin(origin.pitch);
+         const right=[cy,0,sy],up=[sy*sp,cp,-cy*sp];
+         for(let i=0;i<3;i++)state.target[['x','y','z'][i]]=origin.target[['x','y','z'][i]]+
+           right[i]*(-dx/scale)+up[i]*(dy/scale);
+         schedule();
+       }
      }else if(pointers.size===1 && origin?.type==='orbit'){
        const dx=e.clientX-origin.x,dy=e.clientY-origin.y;
        if(Math.abs(dx)+Math.abs(dy)>6){travel=true;beginMove();}
@@ -105,7 +120,18 @@
    function wheel(e){
      if(!Number.isFinite(e.deltaY)||!e.deltaY)return;
      beginMove();e.preventDefault();
-     state.zoom=clamp(state.zoom*(e.deltaY<0?1.09:.91),minZoom,maxZoom);
+     const before=state.zoom,after=clamp(before*(e.deltaY<0?1.09:.91),minZoom,maxZoom);
+     if(after===before)return;
+     const bound=canvas.getBoundingClientRect();
+     const units=Math.min(bound.width/3.25,bound.height/Math.max(.2,state.frameSpan));
+     const scaleBefore=Math.max(.001,units*before),scaleAfter=Math.max(.001,units*after);
+     const x=e.clientX-(bound.left+bound.width*(Number.isFinite(state.anchorX)?state.anchorX:.5));
+     const y=e.clientY-(bound.top+bound.height*(Number.isFinite(state.anchorY)?state.anchorY:.5));
+     const difference=1/scaleBefore-1/scaleAfter;
+     const cy=Math.cos(state.yaw),sy=Math.sin(state.yaw),cp=Math.cos(state.pitch),sp=Math.sin(state.pitch);
+     const right=[cy,0,sy],up=[sy*sp,cp,-cy*sp];
+     for(let i=0;i<3;i++)state.target[['x','y','z'][i]]+=right[i]*x*difference-up[i]*y*difference;
+     state.zoom=after;
      schedule();
    }
    canvas.addEventListener('pointerdown',start);

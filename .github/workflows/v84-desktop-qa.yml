@@ -1,0 +1,55 @@
+name: V8.4 desktop specimen studio QA
+on:
+  push:
+    branches: [feat/v8-4-desktop-studio]
+  pull_request:
+    branches: [feat/v8-3-mobile-workbench]
+permissions:
+  contents: read
+concurrency:
+  group: v8-4-studio-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  studio:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Verify anatomical source and rig invariants
+        run: npm test
+      - run: npx playwright install chromium webkit
+      - name: Desktop UX and regional source motion tests
+        run: npx playwright test tests/v84-desktop.spec.mjs tests/v8-motion.spec.mjs tests/v8-atlas.spec.mjs --reporter=line
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v8-4-studio-qa
+          path: test-results/
+          if-no-files-found: ignore
+  regression:
+    needs: studio
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install chromium webkit
+      - name: Whole-app cross-browser regression
+        run: npm run test:e2e
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v8-4-whole-app-results
+          path: test-results/
+          if-no-files-found: ignore

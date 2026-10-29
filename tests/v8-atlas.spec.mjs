@@ -23,21 +23,30 @@ test('V8 overview renders 137 canonical bones and 149 muscles with three working
  if((await page.viewportSize()).width<=850){
   if(!(await page.locator('#mobile-layers').isVisible()))await page.locator('[data-mobile-tool="layers"]').click();
   await page.locator('[data-mobile-tissue="bones"]').click();
- }else await page.locator('[data-overview-system="bones"]').click();
+ }else{
+  if(!(await page.locator('#studio-layers').isVisible()))await page.locator('[data-studio-tool="layers"]').click();
+  await page.locator('[data-studio-tissue="bones"]').click();
+ }
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.overviewSystem)).toBe('bones');
  const bones=await page.locator('#atlas-canvas').screenshot();
  expect(before.equals(bones)).toBe(false);
  if((await page.viewportSize()).width<=850){
   if(!(await page.locator('#mobile-layers').isVisible()))await page.locator('[data-mobile-tool="layers"]').click();
   await page.locator('[data-mobile-tissue="muscles"]').click();
- }else await page.locator('[data-overview-system="muscles"]').click();
+ }else{
+  if(!(await page.locator('#studio-layers').isVisible()))await page.locator('[data-studio-tool="layers"]').click();
+  await page.locator('[data-studio-tissue="muscles"]').click();
+ }
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.overviewSystem)).toBe('muscles');
  const muscles=await page.locator('#atlas-canvas').screenshot();
  expect(bones.equals(muscles)).toBe(false);
  if((await page.viewportSize()).width<=850){
   if(!(await page.locator('#mobile-layers').isVisible()))await page.locator('[data-mobile-tool="layers"]').click();
   await page.locator('[data-mobile-tissue="combined"]').click();
- }else await page.locator('[data-overview-system="combined"]').click();
+ }else{
+  if(!(await page.locator('#studio-layers').isVisible()))await page.locator('[data-studio-tool="layers"]').click();
+  await page.locator('[data-studio-tissue="combined"]').click();
+ }
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.overviewSystem)).toBe('combined');
  await expect(page.locator('[data-overview-system="combined"]')).toHaveAttribute('aria-pressed','true');
  expect(errors).toEqual([]);

@@ -503,6 +503,26 @@ function reset(){
  if(state.data.view==='detail'){getFrameApi()?.reset?.();$('layer-slider').value=0;state.setDepth(0);$('layer-output').textContent='Surface';return;}
  animateCamera({yaw:-.2,pitch:-.07,zoom:1.03,frameSpan:10.8,target:{x:0,y:-.12,z:0}},reduce()?0:320);
 }
+let studioFramingFrame=0;
+function setInspectorFrame(visible,instant=false){
+ const camera=state.data.camera;
+ const width=Math.max(1,$('atlas-canvas').clientWidth);
+ // A 355px inspector + 90px tool rail must not hide the specimen.
+ const target=(visible&&window.innerWidth>850)?Math.max(.30,.5-Math.min(152,Math.max(99,width*.101))/width):.5;
+ const start=Number.isFinite(camera.anchorX)?camera.anchorX:.5;
+ cancelAnimationFrame(studioFramingFrame);studioFramingFrame=0;
+ if(Math.abs(target-start)<.0002)return target;
+ if(instant||reduce()){camera.anchorX=target;render();return target;}
+ const at=performance.now(),length=270;
+ function step(now){
+  const u=Math.min(1,(now-at)/length),ease=1-Math.pow(1-u,3);
+  camera.anchorX=start+(target-start)*ease;
+  render();
+  if(u<1)studioFramingFrame=requestAnimationFrame(step);else studioFramingFrame=0;
+ }
+ studioFramingFrame=requestAnimationFrame(step);
+ return target;
+}
 function recenter(){
  if(U.isActive()&&state.data.view==='detail')return U.recenter();
  animateCamera({yaw:-.2,pitch:-.07,zoom:1.03,frameSpan:10.8,target:{x:0,y:-.12,z:0}},reduce()?0:280);
@@ -590,6 +610,6 @@ function setup(){
  }).catch(err=>fallback(err.message));
 }
 const U=window.BodyAtlasUnified.create({state,model,loader,render,updateURL,resize,setExpanded,reduce,centerPoint,shortestYaw,enableControls,NOTE,LABEL,navigate:region=>choose(region)});
-window.__BODY_ATLAS__={getState:()=>({...state.snapshot(),renderer:model.stats(),unified:U.snapshot(),assetsLoaded:loaded,overviewLoaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,recenter,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode};
+window.__BODY_ATLAS__={getState:()=>({...state.snapshot(),renderer:model.stats(),unified:U.snapshot(),assetsLoaded:loaded,overviewLoaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,recenter,setInspectorFrame,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode};
 setup();
 })();

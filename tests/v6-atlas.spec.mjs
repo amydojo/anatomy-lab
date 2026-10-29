@@ -15,8 +15,8 @@ async function choose(page,region){
    await expect(page.locator('#mobile-source')).toBeVisible();
    await page.locator('#mobile-source').click();
   }else{
-   await expect(page.locator('#top-enter-region')).toBeVisible();
-   await page.locator('#top-enter-region').click();
+   await expect(page.locator('#studio-open-nerve')).toBeVisible();
+   await page.locator('#studio-open-nerve').click();
   }
  }
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:20000}).toBe('detail');
@@ -28,7 +28,7 @@ test('Pinned 78-part sourced skeleton loads in one WebGL canvas',async({page})=>
  expect(st.renderer.webgl).toBe(true);
  expect(st.pins).toBe(10);
  if((await page.viewportSize()).width<=850)await expect(page.locator('#mobile-region')).toBeVisible();
- else await expect(page.locator('#hotspots [data-region="hip"]')).toBeVisible();
+ else await expect(page.locator('#studio-current')).toBeVisible();
  await expect(page.locator('a[href="/atlas/sources/"]')).toHaveCount(2);
  expect(errors).toEqual([]);
 });
@@ -162,7 +162,10 @@ test('Unified Hip motion slider drives real specimen pose and Back restores cont
  if((await page.viewportSize()).width<=850){
   await page.locator('[data-mobile-tool="move"]').click();
   await expect(page.locator('#mobile-move')).toBeVisible();
- }else await expect(page.locator('#joint-motion')).toBeVisible();
+ }else{
+  await page.locator('[data-studio-tool="move"]').click();
+  await expect(page.locator('#studio-motion')).toBeVisible();
+ }
  await expect(page.locator('#joint-motion-label')).toHaveText('Hip flexion');
  await page.locator('#joint-motion-slider').evaluate(e=>{e.value='40';e.dispatchEvent(new Event('input',{bubbles:true}));});
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(40);
@@ -201,14 +204,13 @@ test('Direct selection inside unified specimen produces meaningful structure ins
  if((await page.viewportSize()).width<=850){
   await page.locator('[data-mobile-tool="inspect"]').click();
   await expect(page.locator('#mobile-inspect-name')).not.toHaveText('Tap a structure to inspect');
- }else await expect(page.locator('#structure-chip')).toBeVisible();
+ }else await expect(page.locator('#studio-inspector')).toBeVisible();
  if((await page.viewportSize()).width<=850){
   await expect(page.locator('#mobile-inspect')).toBeVisible();
   await expect(page.locator('#mobile-inspect-name')).not.toHaveText('Tap a structure to inspect');
  }else{
-  await page.locator('#structure-chip-more').evaluate(el=>el.click());
-  await expect(page.locator('#structure-details')).toBeVisible();
-  await expect(page.locator('#atlas-sidebar')).toHaveAttribute('data-expanded','true');
+  await expect(page.locator('#studio-inspector')).toBeVisible();
+  await expect(page.locator('#studio-inspector-name')).not.toHaveText('Select a structure.');
  }
  await page.locator('#structure-chip-close').evaluate(el=>el.click());
  await expect(page.locator('#structure-chip')).toBeHidden();
@@ -284,7 +286,8 @@ test('Separately registered nerve remains explicitly gated, unlike sourced shoul
   await page.evaluate(r=>window.__BODY_ATLAS__.choose(r),region);
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.frameSpan),{timeout:6000}).toBeLessThan(3);
   expect((await page.evaluate(()=>window.__BODY_ATLAS__.getState())).view).toBe('focused');
-  await expect(page.locator('#top-enter-region')).toBeVisible();
+  if((await page.viewportSize()).width<=850)await expect(page.locator('#mobile-source')).toBeVisible();
+   else await expect(page.locator('#studio-open-nerve')).toBeVisible();
   await expect(page.locator('#portal')).toBeHidden();
   await page.evaluate(()=>window.__BODY_ATLAS__.body());
   await expect(page.locator('#portal')).toBeHidden();
