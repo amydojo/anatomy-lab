@@ -652,3 +652,30 @@ test('V8.2 source-registered regional teaching motion has bounded neutral and in
  assert.ok(html.includes('id="joint-secondary-control"'));
  assert.ok(html.includes('id="joint-rest"'));
 });
+
+test('V8.2 source-matched muscle rigs follow their designated moving bones without fabricating tissues',async()=>{
+ const {runInNewContext}=await import('node:vm');
+ const win={};const ctx={window:win,Float32Array,Math};
+ runInNewContext(read('assets/atlas/atlas-extended-regions.js'),ctx);
+ runInNewContext(read('assets/atlas/atlas-region-motion.js'),ctx);
+ const M=win.BodyRegionMotion;
+ const expected={skull:4,neck:14,thorax:8,elbow:10,wrist:10,ankle:12};
+ for(const [region,count]of Object.entries(expected)){
+  const asset=JSON.parse(read('atlas/regions/'+region+'.json'));
+  const movingPose=M.poseExtended(region,asset,Math.min(15,M.profile(region).max),5);
+  let countRigged=0;
+  for(const [id,p]of Object.entries(asset.muscle_parts)){
+   const rig=M.skin(region,id,p.vertices,asset.parts);
+   if(!rig)continue;
+   countRigged++;
+   assert.equal(rig.validated,false);
+   assert.equal(rig.method,'source-surface-proximity-inferred');
+   assert.ok(asset.parts[rig.fixedId]&&asset.parts[rig.targetId],region+'/'+id+' missing bone anchor');
+   assert.equal(rig.weights.length,p.vertices.length);
+   assert.ok(rig.weights.every(w=>Number.isFinite(w)&&w>=0&&w<=1));
+   const moving=movingPose.matrices[rig.targetId],I=M.identity();
+   assert.ok([...moving].some((v,i)=>Math.abs(v-I[i])>1e-5),region+'/'+id+' target did not animate');
+  }
+  assert.equal(countRigged,count,region+' tissue coverage');
+ }
+});
