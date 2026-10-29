@@ -202,9 +202,14 @@ test('Direct selection inside unified specimen produces meaningful structure ins
   await page.locator('[data-mobile-tool="inspect"]').click();
   await expect(page.locator('#mobile-inspect-name')).not.toHaveText('Tap a structure to inspect');
  }else await expect(page.locator('#structure-chip')).toBeVisible();
- await page.locator('#structure-chip-more').evaluate(el=>el.click());
- await expect(page.locator('#structure-details')).toBeVisible();
- await expect(page.locator('#atlas-sidebar')).toHaveAttribute('data-expanded','true');
+ if((await page.viewportSize()).width<=850){
+  await expect(page.locator('#mobile-inspect')).toBeVisible();
+  await expect(page.locator('#mobile-inspect-name')).not.toHaveText('Tap a structure to inspect');
+ }else{
+  await page.locator('#structure-chip-more').evaluate(el=>el.click());
+  await expect(page.locator('#structure-details')).toBeVisible();
+  await expect(page.locator('#atlas-sidebar')).toHaveAttribute('data-expanded','true');
+ }
  await page.locator('#structure-chip-close').evaluate(el=>el.click());
  await expect(page.locator('#structure-chip')).toBeHidden();
  expect(errors).toEqual([]);
