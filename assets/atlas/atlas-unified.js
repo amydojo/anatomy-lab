@@ -147,7 +147,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   if(region&&state.data.view==='focused'){
    state.enter();state.data.frameReady=true;
    reveal=1;$('atlas-app').dataset.mode='immersive';
-   enableControls(region);syncControls(region);
+   transitionFrom=null;enableControls(region);syncControls(region);
    $('joint-motion').hidden=!window.BodyRegionMotion.profile(region);$('back-body').hidden=false;
    $('hotspots').hidden=true;updateURL();render();
   }
@@ -156,7 +156,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   if(!['hip','knee','nerve','shoulder',...window.BodyExtendedRegions.ids].includes(name))return false;
   if(!isActive())return choose(name);
   if(region===name)return false;
-  if(window.innerWidth<=850)return choose(name);
+  if(window.innerWidth<=850&&name!=='nerve')return choose(name);
   navigation=name;
   back();
   return true;
@@ -234,6 +234,8 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   }catch(error){
    if(id!==token)return;
    pending=false;region=departing;reveal=departing?1:0;transitionFrom=null;
+   if(departing){state.select(departing);state.enter();$('atlas-app').dataset.mode='immersive';}
+   else{state.body();$('atlas-app').dataset.mode='overview';}
    setStatus('SOURCED DETAIL UNAVAILABLE · OVERVIEW RETAINED');
    $('context-note').textContent='The additional source geometry could not be verified: '+error.message;
    $('enter-region').disabled=false;$('enter-region').textContent='Open standalone lab ↗';
