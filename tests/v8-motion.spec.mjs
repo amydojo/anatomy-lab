@@ -22,6 +22,16 @@ async function enter(page,region){
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region)).toBe(region);
  return errors;
 }
+async function specimenShot(page){
+ // Playwright screenshots of a canvas element include overlays composited
+ // above it. Temporarily hide UI ONLY during the GPU-pose capture, then
+ // restore it before testing actual visible controls.
+ const studio=page.locator('#desktop-studio');
+ const desktop=(await page.viewportSize()).width>850;
+ if(desktop)await studio.evaluate(el=>{el.style.visibility='hidden';});
+ try{return await page.locator('#atlas-canvas').screenshot();}
+ finally{if(desktop)await studio.evaluate(el=>{el.style.visibility='';});}
+}
 for(const [region,scenario] of Object.entries(movements)){
  test('V8.2 '+region+' has bounded motion, a distinct edited pose and deterministic neutral reset',async({page})=>{
   const errors=await enter(page,region);
@@ -33,22 +43,18 @@ for(const [region,scenario] of Object.entries(movements)){
    await expect(page.locator('#studio-motion')).toBeVisible();
   }
   await expect(page.locator('#joint-motion-slider')).toBeEnabled();
-  // Canvas locator screenshots include overlaid UI pixels. Hide studio chrome
-  // for this GPU-only pose equality check; UI is verified separately in V8.4.
-  if((await page.viewportSize()).width>850)
-   await page.locator('#desktop-studio').evaluate(el=>{el.style.visibility='hidden';});
   // Read an explicitly rendered zero-pose frame on the same WebGL context.
   // A screenshot from the first compositing frame is not a stable baseline.
   await page.locator('#joint-motion-slider').evaluate(el=>{
    el.value='0';el.dispatchEvent(new Event('input',{bubbles:true}));
   });
-  const neutral=await page.locator('#atlas-canvas').screenshot();
+  const neutral=await specimenShot(page);
   await page.locator('#joint-motion-slider').evaluate((el,v)=>{
    el.value=String(v);el.dispatchEvent(new Event('input',{bubbles:true}));
   },scenario.primary);
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(scenario.primary);
   await expect(page.locator('#joint-motion-value')).toHaveText(scenario.primary+'°');
-  const moved=await page.locator('#atlas-canvas').screenshot();
+  const moved=await specimenShot(page);
   expect(moved.equals(neutral)).toBe(false);
   if(Number.isFinite(scenario.secondary)){
    if((await page.viewportSize()).width<=850)await expect(page.locator('#mobile-secondary-row')).toBeVisible();
@@ -57,7 +63,7 @@ for(const [region,scenario] of Object.entries(movements)){
     el.value=String(v);el.dispatchEvent(new Event('input',{bubbles:true}));
    },scenario.secondary);
    await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.secondary)).toBe(scenario.secondary);
-   const combined=await page.locator('#atlas-canvas').screenshot();
+   const combined=await specimenShot(page);
    expect(combined.equals(moved)).toBe(false);
   }else await expect(page.locator('#joint-secondary-control')).toBeHidden();
   await page.locator('#joint-rest').evaluate(el=>el.click());
@@ -70,7 +76,7 @@ for(const [region,scenario] of Object.entries(movements)){
   await page.locator('#joint-motion-slider').evaluate(el=>{
    el.value='0';el.dispatchEvent(new Event('input',{bubbles:true}));
   });
-  const reset=await page.locator('#atlas-canvas').screenshot();
+  const reset=await specimenShot(page);
   expect(reset.equals(neutral)).toBe(true);
   await page.evaluate(()=>window.__BODY_ATLAS__.body());
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view)).toBe('overview');
