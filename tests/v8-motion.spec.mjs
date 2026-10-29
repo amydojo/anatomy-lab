@@ -16,6 +16,7 @@ async function enter(page,region){
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.goto('/atlas/');
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().assetsLoaded||false),{timeout:35000}).toBe(true);
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().overviewLoaded===true),{timeout:35000}).toBe(true);
  await page.evaluate(x=>window.__BODY_ATLAS__.choose(x),region);
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:35000}).toBe('detail');
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region)).toBe(region);
