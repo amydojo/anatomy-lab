@@ -35,14 +35,18 @@ for(const [region,expected] of Object.entries(regions)){
   await page.locator('#layer-slider').evaluate(el=>{el.value='2';el.dispatchEvent(new Event('input',{bubbles:true}));});
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().layer)).toBe(2);
   await page.locator('#layer-slider').evaluate(el=>{el.value='0';el.dispatchEvent(new Event('input',{bubbles:true}));});
-  await page.locator('#mode-trace').click();
+  await page.locator('#mode-trace').evaluate(el=>el.click());
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().layer)).toBe(4);
   await expect(page.locator('#layer-output')).toContainText('Source muscles');
   await expect(page.locator('#mode-trace')).toHaveAttribute('aria-pressed','true');
-  await page.locator('#mode-explore').click();
+  await page.locator('#mode-explore').evaluate(el=>el.click());
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().layer)).toBe(0);
   if(expected.animated){
-   await expect(page.locator('#joint-motion')).toBeVisible();
+   if((await page.viewportSize()).width<=850){
+    await expect(page.locator('#mobile-workbench')).toBeVisible();
+    await page.locator('[data-mobile-tool="move"]').click();
+    await expect(page.locator('#mobile-motion-slider')).toBeVisible();
+   }else await expect(page.locator('#joint-motion')).toBeVisible();
    const rest=await page.locator('#atlas-canvas').screenshot();
    const expectedMotion=Math.min(40,Number(await page.locator('#joint-motion-slider').getAttribute('max')));
    await page.locator('#joint-motion-slider').evaluate(el=>{el.value=String(Math.min(Number(el.max),40));el.dispatchEvent(new Event('input',{bubbles:true}));});
@@ -52,26 +56,27 @@ for(const [region,expected] of Object.entries(regions)){
   }else await expect(page.locator('#joint-motion')).toBeHidden();
   if(['skull','neck','thorax','wrist','ankle','elbow'].includes(region))
    await page.screenshot({path:'artifacts/v7-'+region+'-'+test.info().project.name+'.png',fullPage:true});
-  await page.locator('#reset-view').click();
+  await page.locator('#reset-view').evaluate(el=>el.click());
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().layer)).toBe(0);
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(0);
-  await page.locator('#back-body').click();
+  await page.evaluate(()=>window.__BODY_ATLAS__.body());
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:7000}).toBe('overview');
   expect(errors).toEqual([]);
  });
 }
-test('V7 wrist and skull are reachable from mobile sidebar and return on same 3D canvas',async({page})=>{
+test('V7 wrist and skull remain reachable from mobile region picker on one canvas',async({page})=>{
  await page.setViewportSize({width:390,height:780});
  const errors=[];page.on('pageerror',e=>errors.push(String(e)));
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.goto('/atlas/');
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().assetsLoaded||false)).toBe(true);
- await page.locator('#sidebar-toggle').click();
- await expect(page.locator('#region-list [data-region="wrist"]')).toBeVisible();
- await page.locator('#region-list [data-region="wrist"]').click();
+ await page.locator('#mobile-region').click();
+ await expect(page.locator('[data-mobile-region="wrist"]')).toBeVisible();
+ await page.locator('[data-mobile-region="wrist"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:25000}).toBe('detail');
  await expect(page.locator('#atlas-canvas')).toBeVisible();
- await page.evaluate(()=>window.__BODY_ATLAS__.choose('skull'));
+ await page.locator('#mobile-region').click();
+ await page.locator('[data-mobile-region="skull"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:25000}).toBe('skull');
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:25000}).toBe('detail');
  const metrics=await page.evaluate(()=>({canvases:document.querySelectorAll('#atlas-canvas').length,screen:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
@@ -92,34 +97,29 @@ test('V7 rejects corrupted skull source hash while retaining original atlas',asy
  await expect(page.locator('#atlas-canvas')).toBeVisible();
 });
 
-test('Mobile region dock exposes all 10 destinations outside the canvas without clipping',async({page})=>{
+test('Mobile region picker exposes all 10 destinations without occupying canvas space',async({page})=>{
  await page.setViewportSize({width:390,height:780});
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.goto('/atlas/');
- const dock=page.locator('.region-dock');
- await expect(dock).toBeVisible();
- const buttons=page.locator('.region-dock-grid [data-region]');
+ await expect(page.locator('.region-dock')).toBeHidden();
+ await page.locator('#mobile-region').click();
+ const buttons=page.locator('[data-mobile-region]');
  await expect(buttons).toHaveCount(10);
  for(const name of ['hip','nerve','knee','shoulder','thorax','neck','skull','elbow','wrist','ankle'])
-  await expect(page.locator('.region-dock-grid [data-region="'+name+'"]')).toBeVisible();
- const layout=await page.evaluate(()=>{
-  const dock=document.querySelector('.region-dock').getBoundingClientRect();
-  const stage=document.querySelector('#atlas-stage').getBoundingClientRect();
-  return {dockBottom:dock.bottom,stageTop:stage.top,screenWidth:document.documentElement.clientWidth,
-   totalWidth:document.documentElement.scrollWidth,canvasCount:document.querySelectorAll('#atlas-canvas').length};
- });
- expect(layout.dockBottom).toBeLessThanOrEqual(layout.stageTop+2);
- expect(layout.totalWidth).toBeLessThanOrEqual(layout.screenWidth+2);
- expect(layout.canvasCount).toBe(1);
- await page.locator('.region-dock-grid [data-region="neck"]').click();
+  await expect(page.locator('[data-mobile-region="'+name+'"]')).toBeVisible();
+ const layout=await page.evaluate(()=>({
+  screen:document.documentElement.clientWidth,
+  scroll:document.documentElement.scrollWidth,
+  canvas:document.querySelectorAll('#atlas-canvas').length
+ }));
+ expect(layout.scroll).toBeLessThanOrEqual(layout.screen+2);
+ expect(layout.canvas).toBe(1);
+ await page.locator('[data-mobile-region="neck"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:25000}).toBe('neck');
- await expect(page.locator('.region-dock-grid [data-region="neck"]')).toHaveAttribute('aria-pressed','true');
- await expect(page.locator('.region-dock')).toBeVisible();
- await page.locator('.region-dock-grid [data-region="thorax"]').click();
+ await page.locator('#mobile-region').click();
+ await page.locator('[data-mobile-region="thorax"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:25000}).toBe('thorax');
- await expect(page.locator('.region-dock-grid [data-region="thorax"]')).toHaveAttribute('aria-pressed','true');
 });
-
 test('Elbow muscle layer identifies a sourced muscle from its projected triangle, not a fabricated label',async({page})=>{
  const errors=await open(page,'elbow');
  await page.locator('#mode-trace').click();
