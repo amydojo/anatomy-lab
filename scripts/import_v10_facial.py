@@ -18,7 +18,7 @@ SOURCE_REPO="choxos/OMFAtlas"
 COMMIT="c835665a9ade09ee0b993cee6eee1b25b7f7311b"
 BASE=f"https://raw.githubusercontent.com/{SOURCE_REPO}/{COMMIT}/public/models/facial/"
 EXPECTED_MANIFEST_BLOB="de8608c724c50f15955bf0269767e0ec65a390a7"
-EXPECTED_BINARY_BLOB="0332821585e1b03ac4258d891b3ec220ab3ff30"
+EXPECTED_BINARY_BLOB="0332821585e1b03ac4258d891b3ec220ab3ff30a"
 TARGET=ROOT/"atlas/assets/v10-facial-reference.json"
 PROOF=ROOT/"atlas/assets/v10-facial-provenance.json"
 
