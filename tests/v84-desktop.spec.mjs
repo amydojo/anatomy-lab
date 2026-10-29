@@ -73,8 +73,8 @@ test('Desktop dual-axis motion mirrors rig state and Neutral without replacing s
  await page.keyboard.press('m');
  await expect(page.locator('#studio-motion')).toBeVisible();
  await expect(page.locator('#studio-secondary-wrap')).toBeVisible();
- await page.locator('#studio-motion-slider').fill('65');
- await page.locator('#studio-secondary-slider').fill('25');
+ await page.locator('#studio-motion-slider').evaluate(el=>{el.value='65';el.dispatchEvent(new Event('input',{bubbles:true}));});
+ await page.locator('#studio-secondary-slider').evaluate(el=>{el.value='25';el.dispatchEvent(new Event('input',{bubbles:true}));});
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(65);
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.secondary)).toBe(25);
  await expect(page.locator('#studio-motion-degree')).toHaveText('65°');
