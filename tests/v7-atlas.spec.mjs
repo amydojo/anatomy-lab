@@ -1,8 +1,8 @@
 import {test,expect} from '@playwright/test';
 const regions={
- skull:{parts:14,muscles:16,animated:false},
- neck:{parts:8,muscles:14,animated:false},
- thorax:{parts:30,muscles:11,animated:false},
+ skull:{parts:14,muscles:16,animated:true},
+ neck:{parts:8,muscles:14,animated:true},
+ thorax:{parts:30,muscles:11,animated:true},
  elbow:{parts:3,muscles:10,animated:true},
  wrist:{parts:15,muscles:10,animated:true},
  ankle:{parts:14,muscles:12,animated:true}
