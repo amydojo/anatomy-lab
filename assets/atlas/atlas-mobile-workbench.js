@@ -49,6 +49,7 @@ function renderState(s){
  $('mobile-region-name').textContent=region?labels[region]:'FULL BODY';
  $('mobile-home').hidden=!region;
  $('mobile-source').hidden=!(region==='nerve'&&s.view==='focused');
+ $('mobile-frame').hidden=region==='nerve'&&s.view==='focused';
  $('mobile-region').setAttribute('aria-label',region?'Current region '+labels[region]+'. Choose a different region':'Choose an anatomical region');
  $('mobile-workbench').dataset.tool=activeTool;
  for(const b of document.querySelectorAll('[data-mobile-tool]')){
@@ -153,6 +154,10 @@ const observer=new MutationObserver(()=>{
  if(!isMobile())return;
  const s=snapshot(),r=regionOf(s),id=s.unified?.selected;
  if(r!==lastRegion||id!==lastSelection||$('atlas-app').dataset.mode!==$('mobile-workbench').dataset.mode){
+  // Direct structure taps must produce immediate visible feedback. The old
+  // inspector chip is intentionally hidden on phones, so open the one-pane
+  // inspector when a new source surface is selected.
+  if(id&&id!==lastSelection)activeTool='inspect';
   $('mobile-workbench').dataset.mode=$('atlas-app').dataset.mode;
   sync();
  }
