@@ -277,3 +277,10 @@
  .mobile-panel{max-height:35dvh}
  .mobile-region-card{max-height:88dvh}
 }
+
+
+.overview-system-buttons{flex-wrap:wrap}
+@media(max-width:850px){
+ #mobile-overview-tissues.mobile-choice-row{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+ #mobile-overview-tissues button{font-size:10px;padding:5px 2px;min-height:43px}
+}
