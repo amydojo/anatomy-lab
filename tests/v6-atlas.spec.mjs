@@ -80,7 +80,7 @@ for(const region of ['hip','knee']){
   const posed=await canvas.screenshot();
   expect(rest.equals(posed)).toBe(false);
   expect(await canvas.boundingBox()).toEqual(viewport);
-  await expect(page.locator('#motion-description')).toHaveText('INFERRED ATTACHMENTS');
+  await expect(page.locator('#motion-description')).toHaveText('REGIONAL KINEMATICS · UNVALIDATED');
   await page.screenshot({path:'artifacts/v6-'+region+'-muscle-pose-'+test.info().project.name+'.png',fullPage:true});
   await page.locator('#reset-view').click();
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(0);
@@ -318,7 +318,7 @@ test('Shoulder muscle attachments actually follow humerus without changing sourc
  const bent=await canvas.screenshot();
  expect(atRest.equals(bent)).toBe(false);
  expect(await canvas.evaluate(el=>({w:el.width,h:el.height}))).toEqual(ref);
- await expect(page.locator('#motion-description')).toHaveText('INFERRED ATTACHMENTS');
+ await expect(page.locator('#motion-description')).toHaveText('REGIONAL KINEMATICS · UNVALIDATED');
  await page.locator('#reset-view').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(0);
  expect(errors).toEqual([]);
