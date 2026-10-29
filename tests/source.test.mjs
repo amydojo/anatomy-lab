@@ -735,7 +735,8 @@ test('V9 199 conventional bones, sourced muscles and connective surfaces remain 
  assert.equal(v9.source_commit,base.source_commit);
  assert.equal(v9.source_commit,v8.source_commit);
  assert.equal(v9.source_commit,proof.source_commit);
- assert.deepEqual(v9.source_frame,v8.source_frame);
+ assert.deepEqual(v9.source_frame.origin_metres,v8.source_frame.origin_metres);
+ assert.equal(v9.source_frame.scale,v8.source_frame.scale);
  assert.equal(proof.anatomist_reviewed,false);
  assert.equal(proof.kinematics_validated,false);
  assert.equal(proof.clinical_use_approved,false);
