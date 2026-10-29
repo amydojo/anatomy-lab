@@ -147,7 +147,7 @@ function create(canvas,onContextLost=()=>{}){
    hip||shoulder?Object.entries(asset.parts):
     [...Object.entries(asset.bone_meshes),...Object.entries(asset.muscle_meshes||{})];
   const toWorld=part=>part.vertices.map(p=>p.map((v,i)=>(v/factor+origin[i]-[0,.9,0][i])*5));
-  const worldParts=hip?Object.fromEntries(Object.entries(asset.parts).map(([id,p])=>[id,{vertices:toWorld(p)}])):
+  const worldParts=hip||shoulder||extended?Object.fromEntries(Object.entries(asset.parts).map(([id,p])=>[id,{vertices:toWorld(p)}])):
    knee?Object.fromEntries(entries.map(([id,p])=>[id,{vertices:toWorld(p)}])):null;
   if(knee&&Object.keys(asset.muscle_meshes||{}).length!==5)throw Error('Sourced knee muscles unavailable');
   try{
@@ -163,7 +163,7 @@ function create(canvas,onContextLost=()=>{}){
       converted.skinWeights=rig.weights;converted.rig=rig;
     }
     if(extended&&tissue){
-     const rig=window.BodyExtendedRegions.createSkin(region,id,converted.vertices,asset.parts);
+     const rig=window.BodyRegionMotion.skin(region,id,converted.vertices,worldParts)||window.BodyExtendedRegions.createSkin(region,id,converted.vertices,worldParts);
      if(rig){converted.skinWeights=rig.weights;converted.rig=rig;}
     }
     if(shoulder&&tissue){
@@ -204,7 +204,7 @@ function create(canvas,onContextLost=()=>{}){
   if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
   return {width:w,height:h,dpr};
  }
- function render(camera,selected,mode='clean',layer=0,reveal=0,flex=0,highlight=null){
+ function render(camera,selected,mode='clean',layer=0,reveal=0,flex=0,highlight=null,secondary=0){
   const size=resize();if(!gl||status!=='ready')return size;
   gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(0,0,0,0);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   gl.useProgram(program);const uni=name=>gl.getUniformLocation(program,name);
@@ -213,10 +213,11 @@ function create(canvas,onContextLost=()=>{}){
   gl.uniform1f(uni('uZoom'),camera.zoom);gl.uniform1f(uni('uFrameSpan'),camera.frameSpan);
   gl.uniform3f(uni('uTarget'),camera.target.x,camera.target.y,camera.target.z);
   const locP=gl.getAttribLocation(program,'aPosition'),locN=gl.getAttribLocation(program,'aNormal'),locW=gl.getAttribLocation(program,'aSkinWeight');
-  const shoulderPose=selected==='shoulder'&&shoulderGraph?shoulderGraph.pose(flex):null;
-  const lowerPose=(selected==='hip'||selected==='knee')&&detail.has(selected)?window.BodyLowerLimbRig.pose(selected,flex):null;
+  const M=window.BodyRegionMotion;
+  const shoulderPose=selected==='shoulder'&&shoulderGraph?M.poseLegacy('shoulder',shoulderGraph.pose(flex),secondary):null;
+  const lowerPose=(selected==='hip'||selected==='knee')&&detail.has(selected)?M.poseLegacy(selected,window.BodyLowerLimbRig.pose(selected,flex),secondary):null;
   const extendedPose=window.BodyExtendedRegions?.has(selected)&&detailData.has(selected)
-   ?window.BodyExtendedRegions.createPose(selected,detailData.get(selected),flex):null;
+   ?M.poseExtended(selected,detailData.get(selected),flex,secondary):null;
   const jointPose=shoulderPose||lowerPose||extendedPose;
   const draw=(item,dim=1,alpha=1)=>{
    const moving=(selected==='hip'&&item.id==='femur')||(selected==='knee'&&['tibia','fibula','patella'].includes(item.id))||(selected==='shoulder'&&item.id==='humerus');
@@ -309,7 +310,7 @@ function create(canvas,onContextLost=()=>{}){
   }
   return size;
  }
- function hitTest(camera,region,layer,flex,x,y){
+ function hitTest(camera,region,layer,flex,x,y,secondary=0){
   if(!detail.has(region)||!Number.isFinite(x)||!Number.isFinite(y))return null;
   const width=canvas.clientWidth,height=canvas.clientHeight;
   if(!width||!height)return null;
@@ -319,10 +320,11 @@ function create(canvas,onContextLost=()=>{}){
   const chosen=region==='knee'?(layer===1?new Set(['femur']):layer===2?new Set(['tibia','fibula']):layer===3?new Set(['patella']):null):null;
   const hipLayers=(region==='shoulder'?SHOULDER_LAYERS:region==='knee'?KNEE_MUSCLE_LAYERS:DEPTH_HIP)[clamp(Number(layer)||0,0,3)]||{};
   const angle=Number(flex)*Math.PI/180,ca=Math.cos(angle),sa=Math.sin(angle);
-  const shoulderPose=region==='shoulder'&&shoulderGraph?shoulderGraph.pose(flex):null;
-  const lowerPose=(region==='hip'||region==='knee')?window.BodyLowerLimbRig.pose(region,flex):null;
+  const M=window.BodyRegionMotion;
+  const shoulderPose=region==='shoulder'&&shoulderGraph?M.poseLegacy('shoulder',shoulderGraph.pose(flex),secondary):null;
+  const lowerPose=(region==='hip'||region==='knee')?M.poseLegacy(region,window.BodyLowerLimbRig.pose(region,flex),secondary):null;
   const extendedPose=window.BodyExtendedRegions?.has(region)&&detailData.has(region)
-   ?window.BodyExtendedRegions.createPose(region,detailData.get(region),flex):null;
+   ?M.poseExtended(region,detailData.get(region),flex,secondary):null;
   const jointPose=shoulderPose||lowerPose||extendedPose;
   let nearest=null,front=-Infinity;
   const projection={...camera,width,height};

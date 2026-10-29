@@ -1,0 +1,43 @@
+name: V8.2 region-by-region motion QA
+on:
+  push:
+    branches: [feat/v8-2-regional-kinematics]
+  pull_request:
+    branches: [feat/v8-0-unified-specimen]
+permissions:
+  contents: read
+concurrency:
+  group: regional-motion-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  motion:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Source and bounded kinematic contracts
+        run: npm test
+      - run: npx playwright install chromium webkit
+      - name: Nine motion labs, mobile interaction and original source regions
+        run: npx playwright test tests/v82-motion.spec.mjs tests/v7-atlas.spec.mjs tests/v8-atlas.spec.mjs --reporter=line
+  regression:
+    needs: motion
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install chromium webkit
+      - name: Full BODY LIVE regression
+        run: npm run test:e2e
