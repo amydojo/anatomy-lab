@@ -28,10 +28,10 @@ const DEPTH_HIP={
 };
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function create(canvas,onContextLost=()=>{}){
- let gl=null,program=null,buffers=[],overviewBones=[],overviewMuscles=[],overviewData=null,overviewSystem='combined',status='loading',model=null;
+ let gl=null,program=null,buffers=[],overviewBones=[],overviewMuscles=[],overviewData=null,expansionData=null,expansionBones=[],expansionMuscles=[],expansionConnective=[],overviewSystem='combined',status='loading',model=null;
  let registry=window.BodyAtlasRegistry.create();
  const detail=new Map(),detailData=new Map();let shoulderPivot=[-1.1,1.9,0],shoulderGraph=null;
- function cleanup(){if(gl){for(const item of [...buffers,...overviewBones,...overviewMuscles,...[...detail.values()].flat()])gl.deleteBuffer(item.buffer);if(program)gl.deleteProgram(program);}buffers=[];overviewBones=[];overviewMuscles=[];detail.clear();program=null;}
+ function cleanup(){if(gl){for(const item of [...buffers,...overviewBones,...overviewMuscles,...expansionBones,...expansionMuscles,...expansionConnective,...[...detail.values()].flat()])gl.deleteBuffer(item.buffer);if(program)gl.deleteProgram(program);}buffers=[];overviewBones=[];overviewMuscles=[];expansionBones=[];expansionMuscles=[];expansionConnective=[];detail.clear();program=null;}
  function compile(type,source){const sh=gl.createShader(type);gl.shaderSource(sh,source);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(sh));return sh;}
  function setup(){
   gl=canvas.getContext('webgl2',{alpha:true,antialias:true,depth:true,premultipliedAlpha:false,powerPreference:'low-power'});
@@ -100,6 +100,7 @@ function create(canvas,onContextLost=()=>{}){
   registry=window.BodyAtlasRegistry.create();registry.base(asset);
   status='ready';
   if(overviewData)loadOverview(overviewData);
+  if(expansionData)loadExpansion(expansionData);
   for(const [region,d] of detailData)loadDetail(region,d);
   return true;
  }
@@ -124,7 +125,7 @@ function create(canvas,onContextLost=()=>{}){
   return true;
  }
  function setOverviewSystem(system){
-  if(!['bones','muscles','combined'].includes(system))return false;
+  if(!['bones','muscles','combined','connective'].includes(system))return false;
   overviewSystem=system;return true;
  }
  function loadDetail(region,asset){
@@ -405,8 +406,8 @@ function create(canvas,onContextLost=()=>{}){
   return {markers:pose.markers,rest:pose.rest,degrees:pose.degrees,
    elevation:pose.elevation,attachments,validated:false};
  }
- function dispose(){cleanup();model=null;overviewData=null;shoulderGraph=null;detailData.clear();}
- return Object.freeze({load,loadOverview,setOverviewSystem,getOverviewSystem:()=>overviewSystem,registry:()=>registry,loadDetail,touchDetail,hasDetail:region=>detail.has(region),render,hitTest,shoulderDiagnostics,resize,getStatus:()=>status,dispose,stats:()=>({partCount:buffers.length,overviewBones:overviewBones.length,overviewMuscles:overviewMuscles.length,overviewSystem,registry:registry.stats(),triangles:[...buffers,...overviewBones,...overviewMuscles].reduce((n,b)=>n+b.count/3,0),webgl:status==='ready',detailRegions:[...detail.keys()],detailMeshes:[...detail.values()].reduce((n,items)=>n+items.length,0),riggedShoulderMuscles:(detail.get('shoulder')||[]).filter(p=>p.skinWeights).length,riggedHipMuscles:(detail.get('hip')||[]).filter(p=>p.skinWeights).length,riggedKneeMuscles:(detail.get('knee')||[]).filter(p=>p.skinWeights).length,coordinatedShoulder:!!shoulderGraph,expandedRegions:[...detail.keys()].filter(id=>window.BodyExtendedRegions?.has(id)),expandedMeshes:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>!x.tissue).length,0),expandedMuscles:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>x.tissue).length,0)})});
+ function dispose(){cleanup();model=null;overviewData=null;expansionData=null;shoulderGraph=null;detailData.clear();}
+ return Object.freeze({load,loadOverview,loadExpansion,setOverviewSystem,getOverviewSystem:()=>overviewSystem,registry:()=>registry,loadDetail,touchDetail,hasDetail:region=>detail.has(region),render,hitTest,shoulderDiagnostics,resize,getStatus:()=>status,dispose,stats:()=>({partCount:buffers.length,overviewBones:overviewBones.length,overviewMuscles:overviewMuscles.length,expansionBones:expansionData?Object.keys(expansionData.bones).length:0,expansionMuscles:expansionData?Object.keys(expansionData.muscles).length:0,expansionConnective:expansionData?Object.keys(expansionData.connective).length:0,overviewSystem,registry:registry.stats(),triangles:[...buffers,...overviewBones,...overviewMuscles].reduce((n,b)=>n+b.count/3,0),webgl:status==='ready',detailRegions:[...detail.keys()],detailMeshes:[...detail.values()].reduce((n,items)=>n+items.length,0),riggedShoulderMuscles:(detail.get('shoulder')||[]).filter(p=>p.skinWeights).length,riggedHipMuscles:(detail.get('hip')||[]).filter(p=>p.skinWeights).length,riggedKneeMuscles:(detail.get('knee')||[]).filter(p=>p.skinWeights).length,coordinatedShoulder:!!shoulderGraph,expandedRegions:[...detail.keys()].filter(id=>window.BodyExtendedRegions?.has(id)),expandedMeshes:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>!x.tissue).length,0),expandedMuscles:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>x.tissue).length,0)})});
 }
 window.BodyAtlasRenderer=Object.freeze({create});
 })();
