@@ -54,6 +54,24 @@ async function load(key,{refresh=false}={}){
   if(key==='overviewV8Proof'&&(json.schema!=='body-live/overview-v8-provenance-v1'||
     json.anatomist_reviewed!==false||json.source_commit!=='1c38bf35c254a891200d3cedecfd57abebe83d8d'))
     throw Error('Invalid V8 overview provenance');
+  if(key==='expansionV9'){
+   if(json.schema!=='body-live/v9-source-expansion-v1'||json.license!=='CC BY 4.0'||
+      json.source_commit!=='1c38bf35c254a891200d3cedecfd57abebe83d8d'||
+      json.source_frame?.scale!==5)throw Error('V9 mesh source mismatch');
+   for(const kind of ['bones','muscles','connective']){
+    const collection=json[kind];if(!collection||!Object.keys(collection).length)throw Error('Empty V9 '+kind);
+    for(const [id,p] of Object.entries(collection)){
+     if(!p.fma||!p.name||p.vertices?.length<25||p.faces?.length<25||
+        p.faces.some(f=>f.length!==3||f.some(v=>!Number.isInteger(v)||v<0||v>=p.vertices.length)))
+         throw Error('Corrupt V9 source geometry '+id);
+    }
+   }
+  }
+  if(key==='expansionV9Proof'){
+   if(json.schema!=='body-live/v9-source-provenance-v1'||json.anatomist_reviewed!==false||
+      json.kinematics_validated!==false||json.clinical_use_approved!==false)
+    throw Error('V9 source disclosure is missing');
+  }
   if(key==='hipGeometry'||key==='kneeGeometry'){
     const hip=key==='hipGeometry';
     if(json.schema!==(hip?'body-live/hip-sourced-v1':'body-live/sourced-knee-geometry-v1')||json.license!=='CC BY 4.0')throw Error('Region sourced geometry schema/license mismatch');
