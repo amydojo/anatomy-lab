@@ -277,3 +277,19 @@
  .mobile-panel{max-height:35dvh}
  .mobile-region-card{max-height:88dvh}
 }
+
+
+.overview-system-buttons{flex-wrap:wrap}
+@media(max-width:850px){
+ #mobile-overview-tissues.mobile-choice-row{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+ #mobile-overview-tissues button{font-size:10px;padding:5px 2px;min-height:43px}
+}
+
+
+[data-source-links][hidden],[data-source-links-list][hidden]{display:none!important}
+[data-source-links]{margin-top:12px;border-top:1px solid #654c3b;padding-top:10px}
+[data-source-links-toggle]{font-size:11px;text-align:left;font-weight:700;color:#edd0b6;border:1px solid #8c6148;background:#423025;border-radius:9px;min-height:38px;padding:8px 12px}
+[data-source-links-list]{margin-top:11px;max-height:145px;overflow-y:auto;overscroll-behavior:contain}
+[data-source-links-list] article{padding:8px 0;border-bottom:1px solid #594537}
+[data-source-links-list] strong{font-size:12px;text-transform:capitalize;color:#f0d6bf}
+[data-source-links-list] p{font-size:10px;line-height:1.5;color:#c5a38d;margin:4px 0 0}

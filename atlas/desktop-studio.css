@@ -103,3 +103,10 @@
 @media(prefers-reduced-motion:reduce){
  .studio-region-dialog,.studio-tray,.studio-inspector{transition:none!important}
 }
+
+
+@media(min-width:851px){
+ #studio-tissues.studio-choice-row{grid-template-columns:repeat(4,minmax(0,1fr))}
+ #studio-tissues button{padding:10px 8px}
+ #studio-tissues button span{font-size:13px}
+}

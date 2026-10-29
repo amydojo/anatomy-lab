@@ -724,3 +724,92 @@ test('V8.2 anatomically scoped motion stays bounded, uses real source pivots and
  assert.deepEqual(R.poseLegacy('knee',knee,0).matrices,knee.matrices);
  assert.equal(R.poseLegacy('nerve',knee,20),knee);
 });
+
+test('V9 199 conventional bones, sourced muscles and connective surfaces remain identity-verified',async()=>{
+ const {createHash}=await import('node:crypto');
+ const base=JSON.parse(read('atlas/assets/body-skeleton.json'));
+ const v8=JSON.parse(read('atlas/assets/v8-overview-detail.json'));
+ const v9=JSON.parse(read('atlas/assets/v9-source-expansion.json'));
+ const proof=JSON.parse(read('atlas/assets/v9-source-provenance.json'));
+ assert.equal(v9.schema,'body-live/v9-source-expansion-v1');
+ assert.equal(v9.source_commit,base.source_commit);
+ assert.equal(v9.source_commit,v8.source_commit);
+ assert.equal(v9.source_commit,proof.source_commit);
+ assert.deepEqual(v9.source_frame.origin_metres,v8.source_frame.origin_metres);
+ assert.equal(v9.source_frame.scale,v8.source_frame.scale);
+ assert.equal(proof.anatomist_reviewed,false);
+ assert.equal(proof.kinematics_validated,false);
+ assert.equal(proof.clinical_use_approved,false);
+ assert.equal(createHash('sha256').update(read('atlas/assets/v9-source-expansion.json')).digest('hex'),proof.asset_sha256);
+ assert.equal(Object.keys(v9.bones).length,64);
+ assert.equal(Object.keys(v9.muscles).length,237);
+ assert.equal(Object.keys(v9.connective).length,48);
+ assert.equal(proof.conventional_skeleton.total_rendered_standard_bones,199);
+ assert.equal(proof.conventional_skeleton.unavailable_in_pinned_atlas.length,7);
+ const digits=Object.values(v9.bones).filter(p=>/phalanx of/i.test(p.name));
+ assert.equal(digits.length,56);
+ assert.equal(Object.keys(v9.bones).length-digits.length,8);
+ const known=[...base.parts,...Object.values(v8.bones),...Object.values(v8.muscles)];
+ const ids=new Set([...base.parts.map(p=>p.id),...Object.keys(v8.bones),...Object.keys(v8.muscles)]);
+ const fmas=new Set(known.map(p=>p.fma));
+ for(const [kind,system]of [['bones','bone'],['muscles','muscle'],['connective','connective']]){
+  for(const [id,p]of Object.entries(v9[kind])){
+   assert.ok(!ids.has(id),'duplicate geometry '+id);ids.add(id);
+   assert.ok(!fmas.has(p.fma),'duplicate source FMA '+p.fma);fmas.add(p.fma);
+   assert.equal(p.system,system);
+   assert.equal(p.reference_pose_only,true);
+   assert.ok(p.faces.length>=25);
+   assert.ok(p.vertices.every(v=>v.length===3&&v.every(Number.isFinite)));
+   assert.ok(p.faces.every(f=>f.length===3&&f.every(x=>Number.isInteger(x)&&x>=0&&x<p.vertices.length)));
+  }
+ }
+ assert.equal(ids.size,78+59+149+64+237+48);
+ assert.ok(proof.subgroups.back>=30);
+ assert.ok(proof.subgroups['intrinsic-hand-foot']>=55);
+ assert.equal(proof.subgroups.face,0);
+ for(const x of v9.relationships){
+  assert.ok(ids.has(x.structure));assert.ok(x.related.every(n=>ids.has(n)));
+  assert.equal(x.motion_validated,false);
+  assert.equal(x.attachment_coordinates_validated,false);
+ }
+ for(const path of ['assets/atlas/atlas-v9-source.js','assets/atlas/atlas-loader.js','assets/atlas/atlas-renderer.js']){
+  assert.doesNotThrow(()=>new Function(read(path)),path);
+ }
+ assert.match(read('atlas/index.html'),/data-studio-tissue="connective"/);
+ assert.match(read('atlas/index.html'),/data-mobile-tissue="connective"/);
+});
+
+test('V9 canonical digital bones and external-review release gates are explicit',()=>{
+ const v9=JSON.parse(read('atlas/assets/v9-source-expansion.json'));
+ const status=JSON.parse(read('docs/v9-review-status.json'));
+ const all=Object.values(v9.bones).map(p=>p.name.toLowerCase());
+ const finger=all.filter(n=>n.includes('phalanx of')&&(n.includes('finger')||n.includes('thumb')));
+ const toe=all.filter(n=>n.includes('phalanx of')&&n.includes('toe'));
+ assert.equal(finger.length,28);
+ assert.equal(toe.length,28);
+ for(const side of ['left','right']){
+   assert.equal(finger.filter(n=>n.includes(side)).length,14,side+' hand has 14 bones');
+   assert.equal(toe.filter(n=>n.includes(side)).length,14,side+' foot has 14 bones');
+   for(const digit of ['thumb','big toe']){
+     const group=(digit==='thumb'?finger:toe).filter(n=>n.includes(side)&&n.includes(digit));
+     assert.equal(group.length,2,side+' '+digit+' has two phalanges, no fabricated middle');
+   }
+ }
+ const skull=['ethmoid','vomer','left lacrimal bone','right lacrimal bone',
+ 'left palatine bone','right palatine bone','left inferior nasal concha','right inferior nasal concha'];
+ for(const name of skull)assert.equal(all.filter(n=>n===name).length,1,'source skull bone '+name);
+ assert.equal(status.release_approved,false);
+ assert.equal(status.expert_validated,false);
+ assert.equal(status.clinical_use_approved,false);
+ for(const candidate of Object.values(status.candidate_meshes)){
+   assert.equal(candidate.integrated,false,'external source must not be represented as imported');
+   assert.equal(candidate.frame_registered,false,'coordinate compatibility must not be assumed');
+ }
+ for(const [scope,g] of Object.entries(status.approvals)){
+   if(g.status.startsWith('approved')){
+     assert.ok(g.reviewer?.name&&g.reviewer?.credential&&g.reviewer?.affiliation,scope+' requires independent named reviewer');
+     assert.ok(g.signed_at&&g.evidence?.length,scope+' requires dated evidence');
+   }
+ }
+ assert.equal(status.approvals.whole_application_regression.status,'failed');
+});

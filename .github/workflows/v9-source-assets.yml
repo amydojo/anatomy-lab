@@ -1,0 +1,38 @@
+name: Generate verified V9 anatomy expansion
+on:
+  push:
+    branches: [feat/v9-source-anatomy-expansion]
+    paths:
+      - scripts/build_v9_anatomy.py
+      - .github/workflows/v9-source-assets.yml
+permissions:
+  contents: write
+concurrency:
+  group: v9-source-geometry
+  cancel-in-progress: false
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deterministic mesh-reduction dependencies
+        run: python -m pip install --disable-pip-version-check numpy==2.3.4 fast-simplification==0.1.12
+      - name: Validate pinned original anatomy and generate non-synthetic structures
+        run: python scripts/build_v9_anatomy.py
+      - name: Commit SHA-verified sourced geometry and limitations manifest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add atlas/assets/v9-source-expansion.json atlas/assets/v9-source-provenance.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Generate V9 source anatomy expansion and explicit missing-source audit"
+            git fetch origin "refs/heads/${GITHUB_REF_NAME}"
+            git rebase FETCH_HEAD
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi

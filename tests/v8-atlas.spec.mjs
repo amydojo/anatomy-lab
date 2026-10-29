@@ -3,7 +3,7 @@ async function ready(page){
  const errors=[];page.on('pageerror',e=>errors.push(String(e)));
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.goto('/atlas/');
- await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().overviewLoaded===true),{timeout:35000}).toBe(true);
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().expansionLoaded===true),{timeout:35000}).toBe(true);
  return errors;
 }
 test('V8 overview renders 137 canonical bones and 149 muscles with three working global systems',async({page})=>{
@@ -13,12 +13,12 @@ test('V8 overview renders 137 canonical bones and 149 muscles with three working
  expect(state.renderer.partCount).toBe(78);
  expect(state.renderer.overviewBones).toBe(59);
  expect(state.renderer.overviewMuscles).toBe(149);
- expect(state.renderer.registry.bones).toBe(137);
- expect(state.renderer.registry.muscles).toBe(149);
+ expect(state.renderer.registry.bones).toBe(201);
+ expect(state.renderer.registry.muscles).toBe(386);
  expect(state.renderer.registry.duplicateIds).toBe(0);
  expect(state.renderer.overviewSystem).toBe('combined');
- await expect(page.locator('#overview-coverage')).toContainText('137 BONES');
- await expect(page.locator('#overview-coverage')).toContainText('149 MUSCLES');
+ await expect(page.locator('#overview-coverage')).toContainText('201 BONE MESHES');
+ await expect(page.locator('#overview-coverage')).toContainText('386 MUSCLE MESHES');
  const before=await page.locator('#atlas-canvas').screenshot();
  if((await page.viewportSize()).width<=850){
   if(!(await page.locator('#mobile-layers').isVisible()))await page.locator('[data-mobile-tool="layers"]').click();
