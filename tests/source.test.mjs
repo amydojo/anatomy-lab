@@ -679,3 +679,48 @@ test('V8.2 source-matched muscle rigs follow their designated moving bones witho
   assert.equal(countRigged,count,region+' tissue coverage');
  }
 });
+
+test('V8.2 anatomically scoped motion stays bounded, uses real source pivots and returns neutral without drift',async()=>{
+ const vm=await import('node:vm');
+ const context={window:{},Float32Array,Math,Number,Object,Set,Map,WeakMap,Array,Error};
+ vm.runInNewContext(read('assets/atlas/atlas-extended-regions.js'),context);
+ vm.runInNewContext(read('assets/atlas/atlas-region-motion.js'),context);
+ const R=context.window.BodyRegionMotion;
+ const moving=['hip','knee','shoulder','skull','neck','thorax','elbow','wrist','ankle'];
+ assert.equal(R.profile('nerve'),null,'No invented nerve joint mechanics');
+ assert.equal(R.profile('skull').label,'Mandible opening');
+ assert.equal(R.profile('thorax').label,'Inspiratory rib lift');
+ for(const id of moving){
+  const profile=R.profile(id);
+  assert.ok(profile&&profile.max>0,id+' must have bounded motion');
+  const values=R.safe(id,10000,-9999);
+  assert.equal(values.primary,profile.max,id+' clamps primary angle');
+  assert.equal(values.secondary,profile.other?profile.minSecondary:0,id+' clamps secondary');
+  const rest=R.safe(id,0,0);
+  assert.equal(rest.primary,0);assert.equal(rest.secondary,0);
+ }
+ for(const name of ['skull','neck','thorax','elbow','wrist','ankle']){
+  const asset=JSON.parse(read('atlas/regions/'+name+'.json'));
+  const a=R.poseExtended(name,asset,0,0);
+  const primary=R.profile(name).max*.5;
+  const b=R.poseExtended(name,asset,primary,0);
+  const c=R.poseExtended(name,asset,0,0);
+  assert.equal(a.validated,false);
+  const flattened=(pose)=>Object.values(pose.matrices).flatMap(m=>Array.from(m));
+  const one=flattened(a),two=flattened(b),three=flattened(c);
+  assert.ok(one.length>0);
+  assert.ok(two.every(Number.isFinite),name+' nonfinite animated source geometry');
+  assert.ok(two.some((v,i)=>Math.abs(v-one[i])>1e-6),name+' does not move any source structure');
+  assert.deepEqual(three,one,name+' repeated rest pose drift');
+  if(R.profile(name).other){
+   const d=R.poseExtended(name,asset,primary,R.profile(name).maxSecondary*.5);
+   const four=flattened(d);
+   assert.ok(four.some((v,i)=>Math.abs(v-two[i])>1e-6),name+' secondary axis fails to move');
+  }
+ }
+ const I=R.identity(),knee={matrices:{femur:I,tibia:I,fibula:I,patella:I},validated:false};
+ const k=R.poseLegacy('knee',knee,8);
+ assert.ok(Array.from(k.matrices.tibia).some((v,i)=>Math.abs(v-I[i])>1e-6));
+ assert.deepEqual(R.poseLegacy('knee',knee,0).matrices,knee.matrices);
+ assert.equal(R.poseLegacy('nerve',knee,20),knee);
+});
