@@ -28,10 +28,10 @@ const DEPTH_HIP={
 };
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function create(canvas,onContextLost=()=>{}){
- let gl=null,program=null,buffers=[],overviewBones=[],overviewMuscles=[],overviewData=null,expansionData=null,expansionBones=[],expansionMuscles=[],expansionConnective=[],overviewSystem='combined',status='loading',model=null;
+ let gl=null,program=null,buffers=[],overviewBones=[],overviewMuscles=[],overviewData=null,expansionData=null,expansionBones=[],expansionMuscles=[],expansionConnective=[],expansionDetail=new Map(),overviewSystem='combined',status='loading',model=null;
  let registry=window.BodyAtlasRegistry.create();
  const detail=new Map(),detailData=new Map();let shoulderPivot=[-1.1,1.9,0],shoulderGraph=null;
- function cleanup(){if(gl){for(const item of [...buffers,...overviewBones,...overviewMuscles,...expansionBones,...expansionMuscles,...expansionConnective,...[...detail.values()].flat()])gl.deleteBuffer(item.buffer);if(program)gl.deleteProgram(program);}buffers=[];overviewBones=[];overviewMuscles=[];expansionBones=[];expansionMuscles=[];expansionConnective=[];detail.clear();program=null;}
+ function cleanup(){if(gl){for(const item of [...buffers,...overviewBones,...overviewMuscles,...expansionBones,...expansionMuscles,...expansionConnective,...[...expansionDetail.values()].flat(),...[...detail.values()].flat()])gl.deleteBuffer(item.buffer);if(program)gl.deleteProgram(program);}buffers=[];overviewBones=[];overviewMuscles=[];expansionBones=[];expansionMuscles=[];expansionConnective=[];expansionDetail.clear();detail.clear();program=null;}
  function compile(type,source){const sh=gl.createShader(type);gl.shaderSource(sh,source);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(sh));return sh;}
  function setup(){
   gl=canvas.getContext('webgl2',{alpha:true,antialias:true,depth:true,premultipliedAlpha:false,powerPreference:'low-power'});
