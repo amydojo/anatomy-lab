@@ -20,15 +20,24 @@ test('V8 overview renders 137 canonical bones and 149 muscles with three working
  await expect(page.locator('#overview-coverage')).toContainText('137 BONES');
  await expect(page.locator('#overview-coverage')).toContainText('149 MUSCLES');
  const before=await page.locator('#atlas-canvas').screenshot();
- await page.locator('[data-overview-system="bones"]').click();
+ if((await page.viewportSize()).width<=850){
+  if(!(await page.locator('#mobile-layers').isVisible()))await page.locator('[data-mobile-tool="layers"]').click();
+  await page.locator('[data-mobile-tissue="bones"]').click();
+ }else await page.locator('[data-overview-system="bones"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.overviewSystem)).toBe('bones');
  const bones=await page.locator('#atlas-canvas').screenshot();
  expect(before.equals(bones)).toBe(false);
- await page.locator('[data-overview-system="muscles"]').click();
+ if((await page.viewportSize()).width<=850){
+  if(!(await page.locator('#mobile-layers').isVisible()))await page.locator('[data-mobile-tool="layers"]').click();
+  await page.locator('[data-mobile-tissue="muscles"]').click();
+ }else await page.locator('[data-overview-system="muscles"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.overviewSystem)).toBe('muscles');
  const muscles=await page.locator('#atlas-canvas').screenshot();
  expect(bones.equals(muscles)).toBe(false);
- await page.locator('[data-overview-system="combined"]').click();
+ if((await page.viewportSize()).width<=850){
+  if(!(await page.locator('#mobile-layers').isVisible()))await page.locator('[data-mobile-tool="layers"]').click();
+  await page.locator('[data-mobile-tissue="combined"]').click();
+ }else await page.locator('[data-overview-system="combined"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.overviewSystem)).toBe('combined');
  await expect(page.locator('[data-overview-system="combined"]')).toHaveAttribute('aria-pressed','true');
  expect(errors).toEqual([]);
