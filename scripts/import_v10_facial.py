@@ -23,7 +23,7 @@ TARGET=ROOT/"atlas/assets/v10-facial-reference.json"
 PROOF=ROOT/"atlas/assets/v10-facial-provenance.json"
 
 def gitsha(data):
- return hashlib.sha1(b"blob "+str(len(data)).encode()+b"\\0"+data).hexdigest()
+ return hashlib.sha1(b"blob "+str(len(data)).encode()+b"\0"+data).hexdigest()
 def download(file,blob):
  req=urllib.request.Request(BASE+file,headers={"User-Agent":"BODY-LIVE-registered-open-anatomy/1.0"})
  with urllib.request.urlopen(req,timeout=95) as resp:
@@ -91,7 +91,7 @@ def main():
   "source_commit":COMMIT,"base_source_commit":base["source_commit"],
   "source_frame":{"origin_metres":[0,.9,0],"scale":5,"axes":"BodyParts3D 4.0 derivative metres Y up"},
   "license":"CC-BY-SA-2.1-JP","parts":out}
- TARGET.write_text(json.dumps(payload,separators=(",",":"))+"\\n")
+ TARGET.write_text(json.dumps(payload,separators=(",",":"))+"\n")
  proof={"schema":"body-live/v10-facial-provenance-v1","source_repo":SOURCE_REPO,
   "pinned_omf_commit":COMMIT,"manifest_git_blob":EXPECTED_MANIFEST_BLOB,
   "facial_bin_git_blob":EXPECTED_BINARY_BLOB,
@@ -112,7 +112,7 @@ def main():
    "Transform validated numerically upstream, not independently fitted from original four controls in this repository",
    "CC BY-SA 2.1 Japan applies to these adapted facial assets, separately from V4.0 CC BY 4.0 geometry",
    "Adult reference, educational display; no medical or biomechanical expert review"]}
- PROOF.write_text(json.dumps(proof,indent=2)+"\\n")
+ PROOF.write_text(json.dumps(proof,indent=2)+"\n")
  print(json.dumps({"source":SOURCE_REPO,"meshes":len(out),"triangles":sum(len(p["faces"]) for p in out.values()),
   "asset_bytes":TARGET.stat().st_size,"manifest_sha256":proof["manifest_sha256"],
   "model_sha256":proof["asset_sha256"]},indent=2))
