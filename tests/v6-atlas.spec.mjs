@@ -286,7 +286,8 @@ test('Separately registered nerve remains explicitly gated, unlike sourced shoul
   await page.evaluate(r=>window.__BODY_ATLAS__.choose(r),region);
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.frameSpan),{timeout:6000}).toBeLessThan(3);
   expect((await page.evaluate(()=>window.__BODY_ATLAS__.getState())).view).toBe('focused');
-  await expect(page.locator('#top-enter-region')).toBeVisible();
+  if((await page.viewportSize()).width<=850)await expect(page.locator('#mobile-source')).toBeVisible();
+   else await expect(page.locator('#studio-open-nerve')).toBeVisible();
   await expect(page.locator('#portal')).toBeHidden();
   await page.evaluate(()=>window.__BODY_ATLAS__.body());
   await expect(page.locator('#portal')).toBeHidden();
