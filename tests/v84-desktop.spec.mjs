@@ -132,3 +132,26 @@ test('Sciatic nerve remains an explicitly separate source with an entry action',
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:15000}).toBe('overview');
  expect(page.__studioErrors).toEqual([]);
 });
+
+test('Desktop Shift-drag pans in specimen space and mousewheel zoom stays cursor-focal',async({page})=>{
+ const r=await page.locator('#atlas-canvas').boundingBox();
+ const x=r.x+r.width*.55,y=r.y+r.height*.53;
+ const original=await page.evaluate(()=>window.__BODY_ATLAS__.getState().camera);
+ await page.mouse.move(x,y);
+ await page.keyboard.down('Shift');
+ await page.mouse.down();
+ await page.mouse.move(x+90,y+55,{steps:8});
+ await page.mouse.up();
+ await page.keyboard.up('Shift');
+ const pan=await page.evaluate(()=>window.__BODY_ATLAS__.getState().camera);
+ expect(Math.hypot(pan.target.x-original.target.x,pan.target.y-original.target.y,pan.target.z-original.target.z)).toBeGreaterThan(.02);
+ expect(pan.yaw).toBe(original.yaw);
+ await page.mouse.move(x+90,y+55);
+ await page.mouse.wheel(0,-160);
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.zoom)).toBeGreaterThan(pan.zoom);
+ const zoom=await page.evaluate(()=>window.__BODY_ATLAS__.getState().camera);
+ expect(Math.hypot(zoom.target.x-pan.target.x,zoom.target.y-pan.target.y,zoom.target.z-pan.target.z)).toBeGreaterThan(.0001);
+ await page.locator('#studio-recenter').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.zoom)).toBeCloseTo(1.03,2);
+ expect(page.__studioErrors).toEqual([]);
+});
