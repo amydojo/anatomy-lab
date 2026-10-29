@@ -13,7 +13,7 @@ function create(){
    return previous;
   }
   const model={id,name:part.name,fma:part.fma,kind,regions:new Set(region?[region]:[]),
-   overview:true,hasDetail:!!isDetail,source:'BodyParts3D 4.0',reviewed:false};
+   overview:true,hasDetail:!!isDetail,source:part.source_version||'BodyParts3D 4.0',license:part.source_version==='BodyParts3D 3.0'?'CC BY-SA 2.1 Japan':'CC BY 4.0',reviewed:false};
   models.set(id,model);return model;
  }
  function base(asset){
@@ -28,13 +28,17 @@ function create(){
    for(const [id,part] of Object.entries(asset[name]||{}))
     accept(id,part,kind,part.subgroup||'source-extension',false);
  }
+ function facial(asset){
+  for(const [id,part] of Object.entries(asset.parts||{}))
+   accept(id,part,'muscle','skull',true);
+ }
  function detail(region,asset){
   const bones=asset.parts||asset.bone_meshes||{};
   const tissue=asset.muscle_parts||asset.muscle_meshes||{};
   for(const [id,part] of Object.entries(bones))if(part.fma)accept(id,part,part.system==='muscle'?'muscle':'bone',region,true);
   for(const [id,part] of Object.entries(tissue))if(part.fma)accept(id,part,'muscle',region,true);
  }
- return Object.freeze({base,overview,expansion,detail,get:id=>models.get(id)||null,
+ return Object.freeze({base,overview,expansion,facial,detail,get:id=>models.get(id)||null,
   all:()=>[...models.values()].map(x=>({...x,regions:[...x.regions]})),
   stats:()=>({bones:[...models.values()].filter(x=>x.kind==='bone').length,
    muscles:[...models.values()].filter(x=>x.kind==='muscle').length,

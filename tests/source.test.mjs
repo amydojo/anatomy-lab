@@ -813,3 +813,78 @@ test('V9 canonical digital bones and external-review release gates are explicit'
  }
  assert.equal(status.approvals.whole_application_regression.status,'failed');
 });
+
+test('V10 registered facial muscles have independent source license, source IDs and verified geometry',async()=>{
+ const {createHash}=await import('node:crypto');
+ const v10=JSON.parse(read('atlas/assets/v10-facial-reference.json'));
+ const proof=JSON.parse(read('atlas/assets/v10-facial-provenance.json'));
+ const base=JSON.parse(read('atlas/assets/body-skeleton.json'));
+ const v8=JSON.parse(read('atlas/assets/v8-overview-detail.json'));
+ const v9=JSON.parse(read('atlas/assets/v9-source-expansion.json'));
+ assert.equal(v10.schema,'body-live/v10-facial-source-v1');
+ assert.equal(v10.source_commit,'c835665a9ade09ee0b993cee6eee1b25b7f7311b');
+ assert.equal(v10.base_source_commit,base.source_commit);
+ assert.equal(v10.license,'CC-BY-SA-2.1-JP');
+ assert.equal(proof.license,v10.license);
+ assert.equal(proof.anatomist_reviewed,false);
+ assert.equal(proof.jaw_dynamics_validated,false);
+ assert.equal(proof.source_alignment_independently_recomputed,false);
+ assert.equal(proof.clinical_use_approved,false);
+ assert.equal(proof.pinned_omf_commit,v10.source_commit);
+ assert.equal(proof.facial_bin_git_blob,'0332821585e1b03ac4258d891b3ec220ab3ff30a');
+ assert.equal(createHash('sha256').update(read('atlas/assets/v10-facial-reference.json')).digest('hex'),proof.asset_sha256);
+ assert.deepEqual(v10.source_frame.origin_metres,[0,.9,0]);
+ assert.equal(v10.source_frame.scale,5);
+ const parts=Object.entries(v10.parts);
+ assert.equal(parts.length,47);
+ assert.equal(proof.total_muscle_meshes,433);
+ const ids=new Set([...base.parts.map(p=>p.id),...Object.keys(v8.bones),...Object.keys(v8.muscles),
+  ...Object.keys(v9.bones),...Object.keys(v9.muscles),...Object.keys(v9.connective)]);
+ const fmas=new Set([...base.parts,...Object.values(v8.bones),...Object.values(v8.muscles),...Object.values(v9.bones),...Object.values(v9.muscles),...Object.values(v9.connective)].map(x=>x.fma));
+ for(const [id,p] of parts){
+  assert.ok(!ids.has(id),'duplicate source mesh '+id);ids.add(id);
+  assert.ok(!fmas.has(p.fma),'duplicate FMA '+p.fma);fmas.add(p.fma);
+  assert.equal(p.reference_pose_only,true);
+  assert.equal(p.system,'muscle');
+  assert.equal(p.source_version,'BodyParts3D 3.0');
+  assert.ok(proof.original_obj_sha256[id]);
+  assert.ok(p.faces.length>=25);
+  for(const v of p.vertices){
+   assert.equal(v.length,3);
+   assert.ok(v.every(Number.isFinite));
+   assert.ok(v[1]>2.5&&v[1]<4.5,'outside BodyParts3D 4.0 head elevation');
+  }
+  for(const f of p.faces)assert.ok(f.length===3&&f.every(i=>Number.isInteger(i)&&i>=0&&i<p.vertices.length));
+ }
+ for(const re of [/orbicularis oris/i,/masseter/i,/temporalis/i,/pterygoid/i,/zygomaticus/i]){
+  assert.ok(parts.some(([,p])=>re.test(p.name)),'Missing facial family '+re);
+ }
+ assert.equal(proof.upstream_registration.heldOutBone,'FMA53650');
+ assert.ok(proof.upstream_registration.heldOutSourceToTargetSurfaceRmsMm<.5);
+ assert.ok(proof.upstream_registration.heldOutTargetToSourceSurfaceRmsMm<.5);
+ for(const path of ['assets/atlas/atlas-loader.js','assets/atlas/atlas-renderer.js','assets/atlas/atlas-registry.js',
+                    'assets/atlas/atlas-v10-facial.js','assets/atlas/atlas-controller.js'])
+  assert.doesNotThrow(()=>new Function(read(path)),path+' invalid JavaScript');
+ assert.match(read('atlas/index.html'),/atlas-v10-facial\.js/);
+});
+
+test('V10 facial bone-fit sanity checks use actual base mandible vertices and verify sides',()=>{
+ const v10=JSON.parse(read('atlas/assets/v10-facial-reference.json'));
+ const base=JSON.parse(read('atlas/assets/body-skeleton.json'));
+ const jaw=base.parts.find(x=>x.name==='Mandible').vertices;
+ assert.ok(jaw.length>200,'registered source jaw control present');
+ const square=(a,b)=>(a[0]-b[0])**2+(a[1]-b[1])**2+(a[2]-b[2])**2;
+ const muscles=Object.values(v10.parts);
+ for(const p of muscles){
+  const meanX=p.vertices.reduce((s,v)=>s+v[0],0)/p.vertices.length;
+  if(/right/i.test(p.name))assert.ok(meanX<.02,p.name+' should remain on right anatomy');
+  if(/left/i.test(p.name))assert.ok(meanX>-.02,p.name+' should remain on left anatomy');
+ }
+ for(const p of muscles.filter(x=>/masseter|pterygoid/i.test(x.name))){
+  const step=Math.max(1,Math.floor(p.vertices.length/180));
+  let nearest=Infinity;
+  for(let i=0;i<p.vertices.length;i+=step)
+   for(const v of jaw)nearest=Math.min(nearest,square(p.vertices[i],v));
+  assert.ok(Math.sqrt(nearest)<.04,'mastication muscle not near source mandible: '+p.name);
+ }
+});

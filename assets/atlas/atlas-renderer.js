@@ -28,10 +28,10 @@ const DEPTH_HIP={
 };
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function create(canvas,onContextLost=()=>{}){
- let gl=null,program=null,buffers=[],overviewBones=[],overviewMuscles=[],overviewData=null,expansionData=null,expansionBones=[],expansionMuscles=[],expansionConnective=[],expansionDetail=new Map(),overviewSystem='combined',status='loading',model=null;
+ let gl=null,program=null,buffers=[],overviewBones=[],overviewMuscles=[],overviewData=null,expansionData=null,expansionBones=[],expansionMuscles=[],expansionConnective=[],expansionDetail=new Map(),facialData=null,facialOverview=null,facialDetail=[],overviewSystem='combined',status='loading',model=null;
  let registry=window.BodyAtlasRegistry.create();
  const detail=new Map(),detailData=new Map();let shoulderPivot=[-1.1,1.9,0],shoulderGraph=null;
- function cleanup(){if(gl){for(const item of [...buffers,...overviewBones,...overviewMuscles,...expansionBones,...expansionMuscles,...expansionConnective,...[...expansionDetail.values()].flat(),...[...detail.values()].flat()])gl.deleteBuffer(item.buffer);if(program)gl.deleteProgram(program);}buffers=[];overviewBones=[];overviewMuscles=[];expansionBones=[];expansionMuscles=[];expansionConnective=[];expansionDetail.clear();detail.clear();program=null;}
+ function cleanup(){if(gl){for(const item of [...buffers,...overviewBones,...overviewMuscles,...expansionBones,...expansionMuscles,...expansionConnective,...(facialOverview?[facialOverview]:[]),...facialDetail,...[...expansionDetail.values()].flat(),...[...detail.values()].flat()])gl.deleteBuffer(item.buffer);if(program)gl.deleteProgram(program);}buffers=[];overviewBones=[];overviewMuscles=[];expansionBones=[];expansionMuscles=[];expansionConnective=[];facialOverview=null;facialDetail=[];expansionDetail.clear();detail.clear();program=null;}
  function compile(type,source){const sh=gl.createShader(type);gl.shaderSource(sh,source);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(sh));return sh;}
  function setup(){
   gl=canvas.getContext('webgl2',{alpha:true,antialias:true,depth:true,premultipliedAlpha:false,powerPreference:'low-power'});
@@ -101,6 +101,7 @@ function create(canvas,onContextLost=()=>{}){
   status='ready';
   if(overviewData)loadOverview(overviewData);
   if(expansionData)loadExpansion(expansionData);
+  if(facialData)loadFacial(facialData);
   for(const [region,d] of detailData)loadDetail(region,d);
   return true;
  }
@@ -171,6 +172,29 @@ function create(canvas,onContextLost=()=>{}){
   for(const m of expansionDetail.values())for(const p of m)gl.deleteBuffer(p.buffer);
   expansionDetail=additions;
   expansionData=asset;registry.expansion(asset);
+  return true;
+ }
+ function loadFacial(asset){
+  if(!model||!expansionData||asset?.schema!=='body-live/v10-facial-source-v1'||
+     asset.base_source_commit!==model.source_commit)
+    throw Error('V10 facial muscles cannot register to the source skull');
+  if(!gl||status!=='ready')return false;
+  const entries=Object.entries(asset.parts||{}),parts=entries.map(([,p])=>p);
+  if(entries.length!==47)throw Error('V10 incomplete facial muscle set');
+  let overview=null,details=[];
+  try{
+   const merged=combineV9(parts,'v10-facial-overview','head','muscle');
+   overview=makeBuffer(merged,'v10-facial-overview','head',[.88,.51,.42],true);
+   for(const [id,p] of entries){
+    const mesh=makeBuffer(p,id,'head',[.88,.54,.45],true);
+    mesh.sourceVersion='BodyParts3D 3.0';
+    mesh.license='CC BY-SA 2.1 Japan';
+    details.push(mesh);
+   }
+  }catch(e){for(const x of [...(overview?[overview]:[]),...details])gl.deleteBuffer(x.buffer);throw e;}
+  for(const old of [...(facialOverview?[facialOverview]:[]),...facialDetail])gl.deleteBuffer(old.buffer);
+  facialData=asset;facialOverview=overview;facialDetail=details;
+  registry.facial(asset);
   return true;
  }
  function setOverviewSystem(system){
@@ -347,6 +371,11 @@ function create(canvas,onContextLost=()=>{}){
    for(const m of expansionConnective){const a=ctx*connectiveAlpha;if(a>.02)draw(m,1,a);}
    gl.depthMask(true);
   }
+  if(facialOverview){
+   const ctx=from?0:region?1-r:1;
+   const alpha=ctx*(overviewSystem==='muscles'?.86:overviewSystem==='combined'?.38:0);
+   if(alpha>.015){gl.depthMask(false);draw(facialOverview,1,alpha,true);gl.depthMask(true);}
+  }
   // Mobile-only direct transfer: the departing source lab fades as the new
   // source lab appears in the SAME camera space, with no full-body detour.
   if(from&&r<.999){
@@ -374,6 +403,15 @@ function create(canvas,onContextLost=()=>{}){
     draw(bone,(highlight&&highlight!==bone.id)?0.52:1,a);
    }
    gl.depthMask(true);
+   // Source BodyParts3D 3.0 facial muscles remain reference-static.
+   if(region==='skull'&&facialDetail.length){
+    const alpha=r*(layer===4?.91:layer===0?.53:.12);
+    if(alpha>.015){
+     gl.depthMask(false);
+     for(const mesh of facialDetail)draw(mesh,highlight&&highlight!==mesh.id?.55:1,alpha,true);
+     gl.depthMask(true);
+    }
+   }
    if((region==='hip'||region==='shoulder'||region==='knee')&&r>0&&layer<3 || window.BodyExtendedRegions?.has(region)&&r>0&&(layer===0||layer===4)){
     const levels=window.BodyExtendedRegions?.has(region)?null:(region==='shoulder'?SHOULDER_LAYERS:region==='knee'?KNEE_MUSCLE_LAYERS:DEPTH_HIP)[clamp(Number(layer)||0,0,3)]||{};
     gl.depthMask(false);
@@ -398,7 +436,7 @@ function create(canvas,onContextLost=()=>{}){
   const width=canvas.clientWidth,height=canvas.clientHeight;
   if(!width||!height)return null;
   const core=window.BodySpatialCore;if(!core)return null;
-  const pieces=[...detail.get(region),...(expansionDetail.get(region)||[])],pivot=region==='hip'?[-.057*5,(.895-.9)*5,-.045*5]:region==='shoulder'?shoulderPivot:[-.09092915*5,(.4491462+.08/7.5-.9)*5,-.01654605*5];
+  const pieces=[...detail.get(region),...(expansionDetail.get(region)||[]),...(region==='skull'?facialDetail:[])],pivot=region==='hip'?[-.057*5,(.895-.9)*5,-.045*5]:region==='shoulder'?shoulderPivot:[-.09092915*5,(.4491462+.08/7.5-.9)*5,-.01654605*5];
   const moveIds=region==='hip'?new Set(['femur']):region==='shoulder'?new Set(['humerus']):new Set(['tibia','fibula','patella']);
   const chosen=region==='knee'?(layer===1?new Set(['femur']):layer===2?new Set(['tibia','fibula']):layer===3?new Set(['patella']):null):null;
   const hipLayers=(region==='shoulder'?SHOULDER_LAYERS:region==='knee'?KNEE_MUSCLE_LAYERS:DEPTH_HIP)[clamp(Number(layer)||0,0,3)]||{};
@@ -466,8 +504,8 @@ function create(canvas,onContextLost=()=>{}){
   return {markers:pose.markers,rest:pose.rest,degrees:pose.degrees,
    elevation:pose.elevation,attachments,validated:false};
  }
- function dispose(){cleanup();model=null;overviewData=null;expansionData=null;shoulderGraph=null;detailData.clear();}
- return Object.freeze({load,loadOverview,loadExpansion,setOverviewSystem,getOverviewSystem:()=>overviewSystem,registry:()=>registry,loadDetail,touchDetail,hasDetail:region=>detail.has(region),render,hitTest,shoulderDiagnostics,resize,getStatus:()=>status,dispose,stats:()=>({partCount:buffers.length,overviewBones:overviewBones.length,overviewMuscles:overviewMuscles.length,expansionBones:expansionData?Object.keys(expansionData.bones).length:0,expansionMuscles:expansionData?Object.keys(expansionData.muscles).length:0,expansionConnective:expansionData?Object.keys(expansionData.connective).length:0,overviewSystem,registry:registry.stats(),triangles:[...buffers,...overviewBones,...overviewMuscles].reduce((n,b)=>n+b.count/3,0),webgl:status==='ready',detailRegions:[...detail.keys()],detailMeshes:[...detail.values()].reduce((n,items)=>n+items.length,0),riggedShoulderMuscles:(detail.get('shoulder')||[]).filter(p=>p.skinWeights).length,riggedHipMuscles:(detail.get('hip')||[]).filter(p=>p.skinWeights).length,riggedKneeMuscles:(detail.get('knee')||[]).filter(p=>p.skinWeights).length,coordinatedShoulder:!!shoulderGraph,expandedRegions:[...detail.keys()].filter(id=>window.BodyExtendedRegions?.has(id)),expandedMeshes:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>!x.tissue).length,0),expandedMuscles:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>x.tissue).length,0)})});
+ function dispose(){cleanup();model=null;overviewData=null;expansionData=null;facialData=null;shoulderGraph=null;detailData.clear();}
+ return Object.freeze({load,loadOverview,loadExpansion,loadFacial,setOverviewSystem,getOverviewSystem:()=>overviewSystem,registry:()=>registry,loadDetail,touchDetail,hasDetail:region=>detail.has(region),render,hitTest,shoulderDiagnostics,resize,getStatus:()=>status,dispose,stats:()=>({partCount:buffers.length,overviewBones:overviewBones.length,overviewMuscles:overviewMuscles.length,expansionBones:expansionData?Object.keys(expansionData.bones).length:0,expansionMuscles:expansionData?Object.keys(expansionData.muscles).length:0,expansionConnective:expansionData?Object.keys(expansionData.connective).length:0,facialMuscles:facialData?Object.keys(facialData.parts).length:0,facialDetailMeshes:facialDetail.length,overviewSystem,registry:registry.stats(),triangles:[...buffers,...overviewBones,...overviewMuscles].reduce((n,b)=>n+b.count/3,0),webgl:status==='ready',detailRegions:[...detail.keys()],detailMeshes:[...detail.values()].reduce((n,items)=>n+items.length,0),riggedShoulderMuscles:(detail.get('shoulder')||[]).filter(p=>p.skinWeights).length,riggedHipMuscles:(detail.get('hip')||[]).filter(p=>p.skinWeights).length,riggedKneeMuscles:(detail.get('knee')||[]).filter(p=>p.skinWeights).length,coordinatedShoulder:!!shoulderGraph,expandedRegions:[...detail.keys()].filter(id=>window.BodyExtendedRegions?.has(id)),expandedMeshes:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>!x.tissue).length,0),expandedMuscles:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>x.tissue).length,0)})});
 }
 window.BodyAtlasRenderer=Object.freeze({create});
 })();
