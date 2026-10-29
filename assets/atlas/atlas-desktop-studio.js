@@ -91,8 +91,8 @@
   $('studio-source-note').textContent=r==='nerve'?'SEPARATE SOURCE REGISTRATION · SCIATIC NERVE':
     'BODYPARTS3D 4.0 · SOURCE REGISTERED';
   $('studio-open-nerve').hidden=!(r==='nerve'&&s.view==='focused');
-  $('studio-context').textContent=inside?'DRAG ORBIT · PINCH OR WHEEL ZOOM · SELECT SOURCE MESH':
-    'DRAG ORBIT · SCROLL ZOOM · SELECT A REGION · PRESS G TO SEARCH';
+  $('studio-context').textContent=inside?'DRAG TO ORBIT · SHIFT-DRAG TO PAN · SCROLL TO ZOOM · CLICK A STRUCTURE':
+    'DRAG TO ORBIT · SHIFT-DRAG TO PAN · SCROLL TO ZOOM · G TO SEARCH';
   for(const btn of document.querySelectorAll('[data-studio-tool]')){
    const which=btn.dataset.studioTool;
    btn.disabled=(which==='move'&&!profile)||(which==='inspect'&&!inside);
