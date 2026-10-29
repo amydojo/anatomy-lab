@@ -163,7 +163,7 @@ function create(canvas,onContextLost=()=>{}){
       converted.skinWeights=rig.weights;converted.rig=rig;
     }
     if(extended&&tissue){
-     const rig=window.BodyExtendedRegions.createSkin(region,id,converted.vertices,worldParts)||window.BodyRegionMotion.skin(region,id,converted.vertices,worldParts);
+     const rig=window.BodyRegionMotion.skin(region,id,converted.vertices,worldParts)||window.BodyExtendedRegions.createSkin(region,id,converted.vertices,worldParts);
      if(rig){converted.skinWeights=rig.weights;converted.rig=rig;}
     }
     if(shoulder&&tissue){
