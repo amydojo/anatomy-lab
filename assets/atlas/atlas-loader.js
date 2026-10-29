@@ -169,5 +169,5 @@ function verifyOverview(asset,proof,skeleton){
  }
  return true;
 }
-window.BodyAtlasLoader=Object.freeze({load,cancel,verifyAtlas,verifyOverview,verifyShoulder,verifyKneeMuscles,verifyExtended,knownAssets:Object.keys(FIXED)});
+window.BodyAtlasLoader=Object.freeze({load,cancel,digest:key=>hashes.get(key),verifyAtlas,verifyOverview,verifyShoulder,verifyKneeMuscles,verifyExtended,knownAssets:Object.keys(FIXED)});
 })();
