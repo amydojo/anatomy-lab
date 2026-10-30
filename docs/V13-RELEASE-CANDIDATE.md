@@ -75,3 +75,37 @@ SHA-256 of retrieved HTML (direct HTTPS, 2026-10-30; dynamic site pages may chan
 - 8-2-bones-of-the-upper-limb: `ab3b7c0e7abb93ed11464c24fec7b1fd57abf7e10f19f58ceb4bdff3a2e7e79a`
 - 11-5-muscles-of-the-pectoral-girdle-and-upper-limbs: `34cd301c269c74935cc58a548336578b3300d2a612ce876f091f828a4f5e3400`
 - 11-6-appendicular-muscles-of-the-pelvic-girdle-and-lower-limbs: `73ff220bc8d37f813613c9a0f30c90bf9634a5abbac9b445ca8dc167a5d2ec89`
+
+## Completed stabilization rerun at 861f532
+
+[Run 41098234215](https://github.com/amydojo/anatomy-lab/actions/runs/41098234215) tested application head `861f532bf5f0e0806ea419d696f0b2f84089c02b` (PR synthetic merge `0659282de7f93d04d713d5d854506353ed6dbd35`). Source suites passed in all browser jobs.
+
+| Browser | Passed | Failed | Flaky | Skipped |
+|---|---:|---:|---:|---:|
+| Mobile Chromium | 160 | 1 | 0 | 9 |
+| Mobile WebKit | 159 | 1 | 1 | 9 |
+| Desktop Chromium | 162 | 8 | 0 | 0 |
+| Total | 481 | 10 | 1 | 18 |
+
+All former V11 loading, nerve-state, Trace, shoulder label, rig access and mobile-secondary cases passed. The remaining three inspector failures exposed a separate first-selection race: a synchronous sync caches the selected ID before the observer can auto-open Inspect. The sync function itself now opens the first selection; runtime fix commit `60caedde3b9246d782df58df136800f34d031806` also adds a mixed-pointer release/cancel regression and tolerates unavailable pointer capture during pointer simulation.
+
+The seven desktop reset-image comparisons still failed after waiting for optional source loading. That hypothesis was disproven. Raw trace artifacts were retrieved and visually inspected; no verified anatomy drift diagnosis is asserted. The next test compares every decoded RGBA pixel exactly (zero tolerance), rather than PNG compression bytes, and retains both images plus camera/UI state if it fails. This is a test-environment correction/diagnostic change, not a claim that the rendering failure is repaired.
+
+The WebKit camera-continuity case passed on retry and is still an unresolved flaky gate. Its original movement bound remains unchanged.
+
+## Exact hosted-preview browser evidence
+
+Immutable application URL: https://anatomy-2109ubix5-amy-dos-projects.vercel.app/atlas/
+Application SHA: `861f532bf5f0e0806ea419d696f0b2f84089c02b`.
+[Hosted run 41099493428](https://github.com/amydojo/anatomy-lab/actions/runs/41099493428), QA harness commit `75be6b91759d743b0e522dcddfea10b221855815`:
+
+| Browser | Passed | Failed | Skipped |
+|---|---:|---:|---:|
+| Desktop Chromium | 27 | 1 | 0 |
+| Mobile WebKit | 19 | 1 | 8 |
+
+These are genuine browser automation runs against Vercel, not physical-device tests. Both failures are the same first-selection inspector race. The eight WebKit skips are desktop-specific suite cases, not skipped touch or inspector assertions.
+
+The container Git ownership check initially blocked the QA job; it was fixed with a per-command safe-directory value scoped to the runner checkout. A second identity gate detected 163 extra bytes in the HTML. Independent diagnostic output proved they are the single `https://vercel.live/_next-live/feedback/feedback.js` script, and that removing exactly that identified platform script leaves byte-identical application HTML. The successful identity gate permits only this one host addition and still requires exact application payload equality, plus raw equality for five application JavaScript files. Actual browser tests use the hosted page with the toolbar present.
+
+Post-861 runtime fixes and new reset-image diagnostics require a fresh browser run. The 861 preview is evidence for that commit only. No production deployment, merge or ancestry retarget occurred.

@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {PNG} from 'pngjs';
 const REGIONS=[
  ['skull',22,false],['neck',22,true],['thorax',9,false],
  ['hip',65,true],['knee',105,true],['shoulder',110,true],
@@ -27,6 +28,7 @@ for(const [region,max,hasSecondary]of REGIONS){
   }
   await expect(page.locator('#motion-description')).toContainText('UNVALIDATED');
   await expect(page.locator('#joint-motion-slider')).toHaveAttribute('max',String(max));
+  const restState=await page.evaluate(()=>({camera:window.__BODY_ATLAS__.getState().camera,ui:window.BodyDesktopStudio?.snapshot()}));
   const rest=await page.locator('#atlas-canvas').screenshot();
   const primary=Math.min(max,20);
   await page.locator('#joint-motion-slider').evaluate((el,value)=>{
@@ -51,7 +53,16 @@ for(const [region,max,hasSecondary]of REGIONS){
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(0);
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.secondary)).toBe(0);
   const restored=await page.locator('#atlas-canvas').screenshot();
-  expect(restored.equals(rest)).toBe(true);
+  // Compare exact decoded pixels, not PNG compression/container bytes. No tolerance.
+  const expectedImage=PNG.sync.read(rest),actualImage=PNG.sync.read(restored);
+  const same=actualImage.width===expectedImage.width&&actualImage.height===expectedImage.height&&actualImage.data.equals(expectedImage.data);
+  if(!same){
+   await test.info().attach('neutral-before',{body:rest,contentType:'image/png'});
+   await test.info().attach('neutral-after',{body:restored,contentType:'image/png'});
+   const afterState=await page.evaluate(()=>({camera:window.__BODY_ATLAS__.getState().camera,ui:window.BodyDesktopStudio?.snapshot()}));
+   await test.info().attach('neutral-state',{body:JSON.stringify({region,before:restState,after:afterState}),contentType:'application/json'});
+  }
+  expect(same,'Neutral must reproduce every rendered pixel exactly').toBe(true);
   await page.evaluate(()=>window.__BODY_ATLAS__.body());
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:15000}).toBe('overview');
   expect(errors).toEqual([]);
