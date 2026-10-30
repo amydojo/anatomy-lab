@@ -79,7 +79,7 @@
   if(!isDesktop())return;
   const s=incoming||state(),r=regionOf(s),inside=detail(s),profile=motionFor(s);
   if((active==='move'&&!profile)||(active==='inspect'&&!inside))active='explore';
-  if(selected&&selected!==s.unified?.selected&&s.unified?.selected){
+  if(s.unified?.selected&&selected!==s.unified.selected&&inside){
    // Selection changed through the original engine; update the inspector
    // immediately rather than requiring a second click on the old chip.
    active='inspect';

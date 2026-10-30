@@ -192,7 +192,7 @@ if(stage){
   if(!isMobile()||activeTool!=='move'||!eligibleMove(snapshot())||!e.isPrimary||e.pointerType==='mouse')return;
   const slider=$('mobile-motion-slider');
   jointDrag={id:e.pointerId,x:e.clientX,angle:Number(slider.value),min:Number(slider.min||0),max:Number(slider.max||90)};
-  stage.setPointerCapture?.(e.pointerId);
+  try{stage.setPointerCapture?.(e.pointerId);}catch{}
  },{capture:true});
  stage.addEventListener('pointermove',e=>{
   if(!jointDrag||e.pointerId!==jointDrag.id||!e.isPrimary)return;

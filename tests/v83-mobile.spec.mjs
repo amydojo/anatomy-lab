@@ -136,3 +136,36 @@ test('Short iPhone screens never horizontally scroll and the active tray stays i
  expect(bounds.panelBottom).toBeLessThanOrEqual(bounds.dockTop+2);
  expect(errors).toEqual([]);
 });
+
+test('Move pointer simulation hands off to pinch and cleans up either release order',async({page})=>{
+ const errors=await open(page);
+ await page.evaluate(()=>window.__BODY_ATLAS__.choose('knee'));
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:30000}).toBe('detail');
+ await page.locator('[data-mobile-tool="move"]').click();
+ for(const release of [[1,2],[2,1]]){
+  await page.locator('#mobile-neutral').click();
+  const result=await page.evaluate(release=>{
+   const api=window.__BODY_ATLAS__,c=document.querySelector('#atlas-canvas'),r=c.getBoundingClientRect();
+   const emit=(type,id,x)=>c.dispatchEvent(new PointerEvent(type,{pointerType:'touch',pointerId:id,isPrimary:id===1,clientX:r.left+x,clientY:r.top+180,bubbles:true,cancelable:true}));
+   const start=api.getState();
+   emit('pointerdown',1,110);emit('pointermove',1,160);
+   const joint=api.getState();
+   emit('pointerdown',2,260);emit('pointermove',2,310);
+   const pinch=api.getState();
+   for(const id of release)emit('pointerup',id,id===1?160:310);
+   emit('pointerdown',1,110);emit('pointermove',1,150);emit('pointercancel',1,150);
+   const cancelled=api.getState();
+   emit('pointermove',1,270);
+   return {start,joint,pinch,cancelled,after:api.getState()};
+  },release);
+  expect(result.joint.unified.motion).toBeGreaterThan(result.start.unified.motion);
+  expect(result.joint.camera.yaw).toBe(result.start.camera.yaw);
+  expect(result.pinch.unified.motion).toBe(result.joint.unified.motion);
+  expect(result.pinch.camera.zoom).toBeGreaterThan(result.joint.camera.zoom);
+  expect(result.after.unified.motion).toBe(result.cancelled.unified.motion);
+  expect(result.after.unified.selected).toBeNull();
+ }
+ await page.locator('#mobile-neutral').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.motion)).toBe(0);
+ expect(errors).toEqual([]);
+});
