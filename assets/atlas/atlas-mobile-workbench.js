@@ -119,8 +119,9 @@ function renderState(s){
   const title=$('structure-details-name').textContent||String(selected);
   const description=$('structure-details-description').textContent||'';
   const kind=/muscle|tendon/i.test(title+' '+description)?'Muscle / soft tissue':/nerve/i.test(title+' '+description)?'Nerve':'Anatomical structure';
-  $('mobile-inspect-type').textContent=kind+' · '+(labels[region]||'Whole body');
-  $('mobile-inspect-context').textContent=description||'Additional verified anatomical relationships are not yet available for this structure.';
+  const info=window.BodyAnatomyInfo?.lookup(selected);
+  $('mobile-inspect-type').textContent=(info?.type||kind)+' · '+(labels[region]||'Whole body');
+  $('mobile-inspect-context').textContent=info?info.summary+' Related: '+info.relations+'. Reference: '+info.source+'.':(description||'Additional verified anatomical relationships are not yet available for this structure.');
   $('mobile-inspect-motion').hidden=!eligibleMove(s);
  }
  document.querySelectorAll('[data-mobile-region]').forEach(b=>
