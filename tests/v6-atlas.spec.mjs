@@ -109,21 +109,22 @@ test('One camera path uses bounded frame changes and does not snap on detail ent
  const errors=await atlas(page);
  await page.evaluate(()=>window.__BODY_ATLAS__.choose('hip'));
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:10000}).toBe('hip');
- const sampled=await page.evaluate(async()=>{
-  const frames=[];
-  const start=performance.now();
-  while(performance.now()-start<1500){
+ const sampled=await page.evaluate(()=>new Promise(resolve=>{
+  const frames=[];let start=null;
+  function sample(time){
+   if(start===null)start=time;
    const s=window.__BODY_ATLAS__.getState();
-   frames.push({t:performance.now(),z:s.camera.frameSpan,yaw:s.camera.yaw,view:s.view});
-   await new Promise(r=>setTimeout(r,35));
+   frames.push({t:time,z:s.camera.frameSpan,yaw:s.camera.yaw,view:s.view});
+   if(time-start>=1500)resolve(frames);else requestAnimationFrame(sample);
   }
-  return frames;
- });
+  // Use the animation frame clock, not a timer sampled after a blocking draw.
+  requestAnimationFrame(sample);
+ }));
  expect(sampled.some(x=>x.view==='detail')).toBe(true);
  expect(Math.min(...sampled.map(x=>x.z))).toBeLessThan(3.6);
  for(let i=1;i<sampled.length;i++){
-  // Software WebGL can stall the sampling loop on mobile CI. Bound actual
-  // camera movement by elapsed time, not by a fixed amount per stale sample.
+  // Compare successive rendered-frame samples using the same native RAF
+  // timestamp domain as the camera; retain the original movement bounds.
   const dt=sampled[i].t-sampled[i-1].t;
   expect(Math.abs(sampled[i].z-sampled[i-1].z)).toBeLessThan(.03*dt+.35);
   expect(Math.abs(sampled[i].yaw-sampled[i-1].yaw)).toBeLessThan(.012*dt+.25);

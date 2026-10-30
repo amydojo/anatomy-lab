@@ -26,17 +26,6 @@
    return {x:camera.width*(Number.isFinite(camera.anchorX)?camera.anchorX:.50)+x*scale*perspective,
      y:camera.height*(Number.isFinite(camera.anchorY)?camera.anchorY:.50)-(y2-.04)*scale*perspective,z:z2,world:view};
  }
- // Advance animation by rendered-frame time, capped after compositor stalls.
- // Starting on the first frame avoids consuming the journey before it is drawn.
- function animationClock(duration,maxFrameMs=50){
-   let previous=null,elapsed=0;
-   return now=>{
-     if(duration===0)return 1;
-     if(previous!==null)elapsed+=clamp(now-previous,0,maxFrameMs);
-     previous=now;
-     return clamp(elapsed/duration,0,1);
-   };
- }
  function attachOrbit(canvas,{state,render,pick,onInteract=()=>{},onDoubleTap=()=>{},getBounds=()=>null,minZoom=.7,maxZoom=2.5}){
    const pointers=new Map();
    let origin=null,travel=false,scheduled=0,lastTap=null,gestureStarted=false;
@@ -177,5 +166,5 @@
      canvas.removeEventListener('wheel',wheel);
    };
  }
- window.BodySpatialCore=Object.freeze({version:'0.3',project,attachOrbit,rotateAboutX,clamp,animationClock});
+ window.BodySpatialCore=Object.freeze({version:'0.3',project,attachOrbit,rotateAboutX,clamp});
 })();

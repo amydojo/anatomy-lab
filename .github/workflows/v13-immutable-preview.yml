@@ -4,6 +4,9 @@ on:
     branches: ['qa/v13-preview-validation']
 permissions:
   contents: read
+concurrency:
+  group: v13-immutable-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   preview:
     strategy:
@@ -15,12 +18,12 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.56.0-noble
     timeout-minutes: 60
     env:
-      BASE_URL: https://anatomy-p39gdpjv6-amy-dos-projects.vercel.app
-      EXPECTED_SHA: c1be15c0ae3c2993aa1f0e6e7331a26d9c636d56
+      BASE_URL: https://anatomy-ikvq0loyk-amy-dos-projects.vercel.app
+      EXPECTED_SHA: 5eff54053ffce0738eca4044e51f699a83d9fd76
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: c1be15c0ae3c2993aa1f0e6e7331a26d9c636d56
+          ref: 5eff54053ffce0738eca4044e51f699a83d9fd76
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
