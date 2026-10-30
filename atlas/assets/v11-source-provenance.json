@@ -1,0 +1,171 @@
+{
+  "schema": "body-live/v11-source-provenance-v1",
+  "source_url": "https://raw.githubusercontent.com/LluisV/Z-Anatomy/6c7f9016bd5899ac8edafd31b9900c151df42ed6/Resources/Models/FBX/SkeletalSystem100.fbx",
+  "source_sha256": "294a649765cd060a62a4095da52b9c8ef2d97769aa447e196448aa5f7d596dea",
+  "source_commit": "6c7f9016bd5899ac8edafd31b9900c151df42ed6",
+  "license": "CC BY-SA 4.0",
+  "attribution": [
+    "Z-Anatomy \u00a9 Gauthier Kervyn and contributors, CC BY-SA 4.0",
+    "BodyParts3D \u00a9 The Database Center for Life Science, CC BY-SA 2.1 Japan"
+  ],
+  "source_ear_meshes_provenance": "Z-Anatomy skeletal system FBX under CC BY-SA 4.0; other included inner-ear-specific NC models must NOT be copied",
+  "registration": {
+    "coccyx": {
+      "scale": 4.706932016021221,
+      "rotation": [
+        [
+          0.99998102,
+          0.002271976,
+          0.005727007
+        ],
+        [
+          -0.005742305,
+          0.006784905,
+          0.999960495
+        ],
+        [
+          0.002233029,
+          -0.999974401,
+          0.006797823
+        ]
+      ],
+      "translation": [
+        -0.027637299,
+        -4.088707581,
+        -0.11224957
+      ],
+      "iterations": 48,
+      "control_rms": {
+        "Sacrum": 0.012461
+      },
+      "trace": [
+        {
+          "iteration": 0,
+          "trimmed_rms": 0.017179787918787937
+        },
+        {
+          "iteration": 10,
+          "trimmed_rms": 0.012807643019408557
+        },
+        {
+          "iteration": 20,
+          "trimmed_rms": 0.012526110999088123
+        },
+        {
+          "iteration": 30,
+          "trimmed_rms": 0.012485791112445372
+        },
+        {
+          "iteration": 40,
+          "trimmed_rms": 0.012466190859455146
+        }
+      ]
+    },
+    "ear": {
+      "scale": 5.085623500109127,
+      "rotation": [
+        [
+          0.999981946,
+          -0.005908194,
+          -0.001095713
+        ],
+        [
+          0.001036665,
+          -0.009988074,
+          0.999949581
+        ],
+        [
+          -0.00591884,
+          -0.999932664,
+          -0.009981768
+        ]
+      ],
+      "translation": [
+        0.006548465,
+        -4.607175138,
+        0.02372518
+      ],
+      "iterations": 43,
+      "control_rms": {
+        "Temporal bone.l": 0.007967,
+        "Temporal bone.r": 0.008651
+      },
+      "trace": [
+        {
+          "iteration": 0,
+          "trimmed_rms": 0.010223514647104016
+        },
+        {
+          "iteration": 10,
+          "trimmed_rms": 0.008316312360805643
+        },
+        {
+          "iteration": 20,
+          "trimmed_rms": 0.008291749749446999
+        },
+        {
+          "iteration": 30,
+          "trimmed_rms": 0.008287471655401783
+        },
+        {
+          "iteration": 40,
+          "trimmed_rms": 0.008287432812253796
+        }
+      ]
+    }
+  },
+  "validation": {
+    "coccyx_source_control": {
+      "Sacrum": 0.012461
+    },
+    "coccyx_heldout": {
+      "Hip bone.l": {
+        "trimmed_rms_units": 0.025602,
+        "p90_units": 0.045706,
+        "units": "BODY LIVE world units (5 per metre)"
+      },
+      "Hip bone.r": {
+        "trimmed_rms_units": 0.02168,
+        "p90_units": 0.038237,
+        "units": "BODY LIVE world units (5 per metre)"
+      },
+      "Vertebra L5": {
+        "trimmed_rms_units": 0.010181,
+        "p90_units": 0.017055,
+        "units": "BODY LIVE world units (5 per metre)"
+      }
+    },
+    "ear_source_control": {
+      "Temporal bone.l": 0.007967,
+      "Temporal bone.r": 0.008651
+    },
+    "ear_heldout_frontal": {
+      "trimmed_rms_units": 0.011333,
+      "p90_units": 0.018675,
+      "units": "BODY LIVE world units (5 per metre)"
+    },
+    "coccyx_source_sacrum_gap_units": 0.0245,
+    "sacral_apex_alignment_shift_units": [
+      -0.000351,
+      -0.186497,
+      0.017044
+    ],
+    "coccyx_source_sacrum_min_distance_units": 0.026526
+  },
+  "canonical_count_conventional": 206,
+  "previous_conventional_count": 199,
+  "new_osteology_bone_count": 7,
+  "human_anatomist_reviewed": false,
+  "ear_specialist_reviewed": false,
+  "biomechanics_validated": false,
+  "clinical_use_approved": false,
+  "independent_patient_registration": false,
+  "limits": [
+    "Cross-dataset similarity ICP based on shared source reference bones, not patient-specific registration",
+    "Held-out comparison detects gross alignment only; shape morphometry and tiny ear joint contact not clinically validated",
+    "Bones are source-derived, no mirroring or procedural fabrication",
+    "Source license separation and copyright attribution required",
+    "Ear ossicles are source reference-static, no ossicular vibration physics"
+  ],
+  "asset_sha256": "8915fabce561c0f6c3c605900a333c448b46927d1d21ebd50a572a415c8100a3"
+}
