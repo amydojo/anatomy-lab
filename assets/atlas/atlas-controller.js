@@ -8,7 +8,7 @@ let osteologyAsset=null;let lastFocus=null,activeFrameRoute=null,motionFrame=0,t
 const reduce=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const HERE={hip:'/hip/spatial/',nerve:'/hip/spatial/',knee:'/knee/spatial/',shoulder:'/shoulder/'};
 const LABEL={hip:'RIGHT HIP',nerve:'SCIATIC NERVE',knee:'RIGHT KNEE',shoulder:'SHOULDER',
- skull:'SKULL & JAW',neck:'CERVICAL SPINE',thorax:'RIBS & THORAX',
+ skull:'SKULL & JAW',neck:'NECK',thorax:'RIBS & THORAX',
  elbow:'RIGHT ELBOW',wrist:'RIGHT WRIST',ankle:'RIGHT ANKLE'};
 const NOTE={
 hip:'Source hip bones and muscles; muscle layer and joint movement remain illustrative, pending expert review.',
@@ -58,7 +58,7 @@ function refreshOsteologyCoverage(){
 }
 function render(){
  if(document.hidden||(state.data.view==='detail'&&!U.isActive()))return;
- model.render(state.data.camera,U.getRegion()||state.data.region,state.data.evidenceMode,state.data.layer,U.getReveal(),U.getMotion(),U.getSelected(),U.getSecondaryMotion(),U.getTransitionFrom());
+ model.render(state.data.camera,U.getRegion()||state.data.region,state.data.evidenceMode,state.data.layer,U.getReveal(),U.getMotion(),U.getSelected(),U.getSecondaryMotion(),U.getTransitionFrom(),state.data.mode==='trace'&&!window.BodyExtendedRegions?.has(U.getRegion()||state.data.region));
  window.BodyShoulderDebug?.draw(state.data.camera,
   state.data.view==='detail'&&U.getRegion()==='shoulder'?model.shoulderDiagnostics(U.getMotion()):null);
  if(state.data.view==='overview'&&!U.isActive())drawPins();
