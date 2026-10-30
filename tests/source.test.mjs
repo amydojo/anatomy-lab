@@ -888,3 +888,65 @@ test('V10 facial bone-fit sanity checks use actual base mandible vertices and ve
   assert.ok(Math.sqrt(nearest)<.04,'mastication muscle not near source mandible: '+p.name);
  }
 });
+
+test('V11 coccyx and bilateral middle-ear bones are 7 distinct original-source structures with registered control frames',async()=>{
+ const {createHash}=await import('node:crypto');
+ const asset=JSON.parse(read('atlas/assets/v11-coccyx-ossicles.json'));
+ const proof=JSON.parse(read('atlas/assets/v11-source-provenance.json'));
+ const base=JSON.parse(read('atlas/assets/body-skeleton.json'));
+ assert.equal(asset.schema,'body-live/v11-registered-osteology-v1');
+ assert.equal(proof.schema,'body-live/v11-source-provenance-v1');
+ assert.equal(asset.license,'CC BY-SA 4.0');
+ assert.equal(proof.source_sha256,'294a649765cd060a62a4095da52b9c8ef2d97769aa447e196448aa5f7d596dea');
+ assert.equal(createHash('sha256').update(read('atlas/assets/v11-coccyx-ossicles.json')).digest('hex'),proof.asset_sha256);
+ assert.equal(asset.base_source_commit,base.source_commit);
+ assert.equal(proof.canonical_count_conventional,206);
+ assert.equal(proof.previous_conventional_count,199);
+ assert.equal(proof.new_osteology_bone_count,7);
+ for(const prop of ['human_anatomist_reviewed','ear_specialist_reviewed','biomechanics_validated','clinical_use_approved'])
+  assert.equal(proof[prop],false,prop+' is not an accepted clinical claim');
+ assert.deepEqual(asset.source_frame,{origin_metres:[0,.9,0],scale:5});
+ const names=['z-v11-coccyx','z-v11-left-malleus','z-v11-left-incus','z-v11-left-stapes',
+  'z-v11-right-malleus','z-v11-right-incus','z-v11-right-stapes'];
+ assert.deepEqual(Object.keys(asset.bones).sort(),names.sort());
+ const all=[...base.parts.map(p=>p.id)];
+ const fmas=new Set(base.parts.map(p=>p.fma));
+ for(const id of names){
+  const p=asset.bones[id];
+  assert.equal(p.system,'bone');
+  assert.equal(p.license,'CC BY-SA 4.0');
+  assert.equal(p.source_repo,'LluisV/Z-Anatomy');
+  assert.equal(p.reference_pose_only,true);
+  assert.ok(p.faces.length>80&&p.vertices.length>60);
+  assert.ok(!all.includes(id)&&!fmas.has(p.fma));
+  fmas.add(p.fma);
+  assert.ok(p.vertices.every(v=>v.length===3&&v.every(Number.isFinite)));
+  assert.ok(p.faces.every(t=>t.length===3&&t.every(i=>Number.isInteger(i)&&i>=0&&i<p.vertices.length)));
+ }
+ assert.equal(asset.bones['z-v11-coccyx'].fma,'FMA20229');
+ const sacrum=base.parts.find(p=>p.name==='Sacrum');
+ const coc=asset.bones['z-v11-coccyx'];
+ assert.ok(Math.max(...coc.vertices.map(p=>p[1])) < Math.min(...sacrum.vertices.map(p=>p[1]))+.08);
+ assert.ok(Math.abs(coc.vertices.reduce((s,p)=>s+p[0],0)/coc.vertices.length)<.12);
+ for(const side of ['left','right']){
+  const temporal=base.parts.find(p=>p.name===side[0].toUpperCase()+side.slice(1)+' temporal bone');
+  const X=temporal.vertices.map(p=>p[0]);
+  const min=Math.min(...X),max=Math.max(...X);
+  for(const name of ['malleus','incus','stapes']){
+   const p=asset.bones['z-v11-'+side+'-'+name];
+   const center=p.vertices.reduce((s,v)=>s+v[0],0)/p.vertices.length;
+   assert.ok(center>min-.12&&center<max+.12,'ossicle is in source temporal envelope');
+   assert.ok(side==='left'?center>0:center<0,'correct lateral identification');
+   const span=Math.max(...p.vertices.map(v=>v[0]))-Math.min(...p.vertices.map(v=>v[0]));
+   assert.ok(span<.09&&span>.0005,'ossicle size is plausible');
+  }
+ }
+ assert.ok(proof.registration.coccyx.control_rms.Sacrum<.09);
+ assert.ok(proof.registration.ear.control_rms['Temporal bone.l']<.08);
+ assert.ok(proof.registration.ear.control_rms['Temporal bone.r']<.08);
+ assert.ok(proof.validation.ear_heldout_frontal.trimmed_rms_units<.18);
+ assert.ok(proof.validation.coccyx_source_sacrum_min_distance_units<.18);
+ for(const path of ['assets/atlas/atlas-v11-source.js','assets/atlas/atlas-loader.js','assets/atlas/atlas-renderer.js','assets/atlas/atlas-controller.js'])
+  assert.doesNotThrow(()=>new Function(read(path)),path);
+ assert.match(read('atlas/index.html'),/atlas-v11-source\.js/);
+});

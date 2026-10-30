@@ -1,0 +1,37 @@
+name: V11 pinned Z Anatomy skeletal source inventory
+on:
+  push:
+    branches: [feat/v11-pelvis-temporal-registration]
+    paths:
+      - scripts/inspect_v11_z_fbx.py
+      - .github/workflows/v11-source-scan.yml
+permissions:
+  contents: write
+concurrency:
+  group: v11-scan
+  cancel-in-progress: false
+jobs:
+  z-mesh-inspection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 27
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Blender for exact FBX geometry inspection
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq blender python3-numpy
+      - name: Inventory Z Anatomy source controls and candidate meshes
+        run: blender -b -t 2 --python scripts/inspect_v11_z_fbx.py
+      - name: Save inspectable source manifest on branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/v11-z-skeletal-inventory.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Record pinned external skeletal mesh inventory and bounding boxes"
+            git fetch origin "refs/heads/${GITHUB_REF_NAME}"
+            git rebase FETCH_HEAD
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi

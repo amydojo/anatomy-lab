@@ -1,6 +1,6 @@
 /* V6 abortable lazy geometry/provenance loader. Fixed, audited same-origin paths. */
 (function(){'use strict';
-const FIXED={facialV10:'/atlas/assets/v10-facial-reference.json',facialV10Proof:'/atlas/assets/v10-facial-provenance.json',expansionV9:'/atlas/assets/v9-source-expansion.json',expansionV9Proof:'/atlas/assets/v9-source-provenance.json',overviewV8:'/atlas/assets/v8-overview-detail.json',overviewV8Proof:'/atlas/assets/v8-overview-provenance.json',atlas:'/atlas/assets/body-skeleton.json',provenance:'/atlas/assets/provenance.json',hip:'/hip/spatial/assets/provenance.json',nerve:'/hip/spatial/assets/sciatic-provenance.json',hipGeometry:'/hip/spatial/assets/hip-source.json',kneeGeometry:'/knee/spatial/assets/bp3d-right-knee-4.0.json',shoulderGeometry:'/shoulder/spatial/assets/shoulder-source.json',shoulderProof:'/shoulder/spatial/assets/provenance.json',extendedProof:'/atlas/regions/provenance.json',skullRegion:'/atlas/regions/skull.json',neckRegion:'/atlas/regions/neck.json',thoraxRegion:'/atlas/regions/thorax.json',elbowRegion:'/atlas/regions/elbow.json',wristRegion:'/atlas/regions/wrist.json',ankleRegion:'/atlas/regions/ankle.json',kneeMuscles:'/knee/spatial/assets/knee-muscles-source.json',kneeMuscleProof:'/knee/spatial/assets/knee-muscles-provenance.json'};
+const FIXED={osteologyV11:'/atlas/assets/v11-coccyx-ossicles.json',osteologyV11Proof:'/atlas/assets/v11-source-provenance.json',facialV10:'/atlas/assets/v10-facial-reference.json',facialV10Proof:'/atlas/assets/v10-facial-provenance.json',expansionV9:'/atlas/assets/v9-source-expansion.json',expansionV9Proof:'/atlas/assets/v9-source-provenance.json',overviewV8:'/atlas/assets/v8-overview-detail.json',overviewV8Proof:'/atlas/assets/v8-overview-provenance.json',atlas:'/atlas/assets/body-skeleton.json',provenance:'/atlas/assets/provenance.json',hip:'/hip/spatial/assets/provenance.json',nerve:'/hip/spatial/assets/sciatic-provenance.json',hipGeometry:'/hip/spatial/assets/hip-source.json',kneeGeometry:'/knee/spatial/assets/bp3d-right-knee-4.0.json',shoulderGeometry:'/shoulder/spatial/assets/shoulder-source.json',shoulderProof:'/shoulder/spatial/assets/provenance.json',extendedProof:'/atlas/regions/provenance.json',skullRegion:'/atlas/regions/skull.json',neckRegion:'/atlas/regions/neck.json',thoraxRegion:'/atlas/regions/thorax.json',elbowRegion:'/atlas/regions/elbow.json',wristRegion:'/atlas/regions/wrist.json',ankleRegion:'/atlas/regions/ankle.json',kneeMuscles:'/knee/spatial/assets/knee-muscles-source.json',kneeMuscleProof:'/knee/spatial/assets/knee-muscles-provenance.json'};
 const cache=new Map(),pending=new Map(),hashes=new Map();
 async function sha256(text){
  if(!globalThis.crypto?.subtle||typeof TextEncoder==='undefined')throw Error('Secure browser digest unavailable; refusing unverified geometry');
@@ -26,7 +26,7 @@ async function load(key,{refresh=false}={}){
   if(!response.ok)throw Error('Asset '+key+': HTTP '+response.status);
   const body=await response.text();
   const json=JSON.parse(body);
-  if(key==='atlas'||key==='facialV10'||key==='expansionV9'||key==='overviewV8'||key==='shoulderGeometry'||key==='kneeMuscles'||key.endsWith('Region'))hashes.set(key,await sha256(body));
+  if(key==='atlas'||key==='osteologyV11'||key==='facialV10'||key==='expansionV9'||key==='overviewV8'||key==='shoulderGeometry'||key==='kneeMuscles'||key.endsWith('Region'))hashes.set(key,await sha256(body));
   if(key==='atlas'){
    if(json.schema!=='body-live/atlas-skeleton-v1'||json.license!=='CC BY 4.0'||json.parts?.length<60)throw Error('Invalid Atlas source');
    for(const part of json.parts){
@@ -54,6 +54,13 @@ async function load(key,{refresh=false}={}){
   if(key==='overviewV8Proof'&&(json.schema!=='body-live/overview-v8-provenance-v1'||
     json.anatomist_reviewed!==false||json.source_commit!=='1c38bf35c254a891200d3cedecfd57abebe83d8d'))
     throw Error('Invalid V8 overview provenance');
+  if(key==='osteologyV11'&&(json.schema!=='body-live/v11-registered-osteology-v1'||
+     json.license!=='CC BY-SA 4.0'||Object.keys(json.bones||{}).length!==7))
+    throw Error('Invalid V11 osteology reference geometry');
+  if(key==='osteologyV11Proof'&&(json.schema!=='body-live/v11-source-provenance-v1'||
+     json.human_anatomist_reviewed!==false||json.biomechanics_validated!==false||
+     json.ear_specialist_reviewed!==false))
+    throw Error('Unreviewed source data improperly labeled');
   if(key==='facialV10'&&(json.schema!=='body-live/v10-facial-source-v1'||
      json.license!=='CC-BY-SA-2.1-JP'||Object.keys(json.parts||{}).length!==47))
       throw Error('Invalid facial reference set');

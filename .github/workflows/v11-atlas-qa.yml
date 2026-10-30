@@ -1,0 +1,50 @@
+name: V11 coccyx and ossicle atlas quality gates
+on:
+  push:
+    branches: [feat/v11-pelvis-temporal-registration]
+    paths-ignore: [docs/**, atlas/assets/v11-source-provenance.json]
+  pull_request:
+    branches: [feat/v10-facial-source-registration]
+permissions:
+  contents: read
+concurrency:
+  group: v11-atlas-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-and-browser:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Validate source geometry, real skull/pelvic alignment and license gates
+        run: npm test
+      - run: npx playwright install chromium webkit
+      - name: Check V11 anatomical scenes and prior source layers on desktop/iPhone
+        run: npx playwright test tests/v11-registered-bones.spec.mjs tests/v10-facial.spec.mjs tests/v9-atlas.spec.mjs tests/v8-atlas.spec.mjs --reporter=line
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v11-registered-bones-diagnostics
+          path: test-results/
+          if-no-files-found: ignore
+  full-regression:
+    needs: source-and-browser
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install chromium webkit
+      - name: Whole anatomy interface regression
+        run: npm run test:e2e

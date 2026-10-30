@@ -3,14 +3,14 @@ async function open(page){
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.goto('/atlas/');
- await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().facialLoaded===true),{timeout:40000}).toBe(true);
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().osteologyLoaded===true),{timeout:40000}).toBe(true);
  return errors;
 }
 test('V10 loads 47 registered licensed facial muscles without substituting existing geometry',async({page})=>{
  const errors=await open(page);
  const state=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
  expect(state.renderer.webgl).toBe(true);
- expect(state.renderer.registry.bones).toBe(201);
+ expect(state.renderer.registry.bones).toBe(208);
  expect(state.renderer.registry.muscles).toBe(433);
  expect(state.renderer.facialMuscles).toBe(47);
  expect(state.renderer.registry.duplicateIds).toBe(0);
@@ -63,9 +63,12 @@ test('V10 invalid downloaded facial geometry fails closed and leaves V9 atlas av
  await page.goto('/atlas/');
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().expansionLoaded===true),{timeout:35000}).toBe(true);
  await expect(page.locator('#context-note')).toContainText('Optional facial source not loaded',{timeout:25000});
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().osteologyLoaded),{timeout:20000}).toBe(true);
  const s=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
  expect(s.facialLoaded).toBe(false);
  expect(s.renderer.registry.muscles).toBe(386);
+ expect(s.renderer.registry.bones).toBe(208);
+ expect(s.renderer.osteologyBones).toBe(7);
  expect(s.renderer.facialMuscles).toBe(0);
  expect(s.renderer.webgl).toBe(true);
  expect(errors).toEqual([]);
