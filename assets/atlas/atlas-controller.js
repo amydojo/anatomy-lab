@@ -726,6 +726,10 @@ function setup(){
   const routeQuery=new URLSearchParams(location.search),rawRegion=routeQuery.get('region');
   const route=routeRegion(rawRegion);
   if(route){
+   if(rawRegion!==route){
+    routeQuery.set('region',route);
+    history.replaceState(history.state,'',location.pathname+'?'+routeQuery.toString());
+   }
    pendingDeepLink={region:route,layer:routeQuery.has('layer')?Number(routeQuery.get('layer')):null,tool:routeQuery.get('tool'),structure:routeQuery.get('structure')};
    choose(route);
   }
