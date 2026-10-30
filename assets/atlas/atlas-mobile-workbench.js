@@ -16,10 +16,16 @@ function snapshot(){return atlas.getState();}
 function regionOf(s){return s.view==='overview'?null:(s.unified?.region||s.region||null);}
 function stateIsDetail(s){return s.view==='detail'&&!!regionOf(s);}
 function eligibleMove(s){const r=regionOf(s);return stateIsDetail(s)&&!!window.BodyRegionMotion?.profile(r);}
+function moveHint(){
+ const picker=$('mobile-region');
+ if(!picker)return;
+ picker.focus();
+ picker.click();
+}
 function setPanel(tool){
  if(!tools.includes(tool))return false;
  const s=snapshot();
- if(tool==='move'&&!eligibleMove(s))return false;
+ if(tool==='move'&&!eligibleMove(s)){moveHint();return false;}
  activeTool=tool;
  renderState(s);
  return true;
@@ -56,8 +62,10 @@ function renderState(s){
  for(const b of document.querySelectorAll('[data-mobile-tool]')){
   b.setAttribute('aria-pressed',String(b.dataset.mobileTool===activeTool));
   if(b.dataset.mobileTool==='move'){
-   b.disabled=!eligibleMove(s);
-   b.title=b.disabled?'Choose a joint region with supported teaching motion':'Move the joint';
+   // Keep Move actionable: tapping it on the overview opens the region picker.
+   b.disabled=false;
+   b.setAttribute('aria-disabled',String(!eligibleMove(s)));
+   b.title=!eligibleMove(s)?'Choose a joint region to enable motion':'Move the joint';
   }
  }
  $('mobile-panel').hidden=activeTool==='explore';
