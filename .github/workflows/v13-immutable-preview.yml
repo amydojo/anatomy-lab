@@ -36,7 +36,7 @@ jobs:
             const response=await fetch(process.env.BASE_URL+'/'+path);
             if(!response.ok) throw Error(path+': HTTP '+response.status);
             const deployed=Buffer.from(await response.arrayBuffer());
-            if(!deployed.equals(readFileSync(path))){ console.log('Preview identity mismatch',JSON.stringify({path,expectedBytes:readFileSync(path).length,receivedBytes:deployed.length,contentType:response.headers.get('content-type'),expectedHash:createHash('sha256').update(readFileSync(path)).digest('hex'),receivedHash:createHash('sha256').update(deployed).digest('hex')}));throw Error('Preview content does not match '+process.env.EXPECTED_SHA+': '+path);}
+            if(!deployed.equals(readFileSync(path))){ const expected=readFileSync(path,'utf8'); const text=deployed.toString('utf8'); const extras=[...text.matchAll(/<script\b[^>]*src="([^"]*)"[^>]*><\/script>/g)].filter(m=>!expected.includes(m[0])).map(m=>({source:new URL(m[1],process.env.BASE_URL).origin+new URL(m[1],process.env.BASE_URL).pathname,bytes:Buffer.byteLength(m[0]),remainingMatches:text.replace(m[0],'')===expected}));console.log('Additional scripts',JSON.stringify(extras));throw Error('Preview content does not match '+process.env.EXPECTED_SHA+': '+path);}
             console.log(path,createHash('sha256').update(deployed).digest('hex'));
           }
           JS
