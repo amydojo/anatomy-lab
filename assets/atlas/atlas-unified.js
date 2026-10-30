@@ -94,6 +94,9 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
    if(selected){clearSelection();render();}
    return null;
   }
+  return applySelection(hit);
+ }
+ function applySelection(hit){
   selected=hit;
   const [name,desc]=INFORMATION[hit.id]||(window.BodyExtendedRegions.has(hit.region)?
     [hit.name||hit.id.split('-').map(x=>x[0].toUpperCase()+x.slice(1)).join(' '),
@@ -105,7 +108,12 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   $('structure-details-name').textContent=name;
   $('structure-details-description').textContent=desc;
   $('structure-details').hidden=false;
-  render();return hit.id;
+  render();updateURL({replace:true});return hit.id;
+ }
+ function selectById(id){
+  if(!region||state.data.view!=='detail')return false;
+  const hit=model.getStructure(region,id);
+  return hit?!!applySelection(hit):false;
  }
  function showSelected(){
   if(!selected)return;
@@ -229,7 +237,8 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
     enableControls(name);syncControls(name);$('back-body').hidden=false;
     $('joint-motion').hidden=!window.BodyRegionMotion.profile(name);
     $('top-continue-knee').hidden=name!=='hip';
-    updateURL();render();window.BodyMobileWorkbench?.sync();
+    updateURL();render();window.BodyMobileWorkbench?.sync();window.BodyDesktopStudio?.sync();
+    window.dispatchEvent(new CustomEvent('body:region-ready',{detail:{region:name}}));
    });
   }catch(error){
    if(id!==token)return;
@@ -271,7 +280,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
    if(id!==token)return;
    region=null;reveal=0;returning=false;state.data.layer=0;motion=0;secondary=0;
    $('hotspots').hidden=false;setStatus((model.stats().overviewBones?'SOURCE-ALIGNED BONES + MUSCLES · V8':'SOURCED SKELETON · 78 STRUCTURES'));
-   render();
+   render();window.BodyDesktopStudio?.sync();window.BodyMobileWorkbench?.sync();
    if(navigation){const to=navigation;navigation=null;navigate(to);}
   });
  }
@@ -313,7 +322,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   state.mode(v>0?'peel':'explore');
   const displayed=v===4&&window.BodyExtendedRegions.has(region)?'trace':v>0?'peel':'explore';
   document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-'+displayed)));
-  render();
+  render();updateURL({replace:true});
  }
  function setMode(mode){
   if(mode==='trace'){
@@ -333,7 +342,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
    ?'Four rotator-cuff muscle surfaces from the same pinned source. Deltoid, labrum, ligaments and nerve geometry are not yet verified in this layer.'
    :mode==='peel'?'Selected layers come from their attributed sources. Motion remains an illustrative pivot, not clinical biomechanics.'
    :NOTE[region]||'Source-derived skeletal geometry.';
-  render();
+  render();updateURL({replace:true});
  }
  function reset(){
   if(!region)return;
@@ -359,7 +368,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   return true;
  }
  return Object.freeze({choose,back,travelKnee,isActive,getRegion,getReveal,getMotion,getSecondaryMotion,getSelected,getTransitionFrom,
-  snapshot,depthChange,setMode,reset,recenter,neutral,setMotion,setSecondaryMotion,pickAt,clearSelection,showSelected,nextRegion,interrupt});
+  snapshot,depthChange,setMode,reset,recenter,neutral,setMotion,setSecondaryMotion,pickAt,selectById,clearSelection,showSelected,nextRegion,interrupt});
 }
 window.BodyAtlasUnified=Object.freeze({create});
 })();
