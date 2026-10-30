@@ -9,11 +9,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        browser: [webkit-mobile, desktop-chromium]
+        browser: [chromium-mobile, webkit-mobile, desktop-chromium]
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.56.0-noble
-    timeout-minutes: 30
+    timeout-minutes: 60
     env:
       BASE_URL: https://anatomy-p39gdpjv6-amy-dos-projects.vercel.app
       EXPECTED_SHA: c1be15c0ae3c2993aa1f0e6e7331a26d9c636d56
@@ -26,6 +26,8 @@ jobs:
         with:
           node-version: '22'
       - run: npm ci --no-audit --no-fund
+      - run: npm test
+      - run: python3 -m unittest discover -s scripts/tests
       - name: Verify immutable preview files against exact checked out commit
         run: |
           test "$(git -c safe.directory="$GITHUB_WORKSPACE" rev-parse HEAD)" = "$EXPECTED_SHA"
@@ -48,8 +50,8 @@ jobs:
             console.log(path,createHash('sha256').update(application).digest('hex'));
           }
           JS
-      - name: Hosted navigation, inspector, mobile gestures and desktop checks
-        run: npx playwright test tests/v12-stabilization.spec.mjs tests/v13-inspector.spec.mjs tests/v82-motion.spec.mjs tests/v83-mobile.spec.mjs tests/v84-desktop.spec.mjs --project=${{ matrix.browser }}
+      - name: Complete hosted regression against the immutable RC
+        run: npm run test:e2e -- --project=${{ matrix.browser }}
       - if: always()
         uses: actions/upload-artifact@v4
         with:
