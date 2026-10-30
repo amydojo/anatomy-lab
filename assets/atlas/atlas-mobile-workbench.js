@@ -69,7 +69,7 @@ function renderState(s){
  if(activeTool==='layers'){
   if(!detail){
    const system=s.renderer?.overviewSystem||'combined';
-   $('mobile-layer-value').textContent=system==='combined'?'Both':system[0].toUpperCase()+system.slice(1);
+   $('mobile-layer-value').textContent=system==='combined'?'Both':system==='connective'?'Connective · partial':system[0].toUpperCase()+system.slice(1);
    document.querySelectorAll('[data-mobile-tissue]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mobileTissue===system)));
   }else{
    $('mobile-layer-value').textContent=$('layer-output').textContent;
