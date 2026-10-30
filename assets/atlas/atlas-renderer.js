@@ -30,7 +30,7 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function create(canvas,onContextLost=()=>{}){
  let gl=null,program=null,buffers=[],overviewBones=[],overviewMuscles=[],overviewData=null,expansionData=null,expansionBones=[],expansionMuscles=[],expansionConnective=[],expansionDetail=new Map(),facialData=null,facialOverview=null,facialDetail=[],osteologyData=null,osteologyOverview=[],osteologyDetail=new Map(),osteologyFocus=null,overviewSystem='combined',status='loading',model=null;
  let registry=window.BodyAtlasRegistry.create();
- const detail=new Map(),detailData=new Map();let shoulderPivot=[-1.1,1.9,0],shoulderGraph=null;let destroyed=false,rebuilding=false;let uniformCache=new Map();const boundsCache=new Map();
+ const detail=new Map(),detailData=new Map();let shoulderPivot=[-1.1,1.9,0],shoulderGraph=null;let destroyed=false,rebuilding=false,recoveryScheduled=false;let uniformCache=new Map();const boundsCache=new Map();
  function cleanup(){if(gl){for(const item of [...buffers,...overviewBones,...overviewMuscles,...expansionBones,...expansionMuscles,...expansionConnective,...(facialOverview?[facialOverview]:[]),...facialDetail,...osteologyOverview,...[...expansionDetail.values()].flat(),...[...osteologyDetail.values()].flat(),...[...detail.values()].flat()])gl.deleteBuffer(item.buffer);if(program)gl.deleteProgram(program);}buffers=[];overviewBones=[];overviewMuscles=[];expansionBones=[];expansionMuscles=[];expansionConnective=[];facialOverview=null;facialDetail=[];osteologyOverview=[];osteologyDetail.clear();expansionDetail.clear();detail.clear();program=null;uniformCache.clear();boundsCache.clear();}
  function compile(type,source){const sh=gl.createShader(type);gl.shaderSource(sh,source);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(sh));return sh;}
  function setup(){
@@ -320,7 +320,19 @@ function create(canvas,onContextLost=()=>{}){
   const size=resize();
   if(!gl||status!=='ready'||gl.isContextLost?.())return size;
   // Resizing can invalidate a GPU context; never query locations from a stale program.
-  if(!program||!gl.isProgram(program)){status='recovering';return size;}
+  if(!program||!gl.isProgram(program)){
+   status='recovering';
+   if(!recoveryScheduled&&!rebuilding){
+    recoveryScheduled=true;
+    requestAnimationFrame(()=>{
+     recoveryScheduled=false;
+     if(!destroyed&&!gl.isContextLost?.()&&status==='recovering'){
+      if(restore())window.dispatchEvent(new CustomEvent('body:webgl-restored'));
+     }
+    });
+   }
+   return size;
+  }
   gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(0,0,0,0);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   gl.useProgram(program);
   const uni=name=>{if(!uniformCache.has(name))uniformCache.set(name,gl.getUniformLocation(program,name));return uniformCache.get(name);};
@@ -585,9 +597,15 @@ function create(canvas,onContextLost=()=>{}){
   const bounds={center,radius,min:lo,max:hi};boundsCache.set(key,bounds);return bounds;
  }
  function restore(){
-  if(destroyed||!model||gl?.isContextLost?.())return false;
-  try{status='loading';return load(model);}
-  catch(err){status='fallback';onContextLost('Unable to restore the verified anatomy scene: '+err.message);return false;}
+  if(destroyed||rebuilding||!model||gl?.isContextLost?.())return false;
+  rebuilding=true;
+  try{
+   status='loading';
+   return load(model);
+  }catch(err){
+   status='fallback';onContextLost('Unable to restore the verified anatomy scene: '+err.message);
+   return false;
+  }finally{rebuilding=false;}
  }
  function dispose(){destroyed=true;status='disposed';cleanup();model=null;overviewData=null;expansionData=null;facialData=null;osteologyData=null;shoulderGraph=null;detailData.clear();}
  return Object.freeze({load,loadOverview,loadExpansion,loadFacial,loadOsteology,setOsteologyFocus,setOverviewSystem,getOverviewSystem:()=>overviewSystem,registry:()=>registry,loadDetail,touchDetail,hasDetail:region=>detail.has(region),render,hitTest,shoulderDiagnostics,resize,getStatus:()=>status,getViewBounds:viewBounds,getStructure,restore,dispose,stats:()=>({partCount:buffers.length,overviewBones:overviewBones.length,overviewMuscles:overviewMuscles.length,expansionBones:expansionData?Object.keys(expansionData.bones).length:0,expansionMuscles:expansionData?Object.keys(expansionData.muscles).length:0,expansionConnective:expansionData?Object.keys(expansionData.connective).length:0,facialMuscles:facialData?Object.keys(facialData.parts).length:0,facialDetailMeshes:facialDetail.length,osteologyBones:osteologyData?Object.keys(osteologyData.bones).length:0,osteologyFocus,overviewSystem,registry:registry.stats(),triangles:[...buffers,...overviewBones,...overviewMuscles].reduce((n,b)=>n+b.count/3,0),webgl:status==='ready',detailRegions:[...detail.keys()],detailMeshes:[...detail.values()].reduce((n,items)=>n+items.length,0),riggedShoulderMuscles:(detail.get('shoulder')||[]).filter(p=>p.skinWeights).length,riggedHipMuscles:(detail.get('hip')||[]).filter(p=>p.skinWeights).length,riggedKneeMuscles:(detail.get('knee')||[]).filter(p=>p.skinWeights).length,coordinatedShoulder:!!shoulderGraph,expandedRegions:[...detail.keys()].filter(id=>window.BodyExtendedRegions?.has(id)),expandedMeshes:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>!x.tissue).length,0),expandedMuscles:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>x.tissue).length,0)})});
