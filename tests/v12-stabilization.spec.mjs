@@ -128,3 +128,18 @@ test('V12 D8: legacy ribs URL resolves to thorax and invalid routes communicate 
  await expect(page.locator('#context-note')).toContainText('Unknown region');
  expect(errors).toEqual([]);
 });
+
+
+const allRegions=['skull','neck','thorax','shoulder','elbow','wrist','hip','knee','ankle','nerve'];
+test('V12.1: ten-region navigation matrix preserves source viewer and browser state',async({page})=>{
+ const errors=await load(page);
+ for(const name of allRegions){
+  await page.evaluate(()=>window.__BODY_ATLAS__.body());
+  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:30000}).toBe('overview');
+  await page.evaluate(name=>window.__BODY_ATLAS__.choose(name),name);
+  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:30000}).toBe(name);
+  await expect(page).toHaveURL(new RegExp('region='+name));
+  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.webgl)).toBe(true);
+ }
+ expect(errors).toEqual([]);
+});
