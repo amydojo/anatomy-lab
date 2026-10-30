@@ -275,7 +275,8 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   $('context-note').textContent='Source-derived skeleton. Nerve registration and biomechanics remain unverified.';
   document.querySelectorAll('[data-region]').forEach(b=>b.setAttribute('aria-pressed','false'));
   enableControls(null);$('mode-trace').disabled=false;$('mode-peel').textContent='Peel';if(window.innerWidth<=850)setExpanded(false);
-  setStatus('RETURNING THROUGH THE BODY');updateURL();
+  // An internal stop during a direct region transfer is not user navigation.
+  setStatus('RETURNING THROUGH THE BODY');if(!navigation)updateURL();
   travel(home,reduce()?0:850,v=>{reveal=1-v;},()=>{
    if(id!==token)return;
    region=null;reveal=0;returning=false;state.data.layer=0;motion=0;secondary=0;
