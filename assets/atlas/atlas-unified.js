@@ -33,9 +33,9 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   // Interpolate projected scale continuously instead of interpolating zoom alone.
   const aScale=Math.max(.001,base(from.frameSpan)*from.zoom);
   const bScale=Math.max(.001,base(to.frameSpan)*to.zoom);
-  const progressAt=window.BodySpatialCore.animationClock(ms);
+  const start=performance.now();
   const tick=now=>{
-   const u=progressAt(now),v=easing(u);
+   const u=ms===0?1:clamp((now-start)/ms,0,1),v=easing(u);
    for(const key of ['yaw','pitch','frameSpan'])camera[key]=from[key]+(to[key]-from[key])*v;
    camera.zoom=Math.exp(Math.log(aScale)+(Math.log(bScale)-Math.log(aScale))*v)/base(camera.frameSpan);
    camera.target={x:from.target.x+(to.target.x-from.target.x)*v,y:from.target.y+(to.target.y-from.target.y)*v,z:from.target.z+(to.target.z-from.target.z)*v};

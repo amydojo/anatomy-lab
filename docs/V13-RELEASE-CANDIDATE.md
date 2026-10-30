@@ -145,3 +145,11 @@ Candidate `015a1ac993705accd7a9fd6a7a5511d37bd8d52b` passed all 47 hosted deskto
 The same hosted run passed 30 mobile WebKit checks but failed nine newly strengthened reset cases (8 desktop-only cases skipped). Exact failure: the engine angle returned to 0 while `#mobile-motion-slider` retained 20. This is a real adapter synchronization defect, independent of anatomy and of the former screenshot artifact. Mobile previously observed only region/selection changes; motion values modified by the shared controller were not subscribed.
 
 The adapter now observes both original motion outputs and synchronizes when either engine angle changes. Its cached angles prevent redundant render loops. The strict visible-slider zero, label zero, unchanged capture state, nonblank specimen, changed motion image and exact neutral specimen assertions all remain in place. A fresh full matrix and immutable hosted check are required for the subscription repair.
+
+## Camera timing trial rejected; runtime restored
+
+Full logs for c1be15c exposed six V6 travel/return failures each in desktop Chromium and mobile WebKit. The per-frame progress cap introduced in 015a1ac could stretch return-to-body beyond the existing five-second bound when overview rendering was slow. That runtime change is reverted, including its now-obsolete helper-only unit test. All original camera completion/return behavior is restored; source suite returns to 35 tests.
+
+The continuity fixture now samples every rendered frame with requestAnimationFrame and records the RAF timestamp, matching the timestamp domain used by the existing camera animation. Previously it sampled with setTimeout and recorded performance.now after a potentially blocking draw; mismatched sampling phases could report a camera change against the wrong elapsed interval. The original 1500ms sampling window, detail-completion assertion, minimum frameSpan, frameSpan/yaw movement bounds, and exception checks are retained. No timing threshold is increased and no camera test is skipped. This is a test measurement correction; it does not slow production navigation.
+
+The exact WebGL specimen capture and the real mobile motion-subscription repair are retained. Hosted focused checks at c1be15c passed 47 desktop and 39 WebKit tests; the whole regression is required again after the camera trial rollback and sampling correction.

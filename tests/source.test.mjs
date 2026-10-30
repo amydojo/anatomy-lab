@@ -1018,19 +1018,3 @@ test('Seven anatomy records map exact source structure identities without fuzzy 
  assert.equal(info.lookup('patella-muscle'),null);
  assert.equal(info.lookup('patella!'),null);
 });
-
-test('Camera journey clock starts at its first rendered frame and bounds compositor stalls',async()=>{
- const {runInNewContext}=await import('node:vm');const sandbox={window:{}};
- runInNewContext(read('assets/spatial-core.js'),sandbox);
- const create=sandbox.window.BodySpatialCore.animationClock;
- const clock=create(900);
- assert.equal(clock(4000),0,'a delayed first RAF must not consume unseen travel');
- const before=clock(4016);
- const after=clock(5016);
- assert.ok(after>before);
- assert.ok(after-before<=50/900+Number.EPSILON,'a 1s stall must not cause a large camera jump');
- let previous=after,value=after;
- for(let now=5032;now<7000;now+=16){value=clock(now);assert.ok(value>=previous);previous=value;}
- assert.equal(value,1,'the journey still completes once frames resume');
- assert.equal(create(0)(9000),1,'reduced-motion completion remains immediate');
-});
