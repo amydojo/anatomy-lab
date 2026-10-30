@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const state=window.BodyAtlasState.create();
 const loader=window.BodyAtlasLoader,model=window.BodyAtlasRenderer.create($('atlas-canvas'),reason=>fallback(reason));
 const E=window.BodyAtlasEvidence;let source=null,proof=null,hipProof=null,nerveProof=null,shoulderProof=null,kneeMuscleProof=null,extendedProof=null,overviewProof=null;
-let lastFocus=null,activeFrameRoute=null,motionFrame=0,travelMixFrame=0,frameTimeout=0,entryTimer=0,exitTimer=0,seq=0,previousFocus=null,pins=[],loaded=false,overviewLoaded=false,expansionLoaded=false,facialLoaded=false,pendingEntry=null,sourceSeamPending=false;
+let lastFocus=null,activeFrameRoute=null,motionFrame=0,travelMixFrame=0,frameTimeout=0,entryTimer=0,exitTimer=0,seq=0,previousFocus=null,pins=[],loaded=false,overviewLoaded=false,expansionLoaded=false,facialLoaded=false,osteologyLoaded=false,pendingEntry=null,sourceSeamPending=false;
 const reduce=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const HERE={hip:'/hip/spatial/',nerve:'/hip/spatial/',knee:'/knee/spatial/',shoulder:'/shoulder/'};
 const LABEL={hip:'RIGHT HIP',nerve:'SCIATIC NERVE',knee:'RIGHT KNEE',shoulder:'SHOULDER',
@@ -36,6 +36,14 @@ function getFrameApi(){
 function resize(){
  const rect=$('atlas-canvas').getBoundingClientRect();state.data.camera.width=rect.width;state.data.camera.height=rect.height;
  render();
+}
+function refreshOsteologyCoverage(){
+ const st=model.stats();
+ const bones=st.partCount+st.overviewBones+st.expansionBones+st.osteologyBones;
+ const muscles=st.overviewMuscles+st.expansionMuscles+st.facialMuscles;
+ $('overview-coverage').textContent=bones+' BONE MESHES · '+muscles+' MUSCLE MESHES';
+ $('stage-caveat').textContent=(osteologyLoaded?'206/206':'199/206')+
+  ' conventional bones · BP3D 4.0 CC BY 4.0 · BP3D 3.0 facial CC BY-SA 2.1 Japan · Z-Anatomy CC BY-SA 4.0 · expert review pending';
 }
 function render(){
  if(document.hidden||(state.data.view==='detail'&&!U.isActive()))return;
@@ -603,20 +611,26 @@ function setup(){
         window.BodyV10Facial.verify(facial,facialProof,source,asset,addition);
         if(!model.loadFacial(facial))throw Error('Facial renderer unavailable');
         facialLoaded=true;
-        const status=model.stats();
-        $('overview-coverage').textContent=(status.partCount+status.overviewBones+status.expansionBones)+
-          ' BONE MESHES · '+(status.overviewMuscles+status.expansionMuscles+status.facialMuscles)+' MUSCLE MESHES';
-        $('stage-caveat').textContent='199/206 conventional bones · 433 muscle meshes · BP3D 4.0 CC BY 4.0 + BP3D 3.0 facial CC BY-SA 2.1 Japan · unreviewed';
+        refreshOsteologyCoverage();
         render();
        })
        .catch(err=>{
         $('context-note').textContent='Optional facial source not loaded: '+err.message;
        });
+      // V11 source-aligned osteology is optional and independently verified.
+      Promise.all([loader.load('osteologyV11'),loader.load('osteologyV11Proof'),loader.load('facialV10')])
+       .then(([newBones,boneProof,faceManifest])=>{
+        window.BodyV11Source.verify(newBones,boneProof,source,asset,addition,faceManifest);
+        if(!model.loadOsteology(newBones))throw Error('Osteology renderer unavailable');
+        osteologyLoaded=true;
+        refreshOsteologyCoverage();
+        render();
+       })
+       .catch(err=>{
+        $('context-note').textContent='Optional sacrum/temporal osteology unavailable: '+err.message;
+       });
       window.BodyV9Source.mount(addition);
-      const info=model.stats();
-      $('overview-coverage').textContent=(info.partCount+info.overviewBones+info.expansionBones)+
-       ' BONE MESHES · '+(info.overviewMuscles+info.expansionMuscles)+' MUSCLE MESHES';
-      $('stage-caveat').textContent='199/206 conventional bones · 7 unavailable in source · connective meshes unvalidated';
+      refreshOsteologyCoverage();
       render();
      })
      .catch(err=>{
@@ -638,6 +652,6 @@ function setup(){
  }).catch(err=>fallback(err.message));
 }
 const U=window.BodyAtlasUnified.create({state,model,loader,render,updateURL,resize,setExpanded,reduce,centerPoint,shortestYaw,enableControls,NOTE,LABEL,navigate:region=>choose(region)});
-window.__BODY_ATLAS__={getState:()=>({...state.snapshot(),renderer:model.stats(),unified:U.snapshot(),assetsLoaded:loaded,overviewLoaded,expansionLoaded,facialLoaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,recenter,setInspectorFrame,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode};
+window.__BODY_ATLAS__={getState:()=>({...state.snapshot(),renderer:model.stats(),unified:U.snapshot(),assetsLoaded:loaded,overviewLoaded,expansionLoaded,facialLoaded,osteologyLoaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,recenter,setInspectorFrame,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode};
 setup();
 })();
