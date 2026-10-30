@@ -154,6 +154,30 @@ document.querySelectorAll('[data-mobile-layer-mode]').forEach(b=>b.addEventListe
  press('mode-'+b.dataset.mobileLayerMode);sync();
 }));
 $('mobile-layer-slider').addEventListener('input',e=>{setInput('layer-slider',e.target.value);sync();});
+// Direct manipulation: horizontal drags across the anatomical stage adjust the
+// selected joint's primary angle. Only intercept gestures in Move mode; preserve
+// ordinary orbit/pan/pinch in Explore and multi-touch gestures everywhere.
+const stage=$('atlas-canvas');
+let jointDrag=null;
+if(stage){
+ stage.addEventListener('pointerdown',e=>{
+  if(!isMobile()||activeTool!=='move'||!eligibleMove(snapshot())||!e.isPrimary||e.pointerType==='mouse')return;
+  const slider=$('mobile-motion-slider');
+  jointDrag={id:e.pointerId,x:e.clientX,angle:Number(slider.value),min:Number(slider.min||0),max:Number(slider.max||90)};
+  stage.setPointerCapture?.(e.pointerId);
+ },{capture:true});
+ stage.addEventListener('pointermove',e=>{
+  if(!jointDrag||e.pointerId!==jointDrag.id||!e.isPrimary)return;
+  const next=Math.max(jointDrag.min,Math.min(jointDrag.max,Math.round(jointDrag.angle+(e.clientX-jointDrag.x)*.45)));
+  setInput('joint-motion-slider',next);
+  $('mobile-motion-slider').value=String(next);
+  $('mobile-motion-value').textContent=next+'°';
+  e.preventDefault();e.stopImmediatePropagation();
+ },{capture:true,passive:false});
+ const stop=e=>{if(jointDrag?.id===e.pointerId){jointDrag=null;sync();}};
+ stage.addEventListener('pointerup',stop,{capture:true});
+ stage.addEventListener('pointercancel',stop,{capture:true});
+}
 $('mobile-motion-slider').addEventListener('input',e=>{setInput('joint-motion-slider',e.target.value);sync();});
 $('mobile-secondary-slider').addEventListener('input',e=>{setInput('joint-secondary-slider',e.target.value);sync();});
 $('mobile-neutral').addEventListener('click',()=>{press('joint-rest');sync();});
