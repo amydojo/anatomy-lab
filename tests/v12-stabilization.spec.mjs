@@ -55,13 +55,12 @@ test('V12 D3: bounds-aware wheel zoom and focal pan stay finite and recenter rem
  const rect=await bounds.boundingBox();
  const x=rect.x+rect.width*.72,y=rect.y+rect.height*.59;
  await page.mouse.move(x,y);
- if(test.info().project.name.includes('webkit-mobile')){
-  await page.evaluate(()=>window.__BODY_ATLAS__.recenter());
- }else for(let i=0;i<16;i++)await page.mouse.wheel(0,-400);
+ if(test.info().project.name.includes('webkit-mobile'))test.skip(true,'Mouse wheel is not a supported mobile WebKit gesture; covered by separate touch tests');
+ for(let i=0;i<16;i++)await page.mouse.wheel(0,-400);
  let state=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
  expect(state.camera.zoom).toBeLessThanOrEqual(2.35);
  expect(Object.values(state.camera.target).every(Number.isFinite)).toBe(true);
- if(!test.info().project.name.includes('webkit-mobile'))for(let i=0;i<16;i++)await page.mouse.wheel(0,400);
+ for(let i=0;i<16;i++)await page.mouse.wheel(0,400);
  await page.locator('#studio-recenter').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.zoom)).toBeGreaterThan(.6);
  state=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
