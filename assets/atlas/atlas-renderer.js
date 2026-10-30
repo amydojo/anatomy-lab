@@ -43,7 +43,7 @@ function create(canvas,onContextLost=()=>{}){
    'float x=p.x*cy+p.z*sy;','float z=p.z*cy-p.x*sy;','float y=p.y*cp-z*sp;','float z2=p.y*sp+z*cp;',
    'float scale=min(uViewport.x/3.25,uViewport.y/uFrameSpan)*uZoom;',
    'float w=max(.10,(7.4-z2)/7.4);',
-   'gl_Position=vec4(x*scale/(uViewport.x*.5)+(uAnchorX-.5)*2.0*w,y*scale/(uViewport.y*.5)+(uAnchorY-.5)*2.0*w,-z2/15.0,w);',
+   'gl_Position=vec4(x*scale/(uViewport.x*.5)+(uAnchorX-.5)*2.0*w,(y-.04)*scale/(uViewport.y*.5)-(uAnchorY-.5)*2.0*w,-z2/15.0,w);',
    'vNormal=n;','}'
   ].join('\n');
   const frag=['#version 300 es','precision mediump float;','in vec3 vNormal;','uniform vec3 uColor;','uniform float uDim;','uniform float uAlpha;','out vec4 outColor;',
