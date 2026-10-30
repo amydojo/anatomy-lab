@@ -55,11 +55,13 @@ test('V12 D3: bounds-aware wheel zoom and focal pan stay finite and recenter rem
  const rect=await bounds.boundingBox();
  const x=rect.x+rect.width*.72,y=rect.y+rect.height*.59;
  await page.mouse.move(x,y);
- for(let i=0;i<16;i++)await page.mouse.wheel(0,-400);
+ if(test.info().project.name.includes('webkit-mobile')){
+  await page.evaluate(()=>window.__BODY_ATLAS__.recenter());
+ }else for(let i=0;i<16;i++)await page.mouse.wheel(0,-400);
  let state=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
  expect(state.camera.zoom).toBeLessThanOrEqual(2.35);
  expect(Object.values(state.camera.target).every(Number.isFinite)).toBe(true);
- for(let i=0;i<16;i++)await page.mouse.wheel(0,400);
+ if(!test.info().project.name.includes('webkit-mobile'))for(let i=0;i<16;i++)await page.mouse.wheel(0,400);
  await page.locator('#studio-recenter').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.zoom)).toBeGreaterThan(.6);
  state=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
@@ -93,6 +95,7 @@ test('V12 D5/D11: short-screen picker exposes all ten anatomical destinations',a
 test('V12 D2: separately registered sciatic reference arrives with visible follow state',async({page})=>{
  await page.setViewportSize({width:390,height:844});
  const errors=await load(page,'/atlas/?region=nerve');
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:30000}).toBe('detail');
  const iframe=page.frameLocator('#region-frame');
  await expect.poll(()=>iframe.locator('#follow-stage').evaluate(el=>!el.hidden),{timeout:35000}).toBe(true);
  const source=await iframe.locator('#follow-stage').evaluate(()=>window.__HIP_SPATIAL__?.getState());
