@@ -22,12 +22,22 @@ shoulder:'Source-matched scapula, clavicle and humerus with four sourced rotator
  wrist:'Eight sourced carpals, five metacarpals and forearm bones. The illustrative wrist hinge is not validated intercarpal kinematics.',
  ankle:'Talus, calcaneus and other real foot/tarsal bones plus the right tibia/fibula. Dorsiflexion is illustrative, without ligament or tendon mechanics.'};
 const MODE_TEXT={explore:'Explore',peel:'Peel',trace:'Trace'};
-function updateURL(){
+const REGION_ALIAS={ribs:'thorax',cervical:'neck',sciatic:'nerve',foot:'ankle',hand:'wrist'};
+const routeRegion=raw=>{const normalized=REGION_ALIAS[raw]||raw;return window.BodyAtlasState.regions.includes(normalized)?normalized:null;};
+let restoringHistory=false;
+function updateURL({replace=false}={}){
  const q=new URLSearchParams(location.search);
  if(state.data.region)q.set('region',state.data.region);else q.delete('region');
+ if(state.data.region&&state.data.view==='detail'){
+  if(state.data.layer)q.set('layer',String(state.data.layer));else q.delete('layer');
+  if(['peel','trace'].includes(state.data.mode))q.set('tool',state.data.mode);else q.delete('tool');
+  const id=U.getSelected();if(id)q.set('structure',id);else q.delete('structure');
+ }else{q.delete('layer');q.delete('tool');q.delete('structure');}
  if(state.data.evidenceMode==='evidence')q.set('evidence','1');else q.delete('evidence');
- const suffix=q.toString();
- history.replaceState(null,'',location.pathname+(suffix?'?'+suffix:''));
+ const suffix=q.toString(),url=location.pathname+(suffix?'?'+suffix:'');
+ if(url===location.pathname+location.search||restoringHistory)return;
+ const changedRegion=new URLSearchParams(location.search).get('region')!==state.data.region;
+ history[replace||!changedRegion?'replaceState':'pushState']({atlas:true},'',url);
 }
 function getFrameApi(){
  try{const win=$('region-frame').contentWindow;return state.data.region==='knee'?win.__BODY_SPATIAL__:win.__HIP_SPATIAL__;}
@@ -562,11 +572,32 @@ function recenter(){
 }
 function setup(){
  const canvas=$('atlas-canvas');
- window.BodySpatialCore.attachOrbit(canvas,{state:state.data.camera,render,pick:pickAt,maxZoom:4,onInteract:()=>U.interrupt(),onDoubleTap:recenter});
+ window.BodySpatialCore.attachOrbit(canvas,{state:state.data.camera,render,pick:pickAt,getBounds:()=>model.getViewBounds(U.getRegion()||state.data.region),maxZoom:4,onInteract:()=>U.interrupt(),onDoubleTap:recenter});
  window.addEventListener('resize',resize,{passive:true});
  if(typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe($('atlas-stage'));
  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(motionFrame);motionFrame=0;clearTimeout(frameTimeout);}else render();});
- window.addEventListener('pagehide',()=>{loader.cancel();model.dispose();clearTimeout(frameTimeout);clearTimeout(entryTimer);clearTimeout(exitTimer);cancelAnimationFrame(motionFrame);cancelAnimationFrame(travelMixFrame);cancelAnimationFrame(travelMixFrame);});
+ // A BFCache navigation keeps the document and renderer alive. Disposing on
+ // pagehide permanently blanked the restored canvas and stranded shader state.
+ window.addEventListener('pagehide',event=>{
+  clearTimeout(frameTimeout);clearTimeout(entryTimer);clearTimeout(exitTimer);
+  cancelAnimationFrame(motionFrame);cancelAnimationFrame(travelMixFrame);
+  if(!event.persisted){loader.cancel();model.dispose();}
+ });
+ window.addEventListener('pageshow',event=>{if(event.persisted){
+  if(model.getStatus()!=='ready')model.restore();
+  resize();window.BodyDesktopStudio?.sync();window.BodyMobileWorkbench?.sync();
+ }});
+ window.addEventListener('body:webgl-restored',()=>{$('canvas-fallback').hidden=true;resize();});
+ window.addEventListener('popstate',()=>{
+  const q=new URLSearchParams(location.search),raw=q.get('region'),target=routeRegion(raw);
+  restoringHistory=true;
+  try{
+   if(target){
+    if(state.data.region!==target||state.data.view==='overview')choose(target);
+   }else if(state.data.region||U.isActive())body();
+   window.BodyDesktopStudio?.sync();window.BodyMobileWorkbench?.sync();
+  }finally{queueMicrotask(()=>{restoringHistory=false;});}
+ });
  $('sidebar-toggle').onclick=()=>setExpanded($('atlas-sidebar').dataset.expanded!=='true');
  document.querySelectorAll('[data-overview-system]').forEach(button=>{
   button.addEventListener('click',()=>{
@@ -672,7 +703,10 @@ function setup(){
     $('context-note').textContent='The detailed V8 overview layer could not be verified: '+err.message;
     if(state.data.view==='overview')$('scene-status').textContent='LEGACY 78-BONE FALLBACK · V8 UNAVAILABLE';
    });
-  const route=new URLSearchParams(location.search).get('region');if(route&&window.BodyAtlasState.regions.includes(route))choose(route);
+  const routeQuery=new URLSearchParams(location.search),rawRegion=routeQuery.get('region');
+  const route=routeRegion(rawRegion);
+  if(route)choose(route);
+  else if(rawRegion){$('context-note').textContent='Unknown region: '+rawRegion+'. Showing the full body.';}
   if(new URLSearchParams(location.search).get('evidence')==='1'){setEvidence('evidence');showEvidence();}
  }).catch(err=>fallback(err.message));
 }
