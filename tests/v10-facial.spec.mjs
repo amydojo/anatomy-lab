@@ -3,14 +3,14 @@ async function open(page){
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.goto('/atlas/');
- await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().facialLoaded===true),{timeout:40000}).toBe(true);
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().osteologyLoaded===true),{timeout:40000}).toBe(true);
  return errors;
 }
 test('V10 loads 47 registered licensed facial muscles without substituting existing geometry',async({page})=>{
  const errors=await open(page);
  const state=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
  expect(state.renderer.webgl).toBe(true);
- expect(state.renderer.registry.bones).toBe(201);
+ expect(state.renderer.registry.bones).toBe(208);
  expect(state.renderer.registry.muscles).toBe(433);
  expect(state.renderer.facialMuscles).toBe(47);
  expect(state.renderer.registry.duplicateIds).toBe(0);
