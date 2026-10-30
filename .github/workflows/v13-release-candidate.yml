@@ -8,7 +8,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: v13-release-${{ github.ref }}
+  group: v13-release-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 jobs:
   regression:

@@ -109,3 +109,23 @@ These are genuine browser automation runs against Vercel, not physical-device te
 The container Git ownership check initially blocked the QA job; it was fixed with a per-command safe-directory value scoped to the runner checkout. A second identity gate detected 163 extra bytes in the HTML. Independent diagnostic output proved they are the single `https://vercel.live/_next-live/feedback/feedback.js` script, and that removing exactly that identified platform script leaves byte-identical application HTML. The successful identity gate permits only this one host addition and still requires exact application payload equality, plus raw equality for five application JavaScript files. Actual browser tests use the hosted page with the toolbar present.
 
 Post-861 runtime fixes and new reset-image diagnostics require a fresh browser run. The 861 preview is evidence for that commit only. No production deployment, merge or ancestry retarget occurred.
+
+## Desktop artifact diagnosis at ab1a87d
+
+Completed run [41100464666](https://github.com/amydojo/anatomy-lab/actions/runs/41100464666) at `ab1a87ddc8d2f924293806db56964626126094a7`:
+
+| Browser | Passed | Failed | Flaky | Skipped |
+|---|---:|---:|---:|---:|
+| Mobile Chromium | 162 | 0 | 0 | 9 |
+| Mobile WebKit | 162 | 0 | 0 | 9 |
+| Desktop Chromium | 164 | 7 | 0 | 0 |
+
+The desktop artifact `12997763345` was downloaded and all seven `neutral-before`, `neutral-after` and `neutral-state` attachments were decoded and compared. The before/after camera and UI states are exactly equal in every case. All changed pixels are confined to the same native primary-range thumb edge: bounds `(304,687)-(308,695)` for neck, hip, knee, elbow, wrist and ankle; `(304,630)-(308,638)` for shoulder (whose tray is taller). Color differences are only native-control edge antialiasing. No anatomy pixels differ.
+
+Classification: seven screenshot failures caused by browser-native range-control painting after a programmatic value round trip. These are not anatomical reset defects, not stale golden baselines (each expected image is captured in the same test), and not PNG compression differences (decoded pixels differ).
+
+Repair: explicit desktop range track/thumb appearance replaces native accent-color shading, with a 44px input target and visible keyboard focus. The exact decoded-pixel equality assertions are unchanged: no masks, tolerances, baseline updates or skips. Full regression must validate the repair.
+
+CI push and PR jobs now share the same head-branch concurrency key, so redundant runs do not consume runner capacity in parallel. This scheduling repair is separate from the slider-rendering change.
+
+The hosted ab1a87d run [41100529521](https://github.com/amydojo/anatomy-lab/actions/runs/41100529521) passed 29 desktop Chromium tests and 21 mobile WebKit tests (8 desktop-only cases skipped), including inspector and mixed-pointer tests. This is automation, not physical iPhone QA.

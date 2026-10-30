@@ -15,12 +15,12 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.56.0-noble
     timeout-minutes: 30
     env:
-      BASE_URL: https://anatomy-3hpo7sxmp-amy-dos-projects.vercel.app
-      EXPECTED_SHA: ab1a87ddc8d2f924293806db56964626126094a7
+      BASE_URL: https://anatomy-126xe05xv-amy-dos-projects.vercel.app
+      EXPECTED_SHA: 5a594c46be066d623f65c26f03abc33646f07576
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ab1a87ddc8d2f924293806db56964626126094a7
+          ref: 5a594c46be066d623f65c26f03abc33646f07576
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -32,7 +32,7 @@ jobs:
           node --input-type=module <<'JS'
           import {readFileSync} from 'node:fs';
           import {createHash} from 'node:crypto';
-          for (const path of ['atlas/index.html','assets/spatial-core.js','assets/atlas/atlas-mobile-workbench.js','assets/atlas/atlas-desktop-studio.js','assets/atlas/v13-anatomy-info.js','assets/atlas/atlas-v11-source.js']) {
+          for (const path of ['atlas/index.html','atlas/desktop-studio.css','assets/spatial-core.js','assets/atlas/atlas-mobile-workbench.js','assets/atlas/atlas-desktop-studio.js','assets/atlas/v13-anatomy-info.js','assets/atlas/atlas-v11-source.js']) {
             const response=await fetch(process.env.BASE_URL+'/'+path);
             if(!response.ok) throw Error(path+': HTTP '+response.status);
             const deployed=Buffer.from(await response.arrayBuffer());
