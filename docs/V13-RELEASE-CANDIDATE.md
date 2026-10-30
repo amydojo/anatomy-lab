@@ -124,8 +124,16 @@ The desktop artifact `12997763345` was downloaded and all seven `neutral-before`
 
 Classification: seven screenshot failures caused by browser-native range-control painting after a programmatic value round trip. These are not anatomical reset defects, not stale golden baselines (each expected image is captured in the same test), and not PNG compression differences (decoded pixels differ).
 
-Repair: explicit desktop range track/thumb appearance replaces native accent-color shading, with a 44px input target and visible keyboard focus. The exact decoded-pixel equality assertions are unchanged: no masks, tolerances, baseline updates or skips. Full regression must validate the repair.
+The initial styling trial at `5a594c46be066d623f65c26f03abc33646f07576` did not resolve the screenshot gate and was reverted. Its hosted motion suite failed all nine desktop reset image comparisons; inspected fresh artifacts again confined every difference to the HTML controls, with identical camera and UI states. No anatomical rendering defect was found.
+
+Final classification: test capture/environment error. A Playwright element screenshot captures HTML controls overlaid on the full-width canvas, so it is not an isolated specimen image. The corrected fixture redraws and reads the WebGL image synchronously (required because preserveDrawingBuffer is false), verifies that capture changes no camera/region/pose/layer state, rejects blank images, and compares every decoded specimen pixel exactly. Primary and secondary motion must each change the rendered specimen. Reset must return all specimen pixels exactly and visible controls/labels must return to zero. No pixels are masked, no difference tolerance is allowed, no golden baseline was replaced, and no test was skipped. This also covers the anatomy previously obscured by the control tray.
 
 CI push and PR jobs now share the same head-branch concurrency key, so redundant runs do not consume runner capacity in parallel. This scheduling repair is separate from the slider-rendering change.
 
 The hosted ab1a87d run [41100529521](https://github.com/amydojo/anatomy-lab/actions/runs/41100529521) passed 29 desktop Chromium tests and 21 mobile WebKit tests (8 desktop-only cases skipped), including inspector and mixed-pointer tests. This is automation, not physical iPhone QA.
+
+## Additional full-run finding at 5a594c4
+
+Run [41106699770](https://github.com/amydojo/anatomy-lab/actions/runs/41106699770) completed with mobile Chromium 169 passed / 9 skipped, mobile WebKit 168 passed / 1 flaky / 9 skipped, and desktop Chromium 169 passed / 9 failed. The nine desktop failures are the unchanged composited-image reset assertion during the rejected slider-style trial. All seven new anatomy selection/source cases passed in each browser.
+
+The WebKit flaky case is the original camera-continuity bound, with frameSpan delta 2.894 over a sample interval whose permitted bound is 1.910. This is a separate application timing defect: the journey consumes wall-clock time while no frames are rendered, then jumps forward after a stall. The repair starts progress on the first rendered frame and caps advancement after a delayed frame at 50ms. A pure clock test verifies delayed start, bounded stall progress, eventual completion and immediate reduced-motion completion. The browser continuity assertion is unchanged. Source suite now contains 36 tests; browser proof is required for this new candidate.
