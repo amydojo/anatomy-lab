@@ -15,12 +15,12 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.56.0-noble
     timeout-minutes: 30
     env:
-      BASE_URL: https://anatomy-3g297iv7f-amy-dos-projects.vercel.app
-      EXPECTED_SHA: 015a1ac993705accd7a9fd6a7a5511d37bd8d52b
+      BASE_URL: https://anatomy-p39gdpjv6-amy-dos-projects.vercel.app
+      EXPECTED_SHA: c1be15c0ae3c2993aa1f0e6e7331a26d9c636d56
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 015a1ac993705accd7a9fd6a7a5511d37bd8d52b
+          ref: c1be15c0ae3c2993aa1f0e6e7331a26d9c636d56
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:

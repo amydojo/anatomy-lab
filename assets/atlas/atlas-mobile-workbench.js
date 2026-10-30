@@ -9,7 +9,7 @@ if(!atlas||!$('mobile-workbench'))return;
 const labels={skull:'SKULL & JAW',neck:'NECK',thorax:'RIBS & THORAX',
  shoulder:'SHOULDER',elbow:'ELBOW',wrist:'WRIST & HAND',hip:'HIP',knee:'KNEE',
  ankle:'ANKLE & FOOT',nerve:'SCIATIC NERVE'};
-const tools=['explore','layers','move','inspect'];let activeTool='explore',lastRegion=null,lastSelection=null,focusBefore=null,modalOpen=false,inspectExpanded=false;
+const tools=['explore','layers','move','inspect'];let activeTool='explore',lastRegion=null,lastSelection=null,focusBefore=null,modalOpen=false,inspectExpanded=false,lastMotion=null,lastSecondary=null;
 const isMobile=()=>matchMedia('(max-width:850px)').matches;
 const press=(id)=>$(id)?.click();
 function snapshot(){return atlas.getState();}
@@ -137,6 +137,7 @@ function renderState(s){
  document.querySelectorAll('[data-mobile-region]').forEach(b=>
   b.setAttribute('aria-pressed',String(b.dataset.mobileRegion===region)));
  lastRegion=region;lastSelection=selected;
+ lastMotion=s.unified?.motion||0;lastSecondary=s.unified?.secondary||0;
 }
 function sync(){renderState(snapshot());}
 for(const b of document.querySelectorAll('[data-mobile-tool]'))b.addEventListener('click',()=>{
@@ -223,7 +224,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modalOpen){closePic
 const observer=new MutationObserver(()=>{
  if(!isMobile())return;
  const s=snapshot(),r=regionOf(s),id=s.unified?.selected;
- if(r!==lastRegion||id!==lastSelection||$('atlas-app').dataset.mode!==$('mobile-workbench').dataset.mode){
+ if(r!==lastRegion||id!==lastSelection||(s.unified?.motion||0)!==lastMotion||(s.unified?.secondary||0)!==lastSecondary||$('atlas-app').dataset.mode!==$('mobile-workbench').dataset.mode){
   // Direct structure taps must produce immediate visible feedback. The old
   // inspector chip is intentionally hidden on phones, so open the one-pane
   // inspector when a new source surface is selected.
@@ -235,6 +236,10 @@ const observer=new MutationObserver(()=>{
 observer.observe($('atlas-app'),{attributes:true,attributeFilter:['data-mode']});
 observer.observe($('structure-chip'),{attributes:true,attributeFilter:['hidden']});
 observer.observe($('structure-chip-name'),{childList:true,characterData:true,subtree:true});
+// Shared-engine resets and external motion controls must update the visible
+// mobile adapter just as they do the desktop adapter.
+for(const id of ['joint-motion-value','joint-secondary-value'])
+ observer.observe($(id),{childList:true,characterData:true,subtree:true});
 window.addEventListener('popstate',sync);
 window.addEventListener('resize',()=>{if(!isMobile())closePicker({restore:false});sync()},{passive:true});
 $('mobile-workbench').dataset.mode=$('atlas-app').dataset.mode;
