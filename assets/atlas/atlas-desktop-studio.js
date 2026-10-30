@@ -6,7 +6,7 @@
  const $=id=>document.getElementById(id);
  const atlas=window.__BODY_ATLAS__;
  if(!atlas||!$('desktop-studio'))return;
- const labels={skull:'SKULL & JAW',neck:'CERVICAL SPINE',thorax:'RIBS & THORAX',
+ const labels={skull:'SKULL & JAW',neck:'NECK',thorax:'RIBS & THORAX',
   shoulder:'SHOULDER',elbow:'ELBOW',wrist:'WRIST & HAND',hip:'RIGHT HIP',
   knee:'RIGHT KNEE',ankle:'ANKLE & FOOT',nerve:'SCIATIC NERVE'};
  const isDesktop=()=>matchMedia('(min-width:851px)').matches;
