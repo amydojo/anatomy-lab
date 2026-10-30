@@ -739,6 +739,17 @@ function setup(){
    }
    pendingDeepLink={region:route,layer:routeQuery.has('layer')?Number(routeQuery.get('layer')):null,tool:routeQuery.get('tool'),structure:routeQuery.get('structure')};
    choose(route);
+   // Separately sourced nerve scenes require an explicit focused -> detail handoff.
+   // A deep link has no human Enter click, so complete that handoff once selected.
+   if(route==='nerve'){
+    let attempts=0;
+    const openNerveRoute=()=>{
+     if(state.data.region!=='nerve'||++attempts>100)return;
+     if(state.data.view==='focused')enterUnmatchedRegion('nerve');
+     else if(state.data.view!=='detail')setTimeout(openNerveRoute,120);
+    };
+    openNerveRoute();
+   }
   }
   else if(rawRegion){$('context-note').textContent='Unknown region: '+rawRegion+'. Showing the full body.';}
   if(new URLSearchParams(location.search).get('evidence')==='1'){setEvidence('evidence');showEvidence();}
