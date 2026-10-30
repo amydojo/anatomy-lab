@@ -1,0 +1,61 @@
+import {test,expect} from '@playwright/test';
+async function ready(page){
+ const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await page.goto('/atlas/');
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().osteologyLoaded===true),{timeout:45000}).toBe(true);
+ return errors;
+}
+test('V11 loads all 206 conventional bones with separate licensed ear and coccyx identities',async({page})=>{
+ const errors=await ready(page);
+ const st=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
+ expect(st.renderer.webgl).toBe(true);
+ expect(st.renderer.registry.bones).toBe(208);
+ expect(st.renderer.osteologyBones).toBe(7);
+ expect(st.renderer.registry.muscles).toBe(433);
+ expect(st.renderer.registry.duplicateIds).toBe(0);
+ await expect(page.locator('#overview-coverage')).toContainText('208 BONE MESHES');
+ await expect(page.locator('#overview-coverage')).toContainText('433 MUSCLE MESHES');
+ await expect(page.locator('#stage-caveat')).toContainText('206/206 conventional bones');
+ const asset=await page.evaluate(async()=>await(await fetch('/atlas/assets/v11-coccyx-ossicles.json')).json());
+ expect(Object.keys(asset.bones).length).toBe(7);
+ expect(asset.license).toBe('CC BY-SA 4.0');
+ expect(Object.values(asset.bones).every(p=>p.reference_pose_only===true)).toBe(true);
+ expect(errors).toEqual([]);
+});
+test('V11 skull and hip retain one canvas, selectable additional bone identities and motion baseline',async({page})=>{
+ const errors=await ready(page);
+ await page.evaluate(()=>window.__BODY_ATLAS__.choose('skull'));
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:30000}).toBe('skull');
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:30000}).toBe('detail');
+ const skull=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
+ expect(skull.renderer.osteologyBones).toBe(7);
+ expect(skull.unified.motion).toBe(0);
+ expect(skull.unified.secondary).toBe(0);
+ expect(await page.locator('#atlas-canvas').count()).toBe(1);
+ await page.evaluate(()=>window.__BODY_ATLAS__.choose('hip'));
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:30000}).toBe('hip');
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:30000}).toBe('detail');
+ const hip=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
+ expect(hip.renderer.osteologyBones).toBe(7);
+ expect(hip.unified.motion).toBe(0);
+ expect(await page.locator('#atlas-canvas').count()).toBe(1);
+ expect(errors).toEqual([]);
+});
+test('V11 corrupt geometry checksum preserves V10 viewer and does not claim completion',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+ await page.route('**/atlas/assets/v11-coccyx-ossicles.json',async route=>{
+  const response=await route.fetch();
+  await route.fulfill({response,body:(await response.text()).replace('body-live/v11-registered-osteology-v1','unverified-bones')});
+ });
+ await page.goto('/atlas/');
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().facialLoaded===true),{timeout:45000}).toBe(true);
+ await expect(page.locator('#context-note')).toContainText('Optional sacrum/temporal osteology unavailable',{timeout:20000});
+ const s=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
+ expect(s.osteologyLoaded).toBe(false);
+ expect(s.renderer.osteologyBones).toBe(0);
+ expect(s.renderer.registry.bones).toBe(201);
+ expect(s.renderer.registry.muscles).toBe(433);
+ await expect(page.locator('#stage-caveat')).toContainText('199/206 conventional bones');
+ expect(errors).toEqual([]);
+});
