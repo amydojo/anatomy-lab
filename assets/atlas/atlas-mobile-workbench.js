@@ -16,10 +16,16 @@ function snapshot(){return atlas.getState();}
 function regionOf(s){return s.view==='overview'?null:(s.unified?.region||s.region||null);}
 function stateIsDetail(s){return s.view==='detail'&&!!regionOf(s);}
 function eligibleMove(s){const r=regionOf(s);return stateIsDetail(s)&&!!window.BodyRegionMotion?.profile(r);}
+function moveHint(){
+ const picker=$('mobile-region');
+ if(!picker)return;
+ picker.focus();
+ picker.click();
+}
 function setPanel(tool){
  if(!tools.includes(tool))return false;
  const s=snapshot();
- if(tool==='move'&&!eligibleMove(s))return false;
+ if(tool==='move'&&!eligibleMove(s)){moveHint();return false;}
  activeTool=tool;
  renderState(s);
  return true;
@@ -56,8 +62,10 @@ function renderState(s){
  for(const b of document.querySelectorAll('[data-mobile-tool]')){
   b.setAttribute('aria-pressed',String(b.dataset.mobileTool===activeTool));
   if(b.dataset.mobileTool==='move'){
-   b.disabled=!eligibleMove(s);
-   b.title=b.disabled?'Choose a joint region with supported teaching motion':'Move the joint';
+   // Keep Move actionable: tapping it on the overview opens the region picker.
+   b.disabled=false;
+   b.setAttribute('aria-disabled',String(!eligibleMove(s)));
+   b.title=!eligibleMove(s)?'Choose a joint region to enable motion':'Move the joint';
   }
  }
  $('mobile-panel').hidden=activeTool==='explore';
@@ -146,6 +154,30 @@ document.querySelectorAll('[data-mobile-layer-mode]').forEach(b=>b.addEventListe
  press('mode-'+b.dataset.mobileLayerMode);sync();
 }));
 $('mobile-layer-slider').addEventListener('input',e=>{setInput('layer-slider',e.target.value);sync();});
+// Direct manipulation: horizontal drags across the anatomical stage adjust the
+// selected joint's primary angle. Only intercept gestures in Move mode; preserve
+// ordinary orbit/pan/pinch in Explore and multi-touch gestures everywhere.
+const stage=$('atlas-canvas');
+let jointDrag=null;
+if(stage){
+ stage.addEventListener('pointerdown',e=>{
+  if(!isMobile()||activeTool!=='move'||!eligibleMove(snapshot())||!e.isPrimary||e.pointerType==='mouse')return;
+  const slider=$('mobile-motion-slider');
+  jointDrag={id:e.pointerId,x:e.clientX,angle:Number(slider.value),min:Number(slider.min||0),max:Number(slider.max||90)};
+  stage.setPointerCapture?.(e.pointerId);
+ },{capture:true});
+ stage.addEventListener('pointermove',e=>{
+  if(!jointDrag||e.pointerId!==jointDrag.id||!e.isPrimary)return;
+  const next=Math.max(jointDrag.min,Math.min(jointDrag.max,Math.round(jointDrag.angle+(e.clientX-jointDrag.x)*.45)));
+  setInput('joint-motion-slider',next);
+  $('mobile-motion-slider').value=String(next);
+  $('mobile-motion-value').textContent=next+'°';
+  e.preventDefault();e.stopImmediatePropagation();
+ },{capture:true,passive:false});
+ const stop=e=>{if(jointDrag?.id===e.pointerId){jointDrag=null;sync();}};
+ stage.addEventListener('pointerup',stop,{capture:true});
+ stage.addEventListener('pointercancel',stop,{capture:true});
+}
 $('mobile-motion-slider').addEventListener('input',e=>{setInput('joint-motion-slider',e.target.value);sync();});
 $('mobile-secondary-slider').addEventListener('input',e=>{setInput('joint-secondary-slider',e.target.value);sync();});
 $('mobile-neutral').addEventListener('click',()=>{press('joint-rest');sync();});

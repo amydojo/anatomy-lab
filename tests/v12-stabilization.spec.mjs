@@ -55,6 +55,7 @@ test('V12 D3: bounds-aware wheel zoom and focal pan stay finite and recenter rem
  const rect=await bounds.boundingBox();
  const x=rect.x+rect.width*.72,y=rect.y+rect.height*.59;
  await page.mouse.move(x,y);
+ if(test.info().project.name.includes('webkit-mobile'))test.skip(true,'Mouse wheel is not a supported mobile WebKit gesture; covered by separate touch tests');
  for(let i=0;i<16;i++)await page.mouse.wheel(0,-400);
  let state=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
  expect(state.camera.zoom).toBeLessThanOrEqual(2.35);
@@ -93,6 +94,7 @@ test('V12 D5/D11: short-screen picker exposes all ten anatomical destinations',a
 test('V12 D2: separately registered sciatic reference arrives with visible follow state',async({page})=>{
  await page.setViewportSize({width:390,height:844});
  const errors=await load(page,'/atlas/?region=nerve');
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:30000}).toBe('detail');
  const iframe=page.frameLocator('#region-frame');
  await expect.poll(()=>iframe.locator('#follow-stage').evaluate(el=>!el.hidden),{timeout:35000}).toBe(true);
  const source=await iframe.locator('#follow-stage').evaluate(()=>window.__HIP_SPATIAL__?.getState());
@@ -124,5 +126,20 @@ test('V12 D8: legacy ribs URL resolves to thorax and invalid routes communicate 
  await expect(page).toHaveURL(/region=thorax/);
  await page.goto('/atlas/?region=not-a-region');
  await expect(page.locator('#context-note')).toContainText('Unknown region');
+ expect(errors).toEqual([]);
+});
+
+
+const allRegions=['skull','neck','thorax','shoulder','elbow','wrist','hip','knee','ankle','nerve'];
+test('V12.1: ten-region navigation matrix preserves source viewer and browser state',async({page})=>{
+ const errors=await load(page);
+ for(const name of allRegions){
+  await page.evaluate(()=>window.__BODY_ATLAS__.body());
+  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:30000}).toBe('overview');
+  await page.evaluate(name=>window.__BODY_ATLAS__.choose(name),name);
+  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:30000}).toBe(name);
+  await expect(page).toHaveURL(new RegExp('region='+name));
+  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.webgl)).toBe(true);
+ }
  expect(errors).toEqual([]);
 });
