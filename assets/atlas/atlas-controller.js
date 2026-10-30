@@ -24,7 +24,7 @@ shoulder:'Source-matched scapula, clavicle and humerus with four sourced rotator
 const MODE_TEXT={explore:'Explore',peel:'Peel',trace:'Trace'};
 const REGION_ALIAS={ribs:'thorax',cervical:'neck',sciatic:'nerve',foot:'ankle',hand:'wrist'};
 const routeRegion=raw=>{const normalized=REGION_ALIAS[raw]||raw;return window.BodyAtlasState.regions.includes(normalized)?normalized:null;};
-let restoringHistory=false,pendingDeepLink=null;
+let restoringHistory=false,restoringTarget=null,pendingDeepLink=null;
 function updateURL({replace=false}={}){
  const q=new URLSearchParams(location.search);
  if(state.data.region)q.set('region',state.data.region);else q.delete('region');
@@ -36,6 +36,12 @@ function updateURL({replace=false}={}){
  }else{q.delete('layer');q.delete('tool');q.delete('structure');}
  if(state.data.evidenceMode==='evidence')q.set('evidence','1');else q.delete('evidence');
  const suffix=q.toString(),url=location.pathname+(suffix?'?'+suffix:'');
+ // During a browser Back transition we may briefly pass through Whole Body.
+ // Intermediate camera states must not become new history entries.
+ if(restoringTarget!==null){
+  if((state.data.region||'')!==restoringTarget)return;
+  restoringTarget=null;
+ }
  if(url===location.pathname+location.search||restoringHistory)return;
  const changedRegion=new URLSearchParams(location.search).get('region')!==state.data.region;
  history[replace||!changedRegion?'replaceState':'pushState']({atlas:true},'',url);
@@ -609,7 +615,7 @@ function setup(){
  window.addEventListener('popstate',()=>{
   const q=new URLSearchParams(location.search),raw=q.get('region'),target=routeRegion(raw);
   pendingDeepLink=target?{region:target,layer:q.has('layer')?Number(q.get('layer')):null,tool:q.get('tool'),structure:q.get('structure')}:null;
-  restoringHistory=true;
+  restoringTarget=target||'';restoringHistory=true;
   try{
    if(target){
     if(state.data.region!==target||state.data.view==='overview')choose(target);
