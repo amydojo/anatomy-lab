@@ -642,9 +642,9 @@ function setup(){
         $('context-note').textContent='Optional facial source not loaded: '+err.message;
        });
       // V11 source-aligned osteology is optional and independently verified.
-      Promise.all([loader.load('osteologyV11'),loader.load('osteologyV11Proof'),loader.load('facialV10')])
-       .then(([newBones,boneProof,faceManifest])=>{
-        window.BodyV11Source.verify(newBones,boneProof,source,asset,addition,faceManifest);
+      Promise.all([loader.load('osteologyV11'),loader.load('osteologyV11Proof')])
+       .then(([newBones,boneProof])=>{
+        window.BodyV11Source.verify(newBones,boneProof,source,asset,addition,null);
         if(!model.loadOsteology(newBones))throw Error('Osteology renderer unavailable');
         osteologyAsset=newBones;osteologyLoaded=true;
         refreshOsteologyCoverage();
