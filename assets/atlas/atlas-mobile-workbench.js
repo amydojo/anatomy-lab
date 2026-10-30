@@ -52,7 +52,7 @@ function renderState(s){
  $('mobile-frame').hidden=region==='nerve'&&s.view==='focused';
  $('mobile-region').setAttribute('aria-label',region?'Current region '+labels[region]+'. Choose a different region':'Choose an anatomical region');
  $('mobile-workbench').dataset.tool=activeTool;
- atlas.setMobileFrame?.(activeTool!=='explore');
+ atlas.setMobileFrame?.(isMobile()&&activeTool!=='explore');
  for(const b of document.querySelectorAll('[data-mobile-tool]')){
   b.setAttribute('aria-pressed',String(b.dataset.mobileTool===activeTool));
   if(b.dataset.mobileTool==='move'){
