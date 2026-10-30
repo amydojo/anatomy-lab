@@ -28,6 +28,15 @@ test('V11 skull and hip retain one canvas, selectable additional bone identities
  await page.evaluate(()=>window.__BODY_ATLAS__.choose('skull'));
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:30000}).toBe('skull');
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:30000}).toBe('detail');
+ await expect(page.locator('[data-bone-focus="left-ear"]')).toBeVisible({timeout:20000});
+ await page.locator('[data-bone-focus="left-ear"]').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.osteologyFocus)).toBe('left-ear');
+ await expect(page.locator('#bone-focus-return')).toBeVisible();
+ await page.locator('#bone-focus-return').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.osteologyFocus)).toBe(null);
+ await page.locator('[data-bone-focus="right-ear"]').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.osteologyFocus)).toBe('right-ear');
+ await page.locator('#bone-focus-return').click();
  const skull=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
  expect(skull.renderer.osteologyBones).toBe(7);
  expect(skull.unified.motion).toBe(0);
@@ -36,6 +45,10 @@ test('V11 skull and hip retain one canvas, selectable additional bone identities
  await page.evaluate(()=>window.__BODY_ATLAS__.choose('hip'));
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:30000}).toBe('hip');
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:30000}).toBe('detail');
+ await expect(page.locator('[data-bone-focus="coccyx"]')).toBeVisible({timeout:20000});
+ await page.locator('[data-bone-focus="coccyx"]').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.osteologyFocus)).toBe('coccyx');
+ await page.locator('#bone-focus-return').click();
  const hip=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
  expect(hip.renderer.osteologyBones).toBe(7);
  expect(hip.unified.motion).toBe(0);
