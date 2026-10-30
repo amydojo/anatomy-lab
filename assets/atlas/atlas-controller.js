@@ -24,13 +24,14 @@ shoulder:'Source-matched scapula, clavicle and humerus with four sourced rotator
 const MODE_TEXT={explore:'Explore',peel:'Peel',trace:'Trace'};
 const REGION_ALIAS={ribs:'thorax',cervical:'neck',sciatic:'nerve',foot:'ankle',hand:'wrist'};
 const routeRegion=raw=>{const normalized=REGION_ALIAS[raw]||raw;return window.BodyAtlasState.regions.includes(normalized)?normalized:null;};
-let restoringHistory=false;
+let restoringHistory=false,pendingDeepLink=null;
 function updateURL({replace=false}={}){
  const q=new URLSearchParams(location.search);
  if(state.data.region)q.set('region',state.data.region);else q.delete('region');
  if(state.data.region&&state.data.view==='detail'){
   if(state.data.layer)q.set('layer',String(state.data.layer));else q.delete('layer');
-  if(['peel','trace'].includes(state.data.mode))q.set('tool',state.data.mode);else q.delete('tool');
+  const tool=state.data.layer===4&&window.BodyExtendedRegions?.has(state.data.region)?'trace':state.data.mode;
+  if(['peel','trace'].includes(tool))q.set('tool',tool);else q.delete('tool');
   const id=U.getSelected();if(id)q.set('structure',id);else q.delete('structure');
  }else{q.delete('layer');q.delete('tool');q.delete('structure');}
  if(state.data.evidenceMode==='evidence')q.set('evidence','1');else q.delete('evidence');
@@ -593,12 +594,26 @@ function setup(){
   resize();window.BodyDesktopStudio?.sync();window.BodyMobileWorkbench?.sync();
  }});
  window.addEventListener('body:webgl-restored',()=>{$('canvas-fallback').hidden=true;resize();});
+ function applyRouteState(region){
+  const saved=pendingDeepLink;
+  if(!saved||saved.region!==region||state.data.view!=='detail')return;
+  pendingDeepLink=null;
+  if(saved.tool==='peel'||saved.tool==='trace')U.setMode(saved.tool);
+  if(Number.isInteger(saved.layer)&&saved.layer>=0&&saved.layer<=4)U.depthChange(saved.layer);
+  if(saved.structure&&!U.selectById(saved.structure)){
+   $('context-note').textContent='Selected structure unavailable in this source layer.';
+  }
+  window.BodyDesktopStudio?.sync();window.BodyMobileWorkbench?.sync();
+ }
+ window.addEventListener('body:region-ready',event=>applyRouteState(event.detail.region));
  window.addEventListener('popstate',()=>{
   const q=new URLSearchParams(location.search),raw=q.get('region'),target=routeRegion(raw);
+  pendingDeepLink=target?{region:target,layer:q.has('layer')?Number(q.get('layer')):null,tool:q.get('tool'),structure:q.get('structure')}:null;
   restoringHistory=true;
   try{
    if(target){
     if(state.data.region!==target||state.data.view==='overview')choose(target);
+    else applyRouteState(target);
    }else if(state.data.region||U.isActive())body();
    window.BodyDesktopStudio?.sync();window.BodyMobileWorkbench?.sync();
   }finally{queueMicrotask(()=>{restoringHistory=false;});}
@@ -648,7 +663,7 @@ function setup(){
  $('joint-secondary-slider').oninput=e=>U.setSecondaryMotion(e.target.value);
  $('joint-rest').onclick=()=>U.neutral();
  $('structure-chip-more').onclick=()=>U.showSelected();
- $('structure-chip-close').onclick=()=>{U.clearSelection();render();};
+ $('structure-chip-close').onclick=()=>{U.clearSelection();updateURL({replace:true});render();};
  buildPins();resize();
  Promise.all([loader.load('atlas'),loader.load('provenance')]).then(([asset,provenance])=>{
   loader.verifyAtlas(asset,provenance);
@@ -710,7 +725,10 @@ function setup(){
    });
   const routeQuery=new URLSearchParams(location.search),rawRegion=routeQuery.get('region');
   const route=routeRegion(rawRegion);
-  if(route)choose(route);
+  if(route){
+   pendingDeepLink={region:route,layer:routeQuery.has('layer')?Number(routeQuery.get('layer')):null,tool:routeQuery.get('tool'),structure:routeQuery.get('structure')};
+   choose(route);
+  }
   else if(rawRegion){$('context-note').textContent='Unknown region: '+rawRegion+'. Showing the full body.';}
   if(new URLSearchParams(location.search).get('evidence')==='1'){setEvidence('evidence');showEvidence();}
  }).catch(err=>fallback(err.message));
