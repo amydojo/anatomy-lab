@@ -49,14 +49,7 @@
  .studio-choice-row button[aria-pressed=true]{background:#574034;border-color:#d6a987;color:#f4c9a6}
  .studio-choice-row button:disabled{opacity:.3;cursor:not-allowed}
  .studio-range{display:grid;grid-template-columns:140px minmax(100px,1fr) 75px;align-items:center;gap:16px;min-height:55px;font-size:11px;font-weight:610;color:#d9c5b6}
- /* Own the range paint instead of browser-native accent-color shading, whose
-    minimum-position antialiasing can change after a value round trip. */
- .studio-range input{width:100%;appearance:none;-webkit-appearance:none;background:transparent;border:0;padding:0;cursor:ew-resize;min-height:44px;touch-action:pan-x}
- .studio-range input::-webkit-slider-runnable-track{height:4px;box-sizing:border-box;background:#665044;border:1px solid #94745d;border-radius:2px}
- .studio-range input::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:16px;height:16px;box-sizing:border-box;margin-top:-7px;border-radius:50%;background:#d9a680;border:1px solid #edc7a9;box-shadow:none}
- .studio-range input::-moz-range-track{height:4px;box-sizing:border-box;background:#665044;border:1px solid #94745d;border-radius:2px}
- .studio-range input::-moz-range-thumb{width:16px;height:16px;box-sizing:border-box;border-radius:50%;background:#d9a680;border:1px solid #edc7a9;box-shadow:none}
- .studio-range input:focus-visible{outline:2px solid #e6b19a;outline-offset:2px;border-radius:6px}
+ .studio-range input{width:100%;accent-color:#d9a680;cursor:ew-resize;min-height:30px}
  .studio-range output{text-align:right;font:400 19px Georgia,serif;color:#f5d5b8}
  .studio-motion-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
  .studio-motion-heading button{border:1px solid #7a5a44;background:#422b20;border-radius:9px;min-height:36px;color:#f4d3b9;padding:6px 12px;cursor:pointer}
