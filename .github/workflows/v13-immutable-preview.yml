@@ -18,7 +18,7 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.56.0-noble
     timeout-minutes: 60
     env:
-      BASE_URL: https://anatomy-ikvq0loyk-amy-dos-projects.vercel.app
+      BASE_URL: https://anatomy-5pbw3dr8d-amy-dos-projects.vercel.app
       EXPECTED_SHA: 5eff54053ffce0738eca4044e51f699a83d9fd76
     steps:
       - uses: actions/checkout@v4
@@ -37,18 +37,11 @@ jobs:
           node --input-type=module <<'JS'
           import {readFileSync} from 'node:fs';
           import {createHash} from 'node:crypto';
-          for (const path of ['atlas/index.html','atlas/desktop-studio.css','assets/spatial-core.js','assets/atlas/atlas-unified.js','assets/atlas/atlas-mobile-workbench.js','assets/atlas/atlas-desktop-studio.js','assets/atlas/v13-anatomy-info.js','assets/atlas/atlas-v11-source.js']) {
+          for (const path of ['atlas/index.html','hip/spatial/index.html','hip/spatial/sources/index.html','hip/dissection/index.html','atlas/desktop-studio.css','assets/spatial-core.js','assets/atlas/atlas-unified.js','assets/atlas/atlas-mobile-workbench.js','assets/atlas/atlas-desktop-studio.js','assets/atlas/v13-anatomy-info.js','assets/atlas/atlas-v11-source.js']) {
             const response=await fetch(process.env.BASE_URL+'/'+path);
             if(!response.ok) throw Error(path+': HTTP '+response.status);
             const deployed=Buffer.from(await response.arrayBuffer());
-            let application=deployed;
-            if(path==='atlas/index.html'&&!deployed.equals(readFileSync(path))){
-              const text=deployed.toString('utf8');
-              const toolbar=[...text.matchAll(/<script\b[^>]*src="([^"]*)"[^>]*><\/script>/g)].filter(m=>m[1]==='https://vercel.live/_next-live/feedback/feedback.js');
-              if(toolbar.length!==1)throw Error('Unrecognized hosted HTML transformation');
-              application=Buffer.from(text.replace(toolbar[0][0],''));
-              console.log('Vercel preview toolbar identified; application payload must still match byte-for-byte');
-            }
+            const application=deployed;
             if(!application.equals(readFileSync(path)))throw Error('Preview content does not match '+process.env.EXPECTED_SHA+': '+path);
             console.log(path,createHash('sha256').update(application).digest('hex'));
           }
