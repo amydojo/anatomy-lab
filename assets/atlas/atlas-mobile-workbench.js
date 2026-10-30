@@ -51,7 +51,10 @@ function closePicker({restore=true}={}){
 }
 function renderState(s){
  const region=regionOf(s),detail=stateIsDetail(s),motion=window.BodyRegionMotion?.profile(region);
- if(activeTool==='move'&&!eligibleMove(s))activeTool='explore';
+ if(activeTool==='move'&&s.view==='overview')activeTool='explore';
+ $('mobile-motion-slider').disabled=!eligibleMove(s);
+ $('mobile-secondary-slider').disabled=!eligibleMove(s);
+ $('mobile-neutral').disabled=!eligibleMove(s);
  $('mobile-region-name').textContent=region?labels[region]:'FULL BODY';
  $('mobile-home').hidden=!region;
  $('mobile-source').hidden=!(region==='nerve'&&s.view==='focused');
@@ -91,6 +94,10 @@ function renderState(s){
    });
   }
  }
+ if(isMobile()&&region==='shoulder'&&activeTool==='move'){
+  const rig=$('shoulder-rig-tools');
+  if(rig.parentElement!==$('mobile-move'))$('mobile-move').append(rig);
+ }
  if(motion){
   $('mobile-motion-label').textContent=motion.label;
   $('mobile-motion-slider').max=String(motion.max);
@@ -122,6 +129,8 @@ function renderState(s){
   const info=window.BodyAnatomyInfo?.lookup(selected);
   $('mobile-inspect-type').textContent=(info?.type||kind)+' · '+(labels[region]||'Whole body');
   $('mobile-inspect-context').textContent=info?info.summary+' Related: '+info.relations+'. Reference: '+info.source+'.':(description||'Additional verified anatomical relationships are not yet available for this structure.');
+  $('mobile-anatomy-source').hidden=!info;
+  if(info)$('mobile-anatomy-source').href=info.sourceUrl;
   $('mobile-inspect-motion').hidden=!eligibleMove(s);
   $('mobile-inspect-motion').textContent='Explore '+(labels[region]||'region').toLowerCase()+' teaching motion';
  }
@@ -173,8 +182,13 @@ $('mobile-layer-slider').addEventListener('input',e=>{setInput('layer-slider',e.
 // ordinary orbit/pan/pinch in Explore and multi-touch gestures everywhere.
 const stage=$('atlas-canvas');
 let jointDrag=null;
+const jointTouches=new Set();
 if(stage){
  stage.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='touch'){
+   jointTouches.add(e.pointerId);
+   if(jointTouches.size>1){jointDrag=null;return;}
+  }
   if(!isMobile()||activeTool!=='move'||!eligibleMove(snapshot())||!e.isPrimary||e.pointerType==='mouse')return;
   const slider=$('mobile-motion-slider');
   jointDrag={id:e.pointerId,x:e.clientX,angle:Number(slider.value),min:Number(slider.min||0),max:Number(slider.max||90)};
@@ -182,13 +196,20 @@ if(stage){
  },{capture:true});
  stage.addEventListener('pointermove',e=>{
   if(!jointDrag||e.pointerId!==jointDrag.id||!e.isPrimary)return;
+  if(!isMobile()||activeTool!=='move'||!eligibleMove(snapshot())){jointDrag=null;return;}
   const next=Math.max(jointDrag.min,Math.min(jointDrag.max,Math.round(jointDrag.angle+(e.clientX-jointDrag.x)*.45)));
   setInput('joint-motion-slider',next);
   $('mobile-motion-slider').value=String(next);
   $('mobile-motion-value').textContent=next+'°';
-  e.preventDefault();e.stopImmediatePropagation();
+  // Camera input still records the pointer position for a seamless second-finger
+  // handoff, but defaultPrevented keeps it from orbiting during joint motion.
+  e.preventDefault();
  },{capture:true,passive:false});
- const stop=e=>{if(jointDrag?.id===e.pointerId){jointDrag=null;sync();}};
+ const stop=e=>{
+  jointTouches.delete(e.pointerId);
+  if(jointDrag?.id===e.pointerId){e.preventDefault();jointDrag=null;sync();}
+ };
+ stage.addEventListener('lostpointercapture',stop,{capture:true});
  stage.addEventListener('pointerup',stop,{capture:true});
  stage.addEventListener('pointercancel',stop,{capture:true});
 }

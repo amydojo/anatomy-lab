@@ -10,6 +10,7 @@ async function open(page,region){
  await page.goto('/atlas/');
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().assetsLoaded===true),{timeout:30000}).toBe(true);
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().overviewLoaded===true),{timeout:35000}).toBe(true);
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().osteologyLoaded===true&&window.__BODY_ATLAS__?.getState().facialLoaded===true),{timeout:30000}).toBe(true);
  await page.evaluate(r=>window.__BODY_ATLAS__.choose(r),region);
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:30000}).toBe('detail');
  return errors;
@@ -67,6 +68,7 @@ test('V8.2 mobile switching resets both axes and never adds a second body viewpo
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.secondary)).toBe(25);
  await page.evaluate(()=>window.__BODY_ATLAS__.choose('ankle'));
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:25000}).toBe('ankle');
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:25000}).toBe('detail');
  const s=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
  expect(s.unified.secondary).toBe(0);expect(s.unified.motion).toBe(0);
  const info=await page.evaluate(()=>({canvas:document.querySelectorAll('#atlas-canvas').length,

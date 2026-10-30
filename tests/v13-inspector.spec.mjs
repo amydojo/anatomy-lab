@@ -32,3 +32,18 @@ for(const [region,expected] of [['shoulder','Biceps brachii'],['knee','Biceps fe
   await expect(page.locator('#structure-details-name')).toContainText(expected);
  });
 }
+
+ test('V13 desktop inspector expands anatomical facts within its existing panel',async({page})=>{
+  await page.setViewportSize({width:1440,height:900});
+  await page.goto('/atlas/?region=knee&layer=3&structure=patella');
+  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().unified.selected),{timeout:30000}).toBe('patella');
+  await expect(page.locator('#studio-inspector')).toBeVisible();
+  await expect(page.locator('#studio-anatomy-details')).toBeHidden();
+  await page.locator('#studio-anatomy-expand').click();
+  await expect(page.locator('#studio-anatomy-details')).toBeVisible();
+  await expect(page.locator('#studio-anatomy-context')).toContainText('quadriceps');
+  await page.locator('#studio-anatomy-expand').click();
+  await expect(page.locator('#studio-anatomy-details')).toBeHidden();
+  await page.locator('#studio-inspector-clear').click();
+  await expect(page.locator('#studio-anatomy-expand')).toBeHidden();
+ });

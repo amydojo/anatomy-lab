@@ -12,6 +12,10 @@ concurrency:
   cancel-in-progress: true
 jobs:
   regression:
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium-mobile, webkit-mobile, desktop-chromium]
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.56.0-noble
@@ -24,11 +28,11 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - run: npm test
       - run: python3 -m unittest discover -s scripts/tests
-      - run: npm run test:e2e
+      - run: npm run test:e2e -- --project=${{ matrix.browser }}
       - if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v13-release-evidence
+          name: v13-release-evidence-${{ matrix.browser }}
           path: |
             artifacts/
             test-results/

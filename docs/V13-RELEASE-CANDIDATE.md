@@ -1,51 +1,77 @@
-# V13 release candidate — NOT RELEASE READY
+# V13 stabilization — release held
 
-Audit date: 2026-10-30. Starting checkpoint: 4238b3c07d166ff6fb37acd25f68d495677cb2d4.
+No merge or production deployment is authorized. All existing PR bases remain intact.
 
-## Integration map
+## Verified baseline
 
-main (2d52a27) and the feature stack diverge at a0863916. main has one documentation commit absent from the feature stack. Do not replace main with the feature branch.
+PR #32 head: `0371af182f8310af21ae80f25762aec06ad35dab`.
+GitHub tested its synthetic merge commit `99c60975a0d6bfb9594a4b4e1a22e478322c9b17` into V13 checkpoint `4238b3c07d166ff6fb37acd25f68d495677cb2d4`.
+[Completed run 41086354295](https://github.com/amydojo/anatomy-lab/actions/runs/41086354295): 436 passed, 52 failed, 19 skipped, 40.9 minutes. Source suite: 32/32; Python suite: 18/18.
 
-V11 feat/v11-pelvis-temporal-registration (1e37e81) → PR29 V12 (d0cf80a) → PR30 V12.1 (99fb007) → PR31 V13 (4238b3c) → release/v13-rc.
+| Browser | Passed | Failed | Skipped |
+|---|---:|---:|---:|
+| Mobile Chromium | 145 | 15 | 9 |
+| Mobile WebKit | 143 | 16 | 10 |
+| Desktop Chromium | 148 | 21 | 0 |
 
-The V13 checkpoint contains 454 commits absent from main. PR29 is draft and targets the unmerged V11 branch; PR31 is draft. Do not squash the three named PRs independently without accounting for their ancestry. Resolve and verify the older feature stack and main documentation before producing a final integration PR.
+Exact baseline preview: https://anatomy-d8nubxi2i-amy-dos-projects.vercel.app/atlas/ (Vercel READY metadata at `0371af1`, previously confirmed; hosted interactive QA not completed).
 
-## Changes in this stabilization branch
+## Every failure accounted for
 
-- Region-specific short-head biceps identity prevents the knee's biceps femoris record overwriting shoulder biceps brachii.
-- Removed text-based muscle classification from the mobile fallback. Unmapped records remain Anatomical structure rather than guessing from words in descriptions.
-- Motion action explicitly describes regional teaching motion; it does not imply a verified selected-muscle action.
-- Playwright pinned to 1.56.0 with lockfile to match CI browser image. Added complete regression workflow for this release branch and V13.
-- Added browser regression cases for colliding regional structure IDs.
+| Failure group | Cases | Diagnosis and action |
+|---|---:|---|
+| V8/V9/V10/V11 readiness | 27 | Actual defect: V11 verifier receives null optional facial data, then dereferences v10.parts. Fix accepts an absent optional facial inventory while preserving checksum, source, license, geometry and duplicate checks. New executable VM regression reproduces the runtime call and tests negative cases. Browser rerun required. |
+| Ten-region nerve state | 3 | Test queries unified.region for the intentionally separate nerve source, whose state owner is top-level region. Correct state-owner assertion; also require visible source opener, explicit handoff, detail state and loaded nerve source. |
+| Knee Trace availability | 3 | Legacy test expects muscle mode disabled despite V12 explicitly enabling it. Replace with enabled assertion and verify trace rendering state, retaining isolation assertions. |
+| Mobile direct selection | 2 | Inspector automatically opens on selection; test clicks the active toggle and closes it. Assert automatic activation and visible identity rather than toggling twice. |
+| Shoulder motion label | 3 | Legacy label says abduction; current coordinated profile says elevation. Assert exact current label; preserve motion and geometry checks. |
+| Shoulder rig diagnostics | 3 | Actual UI regression: legacy diagnostic tools are hidden by both mobile and desktop rebuild CSS. Place original controls in existing Move tray; no duplicate controls. Test accesses them through Move. |
+| Mobile secondary motion after switch | 3 | Move resets to Explore during a transitional loading state. Preserve Move intent across region transfer, disable controls until eligible, require detail completion before layout assertions. |
+| Desktop neutral screenshot | 7 | Suspected resource-loading race: rest screenshot precedes optional overview additions. Wait for complete facial/osteology loading before motion comparisons; retain pixel equality and motion-reset assertions. Root cause not yet browser-confirmed. |
+| WebKit camera continuity | 1 | Still unresolved. Timing/render profiling needed. Keep original continuity assertion unchanged. |
 
-## Evidence and limitations
+These are diagnoses, not a claim that all 52 tests now pass.
 
-Before edits: JavaScript source suite 32 passed, 0 failed; Python suite 18 passed, 0 failed.
+## Other stabilization work
 
-Local browser attempt at checkpoint: 334 Chromium cases discovered, 80 browser launch failures, 254 not run, 0 passed. System Chromium failed socket() with Operation not permitted before app execution. Downloaded browser archives were invalid/truncated. This is infrastructure failure, not an application failure diagnosis. WebKit was not executed. No physical iPhone or remote device session was available.
+- Camera pointer handling respects a joint-owned prevented move while keeping coordinates current. A second finger relinquishes joint ownership and initializes camera pinch at the current centroid. Pointer cancel/lost capture cleans up joint state. Executable core test checks no orbit during joint drag, focal handoff, no release selection, and recovery.
+- Desktop progressive anatomy disclosure now lives inside the existing inspector; expand/collapse, clear, fallback and regional teaching-motion action are covered by a new browser case.
+- Mobile WebKit bounds/recenter test now uses explicitly labeled pointer simulation instead of skipping mouse-wheel assertions. This is not physical touch or iPhone testing.
+- Full CI is split into independent browser projects, with JSON results and per-browser evidence. BASE_URL support permits exact-preview checks without starting the local server. No assertion thresholds were relaxed.
 
-No npm build script exists; this is a static HTML/JS application. A production build/deployment has not been validated for the candidate.
+## Seven-record anatomy audit
 
-Vercel API reports production READY at 2d52a27bc9a99edc67580a6d66a0fe264758afac, URL https://anatomy-86sv9xglp-amy-dos-projects.vercel.app. Latest listed preview is 11e6b88420748b2450f4afa7e27b8805893acaa7, URL https://anatomy-24fbh67q3-amy-dos-projects.vercel.app. Neither is the V13 checkpoint. URLs not browser-verified.
+The original broad chapter citations were insufficient. Revised facts were read directly from OpenStax pages on 2026-10-30. Only the narrower supported claim set ships; unsupported original innervation, precise attachment and action claims were removed. This verifies educational text, not anatomy geometry or biomechanics.
 
-## Anatomy evidence gate
+| Record | Inspected passage | Supported facts retained |
+|---|---|---|
+| Patella | [8.4, Patella; Figure 8.16](https://openstax.org/books/anatomy-and-physiology-2e/pages/8-4-bones-of-the-lower-limb) | Sesamoid bone; in quadriceps tendon; distal femur articulation. |
+| Femur | Same section, Femur; Figure 8.16 | Thigh bone; hip-bone and tibial articulations. |
+| Tibia | Same section, introductory paragraph and Tibia | Medial, larger weight-bearing leg bone; femur/fibula relationships. |
+| Scapula | [8.1, Scapula](https://openstax.org/books/anatomy-and-physiology-2e/pages/8-1-the-pectoral-girdle); [8.2, Humerus](https://openstax.org/books/anatomy-and-physiology-2e/pages/8-2-bones-of-the-upper-limb) | Shoulder blade; glenoid cavity articulation with humeral head. |
+| Humerus | 8.2, Humerus; Figure 8.5 | Upper-arm bone; head articulates with scapular glenoid cavity. |
+| Supraspinatus | [11.5, Muscles That Move the Humerus](https://openstax.org/books/anatomy-and-physiology-2e/pages/11-5-muscles-of-the-pectoral-girdle-and-upper-limbs) | Above scapular spine; abduction; tendon participates in scapula-to-humerus rotator cuff. |
+| Gastrocnemius | [11.6, posterior leg compartment paragraph](https://openstax.org/books/anatomy-and-physiology-2e/pages/11-6-appendicular-muscles-of-the-pelvic-girdle-and-lower-limbs) | Superficial calf muscle; soleus deeper. No head-specific attachments/actions claimed. |
 
-Seven V13 seeded records exist. Zero claim-level verifications were completed in this audit: reference retrieval returned tool errors. Broad chapter citations do not satisfy the release gate. Do not expand or claim verified coverage until each claim has an inspected section/table and explicit source locator. Existing legacy descriptions also require review. Geometry/source integrity tests are distinct from factual claim verification.
+Executable identity checks read the actual knee bone, shoulder and ankle muscle source inventories. Gastrocnemius uses exact medial/lateral right-head selection IDs, mapped to whole-muscle context; left-head aliases correspond to overview IDs. Exact matching replaces punctuation-stripping. Unknown IDs return null, never an inferred tissue class. Each record contains its section URL and passage locator.
 
-Not completed: verified relationship highlighting, supported attachment highlighting, selected-structure motion mapping, desktop progressive inspector parity, full performance profiling, real touch WebKit regression. Mobile wheel test remains skipped; synthetic pointer tests are not physical touch validation. Direct Move handling needs multi-pointer conflict verification: the primary joint drag currently persists when a second touch arrives.
+## Remaining gates
 
-## Real iPhone manual QA
+- Await the new browser matrix. Do not treat source tests as interaction validation.
+- Resolve WebKit camera continuity and investigate any remaining screenshot/reset failures from new evidence.
+- Verify exact updated preview SHA and run hosted browser checks; BASE_URL alone is not proof this happened.
+- Real iPhone Safari remains unverified. Check small-screen safe areas, direct joint drag → second finger → lift either finger, neutral reset, selection, scrolling, ten-region Back/Forward, sciatic handoff and repeated background/resume.
+- Do not claim verified spatial attachment highlighting, biomechanical accuracy or expert review. Those remain source/review-limited.
+- Integration remains unmerged V11 → #29 → #30 → #31 → #32. Main has separate documentation work; preserve it when integration is eventually authorized.
 
-Use the exact candidate SHA preview; record model, iOS/Safari version and URL.
+Recommendation: HOLD. No squash, merge, branch-protection bypass or production action.
 
-- Open all ten regions directly and via picker; Back/Forward and region switching preserve selection and labels.
-- Sciatic direct link reaches a visible interactive nerve source viewer; leave and return repeatedly.
-- Overview Move opens picker; joint Move changes angle, respects limits and resets neutral.
-- Start joint drag, add a second finger, pinch/pan, then lift either finger; no simultaneous orbit/joint change or stuck drag.
-- Select bone and muscle, open/close/expand inspector, clear and switch regions; verify title, fallback and source references.
-- Test 375px-class and short landscape screens, safe areas, keyboard focus, scrolling and navigation overlap.
-- Repeat navigation for 10 minutes; background/foreground Safari; inspect WebGL loss, loading errors and resource stability.
+## Source retrieval fingerprints
 
-## Release recommendation
+SHA-256 of retrieved HTML (direct HTTPS, 2026-10-30; dynamic site pages may change):
 
-HOLD. Leave all existing PRs open. Complete claim-level audit, remaining spatial/desktop features, full browser CI and verified candidate preview before considering merge. Physical-device QA must remain explicitly unverified unless performed. Branch protections and required approvals have not yet been verified; no bypass is authorized.
+- openstax: `90d7a09613c700ad439427b26172965e27e57098803a4c9ba3ace048c47fc1f8`
+- 8-1-the-pectoral-girdle: `f248fa1d0848aead70d501fdb23828b1dd66cfbb48ca8bd0728fd3f3ea823558`
+- 8-2-bones-of-the-upper-limb: `ab3b7c0e7abb93ed11464c24fec7b1fd57abf7e10f19f58ceb4bdff3a2e7e79a`
+- 11-5-muscles-of-the-pectoral-girdle-and-upper-limbs: `34cd301c269c74935cc58a548336578b3300d2a612ce876f091f828a4f5e3400`
+- 11-6-appendicular-muscles-of-the-pelvic-girdle-and-lower-limbs: `73ff220bc8d37f813613c9a0f30c90bf9634a5abbac9b445ca8dc167a5d2ec89`

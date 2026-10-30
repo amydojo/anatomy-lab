@@ -28,9 +28,9 @@ function verify(asset,proof,base,v8,v9,v10){
   throw Error('V11 clinical review metadata is not truthful');
  const earlier=[...base.parts,...Object.values(v8.bones),...Object.values(v8.muscles),
   ...Object.values(v9.bones),...Object.values(v9.muscles),...Object.values(v9.connective),
-  ...Object.values(v10.parts)];
+  ...Object.values(v10?.parts||{})];
  const ids=new Set([...base.parts.map(x=>x.id),...Object.keys(v8.bones),...Object.keys(v8.muscles),
-  ...Object.keys(v9.bones),...Object.keys(v9.muscles),...Object.keys(v9.connective),...Object.keys(v10.parts)]);
+  ...Object.keys(v9.bones),...Object.keys(v9.muscles),...Object.keys(v9.connective),...Object.keys(v10?.parts||{})]);
  const fmas=new Set(earlier.map(x=>x.fma));
  if(Object.keys(asset.bones||{}).length!==7)throw Error('V11 missing one of seven bones');
  for(const id of expected){

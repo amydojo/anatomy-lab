@@ -55,12 +55,20 @@ test('V12 D3: bounds-aware wheel zoom and focal pan stay finite and recenter rem
  const rect=await bounds.boundingBox();
  const x=rect.x+rect.width*.72,y=rect.y+rect.height*.59;
  await page.mouse.move(x,y);
- if(test.info().project.name.includes('webkit-mobile'))test.skip(true,'Mouse wheel is not a supported mobile WebKit gesture; covered by separate touch tests');
- for(let i=0;i<16;i++)await page.mouse.wheel(0,-400);
+ const touchZoom=async(expand)=>page.evaluate(({x,y,expand})=>{
+  const canvas=document.querySelector('#atlas-canvas');
+  const emit=(type,id,px)=>canvas.dispatchEvent(new PointerEvent(type,{pointerId:id,pointerType:'touch',isPrimary:id===1,clientX:px,clientY:y,bubbles:true,cancelable:true}));
+  emit('pointerdown',1,x-45);emit('pointerdown',2,x+45);
+  emit('pointermove',1,x-(expand?90:25));emit('pointermove',2,x+(expand?90:25));
+  emit('pointerup',2,x+(expand?90:25));emit('pointerup',1,x-(expand?90:25));
+ },{x,y,expand});
+ const touch=test.info().project.name.includes('mobile');
+ // Pointer simulation verifies the app's touch contract on WebKit; physical iOS remains separate QA.
+ for(let i=0;i<16;i++)if(touch)await touchZoom(true);else await page.mouse.wheel(0,-400);
  let state=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
  expect(state.camera.zoom).toBeLessThanOrEqual(2.35);
  expect(Object.values(state.camera.target).every(Number.isFinite)).toBe(true);
- for(let i=0;i<16;i++)await page.mouse.wheel(0,400);
+ for(let i=0;i<16;i++)if(touch)await touchZoom(false);else await page.mouse.wheel(0,400);
  await page.locator('#studio-recenter').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.zoom)).toBeGreaterThan(.6);
  state=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
@@ -137,8 +145,14 @@ test('V12.1: ten-region navigation matrix preserves source viewer and browser st
   await page.evaluate(()=>window.__BODY_ATLAS__.body());
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:30000}).toBe('overview');
   await page.evaluate(name=>window.__BODY_ATLAS__.choose(name),name);
-  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:30000}).toBe(name);
+  await expect.poll(()=>page.evaluate(name=>(name==='nerve'?window.__BODY_ATLAS__.getState().region:window.__BODY_ATLAS__.getState().unified.region),name),{timeout:30000}).toBe(name);
   await expect(page).toHaveURL(new RegExp('region='+name));
+  if(name==='nerve'){
+   const opener=page.locator((await page.viewportSize()).width<=850?'#mobile-source':'#studio-open-nerve');
+   await expect(opener).toBeVisible();await opener.click();
+   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().view),{timeout:30000}).toBe('detail');
+   await expect.poll(()=>page.frameLocator('#region-frame').locator('#follow-stage').evaluate(()=>window.__HIP_SPATIAL__?.getState().nerveSourceLoaded),{timeout:30000}).toBe(true);
+  }
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.webgl)).toBe(true);
  }
  expect(errors).toEqual([]);
