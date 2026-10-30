@@ -36,7 +36,7 @@ jobs:
             const response=await fetch(process.env.BASE_URL+'/'+path);
             if(!response.ok) throw Error(path+': HTTP '+response.status);
             const deployed=Buffer.from(await response.arrayBuffer());
-            if(!deployed.equals(readFileSync(path)))throw Error('Preview content does not match '+process.env.EXPECTED_SHA+': '+path);
+            if(!deployed.equals(readFileSync(path))){ console.log('Preview identity mismatch',JSON.stringify({path,expectedBytes:readFileSync(path).length,receivedBytes:deployed.length,contentType:response.headers.get('content-type'),expectedHash:createHash('sha256').update(readFileSync(path)).digest('hex'),receivedHash:createHash('sha256').update(deployed).digest('hex')}));throw Error('Preview content does not match '+process.env.EXPECTED_SHA+': '+path);}
             console.log(path,createHash('sha256').update(deployed).digest('hex'));
           }
           JS
