@@ -12,7 +12,7 @@ function verify(asset,proof,base,v8,v9,v10){
   asset.source_repo_commit!=='6c7f9016bd5899ac8edafd31b9900c151df42ed6'||
   asset.base_source_commit!==base.source_commit||
   base.source_commit!==v8.source_commit||base.source_commit!==v9.source_commit||
-  v10.base_source_commit!==base.source_commit)throw Error('V11 source identity mismatch');
+  (v10&&v10.base_source_commit!==base.source_commit))throw Error('V11 source identity mismatch');
  if(asset.license!=='CC BY-SA 4.0'||proof.license!==asset.license||
   proof.source_sha256!=='294a649765cd060a62a4095da52b9c8ef2d97769aa447e196448aa5f7d596dea')
   throw Error('V11 source license or SHA mismatch');
