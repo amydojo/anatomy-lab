@@ -49,7 +49,7 @@ jobs:
           }
           JS
       - name: Hosted navigation, inspector, mobile gestures and desktop checks
-        run: npx playwright test tests/v12-stabilization.spec.mjs tests/v13-inspector.spec.mjs tests/v83-mobile.spec.mjs tests/v84-desktop.spec.mjs --project=${{ matrix.browser }}
+        run: npx playwright test tests/v12-stabilization.spec.mjs tests/v13-inspector.spec.mjs tests/v82-motion.spec.mjs tests/v83-mobile.spec.mjs tests/v84-desktop.spec.mjs --project=${{ matrix.browser }}
       - if: always()
         uses: actions/upload-artifact@v4
         with:
