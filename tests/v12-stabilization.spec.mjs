@@ -102,3 +102,27 @@ test('V12 D2: separately registered sciatic reference arrives with visible follo
  expect(source.zoom).toBeLessThan(1.3);
  expect(errors).toEqual([]);
 });
+
+test('V12 S2: knee muscle layer is an actual visible rendering mode',async({page})=>{
+ await page.setViewportSize({width:1280,height:800});
+ const errors=await load(page);
+ await enter(page,'knee');
+ const before=await page.locator('#atlas-canvas').screenshot();
+ await page.locator('[data-studio-tool="layers"]').click();
+ await expect(page.locator('[data-studio-layer-mode="trace"]')).toBeEnabled();
+ await page.locator('[data-studio-layer-mode="trace"]').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().mode)).toBe('trace');
+ const after=await page.locator('#atlas-canvas').screenshot();
+ expect(before.equals(after)).toBe(false);
+ expect(errors).toEqual([]);
+});
+
+test('V12 D8: legacy ribs URL resolves to thorax and invalid routes communicate fallback',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ const errors=await load(page,'/atlas/?region=ribs');
+ await expect.poll(()=>region(page),{timeout:30000}).toBe('thorax');
+ await expect(page).toHaveURL(/region=thorax/);
+ await page.goto('/atlas/?region=not-a-region');
+ await expect(page.locator('#context-note')).toContainText('Unknown region');
+ expect(errors).toEqual([]);
+});
