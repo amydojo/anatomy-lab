@@ -21,7 +21,7 @@ jobs:
       - name: Install Blender for exact FBX geometry inspection
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq blender
+          sudo apt-get install -y -qq blender python3-numpy
       - name: Inventory Z Anatomy source controls and candidate meshes
         run: blender -b -t 2 --python scripts/inspect_v11_z_fbx.py
       - name: Save inspectable source manifest on branch
