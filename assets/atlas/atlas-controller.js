@@ -631,6 +631,7 @@ function setup(){
    document.querySelectorAll('[data-overview-system]').forEach(el=>{
     el.setAttribute('aria-pressed',String(el===button));
    });
+   $('context-note').textContent=button.dataset.overviewSystem==='connective'?'Connective coverage is partial: only licensed costal cartilage and limited limb fragments are available. Missing structures are not modeled.':'Explore the licensed source anatomy; missing tissues are not implied.';
    render();
   });
  });
