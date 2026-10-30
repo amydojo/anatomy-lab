@@ -1,0 +1,60 @@
+name: V13 immutable preview validation
+on:
+  push:
+    branches: ['qa/v13-preview-validation']
+permissions:
+  contents: read
+jobs:
+  preview:
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [webkit-mobile, desktop-chromium]
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 30
+    env:
+      BASE_URL: https://anatomy-3hpo7sxmp-amy-dos-projects.vercel.app
+      EXPECTED_SHA: ab1a87ddc8d2f924293806db56964626126094a7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ab1a87ddc8d2f924293806db56964626126094a7
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - name: Verify immutable preview files against exact checked out commit
+        run: |
+          test "$(git -c safe.directory="$GITHUB_WORKSPACE" rev-parse HEAD)" = "$EXPECTED_SHA"
+          node --input-type=module <<'JS'
+          import {readFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          for (const path of ['atlas/index.html','assets/spatial-core.js','assets/atlas/atlas-mobile-workbench.js','assets/atlas/atlas-desktop-studio.js','assets/atlas/v13-anatomy-info.js','assets/atlas/atlas-v11-source.js']) {
+            const response=await fetch(process.env.BASE_URL+'/'+path);
+            if(!response.ok) throw Error(path+': HTTP '+response.status);
+            const deployed=Buffer.from(await response.arrayBuffer());
+            let application=deployed;
+            if(path==='atlas/index.html'&&!deployed.equals(readFileSync(path))){
+              const text=deployed.toString('utf8');
+              const toolbar=[...text.matchAll(/<script\b[^>]*src="([^"]*)"[^>]*><\/script>/g)].filter(m=>m[1]==='https://vercel.live/_next-live/feedback/feedback.js');
+              if(toolbar.length!==1)throw Error('Unrecognized hosted HTML transformation');
+              application=Buffer.from(text.replace(toolbar[0][0],''));
+              console.log('Vercel preview toolbar identified; application payload must still match byte-for-byte');
+            }
+            if(!application.equals(readFileSync(path)))throw Error('Preview content does not match '+process.env.EXPECTED_SHA+': '+path);
+            console.log(path,createHash('sha256').update(application).digest('hex'));
+          }
+          JS
+      - name: Hosted navigation, inspector, mobile gestures and desktop checks
+        run: npx playwright test tests/v12-stabilization.spec.mjs tests/v13-inspector.spec.mjs tests/v83-mobile.spec.mjs tests/v84-desktop.spec.mjs --project=${{ matrix.browser }}
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v13-immutable-preview-${{ matrix.browser }}
+          path: |
+            artifacts/
+            test-results/
+          if-no-files-found: ignore
