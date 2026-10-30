@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const state=window.BodyAtlasState.create();
 const loader=window.BodyAtlasLoader,model=window.BodyAtlasRenderer.create($('atlas-canvas'),reason=>fallback(reason));
 const E=window.BodyAtlasEvidence;let source=null,proof=null,hipProof=null,nerveProof=null,shoulderProof=null,kneeMuscleProof=null,extendedProof=null,overviewProof=null;
-let lastFocus=null,activeFrameRoute=null,motionFrame=0,travelMixFrame=0,frameTimeout=0,entryTimer=0,exitTimer=0,seq=0,previousFocus=null,pins=[],loaded=false,overviewLoaded=false,expansionLoaded=false,facialLoaded=false,osteologyLoaded=false,pendingEntry=null,sourceSeamPending=false;
+let osteologyAsset=null;let lastFocus=null,activeFrameRoute=null,motionFrame=0,travelMixFrame=0,frameTimeout=0,entryTimer=0,exitTimer=0,seq=0,previousFocus=null,pins=[],loaded=false,overviewLoaded=false,expansionLoaded=false,facialLoaded=false,osteologyLoaded=false,pendingEntry=null,sourceSeamPending=false;
 const reduce=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const HERE={hip:'/hip/spatial/',nerve:'/hip/spatial/',knee:'/knee/spatial/',shoulder:'/shoulder/'};
 const LABEL={hip:'RIGHT HIP',nerve:'SCIATIC NERVE',knee:'RIGHT KNEE',shoulder:'SHOULDER',
@@ -180,6 +180,7 @@ function setExpanded(next){
 // One continuous world-space travel. The matched lab never shows its own
 // default camera; the hip/knee source-frame pose is sent before revealing it.
 function choose(region){
+ if(osteologyLoaded)model.setOsteologyFocus(null);
  if(isSourceAligned(region)&&model.getStatus()!=='ready'){
   // WebGL is a prerequisite for spatial continuity. Preserve functional
   // semantic navigation rather than silently ignoring region taps.
@@ -531,6 +532,29 @@ function setInspectorFrame(visible,instant=false){
  studioFramingFrame=requestAnimationFrame(step);
  return target;
 }
+function focusOsteology(kind){
+ if(!osteologyAsset||!osteologyLoaded||!['left-ear','right-ear','coccyx'].includes(kind))return false;
+ const region=U.getRegion();
+ if(kind==='coccyx'?region!=='hip':region!=='skull')return false;
+ const ids=kind==='coccyx'?['z-v11-coccyx']:
+  ['malleus','incus','stapes'].map(name=>'z-v11-'+kind.split('-')[0]+'-'+name);
+ const parts=ids.map(id=>osteologyAsset.bones[id]);
+ if(parts.some(p=>!p))return false;
+ const min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
+ for(const p of parts)for(const v of p.vertices)for(let i=0;i<3;i++){
+  min[i]=Math.min(min[i],v[i]);max[i]=Math.max(max[i],v[i]);
+ }
+ const center={x:(min[0]+max[0])/2,y:(min[1]+max[1])/2,z:(min[2]+max[2])/2};
+ model.setOsteologyFocus(kind);
+ animateCamera({yaw:kind==='coccyx'?-.18:-.46,pitch:kind==='coccyx'?-.07:.06,
+  zoom:1.0,frameSpan:kind==='coccyx'?.48:.19,target:center},reduce()?0:460);
+ return true;
+}
+function clearOsteologyFocus(){
+ model.setOsteologyFocus(null);
+ if(U.getRegion()&&state.data.view==='detail')U.recenter();
+ render();return true;
+}
 function recenter(){
  if(U.isActive()&&state.data.view==='detail')return U.recenter();
  animateCamera({yaw:-.2,pitch:-.07,zoom:1.03,frameSpan:10.8,target:{x:0,y:-.12,z:0}},reduce()?0:280);
@@ -622,8 +646,9 @@ function setup(){
        .then(([newBones,boneProof,faceManifest])=>{
         window.BodyV11Source.verify(newBones,boneProof,source,asset,addition,faceManifest);
         if(!model.loadOsteology(newBones))throw Error('Osteology renderer unavailable');
-        osteologyLoaded=true;
+        osteologyAsset=newBones;osteologyLoaded=true;
         refreshOsteologyCoverage();
+        window.dispatchEvent(new Event('body:osteology-ready'));
         render();
        })
        .catch(err=>{
@@ -652,6 +677,6 @@ function setup(){
  }).catch(err=>fallback(err.message));
 }
 const U=window.BodyAtlasUnified.create({state,model,loader,render,updateURL,resize,setExpanded,reduce,centerPoint,shortestYaw,enableControls,NOTE,LABEL,navigate:region=>choose(region)});
-window.__BODY_ATLAS__={getState:()=>({...state.snapshot(),renderer:model.stats(),unified:U.snapshot(),assetsLoaded:loaded,overviewLoaded,expansionLoaded,facialLoaded,osteologyLoaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,recenter,setInspectorFrame,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode};
+window.__BODY_ATLAS__={getState:()=>({...state.snapshot(),renderer:model.stats(),unified:U.snapshot(),assetsLoaded:loaded,overviewLoaded,expansionLoaded,facialLoaded,osteologyLoaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,recenter,focusOsteology,clearOsteologyFocus,setInspectorFrame,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode};
 setup();
 })();
