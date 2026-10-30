@@ -315,7 +315,7 @@ function create(canvas,onContextLost=()=>{}){
   if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
   return {width:w,height:h,dpr};
  }
- function render(camera,selected,mode='clean',layer=0,reveal=0,flex=0,highlight=null,secondary=0,transitionFrom=null){
+ function render(camera,selected,mode='clean',layer=0,reveal=0,flex=0,highlight=null,secondary=0,transitionFrom=null,tissueFocus=false){
   if(destroyed)return {width:canvas.clientWidth,height:canvas.clientHeight,dpr:1};
   const size=resize();
   if(!gl||status!=='ready'||gl.isContextLost?.())return size;
@@ -446,7 +446,7 @@ function create(canvas,onContextLost=()=>{}){
    // and ligaments are NOT silently fabricated just because a slider moved.
    const chosen=region==='knee'?(layer===1?new Set(['femur']):layer===2?new Set(['tibia','fibula']):layer===3?new Set(['patella']):null):null;
    for(const bone of [...bones,...(expansionDetail.get(region)||[]),...(osteologyDetail.get(region)||[])]){
-    let a=r;
+    let a=tissueFocus?r*.15:r;
     if(region==='knee'&&chosen&&!chosen.has(bone.id))a*=.12;
     if(osteologyFocus&&((region==='skull'&&osteologyFocus.endsWith('-ear'))||(region==='hip'&&osteologyFocus==='coccyx'))){
      if(bone.sourceOsteology){
@@ -474,7 +474,7 @@ function create(canvas,onContextLost=()=>{}){
     const levels=window.BodyExtendedRegions?.has(region)?null:(region==='shoulder'?SHOULDER_LAYERS:region==='knee'?KNEE_MUSCLE_LAYERS:DEPTH_HIP)[clamp(Number(layer)||0,0,3)]||{};
     gl.depthMask(false);
     for(const mesh of meshes.filter(p=>p.tissue)){
-     const a=(levels?levels[mesh.id]||0:layer===4?.93:region==='skull'?.09:.46)*r;
+     const a=(tissueFocus?.94:levels?levels[mesh.id]||0:layer===4?.93:region==='skull'?.09:.46)*r;
      if(a>.002)draw(mesh,(highlight&&highlight!==mesh.id)?0.48:1,a);
     }
     gl.depthMask(true);
