@@ -114,7 +114,25 @@ def main():
   mesh["source_mesh"]=name
   mesh["source_origin"]="Z-Anatomy skeletal FBX, registered via shared original bone controls"
   return mesh
- coc=simplify("Coccyx","Coccyx","FMA20229",sac,820)
+ # Apex-constrained sacral registration: match the genuine caudal sacral
+ # surface landmarks after global ICP, preserving scale, source orientation
+ # and coccygeal mesh shape. This is not an arbitrary display translation.
+ sourceSac=np.asarray(data["Sacrum"]["vertices"])
+ fittedSac=to_points(sourceSac,sac["scale"],sac["rotation"],sac["translation"])
+ targetSac=np.asarray(targets["Sacrum"]["vertices"])
+ caudalSource=fittedSac[np.argsort(sourceSac[:,2])[:max(12,int(len(sourceSac)*.01))]].mean(axis=0)
+ caudalTarget=targetSac[np.argsort(targetSac[:,1])[:max(6,int(len(targetSac)*.035))]].mean(axis=0)
+ apexShift=caudalTarget-caudalSource
+ print("SACRAL_APEX_ALIGNMENT",json.dumps({"source_sacrum_end":caudalSource.tolist(),
+  "target_sacrum_end":caudalTarget.tolist(),"shift":apexShift.tolist(),
+  "initial_sacrum_rms":sac["control_rms"],"initial_ear_rms":ear["control_rms"],
+  "heldout":coccyx_heldout,"ear_heldout":ear_heldout}),flush=True)
+ if np.linalg.norm(apexShift)>.28:
+  raise RuntimeError("Sacral apex landmark differs too far for reliable registration")
+ # The selected fitted coccyx moves with an anatomical endplate translation;
+ # the source sacrum/held-out controls remain untouched for independent QA.
+ sacralFit={**sac,"translation":sac["translation"]+apexShift}
+ coc=simplify("Coccyx","Coccyx","FMA20229",sacralFit,820)
  bones={"z-v11-coccyx":coc}
  names={"Malleus":"malleus","Incus":"incus","Stapes":"stapes"}
  for name in names:
@@ -129,7 +147,7 @@ def main():
  xmean=float(c[:,0].mean())
  verticalGap=sb[0,1]-cb[1,1] # should be a modest positive number, not floating far away
  distance=closest(c,sacrum["vertices"])
- if abs(xmean)>.16 or not (-.08<=verticalGap<=.18) or distance>.25:
+ if abs(xmean)>.16 or not (-.06<=verticalGap<=.16) or distance>.18:
   raise RuntimeError(f"Coccyx not anchored beneath sacrum: x={xmean:.4f} vertical_gap={verticalGap:.4f} minimum={distance:.4f}")
  for side in ["left","right"]:
   temporal=targets[side.title()+" temporal bone"]
@@ -156,6 +174,7 @@ def main():
           "coccyx_heldout":coccyx_heldout,"ear_source_control":records["ear"]["control_rms"],
           "ear_heldout_frontal":ear_heldout,
           "coccyx_source_sacrum_gap_units":round(float(verticalGap),6),
+          "sacral_apex_alignment_shift_units":np.asarray(apexShift).round(6).tolist(),
           "coccyx_source_sacrum_min_distance_units":round(distance,6)}
  # Thresholds for detecting gross dislocation. A strict biomechanical
  # verification is intentionally NOT claimed; trial based cross-source ICP.
