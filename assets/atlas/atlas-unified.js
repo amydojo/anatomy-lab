@@ -69,7 +69,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   deltoidAcromial:['Deltoid · middle','Acromial deltoid portion. Only displayed if present in the verified source.'],
   deltoidSpinal:['Deltoid · posterior','Scapular-spine deltoid portion, positioned on the same pinned source reference pose.'],
   bicepsLong:['Biceps brachii · long head','Long head originates at the supraglenoid region; its tendon and dynamic glenoid-labrum relationship are not independently reconstructed here.'],
-  bicepsShort:['Biceps brachii · short head','Short head arises from the coracoid process alongside coracobrachialis in the source pose.'],
+
   pectoralisClavicular:['Pectoralis major · clavicular','Clavicular part of pectoralis major, a shoulder flexor/adductor. The displayed muscle shape bends between inferred clavicular and humeral attachments, not a validated shortening simulation.'],
 
   popliteus:['Popliteus','Deep posterior knee muscle from lateral femur to posterior tibia. Its source mesh bends through inferred attachment weights; not a validated tendon model.'],
@@ -98,7 +98,9 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  }
  function applySelection(hit){
   selected=hit;
-  const [name,desc]=INFORMATION[hit.id]||(window.BodyExtendedRegions.has(hit.region)?
+  const regionalInfo=hit.id==='bicepsShort'&&hit.region==='shoulder'
+    ? ['Biceps brachii · short head','Source-derived shoulder muscle surface. Attachment and motion validation remain pending.'] : null;
+  const [name,desc]=regionalInfo||INFORMATION[hit.id]||(window.BodyExtendedRegions.has(hit.region)?
     [hit.name||hit.id.split('-').map(x=>x[0].toUpperCase()+x.slice(1)).join(' '),
      hit.tissue?'Licensed BodyParts3D 4.0 muscle surface. Where joints move, inferred proximity-to-bone attachment weights are illustrative, not verified physiology.':
      'Real BodyParts3D 4.0 bone surface in a registered reference pose. Selection and any illustrative motion are not an expert-verified diagnosis or biomechanical model.']:

@@ -24,3 +24,11 @@ test('V13: selecting a structure reveals a progressive mobile inspector',async({
  await page.locator('#mobile-inspect-clear').click();
  await expect(page.locator('#mobile-inspect-expand')).toBeHidden();
 });
+
+for(const [region,expected] of [['shoulder','Biceps brachii'],['knee','Biceps femoris']]){
+ test(`V13: ${region} biceps short head retains its regional identity`,async({page})=>{
+  await page.goto(`/atlas/?region=${region}&layer=3&structure=bicepsShort`);
+  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().unified.selected),{timeout:30000}).toBe('bicepsShort');
+  await expect(page.locator('#structure-details-name')).toContainText(expected);
+ });
+}

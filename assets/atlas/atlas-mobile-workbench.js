@@ -118,11 +118,12 @@ function renderState(s){
  if(selected){
   const title=$('structure-details-name').textContent||String(selected);
   const description=$('structure-details-description').textContent||'';
-  const kind=/muscle|tendon/i.test(title+' '+description)?'Muscle / soft tissue':/nerve/i.test(title+' '+description)?'Nerve':'Anatomical structure';
+  const kind='Anatomical structure';
   const info=window.BodyAnatomyInfo?.lookup(selected);
   $('mobile-inspect-type').textContent=(info?.type||kind)+' · '+(labels[region]||'Whole body');
   $('mobile-inspect-context').textContent=info?info.summary+' Related: '+info.relations+'. Reference: '+info.source+'.':(description||'Additional verified anatomical relationships are not yet available for this structure.');
   $('mobile-inspect-motion').hidden=!eligibleMove(s);
+  $('mobile-inspect-motion').textContent='Explore '+(labels[region]||'region').toLowerCase()+' teaching motion';
  }
  document.querySelectorAll('[data-mobile-region]').forEach(b=>
   b.setAttribute('aria-pressed',String(b.dataset.mobileRegion===region)));
