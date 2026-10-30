@@ -94,6 +94,9 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
    if(selected){clearSelection();render();}
    return null;
   }
+  return applySelection(hit);
+ }
+ function applySelection(hit){
   selected=hit;
   const [name,desc]=INFORMATION[hit.id]||(window.BodyExtendedRegions.has(hit.region)?
     [hit.name||hit.id.split('-').map(x=>x[0].toUpperCase()+x.slice(1)).join(' '),
@@ -105,7 +108,12 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   $('structure-details-name').textContent=name;
   $('structure-details-description').textContent=desc;
   $('structure-details').hidden=false;
-  render();return hit.id;
+  render();updateURL({replace:true});return hit.id;
+ }
+ function selectById(id){
+  if(!region||state.data.view!=='detail')return false;
+  const hit=model.getStructure(region,id);
+  return hit?!!applySelection(hit):false;
  }
  function showSelected(){
   if(!selected)return;
@@ -229,7 +237,8 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
     enableControls(name);syncControls(name);$('back-body').hidden=false;
     $('joint-motion').hidden=!window.BodyRegionMotion.profile(name);
     $('top-continue-knee').hidden=name!=='hip';
-    updateURL();render();window.BodyMobileWorkbench?.sync();
+    updateURL();render();window.BodyMobileWorkbench?.sync();window.BodyDesktopStudio?.sync();
+    window.dispatchEvent(new CustomEvent('body:region-ready',{detail:{region:name}}));
    });
   }catch(error){
    if(id!==token)return;
@@ -266,12 +275,13 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   $('context-note').textContent='Source-derived skeleton. Nerve registration and biomechanics remain unverified.';
   document.querySelectorAll('[data-region]').forEach(b=>b.setAttribute('aria-pressed','false'));
   enableControls(null);$('mode-trace').disabled=false;$('mode-peel').textContent='Peel';if(window.innerWidth<=850)setExpanded(false);
-  setStatus('RETURNING THROUGH THE BODY');updateURL();
+  // An internal stop during a direct region transfer is not user navigation.
+  setStatus('RETURNING THROUGH THE BODY');if(!navigation)updateURL();
   travel(home,reduce()?0:850,v=>{reveal=1-v;},()=>{
    if(id!==token)return;
    region=null;reveal=0;returning=false;state.data.layer=0;motion=0;secondary=0;
    $('hotspots').hidden=false;setStatus((model.stats().overviewBones?'SOURCE-ALIGNED BONES + MUSCLES · V8':'SOURCED SKELETON · 78 STRUCTURES'));
-   render();
+   render();window.BodyDesktopStudio?.sync();window.BodyMobileWorkbench?.sync();
    if(navigation){const to=navigation;navigation=null;navigate(to);}
   });
  }
@@ -287,9 +297,9 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   const trace=$('mode-trace'),peel=$('mode-peel'),output=$('layer-output');
   const motionSpec=window.BodyRegionMotion.profile(name);
   const extended=window.BodyExtendedRegions.has(name);
-  trace.disabled=!extended;
-  trace.textContent=extended?'Muscles':'Trace';
-  trace.title=extended?'Show licensed source muscle meshes with faint bone context':'A continuous nerve path is not verified in this source-derived scene';
+  trace.disabled=false;
+  trace.textContent='Muscles';
+  trace.title='Show existing source muscle meshes with faint bone context; missing anatomy is not synthesized';
   peel.textContent=window.BodyExtendedRegions.has(name)?'Isolate':name==='knee'?'Isolate':name==='shoulder'?'Layers':'Peel';
   $('joint-motion-label').textContent=motionSpec?.label||'Teaching motion';
   $('motion-description').textContent='REGIONAL KINEMATICS · UNVALIDATED';
@@ -313,12 +323,17 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   state.mode(v>0?'peel':'explore');
   const displayed=v===4&&window.BodyExtendedRegions.has(region)?'trace':v>0?'peel':'explore';
   document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-'+displayed)));
-  render();
+  render();updateURL({replace:true});
  }
  function setMode(mode){
   if(mode==='trace'){
-   if(window.BodyExtendedRegions.has(region)&&state.data.view==='detail')depthChange(4);
-   return;
+   if(window.BodyExtendedRegions.has(region)&&state.data.view==='detail'){depthChange(4);return;}
+   if(!region||state.data.view!=='detail')return;
+   state.mode('trace');state.setDepth(0);clearSelection();
+   $('layer-slider').value='0';$('layer-output').textContent='Source muscles';
+   document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-trace')));
+   $('context-note').textContent='Visible muscle surfaces are sourced; missing tendons and connective tissues are not reconstructed.';
+   render();updateURL({replace:true});return;
   }
   if(!state.mode(mode))return;
   // Mode buttons are actions, not mere labels. Explore restores all available
@@ -333,7 +348,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
    ?'Four rotator-cuff muscle surfaces from the same pinned source. Deltoid, labrum, ligaments and nerve geometry are not yet verified in this layer.'
    :mode==='peel'?'Selected layers come from their attributed sources. Motion remains an illustrative pivot, not clinical biomechanics.'
    :NOTE[region]||'Source-derived skeletal geometry.';
-  render();
+  render();updateURL({replace:true});
  }
  function reset(){
   if(!region)return;
@@ -359,7 +374,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   return true;
  }
  return Object.freeze({choose,back,travelKnee,isActive,getRegion,getReveal,getMotion,getSecondaryMotion,getSelected,getTransitionFrom,
-  snapshot,depthChange,setMode,reset,recenter,neutral,setMotion,setSecondaryMotion,pickAt,clearSelection,showSelected,nextRegion,interrupt});
+  snapshot,depthChange,setMode,reset,recenter,neutral,setMotion,setSecondaryMotion,pickAt,selectById,clearSelection,showSelected,nextRegion,interrupt});
 }
 window.BodyAtlasUnified=Object.freeze({create});
 })();

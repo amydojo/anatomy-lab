@@ -268,11 +268,12 @@ function setFollowProgress(next){
 function startFollow(id='sciatic'){
  if(!nerveGraph||!NERVES.includes(id))return false;
  if(!follow.active)follow.savedZoom=state.zoom;
- follow.active=true;follow.branch=id;follow.progress=0;
+ // Arrive along the posterior sciatic trunk, not inside the pelvic origin.
+ follow.active=true;follow.branch=id;follow.progress=id==='sciatic'?.30:.18;
  state.selected=id;state.trace=true;state.depth=3;
- state.zoom=window.innerWidth<=850?1.25:1.4;
- state.anchorY=window.innerWidth<=850?.29:.42;
- state.frameSpan=window.innerWidth<=850?3.35:4.5;
+ state.zoom=window.innerWidth<=850?1.06:1.16;
+ state.anchorY=window.innerWidth<=850?.40:.46;
+ state.frameSpan=window.innerWidth<=850?4.15:5.1;
  syncDepth();renderFollow();moveFollowCamera(false);
  if(window.innerWidth<=850)setExpanded(false);
  inspector();draw();return true;

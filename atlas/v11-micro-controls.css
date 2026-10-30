@@ -1,5 +1,6 @@
 
 .osteology-micro-controls[hidden],.osteology-micro-controls button[hidden]{display:none!important}
+@media(max-width:850px){body:has(.mobile-region-sheet:not([hidden])) .osteology-micro-controls{visibility:hidden;pointer-events:none}}
 .osteology-micro-controls{
  position:absolute;z-index:14;top:79px;right:22px;
  background:rgba(29,24,21,.93);border:1px solid rgba(215,165,129,.52);

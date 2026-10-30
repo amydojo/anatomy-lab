@@ -26,9 +26,23 @@
    return {x:camera.width*(Number.isFinite(camera.anchorX)?camera.anchorX:.50)+x*scale*perspective,
      y:camera.height*(Number.isFinite(camera.anchorY)?camera.anchorY:.50)-(y2-.04)*scale*perspective,z:z2,world:view};
  }
- function attachOrbit(canvas,{state,render,pick,onInteract=()=>{},onDoubleTap=()=>{},minZoom=.7,maxZoom=2.5}){
+ function attachOrbit(canvas,{state,render,pick,onInteract=()=>{},onDoubleTap=()=>{},getBounds=()=>null,minZoom=.7,maxZoom=2.5}){
    const pointers=new Map();
    let origin=null,travel=false,scheduled=0,lastTap=null,gestureStarted=false;
+   // Region extents are source-derived. Never let focal-point zoom/pan escape
+   // the inspected specimen or push the synthetic perspective through the mesh.
+   const bounds=()=>{try{return getBounds();}catch{return null;}};
+   const zoomLimit=()=>{
+    const r=bounds()?.radius;
+    return Math.min(maxZoom,!Number.isFinite(r)?2.1:r<.55?3.3:r<1.1?2.35:1.95);
+   };
+   const constrainTarget=()=>{
+    const b=bounds();if(!b)return;
+    for(let i=0;i<3;i++){
+     const k=['x','y','z'][i],span=Math.max(.35,b.max[i]-b.min[i]),margin=Math.max(.18,span*.18);
+     state.target[k]=clamp(state.target[k],b.min[i]-margin,b.max[i]+margin);
+    }
+   };
    const coords=()=>[...pointers.values()];
    const midpoint=()=>{const a=coords(),b=a[1]||a[0];return {x:(a[0].x+b.x)/2,y:(a[0].y+b.y)/2};};
    const distance=()=>{const [a,b]=coords();return Math.hypot(a.x-b.x,a.y-b.y)};
@@ -56,7 +70,7 @@
      pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
      if(pointers.size>=2 && origin?.type==='dual'){
        const mid=midpoint();
-       const zoom=clamp(origin.zoom*distance()/origin.distance,minZoom,maxZoom);
+       const zoom=clamp(origin.zoom*distance()/origin.distance,minZoom,zoomLimit());
        // The camera target pans in the view plane, while zoom stays anchored
        // to the user's pinch centroid rather than jumping to canvas center.
        const bound=canvas.getBoundingClientRect();
@@ -70,7 +84,7 @@
        const shiftX=focalX*difference-panX,shiftY=-focalY*difference+panY;
        for(let i=0;i<3;i++)state.target[['x','y','z'][i]]=origin.target[['x','y','z'][i]]+
           right[i]*shiftX+up[i]*shiftY;
-       state.zoom=zoom;travel=true;schedule();
+       constrainTarget();state.zoom=zoom;travel=true;schedule();
       }else if(pointers.size===1 && origin?.type==='pan'){
        const dx=e.clientX-origin.x,dy=e.clientY-origin.y;
        if(Math.abs(dx)+Math.abs(dy)>4){travel=true;beginMove();}
@@ -81,7 +95,7 @@
          const right=[cy,0,sy],up=[sy*sp,cp,-cy*sp];
          for(let i=0;i<3;i++)state.target[['x','y','z'][i]]=origin.target[['x','y','z'][i]]+
            right[i]*(-dx/scale)+up[i]*(dy/scale);
-         schedule();
+         constrainTarget();schedule();
        }
      }else if(pointers.size===1 && origin?.type==='orbit'){
        const dx=e.clientX-origin.x,dy=e.clientY-origin.y;
@@ -120,7 +134,7 @@
    function wheel(e){
      if(!Number.isFinite(e.deltaY)||!e.deltaY)return;
      beginMove();e.preventDefault();
-     const before=state.zoom,after=clamp(before*(e.deltaY<0?1.09:.91),minZoom,maxZoom);
+     const before=state.zoom,after=clamp(before*(e.deltaY<0?1.09:.91),minZoom,zoomLimit());
      if(after===before)return;
      const bound=canvas.getBoundingClientRect();
      const units=Math.min(bound.width/3.25,bound.height/Math.max(.2,state.frameSpan));
@@ -131,7 +145,7 @@
      const cy=Math.cos(state.yaw),sy=Math.sin(state.yaw),cp=Math.cos(state.pitch),sp=Math.sin(state.pitch);
      const right=[cy,0,sy],up=[sy*sp,cp,-cy*sp];
      for(let i=0;i<3;i++)state.target[['x','y','z'][i]]+=right[i]*x*difference-up[i]*y*difference;
-     state.zoom=after;
+     constrainTarget();state.zoom=after;
      schedule();
    }
    canvas.addEventListener('pointerdown',start);

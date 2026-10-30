@@ -13,7 +13,7 @@ const tools=['explore','layers','move','inspect'];let activeTool='explore',lastR
 const isMobile=()=>matchMedia('(max-width:850px)').matches;
 const press=(id)=>$(id)?.click();
 function snapshot(){return atlas.getState();}
-function regionOf(s){return s.unified?.region||s.region||null;}
+function regionOf(s){return s.view==='overview'?null:(s.unified?.region||s.region||null);}
 function stateIsDetail(s){return s.view==='detail'&&!!regionOf(s);}
 function eligibleMove(s){const r=regionOf(s);return stateIsDetail(s)&&!!window.BodyRegionMotion?.profile(r);}
 function setPanel(tool){
@@ -52,6 +52,7 @@ function renderState(s){
  $('mobile-frame').hidden=region==='nerve'&&s.view==='focused';
  $('mobile-region').setAttribute('aria-label',region?'Current region '+labels[region]+'. Choose a different region':'Choose an anatomical region');
  $('mobile-workbench').dataset.tool=activeTool;
+ atlas.setMobileFrame?.(isMobile()&&activeTool!=='explore');
  for(const b of document.querySelectorAll('[data-mobile-tool]')){
   b.setAttribute('aria-pressed',String(b.dataset.mobileTool===activeTool));
   if(b.dataset.mobileTool==='move'){
@@ -68,7 +69,7 @@ function renderState(s){
  if(activeTool==='layers'){
   if(!detail){
    const system=s.renderer?.overviewSystem||'combined';
-   $('mobile-layer-value').textContent=system==='combined'?'Both':system[0].toUpperCase()+system.slice(1);
+   $('mobile-layer-value').textContent=system==='combined'?'Both':system==='connective'?'Connective · partial':system[0].toUpperCase()+system.slice(1);
    document.querySelectorAll('[data-mobile-tissue]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mobileTissue===system)));
   }else{
    $('mobile-layer-value').textContent=$('layer-output').textContent;

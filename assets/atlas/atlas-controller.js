@@ -8,7 +8,7 @@ let osteologyAsset=null;let lastFocus=null,activeFrameRoute=null,motionFrame=0,t
 const reduce=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const HERE={hip:'/hip/spatial/',nerve:'/hip/spatial/',knee:'/knee/spatial/',shoulder:'/shoulder/'};
 const LABEL={hip:'RIGHT HIP',nerve:'SCIATIC NERVE',knee:'RIGHT KNEE',shoulder:'SHOULDER',
- skull:'SKULL & JAW',neck:'CERVICAL SPINE',thorax:'RIBS & THORAX',
+ skull:'SKULL & JAW',neck:'NECK',thorax:'RIBS & THORAX',
  elbow:'RIGHT ELBOW',wrist:'RIGHT WRIST',ankle:'RIGHT ANKLE'};
 const NOTE={
 hip:'Source hip bones and muscles; muscle layer and joint movement remain illustrative, pending expert review.',
@@ -22,12 +22,29 @@ shoulder:'Source-matched scapula, clavicle and humerus with four sourced rotator
  wrist:'Eight sourced carpals, five metacarpals and forearm bones. The illustrative wrist hinge is not validated intercarpal kinematics.',
  ankle:'Talus, calcaneus and other real foot/tarsal bones plus the right tibia/fibula. Dorsiflexion is illustrative, without ligament or tendon mechanics.'};
 const MODE_TEXT={explore:'Explore',peel:'Peel',trace:'Trace'};
-function updateURL(){
+const REGION_ALIAS={ribs:'thorax',cervical:'neck',sciatic:'nerve',foot:'ankle',hand:'wrist'};
+const routeRegion=raw=>{const normalized=REGION_ALIAS[raw]||raw;return window.BodyAtlasState.regions.includes(normalized)?normalized:null;};
+let restoringHistory=false,restoringTarget=null,pendingDeepLink=null;
+function updateURL({replace=false}={}){
  const q=new URLSearchParams(location.search);
  if(state.data.region)q.set('region',state.data.region);else q.delete('region');
+ if(state.data.region&&state.data.view==='detail'){
+  if(state.data.layer)q.set('layer',String(state.data.layer));else q.delete('layer');
+  const tool=state.data.layer===4&&window.BodyExtendedRegions?.has(state.data.region)?'trace':state.data.mode;
+  if(['peel','trace'].includes(tool))q.set('tool',tool);else q.delete('tool');
+  const id=U.getSelected();if(id)q.set('structure',id);else q.delete('structure');
+ }else{q.delete('layer');q.delete('tool');q.delete('structure');}
  if(state.data.evidenceMode==='evidence')q.set('evidence','1');else q.delete('evidence');
- const suffix=q.toString();
- history.replaceState(null,'',location.pathname+(suffix?'?'+suffix:''));
+ const suffix=q.toString(),url=location.pathname+(suffix?'?'+suffix:'');
+ // During a browser Back transition we may briefly pass through Whole Body.
+ // Intermediate camera states must not become new history entries.
+ if(restoringTarget!==null){
+  if((state.data.region||'')!==restoringTarget)return;
+  restoringTarget=null;
+ }
+ if(url===location.pathname+location.search||restoringHistory)return;
+ const changedRegion=new URLSearchParams(location.search).get('region')!==state.data.region;
+ history[replace||!changedRegion?'replaceState':'pushState']({atlas:true},'',url);
 }
 function getFrameApi(){
  try{const win=$('region-frame').contentWindow;return state.data.region==='knee'?win.__BODY_SPATIAL__:win.__HIP_SPATIAL__;}
@@ -47,7 +64,7 @@ function refreshOsteologyCoverage(){
 }
 function render(){
  if(document.hidden||(state.data.view==='detail'&&!U.isActive()))return;
- model.render(state.data.camera,U.getRegion()||state.data.region,state.data.evidenceMode,state.data.layer,U.getReveal(),U.getMotion(),U.getSelected(),U.getSecondaryMotion(),U.getTransitionFrom());
+ model.render(state.data.camera,U.getRegion()||state.data.region,state.data.evidenceMode,state.data.layer,U.getReveal(),U.getMotion(),U.getSelected(),U.getSecondaryMotion(),U.getTransitionFrom(),state.data.mode==='trace'&&!window.BodyExtendedRegions?.has(U.getRegion()||state.data.region));
  window.BodyShoulderDebug?.draw(state.data.camera,
   state.data.view==='detail'&&U.getRegion()==='shoulder'?model.shoulderDiagnostics(U.getMotion()):null);
  if(state.data.view==='overview'&&!U.isActive())drawPins();
@@ -555,6 +572,11 @@ function clearOsteologyFocus(){
  if(U.getRegion()&&state.data.view==='detail')U.recenter();
  render();return true;
 }
+function setMobileFrame(visible){
+ const c=state.data.camera,target=visible?.39:.5;
+ if(Math.abs((c.anchorY??.5)-target)<.001)return;
+ c.anchorY=target;render();
+}
 function recenter(){
  if(U.isActive()&&state.data.view==='detail')return U.recenter();
  animateCamera({yaw:-.2,pitch:-.07,zoom:1.03,frameSpan:10.8,target:{x:0,y:-.12,z:0}},reduce()?0:280);
@@ -562,11 +584,46 @@ function recenter(){
 }
 function setup(){
  const canvas=$('atlas-canvas');
- window.BodySpatialCore.attachOrbit(canvas,{state:state.data.camera,render,pick:pickAt,maxZoom:4,onInteract:()=>U.interrupt(),onDoubleTap:recenter});
+ window.BodySpatialCore.attachOrbit(canvas,{state:state.data.camera,render,pick:pickAt,getBounds:()=>model.getViewBounds(U.getRegion()||state.data.region),maxZoom:4,onInteract:()=>U.interrupt(),onDoubleTap:recenter});
  window.addEventListener('resize',resize,{passive:true});
  if(typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe($('atlas-stage'));
  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(motionFrame);motionFrame=0;clearTimeout(frameTimeout);}else render();});
- window.addEventListener('pagehide',()=>{loader.cancel();model.dispose();clearTimeout(frameTimeout);clearTimeout(entryTimer);clearTimeout(exitTimer);cancelAnimationFrame(motionFrame);cancelAnimationFrame(travelMixFrame);cancelAnimationFrame(travelMixFrame);});
+ // A BFCache navigation keeps the document and renderer alive. Disposing on
+ // pagehide permanently blanked the restored canvas and stranded shader state.
+ window.addEventListener('pagehide',event=>{
+  clearTimeout(frameTimeout);clearTimeout(entryTimer);clearTimeout(exitTimer);
+  cancelAnimationFrame(motionFrame);cancelAnimationFrame(travelMixFrame);
+  if(!event.persisted){loader.cancel();model.dispose();}
+ });
+ window.addEventListener('pageshow',event=>{if(event.persisted){
+  if(model.getStatus()!=='ready')model.restore();
+  resize();window.BodyDesktopStudio?.sync();window.BodyMobileWorkbench?.sync();
+ }});
+ window.addEventListener('body:webgl-restored',()=>{$('canvas-fallback').hidden=true;resize();});
+ function applyRouteState(region){
+  const saved=pendingDeepLink;
+  if(!saved||saved.region!==region||state.data.view!=='detail')return;
+  pendingDeepLink=null;
+  if(saved.tool==='peel'||saved.tool==='trace')U.setMode(saved.tool);
+  if(Number.isInteger(saved.layer)&&saved.layer>=0&&saved.layer<=4)U.depthChange(saved.layer);
+  if(saved.structure&&!U.selectById(saved.structure)){
+   $('context-note').textContent='Selected structure unavailable in this source layer.';
+  }
+  window.BodyDesktopStudio?.sync();window.BodyMobileWorkbench?.sync();
+ }
+ window.addEventListener('body:region-ready',event=>applyRouteState(event.detail.region));
+ window.addEventListener('popstate',()=>{
+  const q=new URLSearchParams(location.search),raw=q.get('region'),target=routeRegion(raw);
+  pendingDeepLink=target?{region:target,layer:q.has('layer')?Number(q.get('layer')):null,tool:q.get('tool'),structure:q.get('structure')}:null;
+  restoringTarget=target||'';restoringHistory=true;
+  try{
+   if(target){
+    if(state.data.region!==target||state.data.view==='overview')choose(target);
+    else applyRouteState(target);
+   }else if(state.data.region||U.isActive())body();
+   window.BodyDesktopStudio?.sync();window.BodyMobileWorkbench?.sync();
+  }finally{queueMicrotask(()=>{restoringHistory=false;});}
+ });
  $('sidebar-toggle').onclick=()=>setExpanded($('atlas-sidebar').dataset.expanded!=='true');
  document.querySelectorAll('[data-overview-system]').forEach(button=>{
   button.addEventListener('click',()=>{
@@ -574,6 +631,7 @@ function setup(){
    document.querySelectorAll('[data-overview-system]').forEach(el=>{
     el.setAttribute('aria-pressed',String(el===button));
    });
+   $('context-note').textContent=button.dataset.overviewSystem==='connective'?'Connective coverage is partial: only licensed costal cartilage and limited limb fragments are available. Missing structures are not modeled.':'Explore the licensed source anatomy; missing tissues are not implied.';
    render();
   });
  });
@@ -612,7 +670,7 @@ function setup(){
  $('joint-secondary-slider').oninput=e=>U.setSecondaryMotion(e.target.value);
  $('joint-rest').onclick=()=>U.neutral();
  $('structure-chip-more').onclick=()=>U.showSelected();
- $('structure-chip-close').onclick=()=>{U.clearSelection();render();};
+ $('structure-chip-close').onclick=()=>{U.clearSelection();updateURL({replace:true});render();};
  buildPins();resize();
  Promise.all([loader.load('atlas'),loader.load('provenance')]).then(([asset,provenance])=>{
   loader.verifyAtlas(asset,provenance);
@@ -672,11 +730,21 @@ function setup(){
     $('context-note').textContent='The detailed V8 overview layer could not be verified: '+err.message;
     if(state.data.view==='overview')$('scene-status').textContent='LEGACY 78-BONE FALLBACK · V8 UNAVAILABLE';
    });
-  const route=new URLSearchParams(location.search).get('region');if(route&&window.BodyAtlasState.regions.includes(route))choose(route);
+  const routeQuery=new URLSearchParams(location.search),rawRegion=routeQuery.get('region');
+  const route=routeRegion(rawRegion);
+  if(route){
+   if(rawRegion!==route){
+    routeQuery.set('region',route);
+    history.replaceState(history.state,'',location.pathname+'?'+routeQuery.toString());
+   }
+   pendingDeepLink={region:route,layer:routeQuery.has('layer')?Number(routeQuery.get('layer')):null,tool:routeQuery.get('tool'),structure:routeQuery.get('structure')};
+   choose(route);
+  }
+  else if(rawRegion){$('context-note').textContent='Unknown region: '+rawRegion+'. Showing the full body.';}
   if(new URLSearchParams(location.search).get('evidence')==='1'){setEvidence('evidence');showEvidence();}
  }).catch(err=>fallback(err.message));
 }
 const U=window.BodyAtlasUnified.create({state,model,loader,render,updateURL,resize,setExpanded,reduce,centerPoint,shortestYaw,enableControls,NOTE,LABEL,navigate:region=>choose(region)});
-window.__BODY_ATLAS__={getState:()=>({...state.snapshot(),renderer:model.stats(),unified:U.snapshot(),assetsLoaded:loaded,overviewLoaded,expansionLoaded,facialLoaded,osteologyLoaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,recenter,focusOsteology,clearOsteologyFocus,setInspectorFrame,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode};
+window.__BODY_ATLAS__={getState:()=>({...state.snapshot(),renderer:model.stats(),unified:U.snapshot(),assetsLoaded:loaded,overviewLoaded,expansionLoaded,facialLoaded,osteologyLoaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,recenter,focusOsteology,clearOsteologyFocus,setInspectorFrame,setMobileFrame,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode};
 setup();
 })();

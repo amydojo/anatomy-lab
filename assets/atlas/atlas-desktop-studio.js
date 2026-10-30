@@ -6,14 +6,14 @@
  const $=id=>document.getElementById(id);
  const atlas=window.__BODY_ATLAS__;
  if(!atlas||!$('desktop-studio'))return;
- const labels={skull:'SKULL & JAW',neck:'CERVICAL SPINE',thorax:'RIBS & THORAX',
+ const labels={skull:'SKULL & JAW',neck:'NECK',thorax:'RIBS & THORAX',
   shoulder:'SHOULDER',elbow:'ELBOW',wrist:'WRIST & HAND',hip:'RIGHT HIP',
   knee:'RIGHT KNEE',ankle:'ANKLE & FOOT',nerve:'SCIATIC NERVE'};
  const isDesktop=()=>matchMedia('(min-width:851px)').matches;
  const tools=['explore','layers','move','inspect'];
  let active='explore',selected=null,region=null,modalOpen=false,previousFocus=null;
  const state=()=>atlas.getState();
- const regionOf=s=>s.unified?.region||s.region||null;
+ const regionOf=s=>s.view==='overview'?null:(s.unified?.region||s.region||null);
  const detail=s=>s.view==='detail'&&!!regionOf(s);
  const motionFor=s=>detail(s)?window.BodyRegionMotion?.profile(regionOf(s)):null;
  const clickOriginal=id=>$(id)?.click();
@@ -91,7 +91,7 @@
   $('studio-source-note').textContent=r==='nerve'?'SEPARATE SOURCE REGISTRATION · SCIATIC NERVE':
     'BODYPARTS3D 4.0 · SOURCE REGISTERED';
   $('studio-open-nerve').hidden=!(r==='nerve'&&s.view==='focused');
-  $('studio-context').textContent=inside?'DRAG TO ORBIT · SHIFT-DRAG TO PAN · SCROLL TO ZOOM · CLICK A STRUCTURE':
+  $('studio-context').textContent=inside?'DRAG TO ORBIT · SHIFT-DRAG TO PAN · SCROLL TO ZOOM · CLICK TO INSPECT':
     'DRAG TO ORBIT · SHIFT-DRAG TO PAN · SCROLL TO ZOOM · G TO SEARCH';
   for(const btn of document.querySelectorAll('[data-studio-tool]')){
    const which=btn.dataset.studioTool;

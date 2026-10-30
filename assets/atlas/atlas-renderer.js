@@ -30,20 +30,20 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function create(canvas,onContextLost=()=>{}){
  let gl=null,program=null,buffers=[],overviewBones=[],overviewMuscles=[],overviewData=null,expansionData=null,expansionBones=[],expansionMuscles=[],expansionConnective=[],expansionDetail=new Map(),facialData=null,facialOverview=null,facialDetail=[],osteologyData=null,osteologyOverview=[],osteologyDetail=new Map(),osteologyFocus=null,overviewSystem='combined',status='loading',model=null;
  let registry=window.BodyAtlasRegistry.create();
- const detail=new Map(),detailData=new Map();let shoulderPivot=[-1.1,1.9,0],shoulderGraph=null;
- function cleanup(){if(gl){for(const item of [...buffers,...overviewBones,...overviewMuscles,...expansionBones,...expansionMuscles,...expansionConnective,...(facialOverview?[facialOverview]:[]),...facialDetail,...osteologyOverview,...[...expansionDetail.values()].flat(),...[...detail.values()].flat()])gl.deleteBuffer(item.buffer);if(program)gl.deleteProgram(program);}buffers=[];overviewBones=[];overviewMuscles=[];expansionBones=[];expansionMuscles=[];expansionConnective=[];facialOverview=null;facialDetail=[];osteologyOverview=[];osteologyDetail.clear();expansionDetail.clear();detail.clear();program=null;}
+ const detail=new Map(),detailData=new Map();let shoulderPivot=[-1.1,1.9,0],shoulderGraph=null;let destroyed=false,rebuilding=false,recoveryScheduled=false;let uniformCache=new Map();const boundsCache=new Map();
+ function cleanup(){if(gl){for(const item of [...buffers,...overviewBones,...overviewMuscles,...expansionBones,...expansionMuscles,...expansionConnective,...(facialOverview?[facialOverview]:[]),...facialDetail,...osteologyOverview,...[...expansionDetail.values()].flat(),...[...osteologyDetail.values()].flat(),...[...detail.values()].flat()])gl.deleteBuffer(item.buffer);if(program)gl.deleteProgram(program);}buffers=[];overviewBones=[];overviewMuscles=[];expansionBones=[];expansionMuscles=[];expansionConnective=[];facialOverview=null;facialDetail=[];osteologyOverview=[];osteologyDetail.clear();expansionDetail.clear();detail.clear();program=null;uniformCache.clear();boundsCache.clear();}
  function compile(type,source){const sh=gl.createShader(type);gl.shaderSource(sh,source);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(sh));return sh;}
  function setup(){
   gl=canvas.getContext('webgl2',{alpha:true,antialias:true,depth:true,premultipliedAlpha:false,powerPreference:'low-power'});
   if(!gl){status='fallback';return false;}
   const vert=[
    '#version 300 es','precision highp float;','in vec3 aPosition;','in vec3 aNormal;','in float aSkinWeight;',
-   'uniform vec2 uViewport;','uniform float uAnchorX;','uniform float uYaw;','uniform float uPitch;','uniform float uFrameSpan;','uniform float uZoom;','uniform vec3 uTarget;','uniform float uMotion;','uniform float uFlex;','uniform vec3 uPivot;','uniform float uMotionAxis;','uniform float uSoftSkin;','uniform float uJointGraph;','uniform mat4 uOriginPose;','uniform mat4 uInsertionPose;','out vec3 vNormal;',
+   'uniform vec2 uViewport;','uniform float uAnchorX;','uniform float uAnchorY;','uniform float uYaw;','uniform float uPitch;','uniform float uFrameSpan;','uniform float uZoom;','uniform vec3 uTarget;','uniform float uMotion;','uniform float uFlex;','uniform vec3 uPivot;','uniform float uMotionAxis;','uniform float uSoftSkin;','uniform float uJointGraph;','uniform mat4 uOriginPose;','uniform mat4 uInsertionPose;','out vec3 vNormal;',
    'void main(){','vec3 bone=aPosition;','vec3 n=aNormal;','float influence=uMotion>.5?1.:(uSoftSkin>.5?aSkinWeight:0.);','if(uJointGraph>.5){vec4 pt=vec4(aPosition,1.);bone=mix((uOriginPose*pt).xyz,(uInsertionPose*pt).xyz,aSkinWeight);n=normalize(mix(mat3(uOriginPose)*n,mat3(uInsertionPose)*n,aSkinWeight));}else if(influence>.00001){vec3 d=bone-uPivot;float ca=cos(uFlex*influence),sa=sin(uFlex*influence);bone=uPivot+(uMotionAxis>.5?vec3(d.x*ca-d.y*sa,d.x*sa+d.y*ca,d.z):vec3(d.x,d.y*ca-d.z*sa,d.y*sa+d.z*ca));n=uMotionAxis>.5?vec3(n.x*ca-n.y*sa,n.x*sa+n.y*ca,n.z):vec3(n.x,n.y*ca-n.z*sa,n.y*sa+n.z*ca);}','vec3 p=bone-uTarget;','float cy=cos(uYaw),sy=sin(uYaw),cp=cos(uPitch),sp=sin(uPitch);',
    'float x=p.x*cy+p.z*sy;','float z=p.z*cy-p.x*sy;','float y=p.y*cp-z*sp;','float z2=p.y*sp+z*cp;',
    'float scale=min(uViewport.x/3.25,uViewport.y/uFrameSpan)*uZoom;',
    'float w=max(.10,(7.4-z2)/7.4);',
-   'gl_Position=vec4(x*scale/(uViewport.x*.5)+(uAnchorX-.5)*2.0*w,y*scale/(uViewport.y*.5),-z2/15.0,w);',
+   'gl_Position=vec4(x*scale/(uViewport.x*.5)+(uAnchorX-.5)*2.0*w,(y-.04)*scale/(uViewport.y*.5)-(uAnchorY-.5)*2.0*w,-z2/15.0,w);',
    'vNormal=n;','}'
   ].join('\n');
   const frag=['#version 300 es','precision mediump float;','in vec3 vNormal;','uniform vec3 uColor;','uniform float uDim;','uniform float uAlpha;','out vec4 outColor;',
@@ -53,12 +53,19 @@ function create(canvas,onContextLost=()=>{}){
   program=gl.createProgram();gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);
   gl.deleteShader(vs);gl.deleteShader(fs);
   if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));
+  uniformCache=new Map();
   gl.useProgram(program);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);
   gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
   return true;
  }
- canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();status='fallback';onContextLost('WebGL context lost');});
- canvas.addEventListener('webglcontextrestored',()=>{try{status='loading';if(model)load(model);else setup();}catch(e){status='fallback';onContextLost(e.message);}});
+ canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();status='recovering';program=null;uniformCache.clear();onContextLost('WebGL context temporarily lost; restoring anatomy');});
+ canvas.addEventListener('webglcontextrestored',()=>{try{
+  if(destroyed)return;
+  status='loading';gl=canvas.getContext('webgl2');
+  if(model){if(!load(model))throw Error('Source scene did not recover');}
+  else if(!setup())throw Error('WebGL context could not be restored');
+  window.dispatchEvent(new CustomEvent('body:webgl-restored'));
+ }catch(e){status='fallback';onContextLost(e.message);}});
  try{setup();}catch(e){status='fallback';onContextLost(e.message);}
  function makeBuffer(part,id,group,color,tissue=false){
   if(!Array.isArray(part.vertices)||!Array.isArray(part.faces)||part.vertices.length<50||part.faces.length<50)throw Error('Incomplete sourced mesh: '+id);
@@ -94,8 +101,8 @@ function create(canvas,onContextLost=()=>{}){
  }
  function load(asset){
   if(asset.schema!=='body-live/atlas-skeleton-v1')throw Error('Unexpected skeleton schema');
-  model=asset;if(!gl||status==='fallback')return false;
-  cleanup();setup();
+  model=asset;if(destroyed||!gl||gl.isContextLost?.())return false;
+  cleanup();if(!setup())return false;
   buffers=asset.parts.map(part=>makeBuffer(part,part.id,part.group,COLORS[part.group]||COLORS.spine));
   registry=window.BodyAtlasRegistry.create();registry.base(asset);
   status='ready';
@@ -123,7 +130,7 @@ function create(canvas,onContextLost=()=>{}){
   }catch(err){for(const mesh of newlyAdded)gl.deleteBuffer(mesh.buffer);throw err;}
   for(const old of [...overviewBones,...overviewMuscles])gl.deleteBuffer(old.buffer);
   overviewBones=bones;overviewMuscles=muscles;overviewData=asset;
-  registry.overview(asset);
+  registry.overview(asset);boundsCache.delete('__body__');
   return true;
  }
  function combineV9(parts,name,group,kind){
@@ -292,7 +299,7 @@ function create(canvas,onContextLost=()=>{}){
   // remains checksum-validated in the loader cache; evicted GPU buffers and
   // scene resources are destroyed before a different lab is allocated.
   detail.delete(region);detailData.delete(region);
-  detail.set(region,next);detailData.set(region,asset);
+  detail.set(region,next);detailData.set(region,asset);boundsCache.delete(region);
   while(detail.size>3){
    const expired=detail.keys().next().value;
    const meshes=detail.get(expired)||[];
@@ -308,12 +315,30 @@ function create(canvas,onContextLost=()=>{}){
   if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
   return {width:w,height:h,dpr};
  }
- function render(camera,selected,mode='clean',layer=0,reveal=0,flex=0,highlight=null,secondary=0,transitionFrom=null){
-  const size=resize();if(!gl||status!=='ready')return size;
+ function render(camera,selected,mode='clean',layer=0,reveal=0,flex=0,highlight=null,secondary=0,transitionFrom=null,tissueFocus=false){
+  if(destroyed)return {width:canvas.clientWidth,height:canvas.clientHeight,dpr:1};
+  const size=resize();
+  if(!gl||status!=='ready'||gl.isContextLost?.())return size;
+  // Resizing can invalidate a GPU context; never query locations from a stale program.
+  if(!program||!gl.isProgram(program)){
+   status='recovering';
+   if(!recoveryScheduled&&!rebuilding){
+    recoveryScheduled=true;
+    requestAnimationFrame(()=>{
+     recoveryScheduled=false;
+     if(!destroyed&&!gl.isContextLost?.()&&status==='recovering'){
+      if(restore())window.dispatchEvent(new CustomEvent('body:webgl-restored'));
+     }
+    });
+   }
+   return size;
+  }
   gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(0,0,0,0);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-  gl.useProgram(program);const uni=name=>gl.getUniformLocation(program,name);
+  gl.useProgram(program);
+  const uni=name=>{if(!uniformCache.has(name))uniformCache.set(name,gl.getUniformLocation(program,name));return uniformCache.get(name);};
   gl.uniform2f(uni('uViewport'),size.width,size.height);
   gl.uniform1f(uni('uAnchorX'),Number.isFinite(camera.anchorX)?camera.anchorX:.5);
+  gl.uniform1f(uni('uAnchorY'),Number.isFinite(camera.anchorY)?camera.anchorY:.5);
   gl.uniform1f(uni('uYaw'),camera.yaw);gl.uniform1f(uni('uPitch'),camera.pitch);
   gl.uniform1f(uni('uZoom'),camera.zoom);gl.uniform1f(uni('uFrameSpan'),camera.frameSpan);
   gl.uniform3f(uni('uTarget'),camera.target.x,camera.target.y,camera.target.z);
@@ -433,7 +458,7 @@ function create(canvas,onContextLost=()=>{}){
    // and ligaments are NOT silently fabricated just because a slider moved.
    const chosen=region==='knee'?(layer===1?new Set(['femur']):layer===2?new Set(['tibia','fibula']):layer===3?new Set(['patella']):null):null;
    for(const bone of [...bones,...(expansionDetail.get(region)||[]),...(osteologyDetail.get(region)||[])]){
-    let a=r;
+    let a=tissueFocus?r*.15:r;
     if(region==='knee'&&chosen&&!chosen.has(bone.id))a*=.12;
     if(osteologyFocus&&((region==='skull'&&osteologyFocus.endsWith('-ear'))||(region==='hip'&&osteologyFocus==='coccyx'))){
      if(bone.sourceOsteology){
@@ -450,7 +475,7 @@ function create(canvas,onContextLost=()=>{}){
    gl.depthMask(true);
    // Source BodyParts3D 3.0 facial muscles remain reference-static.
    if(region==='skull'&&facialDetail.length){
-    const alpha=osteologyFocus&&osteologyFocus.endsWith('-ear')?0:r*(layer===4?.91:layer===0?.53:.12);
+    const alpha=osteologyFocus&&osteologyFocus.endsWith('-ear')?0:r*(layer===4?.91:layer===0?.085:.12);
     if(alpha>.015){
      gl.depthMask(false);
      for(const mesh of facialDetail)draw(mesh,highlight&&highlight!==mesh.id?.55:1,alpha,true);
@@ -461,7 +486,7 @@ function create(canvas,onContextLost=()=>{}){
     const levels=window.BodyExtendedRegions?.has(region)?null:(region==='shoulder'?SHOULDER_LAYERS:region==='knee'?KNEE_MUSCLE_LAYERS:DEPTH_HIP)[clamp(Number(layer)||0,0,3)]||{};
     gl.depthMask(false);
     for(const mesh of meshes.filter(p=>p.tissue)){
-     const a=(levels?levels[mesh.id]||0:layer===4?.93:.46)*r;
+     const a=(tissueFocus?.94:levels?levels[mesh.id]||0:layer===4?.93:region==='skull'?.09:.46)*r;
      if(a>.002)draw(mesh,(highlight&&highlight!==mesh.id)?0.48:1,a);
     }
     gl.depthMask(true);
@@ -549,8 +574,41 @@ function create(canvas,onContextLost=()=>{}){
   return {markers:pose.markers,rest:pose.rest,degrees:pose.degrees,
    elevation:pose.elevation,attachments,validated:false};
  }
- function dispose(){cleanup();model=null;overviewData=null;expansionData=null;facialData=null;osteologyData=null;shoulderGraph=null;detailData.clear();}
- return Object.freeze({load,loadOverview,loadExpansion,loadFacial,loadOsteology,setOsteologyFocus,setOverviewSystem,getOverviewSystem:()=>overviewSystem,registry:()=>registry,loadDetail,touchDetail,hasDetail:region=>detail.has(region),render,hitTest,shoulderDiagnostics,resize,getStatus:()=>status,dispose,stats:()=>({partCount:buffers.length,overviewBones:overviewBones.length,overviewMuscles:overviewMuscles.length,expansionBones:expansionData?Object.keys(expansionData.bones).length:0,expansionMuscles:expansionData?Object.keys(expansionData.muscles).length:0,expansionConnective:expansionData?Object.keys(expansionData.connective).length:0,facialMuscles:facialData?Object.keys(facialData.parts).length:0,facialDetailMeshes:facialDetail.length,osteologyBones:osteologyData?Object.keys(osteologyData.bones).length:0,osteologyFocus,overviewSystem,registry:registry.stats(),triangles:[...buffers,...overviewBones,...overviewMuscles].reduce((n,b)=>n+b.count/3,0),webgl:status==='ready',detailRegions:[...detail.keys()],detailMeshes:[...detail.values()].reduce((n,items)=>n+items.length,0),riggedShoulderMuscles:(detail.get('shoulder')||[]).filter(p=>p.skinWeights).length,riggedHipMuscles:(detail.get('hip')||[]).filter(p=>p.skinWeights).length,riggedKneeMuscles:(detail.get('knee')||[]).filter(p=>p.skinWeights).length,coordinatedShoulder:!!shoulderGraph,expandedRegions:[...detail.keys()].filter(id=>window.BodyExtendedRegions?.has(id)),expandedMeshes:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>!x.tissue).length,0),expandedMuscles:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>x.tissue).length,0)})});
+ function getStructure(region,id){
+  if(typeof id!=='string'||id.length>150)return null;
+  const parts=[...(detail.get(region)||[]),...(expansionDetail.get(region)||[]),...(osteologyDetail.get(region)||[])];
+  const part=parts.find(p=>p.id===id);
+  return part?{id:part.id,name:part.name,fma:part.fma,tissue:part.tissue,region}:null;
+ }
+ function viewBounds(region){
+  const key=detail.has(region)?region:'__body__';
+  if(boundsCache.has(key))return boundsCache.get(key);
+  const items=key==='__body__'?[...buffers,...overviewBones,...expansionBones,...osteologyOverview]:detail.get(region);
+  if(!items?.length)return null;
+  const lo=[Infinity,Infinity,Infinity],hi=[-Infinity,-Infinity,-Infinity];
+  for(const part of items){
+   for(const p of part.verts||[]){
+    for(let i=0;i<3;i++){if(p[i]<lo[i])lo[i]=p[i];if(p[i]>hi[i])hi[i]=p[i];}
+   }
+  }
+  if(lo.some(v=>!Number.isFinite(v))||hi.some(v=>!Number.isFinite(v)))return null;
+  const center={x:(lo[0]+hi[0])/2,y:(lo[1]+hi[1])/2,z:(lo[2]+hi[2])/2};
+  const radius=Math.max(.2,Math.hypot(hi[0]-lo[0],hi[1]-lo[1],hi[2]-lo[2])/2);
+  const bounds={center,radius,min:lo,max:hi};boundsCache.set(key,bounds);return bounds;
+ }
+ function restore(){
+  if(destroyed||rebuilding||!model||gl?.isContextLost?.())return false;
+  rebuilding=true;
+  try{
+   status='loading';
+   return load(model);
+  }catch(err){
+   status='fallback';onContextLost('Unable to restore the verified anatomy scene: '+err.message);
+   return false;
+  }finally{rebuilding=false;}
+ }
+ function dispose(){destroyed=true;status='disposed';cleanup();model=null;overviewData=null;expansionData=null;facialData=null;osteologyData=null;shoulderGraph=null;detailData.clear();}
+ return Object.freeze({load,loadOverview,loadExpansion,loadFacial,loadOsteology,setOsteologyFocus,setOverviewSystem,getOverviewSystem:()=>overviewSystem,registry:()=>registry,loadDetail,touchDetail,hasDetail:region=>detail.has(region),render,hitTest,shoulderDiagnostics,resize,getStatus:()=>status,getViewBounds:viewBounds,getStructure,restore,dispose,stats:()=>({partCount:buffers.length,overviewBones:overviewBones.length,overviewMuscles:overviewMuscles.length,expansionBones:expansionData?Object.keys(expansionData.bones).length:0,expansionMuscles:expansionData?Object.keys(expansionData.muscles).length:0,expansionConnective:expansionData?Object.keys(expansionData.connective).length:0,facialMuscles:facialData?Object.keys(facialData.parts).length:0,facialDetailMeshes:facialDetail.length,osteologyBones:osteologyData?Object.keys(osteologyData.bones).length:0,osteologyFocus,overviewSystem,registry:registry.stats(),triangles:[...buffers,...overviewBones,...overviewMuscles].reduce((n,b)=>n+b.count/3,0),webgl:status==='ready',detailRegions:[...detail.keys()],detailMeshes:[...detail.values()].reduce((n,items)=>n+items.length,0),riggedShoulderMuscles:(detail.get('shoulder')||[]).filter(p=>p.skinWeights).length,riggedHipMuscles:(detail.get('hip')||[]).filter(p=>p.skinWeights).length,riggedKneeMuscles:(detail.get('knee')||[]).filter(p=>p.skinWeights).length,coordinatedShoulder:!!shoulderGraph,expandedRegions:[...detail.keys()].filter(id=>window.BodyExtendedRegions?.has(id)),expandedMeshes:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>!x.tissue).length,0),expandedMuscles:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>x.tissue).length,0)})});
 }
 window.BodyAtlasRenderer=Object.freeze({create});
 })();
