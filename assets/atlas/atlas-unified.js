@@ -296,9 +296,9 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   const trace=$('mode-trace'),peel=$('mode-peel'),output=$('layer-output');
   const motionSpec=window.BodyRegionMotion.profile(name);
   const extended=window.BodyExtendedRegions.has(name);
-  trace.disabled=!extended;
-  trace.textContent=extended?'Muscles':'Trace';
-  trace.title=extended?'Show licensed source muscle meshes with faint bone context':'A continuous nerve path is not verified in this source-derived scene';
+  trace.disabled=false;
+  trace.textContent='Muscles';
+  trace.title='Show existing source muscle meshes with faint bone context; missing anatomy is not synthesized';
   peel.textContent=window.BodyExtendedRegions.has(name)?'Isolate':name==='knee'?'Isolate':name==='shoulder'?'Layers':'Peel';
   $('joint-motion-label').textContent=motionSpec?.label||'Teaching motion';
   $('motion-description').textContent='REGIONAL KINEMATICS · UNVALIDATED';
@@ -326,8 +326,13 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  }
  function setMode(mode){
   if(mode==='trace'){
-   if(window.BodyExtendedRegions.has(region)&&state.data.view==='detail')depthChange(4);
-   return;
+   if(window.BodyExtendedRegions.has(region)&&state.data.view==='detail'){depthChange(4);return;}
+   if(!region||state.data.view!=='detail')return;
+   state.mode('trace');state.setDepth(0);clearSelection();
+   $('layer-slider').value='0';$('layer-output').textContent='Source muscles';
+   document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-trace')));
+   $('context-note').textContent='Visible muscle surfaces are sourced; missing tendons and connective tissues are not reconstructed.';
+   render();updateURL({replace:true});return;
   }
   if(!state.mode(mode))return;
   // Mode buttons are actions, not mere labels. Explore restores all available
