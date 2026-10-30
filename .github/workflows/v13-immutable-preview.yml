@@ -1,0 +1,52 @@
+name: V13 immutable preview validation
+on:
+  push:
+    branches: ['qa/v13-preview-861f532']
+permissions:
+  contents: read
+jobs:
+  preview:
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [webkit-mobile, desktop-chromium]
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 30
+    env:
+      BASE_URL: https://anatomy-2109ubix5-amy-dos-projects.vercel.app
+      EXPECTED_SHA: 861f532bf5f0e0806ea419d696f0b2f84089c02b
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 861f532bf5f0e0806ea419d696f0b2f84089c02b
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - name: Verify immutable preview files against exact checked out commit
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          node --input-type=module <<'JS'
+          import {readFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          for (const path of ['atlas/index.html','assets/spatial-core.js','assets/atlas/atlas-mobile-workbench.js','assets/atlas/atlas-desktop-studio.js','assets/atlas/v13-anatomy-info.js','assets/atlas/atlas-v11-source.js']) {
+            const response=await fetch(process.env.BASE_URL+'/'+path);
+            if(!response.ok) throw Error(path+': HTTP '+response.status);
+            const deployed=Buffer.from(await response.arrayBuffer());
+            if(!deployed.equals(readFileSync(path)))throw Error('Preview content does not match '+process.env.EXPECTED_SHA+': '+path);
+            console.log(path,createHash('sha256').update(deployed).digest('hex'));
+          }
+          JS
+      - name: Hosted navigation, inspector, mobile gestures and desktop checks
+        run: npx playwright test tests/v12-stabilization.spec.mjs tests/v13-inspector.spec.mjs tests/v83-mobile.spec.mjs tests/v84-desktop.spec.mjs --project=${{ matrix.browser }}
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v13-immutable-preview-${{ matrix.browser }}
+          path: |
+            artifacts/
+            test-results/
+          if-no-files-found: ignore
