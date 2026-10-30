@@ -9,7 +9,7 @@ if(!atlas||!$('mobile-workbench'))return;
 const labels={skull:'SKULL & JAW',neck:'NECK',thorax:'RIBS & THORAX',
  shoulder:'SHOULDER',elbow:'ELBOW',wrist:'WRIST & HAND',hip:'HIP',knee:'KNEE',
  ankle:'ANKLE & FOOT',nerve:'SCIATIC NERVE'};
-const tools=['explore','layers','move','inspect'];let activeTool='explore',lastRegion=null,lastSelection=null,focusBefore=null,modalOpen=false;
+const tools=['explore','layers','move','inspect'];let activeTool='explore',lastRegion=null,lastSelection=null,focusBefore=null,modalOpen=false,inspectExpanded=false;
 const isMobile=()=>matchMedia('(max-width:850px)').matches;
 const press=(id)=>$(id)?.click();
 function snapshot(){return atlas.getState();}
@@ -111,6 +111,19 @@ function renderState(s){
  $('mobile-inspect-description').textContent=selected?$('structure-details-description').textContent:
   'Pinch in to examine smaller structures, then tap a bone or muscle.';
  $('mobile-inspect-clear').hidden=!selected;
+ $('mobile-inspect-expand').hidden=!selected;
+ $('mobile-inspect-expand').setAttribute('aria-expanded',String(inspectExpanded));
+ $('mobile-inspect-expand').textContent=inspectExpanded?'Less anatomy ▴':'More anatomy ▾';
+ $('mobile-inspect-details').hidden=!selected||!inspectExpanded;
+ if(selected){
+  const title=$('structure-details-name').textContent||String(selected);
+  const description=$('structure-details-description').textContent||'';
+  const kind=/muscle|tendon/i.test(title+' '+description)?'Muscle / soft tissue':/nerve/i.test(title+' '+description)?'Nerve':'Anatomical structure';
+  const info=window.BodyAnatomyInfo?.lookup(selected);
+  $('mobile-inspect-type').textContent=(info?.type||kind)+' · '+(labels[region]||'Whole body');
+  $('mobile-inspect-context').textContent=info?info.summary+' Related: '+info.relations+'. Reference: '+info.source+'.':(description||'Additional verified anatomical relationships are not yet available for this structure.');
+  $('mobile-inspect-motion').hidden=!eligibleMove(s);
+ }
  document.querySelectorAll('[data-mobile-region]').forEach(b=>
   b.setAttribute('aria-pressed',String(b.dataset.mobileRegion===region)));
  lastRegion=region;lastSelection=selected;
@@ -181,7 +194,9 @@ if(stage){
 $('mobile-motion-slider').addEventListener('input',e=>{setInput('joint-motion-slider',e.target.value);sync();});
 $('mobile-secondary-slider').addEventListener('input',e=>{setInput('joint-secondary-slider',e.target.value);sync();});
 $('mobile-neutral').addEventListener('click',()=>{press('joint-rest');sync();});
-$('mobile-inspect-clear').addEventListener('click',()=>{press('structure-chip-close');sync();});
+$('mobile-inspect-clear').addEventListener('click',()=>{inspectExpanded=false;press('structure-chip-close');sync();});
+$('mobile-inspect-expand').addEventListener('click',()=>{inspectExpanded=!inspectExpanded;sync();});
+$('mobile-inspect-motion').addEventListener('click',()=>setPanel('move'));
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modalOpen){closePicker();}});
 const observer=new MutationObserver(()=>{
  if(!isMobile())return;
@@ -190,7 +205,7 @@ const observer=new MutationObserver(()=>{
   // Direct structure taps must produce immediate visible feedback. The old
   // inspector chip is intentionally hidden on phones, so open the one-pane
   // inspector when a new source surface is selected.
-  if(id&&id!==lastSelection)activeTool='inspect';
+  if(id&&id!==lastSelection){activeTool='inspect';inspectExpanded=false;}
   $('mobile-workbench').dataset.mode=$('atlas-app').dataset.mode;
   sync();
  }
