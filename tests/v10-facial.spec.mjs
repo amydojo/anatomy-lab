@@ -63,9 +63,12 @@ test('V10 invalid downloaded facial geometry fails closed and leaves V9 atlas av
  await page.goto('/atlas/');
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState().expansionLoaded===true),{timeout:35000}).toBe(true);
  await expect(page.locator('#context-note')).toContainText('Optional facial source not loaded',{timeout:25000});
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().osteologyLoaded),{timeout:20000}).toBe(true);
  const s=await page.evaluate(()=>window.__BODY_ATLAS__.getState());
  expect(s.facialLoaded).toBe(false);
  expect(s.renderer.registry.muscles).toBe(386);
+ expect(s.renderer.registry.bones).toBe(208);
+ expect(s.renderer.osteologyBones).toBe(7);
  expect(s.renderer.facialMuscles).toBe(0);
  expect(s.renderer.webgl).toBe(true);
  expect(errors).toEqual([]);
