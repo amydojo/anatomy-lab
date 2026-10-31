@@ -220,3 +220,15 @@ V5.4 quality gate cleared on the exact source commit: 162 full-app Playwright te
 - PREVIEW ONLY: dependent on unmerged Hip PR #4, Nerve PR #5 and Follow PR #6. No clinical expert or copyright-license approval on these releases. Do not promote to production until review completed.
 
 V6 plan and release gates: docs/V6_ATLAS_PORTAL_PLAN.md, docs/V6_EVIDENCE_CONTRACT.md, docs/V6_RELEASE_READINESS.md.
+
+---
+
+## V6 — Atlas / Portal planning (documentation only)
+
+The next proposed release unifies the full-body overview, Hip → Sciatic nerve → Knee transitions, and an explicit Evidence Lens, without equating continuous camera travel with verified anatomical continuity.
+
+- [V6 implementation architecture and staged release criteria](docs/V6_ATLAS_PORTAL_PLAN.md)
+- [Evidence Lens schema and anatomical uncertainty policy](docs/V6_EVIDENCE_CONTRACT.md)
+- [Read-only audit of V5.3/V5.4/V5.5 draft PRs and release blockers](docs/V6_RELEASE_READINESS.md)
+
+**Planning docs do not merge or publish PRs #4–#6 and do not change V5.2 production.** Clinical or anatomist signoff remains unavailable for the unreviewed content.
