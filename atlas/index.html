@@ -63,7 +63,7 @@
     <strong id="mobile-inspect-name">Tap a structure to inspect</strong>
     <p id="mobile-inspect-description">Pinch in to examine smaller structures, then tap a bone or muscle.</p>
     <button id="mobile-inspect-expand" type="button" aria-expanded="false" hidden>More anatomy ▾</button>
-    <div id="mobile-inspect-details" hidden><p id="mobile-inspect-type"></p><p id="mobile-inspect-context"></p><p class="mobile-qualifier">Source-backed geometry does not imply clinically validated function or attachments.</p><button id="mobile-inspect-motion" type="button" hidden>Explore joint movement</button></div>
+    <div id="mobile-inspect-details" hidden><p id="mobile-inspect-type"></p><p id="mobile-inspect-context"></p><a id="mobile-anatomy-source" target="_blank" rel="noopener noreferrer" hidden>Read the source passage ↗</a><p class="mobile-qualifier">Source-backed geometry does not imply clinically validated function or attachments.</p><button id="mobile-inspect-motion" type="button" hidden>Explore joint movement</button></div>
    </div>
   </div>
   <nav class="mobile-tool-dock" aria-label="Anatomy tools">
@@ -145,6 +145,8 @@
     <h2 id="studio-inspector-name">Select anatomy</h2>
     <div class="studio-inspector-rule"></div>
     <p id="studio-inspector-description">Select a bone or muscle in the 3D specimen to inspect its anatomical context.</p>
+    <button id="studio-anatomy-expand" type="button" aria-expanded="false" aria-controls="studio-anatomy-details" hidden>More anatomy</button>
+    <div id="studio-anatomy-details" hidden><p id="studio-anatomy-type"></p><p id="studio-anatomy-context"></p><a id="studio-anatomy-source" target="_blank" rel="noopener noreferrer" hidden>Read the source passage ↗</a><p>Source-derived geometry and regional teaching motion are not clinically validated biomechanics.</p><button id="studio-anatomy-motion" type="button" hidden>Explore regional teaching motion</button></div>
     <div class="studio-inspector-actions"><button type="button" id="studio-inspector-clear">Clear selection</button><button type="button" id="studio-inspector-evidence">Source evidence ↗</button></div>
     <p class="studio-inspector-note">BodyParts3D 4.0 · CC BY 4.0. Source registration does not establish verified biomechanics or clinical accuracy.</p>
    </aside>

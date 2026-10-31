@@ -68,6 +68,9 @@
    function move(e){
      if(!pointers.has(e.pointerId))return;
      pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+     // A direct joint manipulation owns this one-finger move. Keep coordinates
+     // current so a subsequent two-finger gesture begins at the current centroid.
+     if(e.defaultPrevented)return;
      if(pointers.size>=2 && origin?.type==='dual'){
        const mid=midpoint();
        const zoom=clamp(origin.zoom*distance()/origin.distance,minZoom,zoomLimit());
@@ -108,6 +111,7 @@
      }
    }
    function up(e){
+     if(e.defaultPrevented){cancel(e);return;}
      if(!pointers.has(e.pointerId))return;
      const tap=pointers.size===1&&!travel&&origin?.type==='orbit';
      pointers.delete(e.pointerId);

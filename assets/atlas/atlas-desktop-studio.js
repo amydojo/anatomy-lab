@@ -11,7 +11,7 @@
   knee:'RIGHT KNEE',ankle:'ANKLE & FOOT',nerve:'SCIATIC NERVE'};
  const isDesktop=()=>matchMedia('(min-width:851px)').matches;
  const tools=['explore','layers','move','inspect'];
- let active='explore',selected=null,region=null,modalOpen=false,previousFocus=null;
+ let active='explore',selected=null,region=null,modalOpen=false,previousFocus=null,anatomyExpanded=false;
  const state=()=>atlas.getState();
  const regionOf=s=>s.view==='overview'?null:(s.unified?.region||s.region||null);
  const detail=s=>s.view==='detail'&&!!regionOf(s);
@@ -79,11 +79,12 @@
   if(!isDesktop())return;
   const s=incoming||state(),r=regionOf(s),inside=detail(s),profile=motionFor(s);
   if((active==='move'&&!profile)||(active==='inspect'&&!inside))active='explore';
-  if(selected&&selected!==s.unified?.selected&&s.unified?.selected){
+  if(s.unified?.selected&&selected!==s.unified.selected&&inside){
    // Selection changed through the original engine; update the inspector
    // immediately rather than requiring a second click on the old chip.
    active='inspect';
   }
+  if(selected!==(s.unified?.selected||null))anatomyExpanded=false;
   selected=s.unified?.selected||null;
   region=r;
   $('studio-current-label').textContent=r?labels[r]:'WHOLE BODY';
@@ -120,6 +121,10 @@
     });
    }
   }
+ if(r==='shoulder'&&active==='move'){
+  const rig=$('shoulder-rig-tools');
+  if(rig.parentElement!==$('studio-motion'))$('studio-motion').append(rig);
+ }
   if(profile){
    $('studio-motion-name').textContent=profile.label;
    $('studio-motion-slider').min='0';
@@ -147,6 +152,16 @@
    $('studio-inspector-description').textContent=selected?$('structure-details-description').textContent:
      'Click any source-derived bone or muscle in the specimen to see its anatomical identity and context.';
    $('studio-inspector-clear').disabled=!selected;
+   const info=window.BodyAnatomyInfo?.lookup(selected);
+   $('studio-anatomy-expand').hidden=!selected;
+   $('studio-anatomy-expand').setAttribute('aria-expanded',String(anatomyExpanded));
+   $('studio-anatomy-expand').textContent=anatomyExpanded?'Less anatomy':'More anatomy';
+   $('studio-anatomy-details').hidden=!selected||!anatomyExpanded;
+   $('studio-anatomy-type').textContent=info?.type||'Anatomical structure';
+   $('studio-anatomy-context').textContent=info?info.summary+' Related: '+info.relations+'. Reference: '+info.source+'.':'Validated anatomical metadata is not yet available for this structure.';
+  $('studio-anatomy-source').hidden=!info;
+  if(info)$('studio-anatomy-source').href=info.sourceUrl;
+   $('studio-anatomy-motion').hidden=!selected||!profile;
   }
   renderRegions();
  }
@@ -157,6 +172,8 @@
   });
  }
  $('studio-tray-close').addEventListener('click',()=>chooseTool('explore'));
+ $('studio-anatomy-expand').addEventListener('click',()=>{anatomyExpanded=!anatomyExpanded;sync();});
+ $('studio-anatomy-motion').addEventListener('click',()=>chooseTool('move'));
  $('studio-inspector-close').addEventListener('click',()=>chooseTool('explore'));
  $('studio-inspector-clear').addEventListener('click',()=>{clickOriginal('structure-chip-close');sync();});
  $('studio-inspector-evidence').addEventListener('click',()=>atlas.showEvidence());

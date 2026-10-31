@@ -109,21 +109,22 @@ test('One camera path uses bounded frame changes and does not snap on detail ent
  const errors=await atlas(page);
  await page.evaluate(()=>window.__BODY_ATLAS__.choose('hip'));
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().unified.region),{timeout:10000}).toBe('hip');
- const sampled=await page.evaluate(async()=>{
-  const frames=[];
-  const start=performance.now();
-  while(performance.now()-start<1500){
+ const sampled=await page.evaluate(()=>new Promise(resolve=>{
+  const frames=[];let start=null;
+  function sample(time){
+   if(start===null)start=time;
    const s=window.__BODY_ATLAS__.getState();
-   frames.push({t:performance.now(),z:s.camera.frameSpan,yaw:s.camera.yaw,view:s.view});
-   await new Promise(r=>setTimeout(r,35));
+   frames.push({t:time,z:s.camera.frameSpan,yaw:s.camera.yaw,view:s.view});
+   if(time-start>=1500)resolve(frames);else requestAnimationFrame(sample);
   }
-  return frames;
- });
+  // Use the animation frame clock, not a timer sampled after a blocking draw.
+  requestAnimationFrame(sample);
+ }));
  expect(sampled.some(x=>x.view==='detail')).toBe(true);
  expect(Math.min(...sampled.map(x=>x.z))).toBeLessThan(3.6);
  for(let i=1;i<sampled.length;i++){
-  // Software WebGL can stall the sampling loop on mobile CI. Bound actual
-  // camera movement by elapsed time, not by a fixed amount per stale sample.
+  // Compare successive rendered-frame samples using the same native RAF
+  // timestamp domain as the camera; retain the original movement bounds.
   const dt=sampled[i].t-sampled[i-1].t;
   expect(Math.abs(sampled[i].z-sampled[i-1].z)).toBeLessThan(.03*dt+.35);
   expect(Math.abs(sampled[i].yaw-sampled[i-1].yaw)).toBeLessThan(.012*dt+.25);
@@ -133,7 +134,10 @@ test('One camera path uses bounded frame changes and does not snap on detail ent
 test('Focused knee can isolate sourced femur, tibia/fibula and patella, not pretend to show ligaments',async({page})=>{
  const errors=await atlas(page);await choose(page,'knee');
  await expect(page.locator('#mode-peel')).toContainText('Isolate');
- await expect(page.locator('#mode-trace')).toBeDisabled();
+ await expect(page.locator('#mode-trace')).toBeEnabled();
+ await page.locator('#mode-trace').evaluate(el=>el.click());
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().mode)).toBe('trace');
+ await page.locator('#mode-peel').evaluate(el=>el.click());
  for(const [value,label] of [['1','Femur focus'],['2','Tibia / fibula'],['3','Patella focus']]){
   await page.locator('#layer-slider').evaluate((el,v)=>{el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));},value);
   await expect(page.locator('#layer-output')).toContainText(label);
@@ -202,7 +206,7 @@ test('Direct selection inside unified specimen produces meaningful structure ins
  });
  expect(selected).not.toBe(null);
  if((await page.viewportSize()).width<=850){
-  await page.locator('[data-mobile-tool="inspect"]').click();
+  await expect(page.locator('[data-mobile-tool="inspect"]')).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('#mobile-inspect-name')).not.toHaveText('Tap a structure to inspect');
  }else await expect(page.locator('#studio-inspector')).toBeVisible();
  if((await page.viewportSize()).width<=850){
@@ -302,9 +306,12 @@ test('Shoulder opens in one source-frame canvas with real cuff, deltoid and bone
  expect(st.renderer.detailMeshes).toBeGreaterThanOrEqual(14);
  await expect(page.locator('#portal')).toBeHidden();
  expect(await page.locator('#region-frame').getAttribute('src')).toBe(null);
- await expect(page.locator('#joint-motion-label')).toHaveText('Shoulder abduction');
+ await expect(page.locator('#joint-motion-label')).toHaveText('Shoulder elevation');
  await expect(page.locator('#mode-peel')).toHaveText('Layers');
- await expect(page.locator('#mode-trace')).toBeDisabled();
+ await expect(page.locator('#mode-trace')).toBeEnabled();
+ await page.locator('#mode-trace').evaluate(el=>el.click());
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().mode)).toBe('trace');
+ await page.locator('#mode-peel').evaluate(el=>el.click());
  await page.screenshot({path:'artifacts/v6-shoulder-'+test.info().project.name+'.png',fullPage:true});
  expect(errors).toEqual([]);
 });
@@ -348,6 +355,7 @@ test('V6.8 Shoulder rig diagnostic markers follow connected bones and cuff attac
  await expect(page.locator('#shoulder-rig-tools')).toBeHidden();
  await choose(page,'shoulder');
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.coordinatedShoulder)).toBe(true);
+ await page.locator((await page.viewportSize()).width<=850?'[data-mobile-tool="move"]':'[data-studio-tool="move"]').click();
  await expect(page.locator('#shoulder-rig-tools')).toBeVisible();
  await page.locator('#shoulder-rig-toggle').click();
  await expect(page.locator('#shoulder-rig-toggle')).toHaveAttribute('aria-pressed','true');

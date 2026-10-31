@@ -950,3 +950,71 @@ test('V11 coccyx and bilateral middle-ear bones are 7 distinct original-source s
   assert.doesNotThrow(()=>new Function(read(path)),path);
  assert.match(read('atlas/index.html'),/atlas-v11-source\.js/);
 });
+
+test('V11 verifies independently when optional facial data is absent, and still rejects duplicated identity',async()=>{
+ const {runInNewContext}=await import('node:vm');
+ const data=JSON.parse(read('atlas/assets/v11-coccyx-ossicles.json'));
+ const proof=JSON.parse(read('atlas/assets/v11-source-provenance.json'));
+ const base=JSON.parse(read('atlas/assets/body-skeleton.json'));
+ const v8=JSON.parse(read('atlas/assets/v8-overview-detail.json'));
+ const v9=JSON.parse(read('atlas/assets/v9-source-expansion.json'));
+ const sandbox={window:{BodyAtlasLoader:{digest:()=>proof.asset_sha256}}};
+ runInNewContext(read('assets/atlas/atlas-v11-source.js'),sandbox);
+ const verify=sandbox.window.BodyV11Source.verify;
+ assert.equal(verify(data,proof,base,v8,v9,null),true);
+ assert.equal(verify(data,proof,base,v8,v9,JSON.parse(read('atlas/assets/v10-facial-reference.json'))),true);
+ const duplicate=structuredClone(v9);
+ duplicate.bones['z-v11-coccyx']=data.bones['z-v11-coccyx'];
+ assert.throws(()=>verify(data,proof,base,v8,duplicate,null),/corrupt or duplicate/);
+ const bad=structuredClone(proof);bad.asset_sha256='invalid';
+ assert.throws(()=>verify(data,bad,base,v8,v9,null),/checksum mismatch/);
+});
+
+test('Camera pointer ownership preserves joint drag, second-finger handoff and cleanup',async()=>{
+ const {runInNewContext}=await import('node:vm');
+ const handlers={};let picks=0;
+ const canvas={addEventListener:(type,fn)=>handlers[type]=fn,removeEventListener:()=>{},setPointerCapture:()=>{},getBoundingClientRect:()=>({left:0,top:0,width:390,height:844})};
+ const sandbox={window:{},performance:{now:()=>0},requestAnimationFrame:()=>1,cancelAnimationFrame:()=>{}};
+ runInNewContext(read('assets/spatial-core.js'),sandbox);
+ const camera={yaw:0,pitch:0,zoom:1,frameSpan:4,target:{x:0,y:0,z:0}};
+ const dispose=sandbox.window.BodySpatialCore.attachOrbit(canvas,{state:camera,render:()=>{},pick:()=>picks++});
+ const send=(type,id,x,y,owned=false)=>handlers[type]({pointerId:id,pointerType:'touch',clientX:x,clientY:y,defaultPrevented:owned,preventDefault(){this.defaultPrevented=true;}});
+ send('pointerdown',1,100,200);
+ send('pointermove',1,160,200,true);
+ assert.equal(camera.yaw,0,'joint-owned drag must not orbit');
+ send('pointerdown',2,260,200);
+ send('pointermove',2,310,200);
+ assert.equal(camera.zoom,1.5,'pinch starts from latest first-finger location, not stale drag origin');
+ send('pointerup',2,310,200);send('pointerup',1,160,200);
+ assert.equal(picks,0,'pinch release must not select a structure');
+ send('pointerdown',3,100,200);send('pointerup',3,100,200,true);
+ assert.equal(picks,0,'joint release must not trigger a selection');
+ send('pointerdown',4,100,200);send('pointermove',4,125,200);send('pointerup',4,125,200);
+ assert.ok(camera.yaw>0,'normal orbit recovers after joint release');
+ dispose();
+});
+
+test('Seven anatomy records map exact source structure identities without fuzzy misclassification',async()=>{
+ const {runInNewContext}=await import('node:vm');const sandbox={window:{}};
+ runInNewContext(read('assets/atlas/v13-anatomy-info.js'),sandbox);
+ const info=sandbox.window.BodyAnatomyInfo;
+ assert.equal(Object.keys(info.records).length,7);
+ for(const [id,record] of Object.entries(info.records)){
+  assert.match(record.sourceUrl,/^https:\/\/openstax.org\/books\/anatomy-and-physiology-2e\/pages\//);
+  assert.ok(record.source.includes('—'),'passage locator required for '+id);
+ }
+ const ankle=JSON.parse(read('atlas/regions/ankle.json'));
+ for(const id of ['medial-head-of-right-gastrocnemius','lateral-head-of-right-gastrocnemius']){
+  assert.match(ankle.muscle_parts[id].name,/gastrocnemius/i);
+  assert.equal(info.lookup(id).type,'Skeletal muscle');
+ }
+ for(const [path,group,ids] of [
+  ['knee/spatial/assets/bp3d-right-knee-4.0.json','bone_meshes',['patella','femur','tibia']],
+  ['shoulder/spatial/assets/shoulder-source.json','parts',['scapula','humerus']],
+  ['shoulder/spatial/assets/shoulder-source.json','parts',['supraspinatus']]
+ ]){
+  const asset=JSON.parse(read(path));for(const id of ids){assert.ok(asset[group]?.[id],path+' '+id);assert.ok(info.lookup(id));}
+ }
+ assert.equal(info.lookup('patella-muscle'),null);
+ assert.equal(info.lookup('patella!'),null);
+});

@@ -11,3 +11,11 @@
  #mobile-inspect-motion{border:1px solid #bd806b;border-radius:10px;padding:10px 14px;background:#5c3329;color:#fff;font:inherit}
  #mobile-inspect :focus-visible{outline:2px solid #e6b19a;outline-offset:3px}
 }
+@media(min-width:851px){
+ #studio-anatomy-expand,#studio-anatomy-motion{min-height:44px;border:1px solid #886449;border-radius:10px;background:#39261b;color:#f5eee8;padding:10px 14px;font:inherit}
+ #studio-anatomy-details{font-size:13px;line-height:1.55;color:#d8c8bf}
+ #studio-anatomy-type{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#d7a991}
+ #studio-anatomy-expand:focus-visible,#studio-anatomy-motion:focus-visible{outline:2px solid #e6b19a;outline-offset:3px}
+}
+
+.app #mobile-move .shoulder-rig-tools,.app #studio-motion .shoulder-rig-tools{position:static;display:flex!important;margin-top:12px;flex-wrap:wrap}

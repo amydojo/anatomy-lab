@@ -9,7 +9,7 @@ if(!atlas||!$('mobile-workbench'))return;
 const labels={skull:'SKULL & JAW',neck:'NECK',thorax:'RIBS & THORAX',
  shoulder:'SHOULDER',elbow:'ELBOW',wrist:'WRIST & HAND',hip:'HIP',knee:'KNEE',
  ankle:'ANKLE & FOOT',nerve:'SCIATIC NERVE'};
-const tools=['explore','layers','move','inspect'];let activeTool='explore',lastRegion=null,lastSelection=null,focusBefore=null,modalOpen=false,inspectExpanded=false;
+const tools=['explore','layers','move','inspect'];let activeTool='explore',lastRegion=null,lastSelection=null,focusBefore=null,modalOpen=false,inspectExpanded=false,lastMotion=null,lastSecondary=null;
 const isMobile=()=>matchMedia('(max-width:850px)').matches;
 const press=(id)=>$(id)?.click();
 function snapshot(){return atlas.getState();}
@@ -51,7 +51,10 @@ function closePicker({restore=true}={}){
 }
 function renderState(s){
  const region=regionOf(s),detail=stateIsDetail(s),motion=window.BodyRegionMotion?.profile(region);
- if(activeTool==='move'&&!eligibleMove(s))activeTool='explore';
+ if(activeTool==='move'&&s.view==='overview')activeTool='explore';
+ $('mobile-motion-slider').disabled=!eligibleMove(s);
+ $('mobile-secondary-slider').disabled=!eligibleMove(s);
+ $('mobile-neutral').disabled=!eligibleMove(s);
  $('mobile-region-name').textContent=region?labels[region]:'FULL BODY';
  $('mobile-home').hidden=!region;
  $('mobile-source').hidden=!(region==='nerve'&&s.view==='focused');
@@ -91,6 +94,10 @@ function renderState(s){
    });
   }
  }
+ if(isMobile()&&region==='shoulder'&&activeTool==='move'){
+  const rig=$('shoulder-rig-tools');
+  if(rig.parentElement!==$('mobile-move'))$('mobile-move').append(rig);
+ }
  if(motion){
   $('mobile-motion-label').textContent=motion.label;
   $('mobile-motion-slider').max=String(motion.max);
@@ -118,15 +125,19 @@ function renderState(s){
  if(selected){
   const title=$('structure-details-name').textContent||String(selected);
   const description=$('structure-details-description').textContent||'';
-  const kind=/muscle|tendon/i.test(title+' '+description)?'Muscle / soft tissue':/nerve/i.test(title+' '+description)?'Nerve':'Anatomical structure';
+  const kind='Anatomical structure';
   const info=window.BodyAnatomyInfo?.lookup(selected);
   $('mobile-inspect-type').textContent=(info?.type||kind)+' · '+(labels[region]||'Whole body');
   $('mobile-inspect-context').textContent=info?info.summary+' Related: '+info.relations+'. Reference: '+info.source+'.':(description||'Additional verified anatomical relationships are not yet available for this structure.');
+  $('mobile-anatomy-source').hidden=!info;
+  if(info)$('mobile-anatomy-source').href=info.sourceUrl;
   $('mobile-inspect-motion').hidden=!eligibleMove(s);
+  $('mobile-inspect-motion').textContent='Explore '+(labels[region]||'region').toLowerCase()+' teaching motion';
  }
  document.querySelectorAll('[data-mobile-region]').forEach(b=>
   b.setAttribute('aria-pressed',String(b.dataset.mobileRegion===region)));
  lastRegion=region;lastSelection=selected;
+ lastMotion=s.unified?.motion||0;lastSecondary=s.unified?.secondary||0;
 }
 function sync(){renderState(snapshot());}
 for(const b of document.querySelectorAll('[data-mobile-tool]'))b.addEventListener('click',()=>{
@@ -172,22 +183,34 @@ $('mobile-layer-slider').addEventListener('input',e=>{setInput('layer-slider',e.
 // ordinary orbit/pan/pinch in Explore and multi-touch gestures everywhere.
 const stage=$('atlas-canvas');
 let jointDrag=null;
+const jointTouches=new Set();
 if(stage){
  stage.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='touch'){
+   jointTouches.add(e.pointerId);
+   if(jointTouches.size>1){jointDrag=null;return;}
+  }
   if(!isMobile()||activeTool!=='move'||!eligibleMove(snapshot())||!e.isPrimary||e.pointerType==='mouse')return;
   const slider=$('mobile-motion-slider');
   jointDrag={id:e.pointerId,x:e.clientX,angle:Number(slider.value),min:Number(slider.min||0),max:Number(slider.max||90)};
-  stage.setPointerCapture?.(e.pointerId);
+  try{stage.setPointerCapture?.(e.pointerId);}catch{}
  },{capture:true});
  stage.addEventListener('pointermove',e=>{
   if(!jointDrag||e.pointerId!==jointDrag.id||!e.isPrimary)return;
+  if(!isMobile()||activeTool!=='move'||!eligibleMove(snapshot())){jointDrag=null;return;}
   const next=Math.max(jointDrag.min,Math.min(jointDrag.max,Math.round(jointDrag.angle+(e.clientX-jointDrag.x)*.45)));
   setInput('joint-motion-slider',next);
   $('mobile-motion-slider').value=String(next);
   $('mobile-motion-value').textContent=next+'°';
-  e.preventDefault();e.stopImmediatePropagation();
+  // Camera input still records the pointer position for a seamless second-finger
+  // handoff, but defaultPrevented keeps it from orbiting during joint motion.
+  e.preventDefault();
  },{capture:true,passive:false});
- const stop=e=>{if(jointDrag?.id===e.pointerId){jointDrag=null;sync();}};
+ const stop=e=>{
+  jointTouches.delete(e.pointerId);
+  if(jointDrag?.id===e.pointerId){e.preventDefault();jointDrag=null;sync();}
+ };
+ stage.addEventListener('lostpointercapture',stop,{capture:true});
  stage.addEventListener('pointerup',stop,{capture:true});
  stage.addEventListener('pointercancel',stop,{capture:true});
 }
@@ -201,7 +224,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modalOpen){closePic
 const observer=new MutationObserver(()=>{
  if(!isMobile())return;
  const s=snapshot(),r=regionOf(s),id=s.unified?.selected;
- if(r!==lastRegion||id!==lastSelection||$('atlas-app').dataset.mode!==$('mobile-workbench').dataset.mode){
+ if(r!==lastRegion||id!==lastSelection||(s.unified?.motion||0)!==lastMotion||(s.unified?.secondary||0)!==lastSecondary||$('atlas-app').dataset.mode!==$('mobile-workbench').dataset.mode){
   // Direct structure taps must produce immediate visible feedback. The old
   // inspector chip is intentionally hidden on phones, so open the one-pane
   // inspector when a new source surface is selected.
@@ -213,6 +236,10 @@ const observer=new MutationObserver(()=>{
 observer.observe($('atlas-app'),{attributes:true,attributeFilter:['data-mode']});
 observer.observe($('structure-chip'),{attributes:true,attributeFilter:['hidden']});
 observer.observe($('structure-chip-name'),{childList:true,characterData:true,subtree:true});
+// Shared-engine resets and external motion controls must update the visible
+// mobile adapter just as they do the desktop adapter.
+for(const id of ['joint-motion-value','joint-secondary-value'])
+ observer.observe($(id),{childList:true,characterData:true,subtree:true});
 window.addEventListener('popstate',sync);
 window.addEventListener('resize',()=>{if(!isMobile())closePicker({restore:false});sync()},{passive:true});
 $('mobile-workbench').dataset.mode=$('atlas-app').dataset.mode;
