@@ -1,0 +1,120 @@
+{
+  "schema": "body-live/v10-facial-provenance-v1",
+  "source_repo": "choxos/OMFAtlas",
+  "pinned_omf_commit": "c835665a9ade09ee0b993cee6eee1b25b7f7311b",
+  "manifest_git_blob": "de8608c724c50f15955bf0269767e0ec65a390a7",
+  "facial_bin_git_blob": "0332821585e1b03ac4258d891b3ec220ab3ff30a",
+  "manifest_sha256": "450d79cfc5a042dbd9605a0a09f3441dbf8f4f49f0e06839abafdbae51b8231d",
+  "binary_sha256": "7f24687034d706fc08830f617da35f77cb951cd77621a562fa064fa09d5a1b69",
+  "asset_sha256": "08b3115da430f23952e365fd8547c39f5a9f1de33700053c6c7bc2964acd0497",
+  "license": "CC-BY-SA-2.1-JP",
+  "attribution": "BodyParts3D, Copyright\u00a9 The Database Center for Life Science licensed by CC Attribution-Share Alike 2.1 Japan",
+  "original_archive": "https://dbarchive.biosciencedbc.jp/data/bodyparts3d/20110915/BodyParts3D_3.0_obj_95.zip",
+  "original_obj_sha256": {
+    "facial-v3-fma46841": "2c82d47ce2d8f43a210f6d32cd0604c06d1454b4d896031a0d9bf00a80be2ae5",
+    "facial-v3-fma46759": "ba1f3802da915a7a2f3b46cfc3bccbbcc29c88c37c4b37d3e6039861aebe6b6f",
+    "facial-v3-fma46760": "1641d5dca6155a8b684c20638f637dfbe3269c307ee08dc63ef412f22a5f0b8b",
+    "facial-v3-fma46761": "b4f096c22bbf51e5fd2855ffed274fad85db11d81a78dcb21df70d96e3466a85",
+    "facial-v3-fma46762": "d4fe23b9c111e64945d1184dd76632a15ff135bb6de3313b566a8c83704f6574",
+    "facial-v3-fma46782": "bc961d68f3803cac2af3c42abe5b8472155622f117658c6df7625ecf18c402a9",
+    "facial-v3-fma46783": "52e4534497ef53b841227ca53529c2263303e23069a5256c4dfd13f1f07c7e5a",
+    "facial-v3-fma46785": "ab46b87f0babdf92e7cf5b3a3097623089bfce67331ca4201d300785aaefdcb2",
+    "facial-v3-fma46786": "426dd2416d995b20242760a2a053e682267deabd2e76dc9fed5377154d85d5d0",
+    "facial-v3-fma46796": "11e014da689d7d40292054dbbcad3ae1a80e8320ada215703e78b8707796cada",
+    "facial-v3-fma46797": "3ba4f05230909e3b0b8bb359324c1b2591925336c1ded913f8ffb8fdd35a30c1",
+    "facial-v3-fma46803": "a22e2fe5f5d0422bb036e8b4a2bd53bcf376e02bd41e3f2b3c2fcc2cde792cc6",
+    "facial-v3-fma46804": "6b19b75c521381004156d1d3286ffd28e3539e881d96a893bf4a15b76ea8d8b2",
+    "facial-v3-fma46806": "5a119149d52b0190e3d10693f9ebfcca43e89faecd36003f624bb14543ae4555",
+    "facial-v3-fma46807": "fda219041d1d73a3260b579a8f7fbf86d72f7e003a4435ea1e3fb733ec54a1a1",
+    "facial-v3-fma46812": "6547a1658d8cb9da3007ab5104caba1b85c6eda50b04392d75672a6cca812166",
+    "facial-v3-fma46813": "0bc1fe514fcd3aafabac41f9f4ae9d5d16525ffe611ef7fb5f0d5b7d4fee8d43",
+    "facial-v3-fma46814": "a804c15387cfb6a5f33738e7e9f32279128de6641657d95bef6b1843a4aa6a49",
+    "facial-v3-fma46815": "0faf29ba9e4ef3907584570932469975debbb977fe064d06f7f43ff13eb78ff4",
+    "facial-v3-fma46817": "32c075d9cdff05511c8f08b9e3b5ac5a72e429879bce8e0f83f07279f52599ca",
+    "facial-v3-fma46818": "dfef97487006b57fbb8a7f59fe6ae828ad25102b5a27749ab48e648123dc96fd",
+    "facial-v3-fma46823": "33be80991ca00ca5d9c51af48cfc50ef6f31374b75f58b90e7a6c970fd4deb5b",
+    "facial-v3-fma46824": "a7677fcad2bdb8a202a91609d0923ae45e5f346075b6c704501f88afacd78468",
+    "facial-v3-fma46826": "0944af216b84375ed8310670f69b3d3aa8678cb9b3b76a4d2f193b62afacab5c",
+    "facial-v3-fma46827": "a395ffb837ab108770921c16a1e60e3e80ceb493d5b0fec0ecace0e1ccfd8877",
+    "facial-v3-fma46829": "0805bacea017c4e4f2e6755516c05f0f3246caab5c7ef089fa820f789dd954da",
+    "facial-v3-fma46830": "d8ee648a9310d0399031d456515072c9d6798f7c870baaae93eb10e67c6b610c",
+    "facial-v3-fma46835": "0b1e429ee3d0cd553dd90adf4f9220cfe43325d38983187a6f367bdfbe985acf",
+    "facial-v3-fma46836": "9dbd4a871524d9ecce52edbf6ab37fc0db03b0da30eecd83aa1043c35e569d54",
+    "facial-v3-fma46839": "445393d9015d7d207578f957327e1f0a59cf2c8f4cc91d91c86a800da86c787d",
+    "facial-v3-fma46840": "14eccccb12ae5df5299ea4797284972e5e77b752aae21b83fcd17fa3030c52d8",
+    "facial-v3-fma49001": "0548003276232c506740d5ed3baf386707cfd37313bff83f254d63dac0eb6262",
+    "facial-v3-fma49002": "06c8e6f478247df53da23396ae7c2f6e0c4e4a3a31ead72ca11c5e3c4bbac522",
+    "facial-v3-fma49004": "b590bf5b498e6d10f5b2b3b753f920f0bd9abe4f396c88fb74419bd427cbc39f",
+    "facial-v3-fma49005": "a0d783fb221b2adff0f94d4c6345094d1608280d338938a8b69c401431cb414d",
+    "facial-v3-fma49007": "66c8234570a01e2268f3d83b9d7bc151f46d78b2bf413f9f502107e9c93a482e",
+    "facial-v3-fma49008": "9827d3141418c1eb635e4f5d08cf7c6cd4377c8df5b74146268a403268126738",
+    "facial-v3-fma49012": "d8939ec976b48afad52d5c0adcd5e5b6b0225f467bb073a16dffb2a7cbe97546",
+    "facial-v3-fma49013": "99d766a3c6ec526b2e688ce9ec83779343911665774d417ed56c0ee3e49f9da2",
+    "facial-v3-fma49022": "6ea2efc92c5339d2f1bf35c9379c94042f46109f6e0431559699230b4c9526de",
+    "facial-v3-fma49023": "ab5efbcf6e01bcc8a3abd615ae81d8caf4b46eb8529d64d41d1e94a5b977d8aa",
+    "facial-v3-fma49024": "f1afa956ca6084f98d9b14e8d8f14caa4882b8ef5b9b2834b7c8ec96b439d249",
+    "facial-v3-fma49025": "d726e95caf1a175e23a2fe63d946eaf4fb482f6954510b6abcaea4b7f800d85d",
+    "facial-v3-fma55606": "b6601c06c9adb9914624aefdf25249351fb4f0e680f40dd2aeba6b23f411dd70",
+    "facial-v3-fma55607": "bc9609a2593cc88b28fd3e915d65a1571794f60d277471a3693d484af1653dc9",
+    "facial-v3-fma55610": "279ab33daff4cff9ac439568b38e6178d6e40c6d544bdc10f9efb5ca3dc798e9",
+    "facial-v3-fma55611": "4dc504fd73ef1ff7a4cdc5d4296d30d3a5e83418edf472f1c2a8d1d25525b071"
+  },
+  "upstream_registration": {
+    "scale": 1.059369874098004,
+    "rotation": [
+      [
+        0.9999999697814653,
+        -0.00022542358070208187,
+        9.808811509434028e-05
+      ],
+      [
+        0.00022540964137606034,
+        0.9999999644993117,
+        0.00014209810025212806
+      ],
+      [
+        -9.812014387505785e-05,
+        -0.000142075985950868,
+        0.9999999850934261
+      ]
+    ],
+    "translationMm": [
+      -0.15057996010419217,
+      15.397670982185474,
+      -99.29859059211003
+    ],
+    "trainingBones": [
+      "FMA52748",
+      "FMA52734",
+      "FMA53649"
+    ],
+    "heldOutBone": "FMA53650",
+    "heldOutSourceToTargetSurfaceRmsMm": 0.2583466353828061,
+    "heldOutTargetToSourceSurfaceRmsMm": 0.08919988835896876,
+    "report": "documentation/qa/FACIAL-SOURCE.md"
+  },
+  "coordinate_transform": "[x,(y-.9),z]*5 from OMFAtlas BodyParts3D 4.0-registered metres",
+  "source_alignment_independently_recomputed": false,
+  "source_alignment_method": "Upstream held-out left maxilla RMS plus local source-mandible bbox fit",
+  "all_geometry_reused": true,
+  "anatomist_reviewed": false,
+  "jaw_dynamics_validated": false,
+  "clinical_use_approved": false,
+  "unique_facial_muscles": 47,
+  "total_muscle_meshes": 433,
+  "excluded_bones": [
+    "coccyx",
+    "left malleus",
+    "right malleus",
+    "left incus",
+    "right incus",
+    "left stapes",
+    "right stapes"
+  ],
+  "limits": [
+    "V3.0 facial muscles static reference; no measured tendon origins or insertions",
+    "Transform validated numerically upstream, not independently fitted from original four controls in this repository",
+    "CC BY-SA 2.1 Japan applies to these adapted facial assets, separately from V4.0 CC BY 4.0 geometry",
+    "Adult reference, educational display; no medical or biomechanical expert review"
+  ]
+}

@@ -1,0 +1,22 @@
+
+.osteology-micro-controls[hidden],.osteology-micro-controls button[hidden]{display:none!important}
+@media(max-width:850px){body:has(.mobile-region-sheet:not([hidden])) .osteology-micro-controls{visibility:hidden;pointer-events:none}}
+.osteology-micro-controls{
+ position:absolute;z-index:14;top:79px;right:22px;
+ background:rgba(29,24,21,.93);border:1px solid rgba(215,165,129,.52);
+ border-radius:13px;padding:10px 12px;display:flex;flex-direction:column;gap:7px;
+ box-shadow:0 10px 30px #0007;backdrop-filter:blur(16px);
+}
+.osteology-micro-controls .micro-kicker{font-size:9px;letter-spacing:.13em;color:#d8ae8e;font-weight:740}
+.osteology-micro-controls .micro-choices{display:flex;gap:6px;flex-wrap:wrap}
+.osteology-micro-controls button{
+ min-height:36px;padding:6px 11px;background:#614532;color:#f8e7d7;border:1px solid #a7775b;
+ border-radius:8px;font-size:11px;font-weight:650;cursor:pointer;
+}
+.osteology-micro-controls button:hover{background:#895d43}
+.osteology-micro-controls button:focus-visible{outline:2px solid #f7d8bb;outline-offset:2px}
+@media(max-width:850px){
+ .osteology-micro-controls{top:66px;left:auto;right:11px;max-width:min(218px,56vw);padding:8px 10px}
+ .osteology-micro-controls .micro-kicker{font-size:8px}
+ .osteology-micro-controls button{min-height:37px;font-size:10px;padding:6px 9px}
+}

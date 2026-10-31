@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/><meta name="theme-color" content="#15110f"/>
+<title>HIP / SPATIAL — BODY / LIVE V5.5</title><meta name="description" content="Interactively peel the right hip, move the femur, and discover the deep gluteal anatomy."/>
+<link rel="stylesheet" href="/knee/spatial/spatial.css"/><link rel="stylesheet" href="/hip/spatial/hip.css"/>
+<script defer src="/assets/spatial-core.js"></script><script defer src="/assets/hip-knee-bridge.js"></script>
+<script defer src="/hip/spatial/nerve-follow.js"></script>
+<script defer src="/hip/spatial/hip.js"></script>
+</head><body><div id="app">
+<header class="topbar"><a class="brand" href="/">BODY <span>/</span> LIVE</a><div class="name"><span class="prefix">V5.5 · NERVE / FOLLOW</span><strong>HIP / SPATIAL</strong></div><a class="back" href="/hip/" aria-label="Return to existing hip laboratory">Hip / Live ↗</a></header>
+<main class="workspace">
+<section class="stage" aria-label="Interactive right-hip specimen">
+  <div class="stage-top"><span class="view-label" id="view-caption">RIGHT HIP · POSTERIOR</span><span class="view-label detail" id="asset-status">LOADING SOURCED ANATOMY</span></div>
+  <canvas id="hip-canvas" role="img" aria-label="Three-dimensional interactive right hip: drag to orbit, pinch to zoom, select structures; keyboard-accessible structure list and sliders below."></canvas>
+  <div class="stage-actions"><button id="posterior" type="button">Back</button><button id="lateral" type="button">Side</button><button id="focus-toggle" type="button" aria-pressed="false">Whole bones</button><button id="reset" type="button">Reset</button></div>
+  <section id="follow-stage" class="nerve-follow-stage" aria-label="Follow the source-derived nerve path" hidden>
+   <div class="follow-top"><span class="follow-kicker">NERVE / FOLLOW <span id="follow-mode-label">COMPOSITE</span></span><button id="follow-exit" type="button" aria-label="Exit nerve-follow camera">×</button></div>
+   <div class="follow-branch-row">
+    <label for="follow-branch">BRANCH</label>
+    <select id="follow-branch" aria-label="Choose nerve segment to follow">
+      <option value="sciatic">Sciatic trunk</option><option value="tibial">Tibial continuation</option><option value="commonFibular">Common fibular continuation</option>
+    </select>
+    <output id="follow-distance">0 mm</output>
+   </div>
+   <input id="follow-progress" type="range" min="0" max="100" value="0" step="1" aria-label="Travel along selected nerve path"/>
+   <div class="follow-foot"><span id="follow-path-note">Surface-derived visual centreline, not MRI</span><span id="follow-percent">0%</span></div>
+ </section>
+ <p class="helper">DRAG TO ORBIT · PINCH TO ZOOM · TAP TO INSPECT</p>
+  <div class="legend"><span class="dot bone"></span>BONES <span class="dot ligament" style="background:#d88e79"></span>MUSCLES <span class="dot cartilage" style="background:#eac782"></span>NERVE COMPOSITE</div>
+</section>
+<aside class="inspector" id="hip-inspector" data-expanded="false">
+ <button id="inspector-toggle" class="inspector-grab" aria-expanded="false" aria-controls="inspector-scroll"><span class="handle"></span><span id="selected-short">Inside the right hip</span><span class="grab-icon" aria-hidden="true">⌃</span></button>
+ <div class="inspector-scroll" id="inspector-scroll">
+  <div class="eyebrow" id="structure-type">SOURCED STRUCTURES · SIMPLIFIED MOTION</div>
+  <h1 id="inspector-title">A ball-and-socket laboratory.</h1>
+  <p class="intro" id="structure-intro">Peel the gluteal layers to see how the pelvis, femur, and deep rotators occupy the same space. Move the femur in three axes.</p>
+  <div class="action-row"><button id="isolate" type="button" aria-pressed="false" disabled>Isolate structure</button><button id="show-all" type="button">Restore scene</button><button id="nerve-follow" type="button" hidden aria-pressed="false">Follow sciatic path</button><button id="nerve-evidence-toggle" type="button" hidden aria-controls="nerve-evidence" aria-expanded="false">Source &amp; uncertainty</button><button id="lesson-start" type="button">✧ Why does it stabilize?</button></div>
+  <section id="nerve-info" class="attachment-info" hidden aria-live="polite"></section>
+  <section class="nerve-frames" id="nerve-frames" aria-label="Nerve source comparison" hidden>
+    <div class="eyebrow">DISPLAY SOURCE FRAME</div>
+    <div class="nerve-frame-controls">
+      <button type="button" data-nerve-frame="composite" aria-pressed="true">Registered composite</button>
+      <button type="button" data-nerve-frame="atlas" aria-pressed="false">Atlas nerve alone</button>
+    </div>
+    <p id="nerve-frame-note">Registered onto independent BodyParts3D hip. This is not a same-donor reconstruction.</p>
+  </section><section id="nerve-evidence" class="attachment-info nerve-evidence" hidden></section>
+  <section id="lesson-panel" class="experiment-panel" hidden aria-label="Hip interactive experiment" aria-live="polite"></section>
+  <div class="fact" id="anatomy-fact"><span>SPATIAL INSIGHT</span><p>The femoral head moves within the acetabulum. This educational model uses a fixed estimated pivot, not personalized joint mechanics.</p></div>
+  <div class="section-label">DISCOVER STRUCTURES</div><div class="structure-list" id="structure-list"></div>
+  <div class="section-label">OPEN ORIGINAL DISSECTION</div>
+  <a class="provenance" href="/hip/dissection/">Explore Hip / Exposed — layer-by-layer SVG dissection ↗</a>
+  <div class="section-label">SOURCE &amp; ACCURACY</div>
+  <p class="disclaimer">Bone and muscle meshes are licensed, static BodyParts3D 4.0 geometry when available. A nerve surface from Z-Anatomy is automatically registered to the separately sourced hip; the reference composite is not patient imaging or clinically verified. Joint motion, pivot and gluteal actions are illustrative and unreviewed; not for diagnosis.</p>
+  <a class="provenance" href="/hip/spatial/sources/">Read geometry licensing and accuracy notes ↗</a>
+ </div>
+</aside>
+</main>
+<footer class="controls hip-controls">
+ <div class="control-unit layer-unit"><label for="depth"><span>01 / DISSECT</span><output id="depth-output">SURFACE</output></label><input id="depth" type="range" min="0" max="4" step="1" value="0" aria-label="Hip dissection layer"/></div>
+ <div class="movement-unit"><div class="movement-head"><span>02 / MOVE</span><div class="motion-options" role="group" aria-label="Select joint movement"><button type="button" data-axis="flexion" aria-pressed="true">Flex</button><button type="button" data-axis="abduction" aria-pressed="false">Abduct</button><button type="button" data-axis="rotation" aria-pressed="false">Rotate</button></div></div>
+ <div class="movement-track"><input id="motion" type="range" min="-25" max="90" step="1" value="0" aria-label="Illustrative hip flexion angle"/><output id="motion-output">0°</output></div></div>
+ <button class="play" id="play" type="button" aria-pressed="false" aria-label="Play or pause joint motion">▶ <span>Play</span></button>
+</footer></div></body></html>

@@ -1,0 +1,50 @@
+name: V9 source anatomy and movement safety
+on:
+  push:
+    branches: [feat/v9-source-anatomy-expansion]
+    paths-ignore: [atlas/assets/v9-source-provenance.json]
+  pull_request:
+    branches: [feat/v8-4-desktop-studio]
+permissions:
+  contents: read
+concurrency:
+  group: v9-anatomy-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-and-browser:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 26
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Validate source coverage and static relationships
+        run: npm test
+      - run: npx playwright install chromium webkit
+      - name: Verify V9 expansion across desktop Chromium, iPhone Chromium and WebKit
+        run: npx playwright test tests/v9-atlas.spec.mjs tests/v8-atlas.spec.mjs tests/v7-atlas.spec.mjs --reporter=line
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v9-source-qa-traces
+          path: test-results/
+          if-no-files-found: ignore
+  full-regression:
+    needs: source-and-browser
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install chromium webkit
+      - name: Whole BODY / LIVE Playwright suite
+        run: npm run test:e2e

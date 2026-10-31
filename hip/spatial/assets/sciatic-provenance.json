@@ -1,0 +1,275 @@
+{
+  "schema": "body-live/nerve-provenance-v1",
+  "geometry_origin": "Z-Anatomy anatomical curves, derivative surface exports; NOT MRI/CT segmentation",
+  "upstream_source": "https://github.com/Z-Anatomy/Models-of-human-anatomy",
+  "distribution": "https://github.com/nqwrc/3d-anatomy/tree/8ca3b7421bcfbe88b85859eb1983d5cf79f21749",
+  "license_summary": "Isolated peripheral nerve derivative: CC BY-SA 4.0; exclude unrelated NC inner ear/kidney. Legal license review recommended.",
+  "attribution": [
+    "Z-Anatomy - The libre 3D atlas of anatomy - CC-BY-SA 4.0",
+    "BodyParts3D - The Database Center for Life Science - CC-BY-SA 2.1 Japan",
+    "nqwrc/3d-anatomy - optimized Draco glTF export of Z-Anatomy"
+  ],
+  "source_files": {
+    "nervous.glb": {
+      "url": "https://raw.githubusercontent.com/nqwrc/3d-anatomy/8ca3b7421bcfbe88b85859eb1983d5cf79f21749/public/models/nervous.glb",
+      "git_blob_sha1": "115402de4700658ea0cadb1d9749fa1d145e6397",
+      "sha256": "c7cde35497f887b319c0a84f1b5b605fa3ce66e23084b5e09d6e3825fa5030d9",
+      "bytes": 3802588
+    },
+    "skeletal.glb": {
+      "url": "https://raw.githubusercontent.com/nqwrc/3d-anatomy/8ca3b7421bcfbe88b85859eb1983d5cf79f21749/public/models/skeletal.glb",
+      "git_blob_sha1": "73a8ace5eb2ada06d0253e192679cab9d5cd4e6f",
+      "sha256": "c2b70b31ddec4062cbc5ba969fc24ecfed61d00397a0bca795e2701d997200f8",
+      "bytes": 1863828
+    }
+  },
+  "source_nodes": {
+    "sciatic": {
+      "node": 533,
+      "node_name": "Sciatic nerve.r",
+      "mesh_index": 292,
+      "node_chain": [
+        533
+      ],
+      "node_world_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.05495322
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.6734159
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.04597307
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "vertices": 2484,
+      "faces": 4896,
+      "bbox_m": [
+        [
+          -0.079779,
+          0.539751,
+          -0.071815
+        ],
+        [
+          -0.016253,
+          0.978144,
+          -0.016236
+        ]
+      ]
+    },
+    "tibial": {
+      "node": 532,
+      "node_name": "Tibial nerve.r",
+      "mesh_index": 291,
+      "node_chain": [
+        532,
+        533
+      ],
+      "node_world_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.05495322
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.6734159
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.04597307
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "vertices": 1308,
+      "faces": 2592,
+      "bbox_m": [
+        [
+          -0.096131,
+          0.057529,
+          -0.065896
+        ],
+        [
+          -0.056333,
+          0.540499,
+          -0.037831
+        ]
+      ]
+    },
+    "commonFibular": {
+      "node": 523,
+      "node_name": "Common fibular nerve.r",
+      "mesh_index": 282,
+      "node_chain": [
+        523,
+        533
+      ],
+      "node_world_matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          -0.09622606
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.46640003
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          -0.05195892
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "vertices": 1020,
+      "faces": 2016,
+      "bbox_m": [
+        [
+          -0.123221,
+          0.38501,
+          -0.061648
+        ],
+        [
+          -0.076052,
+          0.540217,
+          -0.0393
+        ]
+      ]
+    }
+  },
+  "benchmark_node": {
+    "node": 61,
+    "node_name": "Femur.r",
+    "mesh_index": 30,
+    "node_chain": [
+      61
+    ],
+    "node_world_matrix": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        -0.09236196
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.65711701
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        -0.01916584
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "vertices": 2020,
+    "faces": 3794,
+    "bbox_m": [
+      [
+        -0.148531,
+        0.429866,
+        -0.059353
+      ],
+      [
+        -0.031941,
+        0.884305,
+        0.018759
+      ]
+    ]
+  },
+  "registration": {
+    "rotation": [
+      [
+        0.99823572,
+        0.00969359,
+        0.05857892
+      ],
+      [
+        -0.0055192,
+        0.99746055,
+        -0.07100702
+      ],
+      [
+        -0.05911848,
+        0.07055844,
+        0.99575424
+      ]
+    ],
+    "translation": [
+      0.58392771,
+      -8.56357802,
+      0.96705369
+    ],
+    "fit": {
+      "method": "right-femur robust rigid ICP (auto; no expert landmarks)",
+      "rms_trimmed_scene_units": 0.054801,
+      "median_scene_units": 0.062219,
+      "p95_scene_units": 0.143454,
+      "max_scene_units": 0.307866,
+      "reference_sample_count": 480,
+      "source_sample_count": 2020,
+      "scale": "shared source metres to hip display units (x10)",
+      "rotation_determinant": 1.0,
+      "clinical_landmarks_verified": false
+    }
+  },
+  "source_hip_model": "1c38bf35c254a891200d3cedecfd57abebe83d8d",
+  "narrative": "Surface geometry is actual Z-Anatomy-derived sciatic model, registered to different BodyParts3D 4.0 hip reference mesh by automated rigid femur ICP. Anatomical relationship is plausible composite, not clinically proven or same donor.",
+  "micro_ct_2026": {
+    "source": "https://discover.pennsieve.io/datasets/692",
+    "license": "CC BY 4.0",
+    "scope": "6 excised ~9 cm sciatic nerve microCT samples from one donor; fascicles/graphs, NOT whole in-situ pelvic nerve",
+    "imported": false,
+    "reason": "No validated registration to pelvis; separate microstructure future work"
+  },
+  "status": {
+    "geometry_real_source": true,
+    "imaging_derived": false,
+    "clinically_verified": false,
+    "same_donor": false,
+    "registration_expert_verified": false,
+    "anatomist_reviewed": false
+  }
+}

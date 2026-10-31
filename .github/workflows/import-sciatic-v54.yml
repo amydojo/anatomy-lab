@@ -1,0 +1,54 @@
+name: Import isolated sciatic atlas geometry
+on:
+  push:
+    branches: ['feat/v5-4-nerve-truth']
+    paths:
+      - 'scripts/import_sciatic_v54.py'
+      - '.github/workflows/import-sciatic-v54.yml'
+permissions:
+  contents: write
+concurrency:
+  group: v54-sciatic-source-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install geometry decoder and alignment math
+        run: python3 -m pip install numpy scipy DracoPy
+      - name: Import and register right sciatic nerve mesh with a measured fit
+        run: python3 scripts/import_sciatic_v54.py
+      - name: Verify evidence and anatomy release blockers
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, math
+          base=Path('hip/spatial/assets')
+          d=json.loads((base/'sciatic-source.json').read_text())
+          p=json.loads((base/'sciatic-provenance.json').read_text())
+          assert d['schema']=='body-live/nerve-truth-atlas-v1'
+          assert set(d['segments'])=={'sciatic','tibial','commonFibular'}
+          assert p['status']['anatomist_reviewed'] is False
+          assert p['status']['same_donor'] is False
+          assert p['status']['imaging_derived'] is False
+          assert d['geometry_license']=='CC BY-SA 4.0'
+          assert all(len(v['vertices'])>=100 and len(v['faces'])>=40 for v in d['segments'].values())
+          assert all(math.isfinite(a) for v in d['segments'].values() for pt in v['vertices'] for a in pt)
+          print('Validated 3 isolated licensed nerve source meshes; review claims remain BLOCKED')
+          PY
+      - name: Commit only derivative peripheral nerve geometry and attribution
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add hip/spatial/assets/sciatic-source.json hip/spatial/assets/sciatic-provenance.json hip/spatial/assets/NERVE-ASSET-LICENSE.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Import license-isolated peripheral nerve composite with registration evidence [skip ci]"
+            git push origin HEAD:feat/v5-4-nerve-truth
+          fi

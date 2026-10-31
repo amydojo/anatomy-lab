@@ -1,0 +1,45 @@
+name: V11 registered coccyx and temporal ossicles
+on:
+  push:
+    branches: [feat/v11-pelvis-temporal-registration]
+    paths:
+      - scripts/extract_v11_z_controls.py
+      - scripts/fit_v11_source_bones.py
+      - .github/workflows/v11-register-source.yml
+permissions:
+  contents: write
+concurrency:
+  group: v11-osteology-registration
+  cancel-in-progress: false
+jobs:
+  registered-bones:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Blender and its FBX import prerequisites
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq blender python3-numpy
+      - name: Extract actual named bone meshes from pinned Z Anatomy skeletal source
+        run: blender -b -t 2 --python scripts/extract_v11_z_controls.py
+      - name: Pin Python registration and simplification dependencies
+        run: python -m pip install --disable-pip-version-check numpy==2.3.4 scipy==1.16.2 fast-simplification==0.1.12
+      - name: Independently register coccyx and 6 ossicles to shared BP3D controls
+        run: python scripts/fit_v11_source_bones.py
+      - name: Save sourced meshes and independent registration report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add atlas/assets/v11-coccyx-ossicles.json atlas/assets/v11-source-provenance.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Generate seven Z Anatomy osteology meshes with sacral and temporal registration"
+            git fetch origin "refs/heads/${GITHUB_REF_NAME}"
+            git rebase FETCH_HEAD
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi

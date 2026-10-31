@@ -1,0 +1,8 @@
+Sciatic, tibial and common fibular nerve surface adaptations
+Z-Anatomy - The libre 3D atlas of anatomy - CC BY-SA 4.0
+BodyParts3D - The Database Center for Life Science - CC BY-SA 2.1 Japan
+3d-anatomy: https://github.com/nqwrc/3d-anatomy (Draco GLB adaptation)
+License: https://creativecommons.org/licenses/by-sa/4.0/
+Changes: mesh extraction of named peripheral nerves, decoding, automatic femur registration, triangulated JSON export.
+No other body-system assets, noncommercial inner-ear structures, Wikipedia text or downstream atlas meshes are included.
+Anatomy is NOT clinically verified and NOT patient-specific.

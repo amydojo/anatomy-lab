@@ -1,0 +1,50 @@
+name: V10 cross-version facial anatomy QA
+on:
+  push:
+    branches: [feat/v10-facial-source-registration]
+    paths-ignore: [docs/**]
+  pull_request:
+    branches: [feat/v9-source-anatomy-expansion]
+permissions:
+  contents: read
+concurrency:
+  group: v10-facial-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  facial-source:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Verify SHA, topology, licensing, FMA IDs and registration bounds
+        run: npm test
+      - run: npx playwright install chromium webkit
+      - name: Facial atlas and previous source-verified rendering tests
+        run: npx playwright test tests/v10-facial.spec.mjs tests/v9-atlas.spec.mjs tests/v8-atlas.spec.mjs --reporter=line
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: facial-source-browser-traces
+          path: test-results/
+          if-no-files-found: ignore
+  full-regression:
+    needs: facial-source
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install chromium webkit
+      - name: Whole anatomy atlas browser regression
+        run: npm run test:e2e

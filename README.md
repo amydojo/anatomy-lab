@@ -180,6 +180,49 @@ The KNEE / SPATIAL inspector now differentiates **sourced BodyParts3D bone geome
 
 **No landmark has been approved by a qualified anatomist.** The bounding-box hints are only automated geometry correspondences, not measured insertion points or validated force vectors. Draft V5 preview only; leave V4 in production.
 
+
+## V5.3 — HIP / SPATIAL (preview)
+
+- **New route**: \`/hip/spatial/\` built on shared \`assets/spatial-core.js\`, retaining original \`/hip/\` and \`/hip/dissection/\`.
+- **Sourced alignment**: 11 right-hip bone and gluteal/deep-rotator meshes from BodyParts3D 4.0, downloaded through the hash-pinned \`scripts/import_bp3d_hip.py\` using one coordinate transform. Attribution and per-asset IDs/counts: \`hip/spatial/assets/provenance.json\`. Geometry: \`hip/spatial/assets/hip-source.json\`.
+- **Motion**: rigid educational femoral flexion, abduction and axial rotation with independently adjustable angles. Pelvis and muscle meshes remain in source reference pose; moving muscles are dimmed rather than falsely deformed.
+- **Depth**: Surface → side stabilizers → deep rotators → sciatic guide → skeleton, with actual sourced muscle surfaces and a **schematic**, explicitly unsourced sciatic line.
+- **Learning**: interactive Gluteus Medius lesson (predict → abduct → reveal), structure list/selection, isolation, accessible inspector, orbit/pinch and camera presets.
+- **Tests**: Playwright \`tests/v53-hip.spec.mjs\` across mobile Chromium, WebKit, desktop; Python topology/license validation \`scripts/tests/test_sourced_hip.py\`; full existing regression suite.
+- **Medical boundary**: no individual anatomy, nerve tracing precision, clinically validated joint centre, tissue deformation, stress or diagnostic application. Review checklist \`docs/V53_HIP_ANATOMY_REVIEW.md\`; keep this release in preview pending verification.
+
+## V5.4 — Nerve Truth Foundation (draft feature branch)
+
+- **Actual nerve source geometry**: Three isolated right Z-Anatomy derivative surfaces (sciatic, tibial, common fibular), imported with pinned hashes and per-component CC BY-SA 4.0 attribution; full mixed-license atlas deliberately excluded.
+- **Registration**: Rigid femur-surface ICP to independently sourced BodyParts3D 4.0 hip, with exact matrix, median/p95 discrepancies and source release hashes recorded in hip/spatial/assets/sciatic-provenance.json. Mixed-reference/composite anatomy, not the same confirmed donor.
+- **UI**: Hip / Spatial displays source-derived nerve surface in the nerve layer with context-specific branch Trace actions, visually sampled centreline, and Source & Uncertainty panel. Asset failure retains the prior schematic fallback.
+- **Imaging audit**: Pennsieve 692 micro-CT has short excised nerve segments; no patient imaging is falsely registered to this pelvis. See docs/V54_NERVE_SOURCE_AUDIT.md.
+- **Test gates**: geometry graph/unit audit, source integrity and mobile Chromium/WebKit/desktop testing. Anatomist and legal review pending; no medical-grade claim.
+
+
+## V5.5 — NERVE / FOLLOW (preview only)
+
+V5.4 quality gate cleared on the exact source commit: 162 full-app Playwright tests passed on workflow attempt 2 of run 40554497441. V5.5 branches from V5.4 without merging either Hip PR into production.
+
+- `hip/spatial/nerve-follow.js`: topology audit of source triangular surfaces, named parent→child relationships, separate quantified branch-junction gaps (never portrayed as continuous sourced geometry), piecewise linear source-derived centreline with arc-length sampling
+- `assets/hip-knee-bridge.js`: deterministic translation/scale conversion between source-matched Hip and Knee BodyParts3D 4.0 coordinate frames; vertex-by-vertex correspondence of all 480 femoral vertices within source rounding. This validates the **bone reference frame only**, not the nerve location
+- In-place viewport Follow control, mobile camera target (shared `assets/spatial-core.js` optional `camera.target`), position slider and branch dropdown; anatomy context dims rather than disappearing; reduce-motion respected
+- Explicit dual evidence modes: `Registered composite` (hip and registered nerve) versus `Atlas nerve alone` (source nerve in its unregistered frame, hip hidden). Switching does NOT claim both models were imaged from one donor
+- Evidence inspector shows source license, femur-registration residuals, measured unverified branch gaps, and link to existing Knee skeletal viewport (nerve is NOT reconstructed there).
+- Tests: source graph connectivity and arc-length invariants, Hip–Knee inverse transforms, mobile 320/390/430 interaction, WebKit/Chromium regression; qualified anatomical and license review still required.
+
+## V6 — ATLAS / PORTAL (staging integration only)
+
+- /atlas/: full-body 78-mesh BodyParts3D 4.0 reference skeleton with source-pinned importer, FMA IDs and DBCLS CC BY 4.0 attribution.
+- assets/atlas/: shared navigation state, lazy source loader, WebGL2 source LOD renderer, semantic fallback, region navigation and Evidence Lens.
+- Hip → Sciatic → Knee includes explicit source-boundary disclosure, not fabricated nerve continuity. Existing labs remain unchanged.
+- /atlas/sources/: provenance and medical-accuracy limits. Automated browser and geometry tests; mobile QA.
+- PREVIEW ONLY: dependent on unmerged Hip PR #4, Nerve PR #5 and Follow PR #6. No clinical expert or copyright-license approval on these releases. Do not promote to production until review completed.
+
+V6 plan and release gates: docs/V6_ATLAS_PORTAL_PLAN.md, docs/V6_EVIDENCE_CONTRACT.md, docs/V6_RELEASE_READINESS.md.
+
+---
+
 ## V6 — Atlas / Portal planning (documentation only)
 
 The next proposed release unifies the full-body overview, Hip → Sciatic nerve → Knee transitions, and an explicit Evidence Lens, without equating continuous camera travel with verified anatomical continuity.
