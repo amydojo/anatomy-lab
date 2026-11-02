@@ -64,7 +64,9 @@ test('pause releases mock camera and resumes with a new stream',async({page})=>{
  await mockCamera(page);await page.goto('/experiments/xray/');
  await page.locator('#launch').click();await page.locator('#open-settings').click();await page.locator('[data-mode="auto"]').click();
  await expect(page.locator('#status')).toHaveText('TRACKING ARM',{timeout:12000});
+ const beforePause=await page.evaluate(()=>globalThis.__tracks.length);
  await page.locator('#pause').click();await expect(page.locator('#status')).toHaveText('FRAME PAUSED');
+ expect(await page.evaluate(i=>globalThis.__tracks[i].readyState,beforePause-1)).toBe('ended');
  await expect(page.locator('[data-id="biceps"]')).toBeVisible();
  await page.locator('#open-settings').click();
  await page.locator('.calibration summary').click();
@@ -73,9 +75,9 @@ test('pause releases mock camera and resumes with a new stream',async({page})=>{
  await expect(page.locator('[data-id="biceps"]')).toBeVisible();
  await page.locator('[data-id="biceps"]').click();
  await expect(page.locator('#structure-name')).toHaveText('Biceps brachii');
- expect(await page.evaluate(()=>globalThis.__tracks[0].readyState)).toBe('ended');
  await page.locator('#resume').click();await expect(page.locator('#status')).toHaveText('TRACKING ARM',{timeout:12000});
- expect(await page.evaluate(()=>globalThis.__tracks.length)).toBe(2);
+ expect(await page.evaluate(()=>globalThis.__tracks.length)).toBe(beforePause+1);
+ expect(await page.evaluate(()=>globalThis.__tracks.at(-1).readyState)).toBe('live');
 });
 test('permission denial has visible retry affordance',async({page})=>{
  await page.addInitScript(()=>{Object.defineProperty(navigator,'mediaDevices',{configurable:true,value:{getUserMedia:async()=>{throw new DOMException('Denied','NotAllowedError');}}});});
