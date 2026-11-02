@@ -7,6 +7,7 @@ async function mockCamera(page){
   globalThis.__testPose=Array.from({length:33},()=>({x:.5,y:.5,visibility:0,presence:0}));
   [[12,.52,.23],[14,.52,.51],[16,.73,.51]].forEach(([i,x,y])=>{globalThis.__testPose[i]={x,y,visibility:.96,presence:1};});
   globalThis.__tracks=[];
+  Object.defineProperty(HTMLMediaElement.prototype,'srcObject',{configurable:true,get(){return this.__mockSource||null;},set(value){this.__mockSource=value;}});
   Object.defineProperty(navigator,'mediaDevices',{configurable:true,value:{getUserMedia:async()=>{
    const track={readyState:'live',stop(){this.readyState='ended';},addEventListener(){}};
    globalThis.__tracks.push(track);
