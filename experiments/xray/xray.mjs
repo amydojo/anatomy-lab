@@ -33,6 +33,7 @@ function updateAnchorHints(){
   $('anchor-reset').disabled=!a.elbow&&!a.wrist;
   $('anchor-hud').hidden=mode!=='closeup';
   $('angle-caption').textContent=mode==='closeup'?'ELBOW / NOT MEASURED':'ELBOW / FLEXION';
+  $('confidence-caption').textContent=mode==='closeup'?'ANCHOR MATCH*':'LANDMARK VISIBILITY';
 }
 function resetSelection(){
   selected=null;setText('structure-name','Tap an illustrated structure');
@@ -60,10 +61,13 @@ function render(){
   if(!lastPose?.ok||(mode==='auto'&&(!lastVideoSize.width||!lastVideoSize.height))){clearOverlay();return;}
   const bounds=viewport.getBoundingClientRect(),width=bounds.width,height=bounds.height;
   svg.setAttribute('viewBox','0 0 '+width+' '+height);
-  const shapes=mode==='closeup'?closeupGeometry(
-    {x:lastPose.elbow.x*width+calibration.x,y:lastPose.elbow.y*height+calibration.y},
-    {x:lastPose.wrist.x*width+calibration.x,y:lastPose.wrist.y*height+calibration.y}
-  ):rigGeometry(lastPose,lastVideoSize,{width,height},calibration);
+  const armElbow={x:lastPose.elbow.x*width+calibration.x,y:lastPose.elbow.y*height+calibration.y};
+  const baseWrist={x:lastPose.wrist.x*width,y:lastPose.wrist.y*height};
+  const rotation=calibration.rotation*Math.PI/180;
+  const dx=baseWrist.x-lastPose.elbow.x*width,dy=baseWrist.y-lastPose.elbow.y*height;
+  const closeWrist={x:armElbow.x+calibration.scale*(dx*Math.cos(rotation)-dy*Math.sin(rotation)),
+    y:armElbow.y+calibration.scale*(dx*Math.sin(rotation)+dy*Math.cos(rotation))};
+  const shapes=mode==='closeup'?closeupGeometry(armElbow,closeWrist):rigGeometry(lastPose,lastVideoSize,{width,height},calibration);
   const visible=new Set();
   // Keep hit targets stable across inference frames. Replacing elements every
   // frame causes touch/click gestures to detach before Safari can dispatch them.
@@ -214,7 +218,8 @@ async function start(){
     granted.getVideoTracks()[0]?.addEventListener('ended',()=>{if(ticket===session)stop({reason:'Camera disconnected. Activate again to retry.'});},{once:true});
     await video.play();
     if(ticket!==session)return;
-    status('acquiring','LOADING POSE MODEL');notice('Loading on-device landmark detection…');
+    status('acquiring',mode==='auto'?'LOADING POSE MODEL':'READY TO CALIBRATE');
+    notice(mode==='auto'?'Loading on-device landmark detection…':'Preparing close-up image tracker…');
     if(mode==='auto'&&!landmarker){
       const engine=await buildLandmarker();
       if(ticket!==session){engine.close();return;}
@@ -270,7 +275,7 @@ ui.start.addEventListener('click',start);ui.stop.addEventListener('click',()=>st
 document.querySelectorAll('[data-mode]').forEach(btn=>btn.addEventListener('click',()=>{
   if(mode===btn.dataset.mode)return;
   const wasActive=running||!!stream;
-  if(wasActive)stop({reason:'Switching tracking mode.'});
+  if(wasActive||!frozen.hidden)stop({reason:'Switching tracking mode.'});
   mode=btn.dataset.mode;tracker.reset();poseLock.reset();anchorStep='elbow';lastPose=null;
   document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));
   updateAnchorHints();resetSelection();clearOverlay();
