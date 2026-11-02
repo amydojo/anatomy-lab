@@ -33,6 +33,7 @@ function status(code,label){
 }
 function clearOverlay(){svg.replaceChildren();}
 function showFrozenMarkers(){
+  for(const old of svg.querySelectorAll('.calibration-halo,.calibration-point,.calibration-label'))old.remove();
   if(mode!=='closeup'||frozen.hidden)return;
   const a=tracker.anchors,bounds=viewport.getBoundingClientRect();
   svg.setAttribute('viewBox','0 0 '+bounds.width+' '+bounds.height);
@@ -41,7 +42,7 @@ function showFrozenMarkers(){
     const cx=p.x/sampleSize.width*bounds.width,cy=p.y/sampleSize.height*bounds.height;
     svg.appendChild(makeNode('circle',{class:'calibration-halo',cx,cy,r:19}));
     svg.appendChild(makeNode('circle',{class:'calibration-point',cx,cy,r:6}));
-    const label=makeNode('text',{x:cx+13,y:cy-16,fill:'#fff5e7','font-size':11,'font-weight':700});
+    const label=makeNode('text',{class:'calibration-label',x:cx+13,y:cy-16,fill:'#fff5e7','font-size':11,'font-weight':700,'pointer-events':'none'});
     label.textContent=key.toUpperCase();svg.appendChild(label);
   }
 }
@@ -142,9 +143,8 @@ function updateTracking(sample,time){
   setText('angle',Math.round(Math.max(0,Math.min(180,lastPose.flexion)))+'°');
   setText('confidence',Math.round(sample.confidence*100)+'%');
   message('Tracking '+side+' elbow. Bend your arm and tap a '+layer+' to inspect it. Angle is estimated in 2D.');
-  if(!wasTracking&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-    const sweep=$('scanline');sweep.classList.remove('active');void sweep.offsetWidth;sweep.classList.add('active');
-  }
+  // The mobile-first lens intentionally has no scanline element. Tracking lock
+  // must never depend on a cosmetic animation being present.
   render();
   updateAnchorHints();
 }
