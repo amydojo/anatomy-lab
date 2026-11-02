@@ -9,7 +9,7 @@
  const esc=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const typeNames={bones:'Bones',muscles:'Muscles',ligaments:'Ligaments',tendons:'Tendons',fibrocartilage:'Fibrocartilage'};
  const regionNames={knee:'Knee',shoulder:'Shoulder',hip:'Hip',ankle:'Ankle',wrist:'Wrist',spine:'Spine'};
- let opened=false,mobilePanel='structures',expanded=false,previousFocus=null,statusMessage='',isChangingRegion=false;
+ let opened=false,mobilePanel='structures',expanded=false,previousFocus=null,statusMessage='',isChangingRegion=false,regionTicket=0;
  const renderProvider=()=>window.BodyConnectiveGeometryProvider||null;
  const provider={
   listStructures(){
@@ -40,11 +40,21 @@
   // The baseline renderer can filter existing meshes, not fabricate missing ones.
   atlas.connectiveFilter?.(s.visibility,ids,s.ghost&&(s.mode==='isolate'||s.mode==='compare'));
  }
+ // Avoid entering a detail scene before the base atlas source has initialized.
+ function chooseWhenReady(id){
+  const ticket=++regionTicket;
+  const check=()=>{
+   if(!opened||ticket!==regionTicket)return;
+   if(!atlas.getState().assetsLoaded){requestAnimationFrame(check);return;}
+   atlas.choose(id);
+  };
+  check();
+ }
  function regionNav(id){
   if(!studio.setRegion(id))return;
   expanded=false;statusMessage='';
-  if(id==='spine'){statusMessage='Spine connective mesh integration pending. Thorax is shown as regional context.';atlas.choose('thorax');}
-  else atlas.choose(id);
+  if(id==='spine'){statusMessage='Spine connective mesh integration pending. Thorax is shown as regional context.';chooseWhenReady('thorax');}
+  else chooseWhenReady(id);
   isChangingRegion=true;
   refreshRenderer();render();
  }
@@ -56,12 +66,12 @@
   $('connective-entry').textContent='← Return to atlas';
   mobilePanel='structures';studio.setRegion('knee');
   atlas.setMobileFrame?.(window.innerWidth<=850);
-  atlas.choose('knee');
+  chooseWhenReady('knee');
   refreshRenderer();render();
  }
  function closeStudio(){
   if(!opened)return;
-  opened=false;app.dataset.connectiveStudio='false';
+  opened=false;regionTicket++;app.dataset.connectiveStudio='false';
   $('connective-entry').setAttribute('aria-pressed','false');
   $('connective-entry').textContent='Connective Studio';
   atlas.connectiveFilter?.(null,null,false);
@@ -179,7 +189,7 @@
   if(e.key==='Escape'){if(mobilePanel==='inspector'){mobilePanel='structures';render();}else closeStudio();e.stopImmediatePropagation();e.preventDefault();return;}
   if(target?.matches?.('input,textarea,select,[contenteditable]'))return;
   if(e.key==='/'&&!e.shiftKey){e.preventDefault();$('connective-search')?.focus();}
- });
+ },true);
  window.addEventListener('body:region-ready',()=>{if(opened){isChangingRegion=false;statusMessage='';refreshRenderer();render();}});
  window.addEventListener('body:connective-geometry-ready',()=>{if(opened){refreshRenderer();render();}});
  window.addEventListener('resize',()=>{if(opened){atlas.setMobileFrame?.(window.innerWidth<=850);render();}},{passive:true});
