@@ -1,7 +1,7 @@
 {
   "schema": "body-live/connective-coverage-v1",
-  "release_status": "inventory-only-not-renderable",
-  "geometry_source": "No new geometry imported or verified in this change",
+  "release_status": "knee-illustrative-preview-other-regions-inventory-only",
+  "geometry_source": "Knee: authored procedural conceptual surfaces registered to the coordinate frame of licensed V13 source bones at runtime. NOT sourced or verified anatomical surface meshes; other regions: no target meshes.",
   "scientific_scope": "Educational topological relationships only; endpoints are anatomical descriptions, not validated 3D attachment coordinates.",
   "source_policy": {
     "license_review_required": true,
@@ -12,7 +12,7 @@
   },
   "regions": {
     "knee": {
-      "status": "pending-source-mesh-and-registration",
+      "status": "illustrative-preview-source-registration-required",
       "structures": [
         {
           "id": "quadriceps-tendon",
@@ -28,7 +28,12 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": true,
+          "illustrative_geometry_id": "quadriceps-tendon",
+          "illustrative_morphology_validated": false,
+          "registration_method": "Bone-bounding-box heuristics, runtime canonical V13 coordinate frame; anatomical landmark endpoints UNVALIDATED",
+          "transform_matrix": null
         },
         {
           "id": "patellar-ligament",
@@ -44,7 +49,12 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": true,
+          "illustrative_geometry_id": "patellar-ligament",
+          "illustrative_morphology_validated": false,
+          "registration_method": "Bone-bounding-box heuristics, runtime canonical V13 coordinate frame; anatomical landmark endpoints UNVALIDATED",
+          "transform_matrix": null
         },
         {
           "id": "medial-collateral-ligament",
@@ -60,7 +70,12 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": true,
+          "illustrative_geometry_id": "medial-collateral-ligament",
+          "illustrative_morphology_validated": false,
+          "registration_method": "Bone-bounding-box heuristics, runtime canonical V13 coordinate frame; anatomical landmark endpoints UNVALIDATED",
+          "transform_matrix": null
         },
         {
           "id": "lateral-collateral-ligament",
@@ -76,7 +91,12 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": true,
+          "illustrative_geometry_id": "lateral-collateral-ligament",
+          "illustrative_morphology_validated": false,
+          "registration_method": "Bone-bounding-box heuristics, runtime canonical V13 coordinate frame; anatomical landmark endpoints UNVALIDATED",
+          "transform_matrix": null
         },
         {
           "id": "anterior-cruciate-ligament",
@@ -92,7 +112,12 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": true,
+          "illustrative_geometry_id": "anterior-cruciate-ligament",
+          "illustrative_morphology_validated": false,
+          "registration_method": "Bone-bounding-box heuristics, runtime canonical V13 coordinate frame; anatomical landmark endpoints UNVALIDATED",
+          "transform_matrix": null
         },
         {
           "id": "posterior-cruciate-ligament",
@@ -108,7 +133,12 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": true,
+          "illustrative_geometry_id": "posterior-cruciate-ligament",
+          "illustrative_morphology_validated": false,
+          "registration_method": "Bone-bounding-box heuristics, runtime canonical V13 coordinate frame; anatomical landmark endpoints UNVALIDATED",
+          "transform_matrix": null
         },
         {
           "id": "medial-meniscus",
@@ -124,7 +154,12 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": true,
+          "illustrative_geometry_id": "medial-meniscus",
+          "illustrative_morphology_validated": false,
+          "registration_method": "Bone-bounding-box heuristics, runtime canonical V13 coordinate frame; anatomical landmark endpoints UNVALIDATED",
+          "transform_matrix": null
         },
         {
           "id": "lateral-meniscus",
@@ -140,7 +175,12 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": true,
+          "illustrative_geometry_id": "lateral-meniscus",
+          "illustrative_morphology_validated": false,
+          "registration_method": "Bone-bounding-box heuristics, runtime canonical V13 coordinate frame; anatomical landmark endpoints UNVALIDATED",
+          "transform_matrix": null
         }
       ]
     },
@@ -161,7 +201,9 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
         },
         {
           "id": "infraspinatus-tendon",
@@ -177,7 +219,9 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
         },
         {
           "id": "subscapularis-tendon",
@@ -193,7 +237,9 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
         },
         {
           "id": "glenoid-labrum",
@@ -209,7 +255,9 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
         }
       ]
     },
@@ -230,7 +278,9 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
         },
         {
           "id": "ischiofemoral-ligament",
@@ -246,7 +296,9 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
         },
         {
           "id": "acetabular-labrum",
@@ -262,7 +314,9 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
         }
       ]
     },
@@ -283,7 +337,9 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
         },
         {
           "id": "anterior-talofibular-ligament",
@@ -299,7 +355,9 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
         },
         {
           "id": "calcaneofibular-ligament",
@@ -315,7 +373,9 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
         },
         {
           "id": "deltoid-ligament",
@@ -331,7 +391,9 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
         }
       ]
     },
@@ -352,7 +414,9 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
         },
         {
           "id": "scapholunate-ligament",
@@ -368,7 +432,9 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
         },
         {
           "id": "triangular-fibrocartilage",
@@ -384,7 +450,9 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
         }
       ]
     },
@@ -405,7 +473,9 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
         },
         {
           "id": "posterior-longitudinal-ligament",
@@ -421,7 +491,9 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
         },
         {
           "id": "ligamentum-flavum",
@@ -436,7 +508,9 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
         },
         {
           "id": "intervertebral-disc",
@@ -451,7 +525,9 @@
           "registration_error_mm": null,
           "geometry_verified": false,
           "attachment_coordinates_validated": false,
-          "kinematics_validated": false
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
         }
       ]
     }
