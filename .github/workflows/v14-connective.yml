@@ -25,6 +25,7 @@ jobs:
           node-version: '22'
       - run: npm ci --no-audit --no-fund
       - run: node scripts/validate_connective_coverage.cjs
+      - run: node scripts/audit_v14_connective_sources.cjs
       - run: node --test tests/v14-connective.test.mjs
       - run: npm test
       - run: python3 -m unittest discover -s scripts/tests
