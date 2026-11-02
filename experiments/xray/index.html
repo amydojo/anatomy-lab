@@ -4,86 +4,96 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#110d0a">
-<meta name="description" content="Experimental on-device elbow pose tracking with an illustrative anatomical overlay. Not a scan or diagnostic tool.">
-<title>X-RAY / BODY LIVE — Experimental Anatomical Lens</title>
+<meta name="description" content="Experimental on-device arm tracking with a calibrated anatomical illustration. Not medical imaging or diagnosis.">
+<title>X-RAY / BODY LIVE — Camera-first anatomical lens</title>
 <link rel="stylesheet" href="/experiments/xray/xray.css">
 <script type="module" src="/experiments/xray/xray.mjs"></script>
 </head>
 <body>
-<div class="app">
-<header class="masthead">
-  <a class="brand" href="/atlas/?region=elbow" aria-label="Return to anatomy atlas">BODY <span>/</span> LIVE</a>
-  <div class="edition"><span class="indicator"></span> EXPERIMENT 001 <span class="divider">/</span> ANATOMICAL LENS</div>
-  <button class="quiet" type="button" id="stop" disabled>Close camera</button>
-</header>
-<main class="workbench">
-  <section class="viewport" id="viewport" aria-label="Live camera anatomy view">
-    <video id="camera" autoplay muted playsinline aria-label="Live camera feed" hidden></video>
-    <canvas id="frozen" aria-label="Paused camera image" hidden></canvas>
-    <svg id="overlay" class="overlay" role="group" aria-label="Illustrative anatomical overlay" xmlns="http://www.w3.org/2000/svg"></svg>
-    <div class="camera-tint" aria-hidden="true"></div>
-    <div class="reticle" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-    <div class="viewport-head"><div class="eyebrow">X-RAY / 01 <span>ELBOW SYSTEM</span></div><div class="live-chip"><span id="status-dot"></span><span id="status">CAMERA OFF</span></div></div>
-    <div class="telemetry" aria-live="off">
-      <span><small id="angle-caption">ELBOW / NOT MEASURED</small><strong id="angle">—°</strong></span>
-      <span><small id="confidence-caption">ANCHOR MATCH*</small><strong id="confidence">—</strong></span>
-      <span><small>INFERENCE</small><strong id="fps">— FPS</strong></span>
+<div class="app" id="app" data-phase="idle">
+ <main class="workbench">
+  <section class="viewport" id="viewport" aria-label="Camera and frozen frame calibration view">
+   <video id="camera" autoplay muted playsinline aria-label="Live camera feed" hidden></video>
+   <canvas id="frozen" aria-label="Frozen frame; tap elbow, then wrist to place calibration anchors" hidden></canvas>
+   <svg id="overlay" class="overlay" role="group" aria-label="Illustrative anatomical overlay" xmlns="http://www.w3.org/2000/svg"></svg>
+   <div class="camera-tint" aria-hidden="true"></div>
+   <div class="viewport-head">
+    <a class="brand" href="/atlas/?region=elbow" aria-label="Back to BODY LIVE atlas">BODY <span>/</span> LIVE</a>
+    <div class="live-chip" aria-live="polite"><span id="status-dot"></span><span id="status">CAMERA OFF</span></div>
+    <button id="stop" class="quiet" type="button" aria-label="Close camera" disabled>✕</button>
+   </div>
+   <div class="empty-state" id="empty">
+    <span class="lens-symbol" aria-hidden="true">◎</span>
+    <div class="index-mark">EXPERIMENT 001 · ANATOMICAL LENS</div>
+    <h1>See beyond<br><em>the surface.</em></h1>
+    <p>Start the camera, frame your arm, then freeze the image to mark your elbow and wrist.</p>
+    <button id="launch" class="launch" type="button">Open camera <span aria-hidden="true">↗</span></button>
+    <span class="privacy-intro">On-device illustration · Not a medical scan</span>
+   </div>
+   <div class="tracking-notice" id="tracking-notice" role="status" hidden></div>
+   <div class="camera-dock" id="camera-dock">
+    <div class="dock-hint" id="anchor-hud" aria-live="polite"><span id="anchor-help">Freeze to mark your elbow and wrist.</span></div>
+    <div class="dock-controls">
+     <button id="open-settings" class="dock-secondary" type="button" aria-haspopup="dialog" aria-controls="settings-sheet" aria-expanded="false"><span aria-hidden="true">☷</span> Layers</button>
+     <button id="pause" class="capture-button" type="button" disabled>Freeze frame</button>
+     <button id="resume" class="capture-button" type="button" hidden>Resume live</button>
+     <button id="anchor-reset" class="dock-secondary" type="button" disabled>Reset</button>
     </div>
-    <div class="empty-state" id="empty">
-      <span class="lens-symbol" aria-hidden="true">◉</span>
-      <div class="index-mark">01 / CAMERA-BASED ANATOMY</div>
-      <h1>See beyond<br><em>the surface.</em></h1>
-      <p>Close-up: tap your elbow and wrist to anchor an illustrative forearm overlay. Full-arm mode detects a visible shoulder–elbow–wrist pose.</p>
-      <button id="launch" class="launch" type="button">Activate X-RAY <span>↗</span></button>
-      <span class="privacy-intro">Camera permission required · Frames processed on device</span>
-    </div>
-    <div class="tracking-notice" id="tracking-notice" role="status" hidden>Finding an arm…</div>
-     <div class="anchor-hud" id="anchor-hud"><span id="anchor-help">Tap your elbow, then wrist</span><button id="anchor-reset" type="button" disabled>Reset anchors</button></div>
-    <div class="scanline" id="scanline" aria-hidden="true"></div>
-    <div class="viewport-foot"><span>BODY / LIVE · EXPERIMENTAL</span><span>ILLUSTRATIVE RIG · NOT MEASURED TISSUE</span></div>
+    <div class="dock-disclosure">ILLUSTRATIVE ANATOMY · NOT MEASURED TISSUE</div>
+   </div>
   </section>
-  <aside class="console" aria-label="X-RAY instrument controls">
-    <div class="console-top">
-      <div><div class="index-mark">EXPERIMENT / XR–001</div><h2>Anatomical lens</h2></div>
-      <span class="experimental">PROTOTYPE</span>
+  <div id="sheet-backdrop" class="sheet-backdrop" hidden></div>
+  <aside class="console" id="settings-sheet" role="dialog" aria-modal="true" aria-labelledby="settings-title" aria-hidden="true" hidden>
+   <div class="sheet-handle" aria-hidden="true"></div>
+   <div class="sheet-heading">
+    <div><div class="index-mark">X-RAY / EXPERIMENT 001</div><h2 id="settings-title">Lens controls</h2></div>
+    <button id="close-settings" class="sheet-close" type="button" aria-label="Close lens controls">Done</button>
+   </div>
+   <div class="control-block mode-control"><div class="control-head"><span id="mode-label">TRACKING MODE</span></div>
+    <div class="segmented" role="group" aria-labelledby="mode-label">
+     <button data-mode="closeup" aria-pressed="true">Close-up / Tap</button>
+     <button data-mode="auto" aria-pressed="false">Full arm / Auto</button>
     </div>
-    <div class="signal"><span class="signal-icon">◎</span><p id="message" role="status">Activate X-RAY to initialize your camera. Keep your shoulder, elbow and wrist visible.</p></div>
-    <div class="control-block mode-control"><div class="control-head"><span id="mode-label">TRACKING MODE</span><small>SELECT CAMERA BEHAVIOR</small></div>
-       <div class="segmented" role="group" aria-labelledby="mode-label"><button data-mode="closeup" aria-pressed="true">CLOSE-UP / TAP</button><button data-mode="auto" aria-pressed="false">FULL ARM / AUTO</button></div>
-       <p class="mode-note">Close-up uses two manually placed visual anchors. It cannot locate an elbow automatically or measure joint flexion.</p>
-     </div>
-     <div class="control-block arm-control"><div class="control-head"><label id="side-label">TRACKED ARM</label><small>WHO IS IN FRAME?</small></div>
-      <div class="segmented" role="group" aria-labelledby="side-label">
-        <button data-side="left" aria-pressed="false">LEFT</button><button data-side="right" aria-pressed="true">RIGHT</button>
-      </div>
+    <p class="mode-note">Close-up tracks manually placed visual points, not automatically detected joints.</p>
+   </div>
+   <div class="control-block arm-control"><div class="control-head"><span id="side-label">TRACKED ARM</span></div>
+    <div class="segmented" role="group" aria-labelledby="side-label">
+     <button data-side="left" aria-pressed="false">Left</button><button data-side="right" aria-pressed="true">Right</button>
     </div>
-    <div class="control-block"><div class="control-head"><span id="layer-label">ANATOMICAL SYSTEM</span><small>SELECT LAYER</small></div>
-      <div class="segmented layers" role="group" aria-labelledby="layer-label">
-        <button data-layer="muscle" aria-pressed="true">Muscle</button>
-        <button data-layer="bone" aria-pressed="false">Bone</button>
-        <button data-layer="connective" aria-pressed="false">Connective</button>
-      </div>
+   </div>
+   <div class="control-block"><div class="control-head"><span id="layer-label">ANATOMICAL SYSTEM</span></div>
+    <div class="segmented layers" role="group" aria-labelledby="layer-label">
+     <button data-layer="muscle" aria-pressed="true">Muscle</button>
+     <button data-layer="bone" aria-pressed="false">Bone</button>
+     <button data-layer="connective" aria-pressed="false">Connective</button>
     </div>
-    <div class="control-block"><div class="control-head"><label for="opacity">LAYER TRANSPARENCY</label><output id="opacity-value">84%</output></div>
-      <input id="opacity" type="range" min="10" max="100" value="84" step="1" aria-label="Anatomical overlay opacity">
-    </div>
-    <details class="calibration"><summary>Alignment <span>MANUAL CALIBRATION ↗</span></summary>
-      <p>Adjust the illustrative rig relative to the detected joints. Camera landmarks do not reveal depth or true muscle position.</p>
-      <label for="scale">Scale <output id="scale-value">100%</output></label><input id="scale" type="range" min="65" max="150" value="100" step="1">
-      <label for="rotation">Rotation <output id="rotation-value">0°</output></label><input id="rotation" type="range" min="-45" max="45" value="0" step="1">
-      <label for="shift-x">Horizontal <output id="shift-x-value">0</output></label><input id="shift-x" type="range" min="-100" max="100" value="0" step="1">
-      <label for="shift-y">Vertical <output id="shift-y-value">0</output></label><input id="shift-y" type="range" min="-100" max="100" value="0" step="1">
-      <button class="calibration-reset" id="reset" type="button">Reset alignment</button>
-    </details>
-    <section class="inspector" aria-live="polite"><div class="index-mark">SPECIMEN / SELECTED STRUCTURE</div>
-      <h3 id="structure-name">Tap an illustrated structure</h3>
-      <p id="structure-info">Select a visible muscle, bone or connective structure to learn its function.</p>
-      <a id="atlas-link" href="/atlas/?region=elbow" hidden>Open in BODY / LIVE Atlas ↗</a>
-    </section>
-    <div class="console-actions"><button id="pause" type="button" disabled>Pause frame</button><button id="resume" type="button" hidden>Resume live ↗</button></div>
-    <p class="disclaimer"><strong>NOT A MEDICAL SCAN.</strong> Anatomical visualization aligned to estimated body position. Not a medical scan or diagnostic tool. Does not reveal the actual tissue beneath your skin. No video is recorded, retained, or uploaded by this experience. Close-up tracking uses local image features, not an automatic anatomical scan. Smooth skin may not provide enough detail for reliable tracking. MediaPipe may send service metrics as described in its privacy policy.</p>
+   </div>
+   <div class="control-block"><div class="control-head"><label for="opacity">LAYER OPACITY</label><output id="opacity-value">84%</output></div>
+    <input id="opacity" type="range" min="10" max="100" value="84" step="1">
+   </div>
+   <details class="calibration"><summary>Advanced alignment <span>Adjust →</span></summary>
+    <p>Manual image alignment only. This does not reveal true muscle boundaries or joint depth.</p>
+    <label for="scale">Scale <output id="scale-value">100%</output></label><input id="scale" type="range" min="65" max="150" value="100" step="1">
+    <label for="rotation">Rotation <output id="rotation-value">0°</output></label><input id="rotation" type="range" min="-45" max="45" value="0" step="1">
+    <label for="shift-x">Horizontal <output id="shift-x-value">0</output></label><input id="shift-x" type="range" min="-100" max="100" value="0" step="1">
+    <label for="shift-y">Vertical <output id="shift-y-value">0</output></label><input id="shift-y" type="range" min="-100" max="100" value="0" step="1">
+    <button class="calibration-reset" id="reset" type="button">Reset alignment</button>
+   </details>
+   <section class="inspector" aria-live="polite">
+    <div class="index-mark">SELECTED STRUCTURE</div>
+    <h3 id="structure-name">Tap an illustrated structure</h3>
+    <p id="structure-info">Select a visible muscle, bone or connective structure to learn its function.</p>
+    <a id="atlas-link" href="/atlas/?region=elbow" hidden>Open in BODY / LIVE Atlas ↗</a>
+   </section>
+   <div class="telemetry" aria-live="off">
+    <span><small id="angle-caption">ELBOW / NOT MEASURED</small><strong id="angle">—°</strong></span>
+    <span><small id="confidence-caption">ANCHOR MATCH*</small><strong id="confidence">—</strong></span>
+    <span><small>INFERENCE</small><strong id="fps">— FPS</strong></span>
+   </div>
+   <div class="signal"><p id="message" role="status">Open camera, freeze a frame, and mark elbow then wrist.</p></div>
+   <p class="disclaimer"><strong>NOT A MEDICAL SCAN.</strong> This is an illustrative overlay on estimated or manually marked image positions. It is not diagnostic and does not reveal actual tissue under your skin. No video is saved or uploaded. Close-up tracking can fail on smooth skin or movement. In Full arm mode, MediaPipe loads third-party model assets and may send service metrics under its privacy policy.</p>
   </aside>
-</main>
+ </main>
 </div>
 </body>
 </html>
