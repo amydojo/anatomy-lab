@@ -11,6 +11,7 @@ const MODEL='https://storage.googleapis.com/mediapipe-models/pose_landmarker/pos
 let landmarker=null,stream=null,side='right',layer='muscle',opacity=.84;
 let selected=null,lastPose=null,raf=0,lastFrameTime=-1,lastInferTime=0,frames=0,fpsStart=0,session=0,running=false;
 let calibration={scale:1,rotation:0,x:0,y:0};
+let lastVideoSize={width:0,height:0};
 const ui={start:$('launch'),stop:$('stop'),pause:$('pause'),resume:$('resume'),empty:$('empty'),message:$('message'),notice:$('tracking-notice')};
 const setText=(id,text)=>{$(id).textContent=text;};
 function message(text){ui.message.textContent=text;}
@@ -44,10 +45,10 @@ function makeNode(tag,attributes){
   return el;
 }
 function render(){
-  if(!lastPose?.ok||!video.videoWidth||!video.videoHeight){clearOverlay();return;}
+  if(!lastPose?.ok||!lastVideoSize.width||!lastVideoSize.height){clearOverlay();return;}
   const bounds=viewport.getBoundingClientRect(),width=bounds.width,height=bounds.height;
   svg.setAttribute('viewBox','0 0 '+width+' '+height);
-  const shapes=rigGeometry(lastPose,{width:video.videoWidth,height:video.videoHeight},{width,height},calibration);
+  const shapes=rigGeometry(lastPose,lastVideoSize,{width,height},calibration);
   const visible=new Set();
   // Keep hit targets stable across inference frames. Replacing elements every
   // frame causes touch/click gestures to detach before Safari can dispatch them.
@@ -69,9 +70,9 @@ function render(){
   }
   for(const old of svg.querySelectorAll('.shape'))
     if(!visible.has(old.dataset.id))old.remove();
-  const e=lastPose.elbow,scale=Math.max(width/video.videoWidth,height/video.videoHeight);
-  const ex=(width-video.videoWidth*scale)/2+e.x*video.videoWidth*scale+calibration.x;
-  const ey=(height-video.videoHeight*scale)/2+e.y*video.videoHeight*scale+calibration.y;
+  const e=lastPose.elbow,scale=Math.max(width/lastVideoSize.width,height/lastVideoSize.height);
+  const ex=(width-lastVideoSize.width*scale)/2+e.x*lastVideoSize.width*scale+calibration.x;
+  const ey=(height-lastVideoSize.height*scale)/2+e.y*lastVideoSize.height*scale+calibration.y;
   let ring=svg.querySelector('.joint-ring');
   if(!ring){ring=makeNode('circle',{class:'joint-ring'});svg.appendChild(ring);}
   ring.setAttribute('cx',String(ex));ring.setAttribute('cy',String(ey));
@@ -106,6 +107,7 @@ function tick(now){
   // Inference may synchronously block the UI; bound it independently of display refresh.
   if(video.readyState<2||!video.videoWidth||video.currentTime===lastFrameTime||now-lastInferTime<34)return;
   lastFrameTime=video.currentTime;lastInferTime=now;
+  lastVideoSize={width:video.videoWidth,height:video.videoHeight};
   try{
     const result=landmarker.detectForVideo(video,now);
     updateTracking(readArm(result,side),now);
@@ -181,7 +183,7 @@ function failure(reason,ticket){
   ui.empty.hidden=false;ui.start.disabled=false;ui.stop.disabled=true;ui.pause.disabled=true;ui.resume.hidden=true;ui.pause.hidden=false;
 }
 function stop({reason='Camera stopped. Activate X-RAY to begin again.'}={}){
-  session++;halt();
+  session++;halt();lastVideoSize={width:0,height:0};
   if(landmarker){landmarker.close();landmarker=null;}
   smoother.reset();lastPose=null;poseState.event('stop');clearOverlay();resetMetrics();resetSelection();
   const context=frozen.getContext('2d');context?.clearRect(0,0,frozen.width,frozen.height);
