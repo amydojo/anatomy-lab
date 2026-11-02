@@ -1,0 +1,39 @@
+name: V14 connective anatomy development gate
+on:
+  push:
+    branches: ['feat/connective-anatomy-regional-foundation']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: v14-connective-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  regression:
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [desktop-chromium, chromium-mobile, webkit-mobile]
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: node scripts/validate_connective_coverage.cjs
+      - run: node --test tests/v14-connective.test.mjs
+      - run: npm test
+      - run: python3 -m unittest discover -s scripts/tests
+      - run: npm run test:e2e -- --project=${{ matrix.browser }}
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v14-connective-${{ matrix.browser }}
+          path: |
+            artifacts/
+            test-results/
+          if-no-files-found: ignore
