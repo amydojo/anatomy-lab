@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {ARM,STRUCTURES,angleDegrees,readArm,createSmoother,createTrackingState,coverPoint,rigGeometry} from '../experiments/xray/xray-core.mjs';
+import {makePatch,grayImage,matchPatch,makeCloseupTracker} from '../experiments/xray/xray-tracker.mjs';
+import {ARM,STRUCTURES,angleDegrees,readArm,createSmoother,createTrackingState,coverPoint,rigGeometry,plausibleFullArm,createPoseLock,closeupGeometry} from '../experiments/xray/xray-core.mjs';
 
 function landmarks({wrist={x:.72,y:.48},visibility=.94,side='right'}={}){
   const pose=Array.from({length:33},()=>({x:.5,y:.5,visibility:0,presence:0}));
@@ -71,4 +72,55 @@ test('source links belong only to genuine atlas bone mappings',()=>{
   assert.equal(STRUCTURES.biceps.source,undefined);
   assert.equal(STRUCTURES.humerus.source,'right-humerus');
   assert.equal(STRUCTURES.radius.group,'bone');
+});
+test('full-arm gate rejects palm-sized hallucinated limbs and requires five stable samples',()=>{
+  const lock=createPoseLock(5);
+  const tiny=readArm(landmarks({wrist:{x:.56,y:.50}}));
+  const fake={...tiny,shoulder:{x:.5,y:.45},elbow:{x:.53,y:.48},wrist:{x:.57,y:.5},angle:130,confidence:.93,ok:true};
+  assert.equal(plausibleFullArm(fake).ok,false);
+  const good=readArm(landmarks());
+  assert.equal(plausibleFullArm(good).ok,true);
+  for(let i=0;i<4;i++)assert.equal(lock.update(good).locked,false);
+  assert.equal(lock.update(good).locked,true);
+  assert.equal(lock.update({ok:false,reason:'lost'}).locked,false);
+  assert.equal(lock.update(good).locked,false);
+});
+test('close-up geometry only exposes structures within the calibrated forearm',()=>{
+  const shapes=closeupGeometry({x:40,y:80},{x:230,y:100});
+  assert.equal(shapes.length,6);
+  assert.ok(shapes.some(p=>p.id==='radius'));
+  assert.ok(shapes.some(p=>p.id==='flexors'));
+  assert.equal(shapes.some(p=>p.id==='humerus'||p.id==='biceps'),false);
+  assert.deepEqual(closeupGeometry({x:5,y:5},{x:12,y:10}),[]);
+});
+function syntheticFrame(shift=0,blank=false){
+ const width=180,height=100,gray=new Float32Array(width*height);
+ for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+  const a=x-shift;
+  const hash=Math.sin(a*12.9898+y*78.233)*43758.5453;
+  gray[y*width+x]=blank?.5:hash-Math.floor(hash);
+ }
+ return {width,height,gray};
+}
+test('texture tracker locates translated image features without fabricating a pose',()=>{
+ const t=makeCloseupTracker(),f=syntheticFrame(0);
+ assert.equal(t.setAnchor('elbow',f,40,45).ok,true);
+ assert.equal(t.ready,false);
+ assert.equal(t.setAnchor('wrist',f,125,58).ok,true);
+ assert.equal(t.ready,true);
+ const result=t.update(syntheticFrame(6));
+ assert.equal(result.ok,true);
+ assert.ok(Math.abs(result.elbow.x-46)<=1);
+ assert.ok(Math.abs(result.wrist.x-131)<=1);
+ assert.equal(t.lost,false);
+ const lost=t.update(syntheticFrame(45));
+ assert.equal(lost.ok,false);
+ assert.equal(t.lost,true);
+ t.reset();assert.equal(t.ready,false);
+});
+test('tracker refuses low-information imagery',()=>{
+ const blank=syntheticFrame(0,true),t=makeCloseupTracker();
+ assert.equal(t.setAnchor('elbow',blank,40,40).ok,false);
+ assert.equal(makePatch(blank,1,1),null);
+ assert.equal(matchPatch(blank,{data:new Float32Array(169),radius:6,x:40,y:40,variance:0,contrast:0},40,40).ok,false);
 });
