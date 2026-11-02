@@ -34,8 +34,14 @@ test('V14 knee: capture five visual perspectives with evidence state',async({pag
  await expect(page.locator('#connective-toggle')).toBeVisible({timeout:30000});
  await page.locator('#connective-toggle').click();
  await page.locator('#connective-workbench .connective-items button').filter({hasText:'Medial meniscus'}).click();
- for(const view of ['anterior','posterior','medial','lateral','sectional']){
-  // Current camera controls already have orbit and zoom; these screenshots do not claim measured sagittal clipping.
-  await page.screenshot({path:testInfo.outputPath('v14-knee-'+view+'.png'),fullPage:false});
+ const canvas=page.locator('#atlas-canvas');const rect=await canvas.boundingBox();
+ expect(rect).toBeTruthy();
+ for(const [i,dx] of [0,120,240,360].entries()){
+  if(i){
+   const x=rect.x+rect.width*.50,y=rect.y+rect.height*.48;
+   await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+dx/3,y,{steps:8});await page.mouse.up();
+  }
+  await page.screenshot({path:testInfo.outputPath('v14-knee-orbit-'+i+'.png'),fullPage:false});
  }
+ // A sectional/sagittal clipping plane is not implemented; do not fake a sectional screenshot.
 });
