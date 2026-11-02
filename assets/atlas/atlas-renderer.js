@@ -313,7 +313,7 @@ function create(canvas,onContextLost=()=>{}){
  function loadConnectiveIllustrations(region){
   if(region!=='knee'||!detail.has('knee'))return false;
   if(connectiveDetail.has('knee'))return true;
-  const bones=Object.fromEntries(detail.get('knee').filter(p=>!p.tissue).map(p=>[p.id,p]));
+  const bones=Object.fromEntries(detail.get('knee').filter(p=>!p.tissue).map(p=>[p.id,{vertices:p.verts,faces:p.faces}]));
   const generated=window.BodyConnectiveMode?.buildKnee(bones);
   if(!generated||Object.keys(generated).length!==8)throw Error('V14 knee illustrative coverage is incomplete');
   const result=[];
