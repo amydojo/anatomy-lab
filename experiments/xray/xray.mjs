@@ -1,0 +1,223 @@
+import {STRUCTURES,readArm,createSmoother,createTrackingState,rigGeometry} from './xray-core.mjs';
+
+// A deliberately independent prototype: do not couple camera state to V13 Atlas globals.
+// Camera pixels are never sent to an application endpoint, saved or recorded.
+const $=id=>document.getElementById(id);
+const video=$('camera'),frozen=$('frozen'),viewport=$('viewport'),svg=$('overlay');
+const poseState=createTrackingState(),smoother=createSmoother();
+const NS='http://www.w3.org/2000/svg';
+const CDN='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.0';
+const MODEL='https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task';
+let landmarker=null,stream=null,side='right',layer='muscle',opacity=.84;
+let selected=null,lastPose=null,raf=0,lastFrameTime=-1,lastInferTime=0,frames=0,fpsStart=0,session=0,running=false;
+let calibration={scale:1,rotation:0,x:0,y:0};
+const ui={start:$('launch'),stop:$('stop'),pause:$('pause'),resume:$('resume'),empty:$('empty'),message:$('message'),notice:$('tracking-notice')};
+const setText=(id,text)=>{$(id).textContent=text;};
+function message(text){ui.message.textContent=text;}
+function notice(text){ui.notice.hidden=!text;ui.notice.textContent=text||'';}
+function status(code,label){
+  setText('status',label);
+  $('status-dot').dataset.status=code;
+}
+function clearOverlay(){svg.replaceChildren();}
+function resetMetrics(){setText('angle','—°');setText('confidence','—');setText('fps','— FPS');}
+function resetSelection(){
+  selected=null;setText('structure-name','Tap an illustrated structure');
+  setText('structure-info','Select a visible muscle, bone or connective structure to learn its function.');
+  $('atlas-link').hidden=true;
+}
+function choose(id){
+  const info=STRUCTURES[id];
+  if(!info||info.group!==layer)return;
+  selected=id;setText('structure-name',info.name);setText('structure-info',info.description);
+  const link=$('atlas-link');
+  if(info.source){
+    link.href='/atlas/?region=elbow&structure='+encodeURIComponent(info.source);
+    link.textContent='View sourced '+info.name+' in the Atlas ↗';
+    link.hidden=false;
+  }else link.hidden=true;
+  render();
+}
+function makeNode(tag,attributes){
+  const el=document.createElementNS(NS,tag);
+  for(const [k,v] of Object.entries(attributes))el.setAttribute(k,String(v));
+  return el;
+}
+function render(){
+  if(!lastPose?.ok||!video.videoWidth||!video.videoHeight){clearOverlay();return;}
+  const bounds=viewport.getBoundingClientRect(),width=bounds.width,height=bounds.height;
+  svg.setAttribute('viewBox','0 0 '+width+' '+height);
+  const shapes=rigGeometry(lastPose,{width:video.videoWidth,height:video.videoHeight},{width,height},calibration);
+  const frag=document.createDocumentFragment();
+  for(const item of shapes){
+    if(item.group!==layer)continue;
+    const shape=makeNode('path',{d:item.d,'data-id':item.id,'data-group':item.group,
+      class:'shape'+(selected===item.id?' selected':''),role:'button',tabindex:'0',
+      'aria-label':'Inspect '+STRUCTURES[item.id].name,
+      'fill-opacity':selected===item.id?Math.min(1,opacity+.14):opacity,
+      'stroke-opacity':opacity});
+    const title=makeNode('title',{});title.textContent=STRUCTURES[item.id].name;shape.appendChild(title);
+    frag.appendChild(shape);
+  }
+  // The positional marker is meaningful only during valid pose tracking.
+  const e=lastPose.elbow,scale=Math.max(width/video.videoWidth,height/video.videoHeight);
+  const ex=(width-video.videoWidth*scale)/2+e.x*video.videoWidth*scale+calibration.x;
+  const ey=(height-video.videoHeight*scale)/2+e.y*video.videoHeight*scale+calibration.y;
+  frag.appendChild(makeNode('circle',{class:'joint-ring',cx:ex,cy:ey,r:Math.max(12,width*.024)}));
+  frag.appendChild(makeNode('circle',{class:'joint-marker',cx:ex,cy:ey,r:2.5}));
+  svg.replaceChildren(frag);
+}
+svg.addEventListener('click',e=>{const id=e.target.closest?.('[data-id]')?.dataset.id;if(id)choose(id);});
+svg.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const id=e.target.closest?.('[data-id]')?.dataset.id;if(id){e.preventDefault();choose(id);}}});
+function updateTracking(sample,time){
+  if(!sample.ok){
+    smoother.reset();lastPose=null;clearOverlay();resetMetrics();
+    poseState.event('missing');status('lost','TRACKING LOST');notice(sample.reason);
+    message(sample.reason+' Anatomy is hidden until tracking returns.');
+    return;
+  }
+  const wasTracking=poseState.status==='tracking';
+  lastPose=smoother.update(sample,time);
+  poseState.event('found');status('tracking','TRACKING ARM');notice('');
+  setText('angle',Math.round(Math.max(0,Math.min(180,lastPose.flexion)))+'°');
+  setText('confidence',Math.round(sample.confidence*100)+'%');
+  message('Tracking '+side+' elbow. Bend your arm and tap a '+layer+' to inspect it. Angle is estimated in 2D.');
+  if(!wasTracking&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    const sweep=$('scanline');sweep.classList.remove('active');void sweep.offsetWidth;sweep.classList.add('active');
+  }
+  render();
+}
+function tick(now){
+  if(!running)return;
+  raf=requestAnimationFrame(tick);
+  // Inference may synchronously block the UI; bound it independently of display refresh.
+  if(video.readyState<2||!video.videoWidth||video.currentTime===lastFrameTime||now-lastInferTime<34)return;
+  lastFrameTime=video.currentTime;lastInferTime=now;
+  try{
+    const result=landmarker.detectForVideo(video,now);
+    updateTracking(readArm(result,side),now);
+    frames++;
+    if(now-fpsStart>=1100){
+      setText('fps',(frames*1000/(now-fpsStart)).toFixed(0)+' FPS');
+      frames=0;fpsStart=now;
+    }
+  }catch(error){
+    stop({reason:'Tracking engine stopped: '+error.message});
+  }
+}
+async function buildLandmarker(){
+  const {FilesetResolver,PoseLandmarker}=await import(CDN+'/vision_bundle.mjs');
+  const fileset=await FilesetResolver.forVisionTasks(CDN+'/wasm');
+  const options={baseOptions:{modelAssetPath:MODEL,delegate:'GPU'},runningMode:'VIDEO',numPoses:1,
+    minPoseDetectionConfidence:.55,minPosePresenceConfidence:.55,minTrackingConfidence:.52};
+  try{return await PoseLandmarker.createFromOptions(fileset,options);}
+  catch{return PoseLandmarker.createFromOptions(fileset,{...options,baseOptions:{modelAssetPath:MODEL,delegate:'CPU'}});}
+}
+function releaseStream(){
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+  video.pause();video.srcObject=null;
+}
+function halt(){
+  running=false;cancelAnimationFrame(raf);raf=0;releaseStream();
+  video.hidden=true;lastFrameTime=-1;
+}
+async function start(){
+  if(running||stream)return;
+  const ticket=++session;
+  smoother.reset();lastPose=null;clearOverlay();resetMetrics();
+  poseState.event('start');status('acquiring','INITIALIZING');notice('Requesting camera…');
+  message('Camera initializes locally. Allow permission when your browser asks.');
+  ui.start.disabled=true;ui.resume.disabled=true;
+  if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia){
+    failure('An HTTPS connection and a browser supporting camera access are required.',ticket);return;
+  }
+  try{
+    const granted=await navigator.mediaDevices.getUserMedia({audio:false,video:{
+      facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30,max:30}}});
+    if(ticket!==session){granted.getTracks().forEach(t=>t.stop());return;}
+    stream=granted;video.srcObject=granted;
+    granted.getVideoTracks()[0]?.addEventListener('ended',()=>{if(ticket===session)stop({reason:'Camera disconnected. Activate again to retry.'});},{once:true});
+    await video.play();
+    if(ticket!==session)return;
+    status('acquiring','LOADING POSE MODEL');notice('Loading on-device landmark detection…');
+    if(!landmarker){
+      const engine=await buildLandmarker();
+      if(ticket!==session){engine.close();return;}
+      landmarker=engine;
+    }
+    ui.empty.hidden=true;video.hidden=false;frozen.hidden=true;
+    const context=frozen.getContext('2d');context?.clearRect(0,0,frozen.width,frozen.height);
+    running=true;ui.start.disabled=false;ui.stop.disabled=false;ui.pause.disabled=false;
+    ui.resume.hidden=true;ui.pause.hidden=false;
+    fpsStart=performance.now();frames=0;lastInferTime=0;
+    status('acquiring','FINDING ARM');notice('Keep shoulder, elbow and wrist visible');
+    message('Align your arm within the camera frame. Detection starts automatically.');
+    raf=requestAnimationFrame(tick);
+  }catch(error){
+    if(ticket!==session)return;
+    const denied=error?.name==='NotAllowedError'||error?.name==='PermissionDeniedError';
+    const reason=denied?'Camera permission denied. Allow camera access in Safari settings and try again.':
+      error?.name==='NotFoundError'?'No camera found on this device.':'Camera or pose model unavailable: '+(error?.message||'Unknown error');
+    failure(reason,ticket);
+  }
+}
+function failure(reason,ticket){
+  if(ticket!==session)return;
+  halt();smoother.reset();lastPose=null;clearOverlay();poseState.event('stop');
+  status('lost','UNAVAILABLE');notice(reason);message(reason);
+  ui.empty.hidden=false;ui.start.disabled=false;ui.stop.disabled=true;ui.pause.disabled=true;ui.resume.hidden=true;ui.pause.hidden=false;
+}
+function stop({reason='Camera stopped. Activate X-RAY to begin again.'}={}){
+  session++;halt();
+  if(landmarker){landmarker.close();landmarker=null;}
+  smoother.reset();lastPose=null;poseState.event('stop');clearOverlay();resetMetrics();resetSelection();
+  const context=frozen.getContext('2d');context?.clearRect(0,0,frozen.width,frozen.height);
+  frozen.hidden=true;ui.empty.hidden=false;ui.start.disabled=false;ui.stop.disabled=true;
+  ui.pause.disabled=true;ui.pause.hidden=false;ui.resume.hidden=true;
+  status('idle','CAMERA OFF');notice('');message(reason);
+}
+function pause(){
+  if(!running||!lastPose?.ok)return;
+  const w=viewport.clientWidth,h=viewport.clientHeight,dpr=Math.min(window.devicePixelRatio||1,2);
+  frozen.width=Math.round(w*dpr);frozen.height=Math.round(h*dpr);
+  const ctx=frozen.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
+  const sourceW=video.videoWidth,sourceH=video.videoHeight,k=Math.max(w/sourceW,h/sourceH);
+  ctx.drawImage(video,(w-sourceW*k)/2,(h-sourceH*k)/2,sourceW*k,sourceH*k);
+  poseState.event('pause');halt();frozen.hidden=false;
+  ui.pause.hidden=true;ui.resume.hidden=false;ui.resume.disabled=false;
+  status('paused','FRAME PAUSED');notice('Camera hardware released · current frame held in memory');
+  message('Frame paused. Camera hardware is off. Select anatomy or adjust alignment; resume to request camera again.');
+  render();
+}
+ui.start.addEventListener('click',start);ui.stop.addEventListener('click',()=>stop());
+ui.pause.addEventListener('click',pause);ui.resume.addEventListener('click',start);
+document.querySelectorAll('[data-side]').forEach(btn=>btn.addEventListener('click',()=>{
+  side=btn.dataset.side;
+  document.querySelectorAll('[data-side]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));
+  smoother.reset();lastPose=null;clearOverlay();resetSelection();
+  if(running){poseState.event('missing');status('acquiring','FINDING ARM');notice('Finding '+side+' arm…');}
+}));
+document.querySelectorAll('[data-layer]').forEach(btn=>btn.addEventListener('click',()=>{
+  layer=btn.dataset.layer;
+  document.querySelectorAll('[data-layer]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));
+  resetSelection();render();
+}));
+$('opacity').addEventListener('input',e=>{opacity=Number(e.target.value)/100;setText('opacity-value',e.target.value+'%');render();});
+const calibrations=[['scale',v=>v/100,v=>v+'%'],['rotation',v=>v,v=>v+'°'],['shift-x',v=>v,v=>String(v)],['shift-y',v=>v,v=>String(v)]];
+for(const [id,convert,format] of calibrations){
+ $(id).addEventListener('input',e=>{
+   const v=Number(e.target.value),key=id==='shift-x'?'x':id==='shift-y'?'y':id;
+   calibration[key]=convert(v);setText(id+'-value',format(v));render();
+ });
+}
+$('reset').addEventListener('click',()=>{
+ calibration={scale:1,rotation:0,x:0,y:0};
+ for(const [id,,format] of calibrations){
+   $(id).value=id==='scale'?100:0;setText(id+'-value',format(Number($(id).value)));
+ }
+ render();
+});
+window.addEventListener('resize',()=>{if(poseState.status==='paused')message('Paused frame may be cropped after resizing. Resume live tracking to recalibrate.');render();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&(stream||running))stop({reason:'Camera automatically stopped when the page was hidden.'});});
+window.addEventListener('pagehide',()=>stop());
+window.__XRAY_EXPERIMENT__=Object.freeze({getState:()=>({status:poseState.status,side,layer,selected,running,liveTracks:stream?.getTracks().filter(t=>t.readyState==='live').length||0,hasPose:!!lastPose})});
