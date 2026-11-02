@@ -53,6 +53,7 @@ test('pause releases mock camera and resumes with a new stream',async({page})=>{
  await expect(page.locator('#status')).toHaveText('TRACKING ARM',{timeout:12000});
  await page.locator('#pause').click();await expect(page.locator('#status')).toHaveText('FRAME PAUSED');
  await expect(page.locator('[data-id="biceps"]')).toBeVisible();
+ await page.locator('.calibration summary').click();
  await page.locator('#scale').fill('120');
  await expect(page.locator('[data-id="biceps"]')).toBeVisible();
  await page.locator('[data-id="biceps"]').click();
