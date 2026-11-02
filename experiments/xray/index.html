@@ -25,7 +25,7 @@
     <div class="reticle" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
     <div class="viewport-head"><div class="eyebrow">X-RAY / 01 <span>ELBOW SYSTEM</span></div><div class="live-chip"><span id="status-dot"></span><span id="status">CAMERA OFF</span></div></div>
     <div class="telemetry" aria-live="off">
-      <span><small>ELBOW / FLEXION</small><strong id="angle">—°</strong></span>
+      <span><small id="angle-caption">ELBOW / NOT MEASURED</small><strong id="angle">—°</strong></span>
       <span><small>POSE CONFIDENCE</small><strong id="confidence">—</strong></span>
       <span><small>INFERENCE</small><strong id="fps">— FPS</strong></span>
     </div>
@@ -33,11 +33,12 @@
       <span class="lens-symbol" aria-hidden="true">◉</span>
       <div class="index-mark">01 / CAMERA-BASED ANATOMY</div>
       <h1>See beyond<br><em>the surface.</em></h1>
-      <p>Point your camera at a visible arm. We estimate the elbow position, then align an interactive anatomical illustration as it moves.</p>
+      <p>Close-up: tap your elbow and wrist to anchor an illustrative forearm overlay. Full-arm mode detects a visible shoulder–elbow–wrist pose.</p>
       <button id="launch" class="launch" type="button">Activate X-RAY <span>↗</span></button>
       <span class="privacy-intro">Camera permission required · Frames processed on device</span>
     </div>
     <div class="tracking-notice" id="tracking-notice" role="status" hidden>Finding an arm…</div>
+     <div class="anchor-hud" id="anchor-hud"><span id="anchor-help">Tap your elbow, then wrist</span><button id="anchor-reset" type="button" disabled>Reset anchors</button></div>
     <div class="scanline" id="scanline" aria-hidden="true"></div>
     <div class="viewport-foot"><span>BODY / LIVE · EXPERIMENTAL</span><span>ILLUSTRATIVE RIG · NOT MEASURED TISSUE</span></div>
   </section>
@@ -47,7 +48,11 @@
       <span class="experimental">PROTOTYPE</span>
     </div>
     <div class="signal"><span class="signal-icon">◎</span><p id="message" role="status">Activate X-RAY to initialize your camera. Keep your shoulder, elbow and wrist visible.</p></div>
-    <div class="control-block"><div class="control-head"><label id="side-label">TRACKED ARM</label><small>WHO IS IN FRAME?</small></div>
+    <div class="control-block mode-control"><div class="control-head"><span id="mode-label">TRACKING MODE</span><small>SELECT CAMERA BEHAVIOR</small></div>
+       <div class="segmented" role="group" aria-labelledby="mode-label"><button data-mode="closeup" aria-pressed="true">CLOSE-UP / TAP</button><button data-mode="auto" aria-pressed="false">FULL ARM / AUTO</button></div>
+       <p class="mode-note">Close-up uses two manually placed visual anchors. It cannot locate an elbow automatically or measure joint flexion.</p>
+     </div>
+     <div class="control-block arm-control"><div class="control-head"><label id="side-label">TRACKED ARM</label><small>WHO IS IN FRAME?</small></div>
       <div class="segmented" role="group" aria-labelledby="side-label">
         <button data-side="left" aria-pressed="false">LEFT</button><button data-side="right" aria-pressed="true">RIGHT</button>
       </div>
@@ -76,7 +81,7 @@
       <a id="atlas-link" href="/atlas/?region=elbow" hidden>Open in BODY / LIVE Atlas ↗</a>
     </section>
     <div class="console-actions"><button id="pause" type="button" disabled>Pause frame</button><button id="resume" type="button" hidden>Resume live ↗</button></div>
-    <p class="disclaimer"><strong>NOT A MEDICAL SCAN.</strong> Anatomical visualization aligned to estimated body position. Not a medical scan or diagnostic tool. Does not reveal the actual tissue beneath your skin. No video is recorded, retained, or uploaded by this experience. MediaPipe may send service metrics as described in its privacy policy.</p>
+    <p class="disclaimer"><strong>NOT A MEDICAL SCAN.</strong> Anatomical visualization aligned to estimated body position. Not a medical scan or diagnostic tool. Does not reveal the actual tissue beneath your skin. No video is recorded, retained, or uploaded by this experience. Close-up tracking uses local image features, not an automatic anatomical scan. Smooth skin may not provide enough detail for reliable tracking. MediaPipe may send service metrics as described in its privacy policy.</p>
   </aside>
 </main>
 </div>
