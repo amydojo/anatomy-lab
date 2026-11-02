@@ -20,6 +20,17 @@ async function mockCamera(page){
   HTMLMediaElement.prototype.play=async function(){};
   HTMLMediaElement.prototype.pause=function(){};
   CanvasRenderingContext2D.prototype.drawImage=function(){};
+  // Deterministic camera texture, so the real close-up matcher is exercised
+  // without uploading personal footage or relying on hardware in CI.
+  CanvasRenderingContext2D.prototype.getImageData=function(x,y,w,h){
+   const data=new Uint8ClampedArray(w*h*4);
+   for(let row=0;row<h;row++)for(let col=0;col<w;col++){
+    const hash=Math.sin(col*12.9898+row*78.233)*43758.5453;
+    const v=Math.round((hash-Math.floor(hash))*255),i=(row*w+col)*4;
+    data[i]=v;data[i+1]=v;data[i+2]=v;data[i+3]=255;
+   }
+   return {data,width:w,height:h};
+  };
  });
 }
 test('standalone route discloses model approximation',async({page})=>{
@@ -30,7 +41,7 @@ test('standalone route discloses model approximation',async({page})=>{
 });
 test('mock landmarks drive overlay, selection, tracking loss and camera release',async({page})=>{
  await mockCamera(page);const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/experiments/xray/');await page.locator('#launch').click();
+ await page.goto('/experiments/xray/');await page.locator('[data-mode="auto"]').click();await page.locator('#launch').click();
  await expect(page.locator('#status')).toHaveText('TRACKING ARM',{timeout:12000});
  await expect(page.locator('[data-id="biceps"]')).toBeVisible();
  await page.evaluate(()=>{globalThis.__testPose[16]={x:.52,y:.83,visibility:.96,presence:1};});
@@ -49,7 +60,7 @@ test('mock landmarks drive overlay, selection, tracking loss and camera release'
 });
 test('pause releases mock camera and resumes with a new stream',async({page})=>{
  await mockCamera(page);await page.goto('/experiments/xray/');
- await page.locator('#launch').click();
+ await page.locator('[data-mode="auto"]').click();await page.locator('#launch').click();
  await expect(page.locator('#status')).toHaveText('TRACKING ARM',{timeout:12000});
  await page.locator('#pause').click();await expect(page.locator('#status')).toHaveText('FRAME PAUSED');
  await expect(page.locator('[data-id="biceps"]')).toBeVisible();
@@ -67,4 +78,36 @@ test('permission denial has visible retry affordance',async({page})=>{
  await page.goto('/experiments/xray/');await page.locator('#launch').click();
  await expect(page.locator('#message')).toContainText('Camera permission denied');
  await expect(page.locator('#launch')).toBeEnabled();
+});
+test('close-up two-tap calibration tracks illustrative forearm, without false elbow angles',async({page})=>{
+ await mockCamera(page);const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/experiments/xray/');
+ await expect(page.locator('[data-mode="closeup"]')).toHaveAttribute('aria-pressed','true');
+ await page.locator('#launch').click();
+ await expect(page.locator('#status')).toHaveText('SET TWO ANCHORS');
+ const vp=page.locator('#viewport'),rect=await vp.boundingBox();
+ await vp.click({position:{x:rect.width*.27,y:rect.height*.41}});
+ await expect(page.locator('#status')).toHaveText('SET WRIST ANCHOR');
+ await vp.click({position:{x:rect.width*.72,y:rect.height*.61}});
+ await expect(page.locator('#status')).toHaveText('ANCHORS TRACKING');
+ await expect(page.locator('[data-id="flexors"]')).toBeVisible();
+ await expect(page.locator('[data-id="biceps"]')).toHaveCount(0);
+ await expect(page.locator('#angle')).toHaveText('N/A');
+ await expect.poll(async()=>page.evaluate(()=>window.__XRAY_EXPERIMENT__.getState().anchorReady)).toBe(true);
+ await page.locator('#anchor-reset').click();
+ await expect(page.locator('#status')).toHaveText('SET TWO ANCHORS');
+ await expect(page.locator('[data-id]')).toHaveCount(0);
+ await page.locator('#pause').click();
+ await expect(page.locator('#status')).toHaveText('FRAME PAUSED');
+ expect(await page.evaluate(()=>globalThis.__tracks.at(-1).readyState)).toBe('ended');
+ expect(errors).toEqual([]);
+});
+test('close-up camera engine starts without external pose-model download',async({page})=>{
+ await mockCamera(page);let loadedModel=false;
+ page.on('request',r=>{if(r.url().includes('vision_bundle.mjs'))loadedModel=true;});
+ await page.goto('/experiments/xray/');await page.locator('#launch').click();
+ await expect(page.locator('#status')).toHaveText('SET TWO ANCHORS');
+ expect(loadedModel).toBe(false);
+ await page.locator('#stop').click();
+ expect(await page.evaluate(()=>window.__XRAY_EXPERIMENT__.getState().liveTracks)).toBe(0);
 });
