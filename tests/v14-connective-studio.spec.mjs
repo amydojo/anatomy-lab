@@ -26,8 +26,21 @@ test('V14: all eight real illustrative knee meshes and source-backed inspector',
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().isolateId)).toBe('anterior-cruciate-ligament');
  await page.locator('[data-cs-action="compare"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().comparison.length)).toBe(2);
- await page.locator('#connective-left [data-cs-select="posterior-cruciate-ligament"]').click();
- await expect(page.locator('#connective-right')).toContainText('posterior');
+ // The mobile inspector intentionally hides the structure explorer. Use the
+ // visible related-structure control instead of targeting a hidden desktop list.
+ await page.locator('#connective-right [data-cs-select="posterior-cruciate-ligament"]').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().selectedId)).toBe('posterior-cruciate-ligament');
+ await expect(page.locator('#connective-right header h2')).toHaveText('Posterior cruciate ligament');
+ await expect(page.locator('#connective-right')).toContainText('Primarily restrains posterior translation');
+ if(page.viewportSize().width<=850){
+   await expect(page.locator('#connective-right')).toBeVisible();
+   await page.locator('#connective-mobile-nav [data-cs-panel="structures"]').click();
+   await expect(page.locator('#connective-left')).toBeVisible();
+   await expect(page.locator('#connective-right')).toBeHidden();
+   await page.locator('#connective-left [data-cs-select="anterior-cruciate-ligament"]').click();
+   await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().selectedId)).toBe('anterior-cruciate-ligament');
+   await expect(page.locator('#connective-right')).toBeVisible();
+ }
  expect(errors).toEqual([]);
 });
 test('V14: independent filters, guided evidence and reset',async({page})=>{
