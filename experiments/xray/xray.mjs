@@ -1,14 +1,17 @@
-import {STRUCTURES,readArm,createSmoother,createTrackingState,rigGeometry} from './xray-core.mjs';
+import {STRUCTURES,readArm,createSmoother,createTrackingState,createPoseLock,rigGeometry,closeupGeometry} from './xray-core.mjs';
+import {grayImage,makeCloseupTracker} from './xray-tracker.mjs';
 
 // A deliberately independent prototype: do not couple camera state to V13 Atlas globals.
 // Camera pixels are never sent to an application endpoint, saved or recorded.
 const $=id=>document.getElementById(id);
 const video=$('camera'),frozen=$('frozen'),viewport=$('viewport'),svg=$('overlay');
-const poseState=createTrackingState(),smoother=createSmoother();
+const poseState=createTrackingState(),smoother=createSmoother(),poseLock=createPoseLock(),tracker=makeCloseupTracker();
 const NS='http://www.w3.org/2000/svg';
 const CDN='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.0';
 const MODEL='https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task';
-let landmarker=null,stream=null,side='right',layer='muscle',opacity=.84;
+let landmarker=null,stream=null,side='right',layer='muscle',opacity=.84,mode='closeup',anchorStep='elbow';
+const sampleCanvas=document.createElement('canvas'),sampleContext=sampleCanvas.getContext('2d',{willReadFrequently:true});
+let sampleSize={width:0,height:0};
 let selected=null,lastPose=null,raf=0,lastFrameTime=-1,lastInferTime=0,frames=0,fpsStart=0,session=0,running=false;
 let calibration={scale:1,rotation:0,x:0,y:0};
 let lastVideoSize={width:0,height:0};
@@ -22,6 +25,15 @@ function status(code,label){
 }
 function clearOverlay(){svg.replaceChildren();}
 function resetMetrics(){setText('angle','—°');setText('confidence','—');setText('fps','— FPS');}
+function clearPoseMetrics(){setText('angle','—°');setText('confidence','—');}
+function updateAnchorHints(){
+  const a=tracker.anchors,ready=tracker.ready;
+  $('anchor-help').textContent=ready?'Anchors set · tap Reset to recalibrate':
+    a.elbow?'Tap the visible wrist (use an edge or texture).':'Tap your elbow (choose a well-lit edge or texture).';
+  $('anchor-reset').disabled=!a.elbow&&!a.wrist;
+  $('anchor-hud').hidden=mode!=='closeup';
+  $('angle-caption').textContent=mode==='closeup'?'ELBOW / NOT MEASURED':'ELBOW / FLEXION';
+}
 function resetSelection(){
   selected=null;setText('structure-name','Tap an illustrated structure');
   setText('structure-info','Select a visible muscle, bone or connective structure to learn its function.');
@@ -45,10 +57,13 @@ function makeNode(tag,attributes){
   return el;
 }
 function render(){
-  if(!lastPose?.ok||!lastVideoSize.width||!lastVideoSize.height){clearOverlay();return;}
+  if(!lastPose?.ok||(mode==='auto'&&(!lastVideoSize.width||!lastVideoSize.height))){clearOverlay();return;}
   const bounds=viewport.getBoundingClientRect(),width=bounds.width,height=bounds.height;
   svg.setAttribute('viewBox','0 0 '+width+' '+height);
-  const shapes=rigGeometry(lastPose,lastVideoSize,{width,height},calibration);
+  const shapes=mode==='closeup'?closeupGeometry(
+    {x:lastPose.elbow.x*width+calibration.x,y:lastPose.elbow.y*height+calibration.y},
+    {x:lastPose.wrist.x*width+calibration.x,y:lastPose.wrist.y*height+calibration.y}
+  ):rigGeometry(lastPose,lastVideoSize,{width,height},calibration);
   const visible=new Set();
   // Keep hit targets stable across inference frames. Replacing elements every
   // frame causes touch/click gestures to detach before Safari can dispatch them.
@@ -70,9 +85,10 @@ function render(){
   }
   for(const old of svg.querySelectorAll('.shape'))
     if(!visible.has(old.dataset.id))old.remove();
-  const e=lastPose.elbow,scale=Math.max(width/lastVideoSize.width,height/lastVideoSize.height);
-  const ex=(width-lastVideoSize.width*scale)/2+e.x*lastVideoSize.width*scale+calibration.x;
-  const ey=(height-lastVideoSize.height*scale)/2+e.y*lastVideoSize.height*scale+calibration.y;
+  const e=lastPose.elbow;
+  const scale=mode==='auto'?Math.max(width/lastVideoSize.width,height/lastVideoSize.height):1;
+  const ex=mode==='closeup'?e.x*width+calibration.x:(width-lastVideoSize.width*scale)/2+e.x*lastVideoSize.width*scale+calibration.x;
+  const ey=mode==='closeup'?e.y*height+calibration.y:(height-lastVideoSize.height*scale)/2+e.y*lastVideoSize.height*scale+calibration.y;
   let ring=svg.querySelector('.joint-ring');
   if(!ring){ring=makeNode('circle',{class:'joint-ring'});svg.appendChild(ring);}
   ring.setAttribute('cx',String(ex));ring.setAttribute('cy',String(ey));
@@ -85,7 +101,7 @@ svg.addEventListener('click',e=>{const id=e.target.closest?.('[data-id]')?.datas
 svg.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const id=e.target.closest?.('[data-id]')?.dataset.id;if(id){e.preventDefault();choose(id);}}});
 function updateTracking(sample,time){
   if(!sample.ok){
-    smoother.reset();lastPose=null;clearOverlay();resetMetrics();
+    smoother.reset();lastPose=null;clearOverlay();clearPoseMetrics();
     poseState.event('missing');status('lost','TRACKING LOST');notice(sample.reason);
     message(sample.reason+' Anatomy is hidden until tracking returns.');
     return;
@@ -101,16 +117,60 @@ function updateTracking(sample,time){
   }
   render();
 }
+function snapshotFrame(){
+  const source=!frozen.hidden?frozen:video;
+  const videoW=source===video?video.videoWidth:frozen.width;
+  const videoH=source===video?video.videoHeight:frozen.height;
+  const w=viewport.clientWidth,h=viewport.clientHeight;
+  if(!videoW||!videoH||!w||!h)return null;
+  const targetW=Math.min(260,Math.max(120,Math.round(w*.7)));
+  const targetH=Math.round(targetW*h/w);
+  if(sampleCanvas.width!==targetW||sampleCanvas.height!==targetH){sampleCanvas.width=targetW;sampleCanvas.height=targetH;}
+  const k=Math.max(targetW/videoW,targetH/videoH);
+  sampleContext.drawImage(source,(targetW-videoW*k)/2,(targetH-videoH*k)/2,videoW*k,videoH*k);
+  sampleSize={width:targetW,height:targetH};
+  return grayImage(sampleContext.getImageData(0,0,targetW,targetH));
+}
+function closeupPose(sample){
+  const e=sample.elbow,w=sample.wrist;
+  const pose={ok:true,elbow:{x:e.x/sampleSize.width,y:e.y/sampleSize.height},
+    wrist:{x:w.x/sampleSize.width,y:w.y/sampleSize.height},confidence:sample.confidence,mode:'closeup'};
+  lastPose=pose;poseState.event('found');status('tracking','ANCHORS TRACKING');notice('');
+  setText('angle','N/A');setText('confidence',Math.round(sample.confidence*100)+'%*');
+  message('Tracking image features near your anchors. Not a measured joint angle or anatomical segmentation.');
+  render();
+}
+function updateCloseup(){
+  const frame=snapshotFrame();if(!frame)return;
+  if(!tracker.ready){
+    lastPose=null;clearOverlay();clearPoseMetrics();
+    status('acquiring','SET TWO ANCHORS');notice('Tap elbow, then wrist in the camera image.');return;
+  }
+  const sample=tracker.update(frame);
+  if(!sample.ok){
+    lastPose=null;clearOverlay();clearPoseMetrics();poseState.event('missing');
+    status('lost','RECALIBRATE');notice(sample.reason+' Tap Reset anchors.');
+    message('Image-feature lock lost. Anatomy hidden until both anchors are reset.');return;
+  }
+  closeupPose(sample);
+}
 function tick(now){
   if(!running)return;
   raf=requestAnimationFrame(tick);
   // Inference may synchronously block the UI; bound it independently of display refresh.
-  if(video.readyState<2||!video.videoWidth||video.currentTime===lastFrameTime||now-lastInferTime<34)return;
+  if(video.readyState<2||!video.videoWidth||video.currentTime===lastFrameTime||now-lastInferTime<(mode==='closeup'?90:34))return;
   lastFrameTime=video.currentTime;lastInferTime=now;
   lastVideoSize={width:video.videoWidth,height:video.videoHeight};
   try{
-    const result=landmarker.detectForVideo(video,now);
-    updateTracking(readArm(result,side),now);
+    if(mode==='closeup'){updateCloseup();}
+    else{
+      const result=landmarker.detectForVideo(video,now);
+      const candidate=readArm(result,side);
+      const gate=poseLock.update(candidate);
+      if(!gate.ok)updateTracking({ok:false,reason:gate.reason},now);
+      else if(!gate.locked)updateTracking({ok:false,reason:gate.reason},now);
+      else updateTracking(candidate,now);
+    }
     frames++;
     if(now-fpsStart>=1100){
       setText('fps',(frames*1000/(now-fpsStart)).toFixed(0)+' FPS');
@@ -139,7 +199,7 @@ function halt(){
 async function start(){
   if(running||stream)return;
   const ticket=++session;
-  smoother.reset();lastPose=null;clearOverlay();resetMetrics();
+  smoother.reset();poseLock.reset();lastPose=null;clearOverlay();resetMetrics();
   poseState.event('start');status('acquiring','INITIALIZING');notice('Requesting camera…');
   message('Camera initializes locally. Allow permission when your browser asks.');
   ui.start.disabled=true;ui.resume.disabled=true;
@@ -155,7 +215,7 @@ async function start(){
     await video.play();
     if(ticket!==session)return;
     status('acquiring','LOADING POSE MODEL');notice('Loading on-device landmark detection…');
-    if(!landmarker){
+    if(mode==='auto'&&!landmarker){
       const engine=await buildLandmarker();
       if(ticket!==session){engine.close();return;}
       landmarker=engine;
@@ -165,8 +225,10 @@ async function start(){
     running=true;ui.start.disabled=false;ui.stop.disabled=false;ui.pause.disabled=false;
     ui.resume.hidden=true;ui.pause.hidden=false;
     fpsStart=performance.now();frames=0;lastInferTime=0;
-    status('acquiring','FINDING ARM');notice('Keep shoulder, elbow and wrist visible');
-    message('Align your arm within the camera frame. Detection starts automatically.');
+    status('acquiring',mode==='closeup'?'SET TWO ANCHORS':'FINDING ARM');
+    notice(mode==='closeup'?'Tap your elbow, then wrist in the camera preview.':'Keep shoulder, elbow and wrist visible');
+    message(mode==='closeup'?'Calibrate two visual anchors. Tracking is illustrative and may lose lock on smooth skin.':'Include the whole arm for automatic pose tracking.');
+    updateAnchorHints();
     raf=requestAnimationFrame(tick);
   }catch(error){
     if(ticket!==session)return;
@@ -183,7 +245,7 @@ function failure(reason,ticket){
   ui.empty.hidden=false;ui.start.disabled=false;ui.stop.disabled=true;ui.pause.disabled=true;ui.resume.hidden=true;ui.pause.hidden=false;
 }
 function stop({reason='Camera stopped. Activate X-RAY to begin again.'}={}){
-  session++;halt();lastVideoSize={width:0,height:0};
+  session++;halt();lastVideoSize={width:0,height:0};poseLock.reset();
   if(landmarker){landmarker.close();landmarker=null;}
   smoother.reset();lastPose=null;poseState.event('stop');clearOverlay();resetMetrics();resetSelection();
   const context=frozen.getContext('2d');context?.clearRect(0,0,frozen.width,frozen.height);
@@ -192,7 +254,7 @@ function stop({reason='Camera stopped. Activate X-RAY to begin again.'}={}){
   status('idle','CAMERA OFF');notice('');message(reason);
 }
 function pause(){
-  if(!running||!lastPose?.ok)return;
+  if(!running)return;
   const w=viewport.clientWidth,h=viewport.clientHeight,dpr=Math.min(window.devicePixelRatio||1,2);
   frozen.width=Math.round(w*dpr);frozen.height=Math.round(h*dpr);
   const ctx=frozen.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -201,16 +263,44 @@ function pause(){
   poseState.event('pause');halt();frozen.hidden=false;
   ui.pause.hidden=true;ui.resume.hidden=false;ui.resume.disabled=false;
   status('paused','FRAME PAUSED');notice('Camera hardware released · current frame held in memory');
-  message('Frame paused. Camera hardware is off. Select anatomy or adjust alignment; resume to request camera again.');
+  message(mode==='closeup'?'Camera off. You can set or reset anchors on the frozen frame.':'Camera off. Adjust alignment, or resume to reacquire tracking.');
   render();
 }
 ui.start.addEventListener('click',start);ui.stop.addEventListener('click',()=>stop());
+document.querySelectorAll('[data-mode]').forEach(btn=>btn.addEventListener('click',()=>{
+  if(mode===btn.dataset.mode)return;
+  const wasActive=running||!!stream;
+  if(wasActive)stop({reason:'Switching tracking mode.'});
+  mode=btn.dataset.mode;tracker.reset();poseLock.reset();anchorStep='elbow';lastPose=null;
+  document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));
+  updateAnchorHints();resetSelection();clearOverlay();
+  message(mode==='closeup'?'Close-up lens: tap elbow and wrist after activating the camera.':'Full arm: show shoulder, elbow and wrist for automatic pose tracking.');
+  if(wasActive)start();
+}));
+$('anchor-reset').addEventListener('click',()=>{
+  tracker.reset();anchorStep='elbow';lastPose=null;clearOverlay();clearPoseMetrics();updateAnchorHints();
+  status('acquiring','SET TWO ANCHORS');notice('Tap your elbow, then your wrist.');
+});
+viewport.addEventListener('pointerup',event=>{
+  if(mode!=='closeup'||(!running&&frozen.hidden)||tracker.ready&&!tracker.lost)return;
+  if(event.target.closest?.('button,a'))return;
+  const rect=viewport.getBoundingClientRect();
+  const x=event.clientX-rect.left,y=event.clientY-rect.top;
+  // Retap elbow then wrist after a tracker loss, avoiding stale anchors.
+  if(tracker.lost){tracker.reset();anchorStep='elbow';}
+  const frame=snapshotFrame();if(!frame)return;
+  const result=tracker.setAnchor(anchorStep,frame,x/rect.width*frame.width,y/rect.height*frame.height);
+  if(!result.ok){notice(result.reason);return;}
+  anchorStep=anchorStep==='elbow'?'wrist':'elbow';updateAnchorHints();
+  if(tracker.ready){const a=tracker.anchors;closeupPose({ok:true,elbow:a.elbow,wrist:a.wrist,confidence:1});}
+  else {status('acquiring','SET WRIST ANCHOR');notice('Elbow set. Tap your wrist.');}
+});
 ui.pause.addEventListener('click',pause);ui.resume.addEventListener('click',start);
 document.querySelectorAll('[data-side]').forEach(btn=>btn.addEventListener('click',()=>{
   side=btn.dataset.side;
   document.querySelectorAll('[data-side]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));
-  smoother.reset();lastPose=null;clearOverlay();resetSelection();
-  if(running){poseState.event('missing');status('acquiring','FINDING ARM');notice('Finding '+side+' arm…');}
+  smoother.reset();poseLock.reset();lastPose=null;clearOverlay();resetSelection();
+  if(running&&mode==='auto'){poseState.event('missing');status('acquiring','FINDING ARM');notice('Finding '+side+' arm…');}
 }));
 document.querySelectorAll('[data-layer]').forEach(btn=>btn.addEventListener('click',()=>{
   layer=btn.dataset.layer;
@@ -235,4 +325,5 @@ $('reset').addEventListener('click',()=>{
 window.addEventListener('resize',()=>{if(poseState.status==='paused')message('Paused frame may be cropped after resizing. Resume live tracking to recalibrate.');render();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&(stream||running))stop({reason:'Camera automatically stopped when the page was hidden.'});});
 window.addEventListener('pagehide',()=>stop());
-window.__XRAY_EXPERIMENT__=Object.freeze({getState:()=>({status:poseState.status,side,layer,selected,running,liveTracks:stream?.getTracks().filter(t=>t.readyState==='live').length||0,hasPose:!!lastPose})});
+updateAnchorHints();
+window.__XRAY_EXPERIMENT__=Object.freeze({getState:()=>({status:poseState.status,mode,side,layer,selected,running,anchors:tracker.anchors,anchorReady:tracker.ready,liveTracks:stream?.getTracks().filter(t=>t.readyState==='live').length||0,hasPose:!!lastPose})});
