@@ -41,14 +41,16 @@ test('standalone route discloses model approximation',async({page})=>{
 });
 test('mock landmarks drive overlay, selection, tracking loss and camera release',async({page})=>{
  await mockCamera(page);const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/experiments/xray/');await page.locator('[data-mode="auto"]').click();await page.locator('#launch').click();
+ await page.goto('/experiments/xray/');await page.locator('#launch').click();await page.locator('#open-settings').click();await page.locator('[data-mode="auto"]').click();
  await expect(page.locator('#status')).toHaveText('TRACKING ARM',{timeout:12000});
  await expect(page.locator('[data-id="biceps"]')).toBeVisible();
  await page.evaluate(()=>{globalThis.__testPose[16]={x:.52,y:.83,visibility:.96,presence:1};});
  await expect.poll(async()=>Number((await page.locator('#angle').textContent()).replace('°',''))).toBeLessThan(25);
  await page.locator('[data-id="biceps"]').click();
  await expect(page.locator('#structure-name')).toHaveText('Biceps brachii');
+ await page.locator('#open-settings').click();
  await page.locator('[data-layer="bone"]').click();
+ await page.locator('#close-settings').click();
  await page.locator('[data-id="humerus"]').click();
  await expect(page.locator('#atlas-link')).toHaveAttribute('href',/right-humerus/);
  await page.evaluate(()=>{globalThis.__testPose[14].visibility=.1;});
@@ -60,12 +62,14 @@ test('mock landmarks drive overlay, selection, tracking loss and camera release'
 });
 test('pause releases mock camera and resumes with a new stream',async({page})=>{
  await mockCamera(page);await page.goto('/experiments/xray/');
- await page.locator('[data-mode="auto"]').click();await page.locator('#launch').click();
+ await page.locator('#launch').click();await page.locator('#open-settings').click();await page.locator('[data-mode="auto"]').click();
  await expect(page.locator('#status')).toHaveText('TRACKING ARM',{timeout:12000});
  await page.locator('#pause').click();await expect(page.locator('#status')).toHaveText('FRAME PAUSED');
  await expect(page.locator('[data-id="biceps"]')).toBeVisible();
+ await page.locator('#open-settings').click();
  await page.locator('.calibration summary').click();
  await page.locator('#scale').fill('120');
+ await page.locator('#close-settings').click();
  await expect(page.locator('[data-id="biceps"]')).toBeVisible();
  await page.locator('[data-id="biceps"]').click();
  await expect(page.locator('#structure-name')).toHaveText('Biceps brachii');
@@ -84,21 +88,27 @@ test('close-up two-tap calibration tracks illustrative forearm, without false el
  await page.goto('/experiments/xray/');
  await expect(page.locator('[data-mode="closeup"]')).toHaveAttribute('aria-pressed','true');
  await page.locator('#launch').click();
- await expect(page.locator('#status')).toHaveText('SET TWO ANCHORS');
+ await expect(page.locator('#status')).toHaveText('FREEZE TO CALIBRATE');
+ await page.locator('#pause').click();
+ await expect(page.locator('#status')).toHaveText('FRAME PAUSED');
+ expect(await page.evaluate(()=>globalThis.__tracks.at(-1).readyState)).toBe('ended');
  const vp=page.locator('#viewport'),rect=await vp.boundingBox();
  await vp.click({position:{x:rect.width*.27,y:rect.height*.41}});
- await expect(page.locator('#status')).toHaveText('SET WRIST ANCHOR');
+ await expect(page.locator('#status')).toHaveText('TAP WRIST');
  await vp.click({position:{x:rect.width*.72,y:rect.height*.61}});
- await expect(page.locator('#status')).toHaveText('ANCHORS TRACKING');
+ await expect(page.locator('#status')).toHaveText('FRAME CALIBRATED');
  await expect(page.locator('[data-id="flexors"]')).toBeVisible();
  await expect(page.locator('[data-id="biceps"]')).toHaveCount(0);
  await expect(page.locator('#angle')).toHaveText('N/A');
  await expect.poll(async()=>page.evaluate(()=>window.__XRAY_EXPERIMENT__.getState().anchorReady)).toBe(true);
- await page.locator('#anchor-reset').click();
- await expect(page.locator('#status')).toHaveText('SET TWO ANCHORS');
- await expect(page.locator('[data-id]')).toHaveCount(0);
+ await page.locator('#resume').click();
+ await expect(page.locator('#status')).toHaveText('ANCHORS TRACKING',{timeout:12000});
+ await expect(page.locator('[data-id="flexors"]')).toBeVisible();
  await page.locator('#pause').click();
  await expect(page.locator('#status')).toHaveText('FRAME PAUSED');
+ await page.locator('#anchor-reset').click();
+ await expect(page.locator('#status')).toHaveText('TAP ELBOW');
+ await expect(page.locator('[data-id]')).toHaveCount(0);
  expect(await page.evaluate(()=>globalThis.__tracks.at(-1).readyState)).toBe('ended');
  expect(errors).toEqual([]);
 });
@@ -106,8 +116,52 @@ test('close-up camera engine starts without external pose-model download',async(
  await mockCamera(page);let loadedModel=false;
  page.on('request',r=>{if(r.url().includes('vision_bundle.mjs'))loadedModel=true;});
  await page.goto('/experiments/xray/');await page.locator('#launch').click();
- await expect(page.locator('#status')).toHaveText('SET TWO ANCHORS');
+ await expect(page.locator('#status')).toHaveText('FREEZE TO CALIBRATE');
  expect(loadedModel).toBe(false);
  await page.locator('#stop').click();
  expect(await page.evaluate(()=>window.__XRAY_EXPERIMENT__.getState().liveTracks)).toBe(0);
+});
+
+test('P0 mobile live viewport is nearly full height, controls never replace camera',async({page})=>{
+ await mockCamera(page);
+ await page.goto('/experiments/xray/');
+ await page.locator('#launch').click();
+ await expect(page.locator('#app')).toHaveAttribute('data-phase','live');
+ await expect(page.locator('#settings-sheet')).toBeHidden();
+ const l=await page.evaluate(()=>{
+  const get=id=>document.getElementById(id).getBoundingClientRect();
+  const camera=get('viewport'),dock=get('camera-dock'),status=get('status'),screen={w:window.innerWidth,h:window.innerHeight};
+  const center=document.elementFromPoint(screen.w/2,screen.h*.48);
+  return {cameraH:camera.height,screenH:screen.h,dockH:dock.height,
+    dockBottom:Math.abs(dock.bottom-camera.bottom),statusTop:status.top,
+    middleElement:center?.id||center?.tagName,phase:document.getElementById('app').dataset.phase};
+ });
+ expect(l.cameraH/l.screenH).toBeGreaterThan(.95);
+ expect(l.dockH/l.screenH).toBeLessThan(.25);
+ expect(l.dockBottom).toBeLessThan(1);
+ expect(l.middleElement).not.toBe('console');
+ await page.locator('#open-settings').click();
+ await expect(page.locator('#settings-sheet')).toBeVisible();
+ await expect(page.locator('#app')).toHaveAttribute('data-phase','live');
+ await page.locator('#close-settings').click();
+ await expect(page.locator('#settings-sheet')).toBeHidden();
+});
+test('P0 frozen frame allows calibration without a live stream and sheet remains dismissible',async({page})=>{
+ await mockCamera(page);const errors=[];page.on('pageerror',err=>errors.push(err.message));
+ await page.goto('/experiments/xray/');await page.locator('#launch').click();
+ await page.locator('#pause').click();
+ await expect(page.locator('#app')).toHaveAttribute('data-phase','paused');
+ expect(await page.evaluate(()=>window.__XRAY_EXPERIMENT__.getState().liveTracks)).toBe(0);
+ const vp=page.locator('#viewport'),rect=await vp.boundingBox();
+ const centerHit=await page.evaluate(()=>document.elementFromPoint(innerWidth/2,innerHeight*.5)?.id||'');
+ expect(centerHit).not.toBe('camera-dock');
+ await vp.click({position:{x:rect.width*.2,y:rect.height*.4}});
+ await expect(page.locator('.calibration-point')).toHaveCount(1);
+ await vp.click({position:{x:rect.width*.75,y:rect.height*.59}});
+ await expect(page.locator('.calibration-point')).toHaveCount(2);
+ await page.locator('#open-settings').click();
+ await expect(page.locator('#settings-sheet')).toBeVisible();
+ await page.keyboard.press('Escape');
+ await expect(page.locator('#settings-sheet')).toBeHidden();
+ expect(errors).toEqual([]);
 });
