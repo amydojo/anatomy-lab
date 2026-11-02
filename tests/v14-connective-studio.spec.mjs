@@ -76,6 +76,8 @@ test('V14: desktop layout preserves V13 exit and inspector',async({page},info)=>
  expect(dimensions[1].width).toBeGreaterThan(500);
  await page.screenshot({path:'artifacts/v14-integrated-desktop-'+info.project.name+'.png',fullPage:true});
  await page.locator('#connective-entry').click();
- await expect(page.locator('#atlas-sidebar')).toBeVisible();
+ await expect(page.locator('#atlas-app')).toHaveAttribute('data-connective-studio','false');
+ await expect(page.locator('#desktop-studio')).toBeVisible();
+ await expect(page.locator('#connective-left')).toBeHidden();
  expect(errors).toEqual([]);
 });
