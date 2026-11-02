@@ -16,6 +16,14 @@ let selected=null,lastPose=null,raf=0,lastFrameTime=-1,lastInferTime=0,frames=0,
 let calibration={scale:1,rotation:0,x:0,y:0};
 let lastVideoSize={width:0,height:0};
 const ui={start:$('launch'),stop:$('stop'),pause:$('pause'),resume:$('resume'),empty:$('empty'),message:$('message'),notice:$('tracking-notice')};
+const app=$('app'),settings=$('settings-sheet'),backdrop=$('sheet-backdrop');
+function setPhase(phase){app.dataset.phase=phase;}
+function openSettings(){settings.hidden=false;backdrop.hidden=false;settings.setAttribute('aria-hidden','false');$('open-settings').setAttribute('aria-expanded','true');$('close-settings').focus();}
+function closeSettings({restoreFocus=true}={}){settings.hidden=true;backdrop.hidden=true;settings.setAttribute('aria-hidden','true');$('open-settings').setAttribute('aria-expanded','false');if(restoreFocus)$('open-settings').focus();}
+$('open-settings').addEventListener('click',openSettings);
+$('close-settings').addEventListener('click',()=>closeSettings());
+backdrop.addEventListener('click',()=>closeSettings());
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!settings.hidden)closeSettings();});
 const setText=(id,text)=>{$(id).textContent=text;};
 function message(text){ui.message.textContent=text;}
 function notice(text){ui.notice.hidden=!text;ui.notice.textContent=text||'';}
@@ -24,14 +32,30 @@ function status(code,label){
   $('status-dot').dataset.status=code;
 }
 function clearOverlay(){svg.replaceChildren();}
+function showFrozenMarkers(){
+  if(mode!=='closeup'||frozen.hidden)return;
+  const a=tracker.anchors,bounds=viewport.getBoundingClientRect();
+  svg.setAttribute('viewBox','0 0 '+bounds.width+' '+bounds.height);
+  for(const [key,p] of Object.entries(a)){
+    if(!p)continue;
+    const cx=p.x/sampleSize.width*bounds.width,cy=p.y/sampleSize.height*bounds.height;
+    svg.appendChild(makeNode('circle',{class:'calibration-halo',cx,cy,r:19}));
+    svg.appendChild(makeNode('circle',{class:'calibration-point',cx,cy,r:6}));
+    const label=makeNode('text',{x:cx+13,y:cy-16,fill:'#fff5e7','font-size':11,'font-weight':700});
+    label.textContent=key.toUpperCase();svg.appendChild(label);
+  }
+}
 function resetMetrics(){setText('angle','—°');setText('confidence','—');setText('fps','— FPS');}
 function clearPoseMetrics(){setText('angle','—°');setText('confidence','—');}
 function updateAnchorHints(){
-  const a=tracker.anchors,ready=tracker.ready;
-  $('anchor-help').textContent=ready?'Anchors set · tap Reset to recalibrate':
-    a.elbow?'Tap the visible wrist (use an edge or texture).':'Tap your elbow (choose a well-lit edge or texture).';
-  $('anchor-reset').disabled=!a.elbow&&!a.wrist;
-  $('anchor-hud').hidden=mode!=='closeup';
+  const a=tracker.anchors,ready=tracker.ready,paused=!frozen.hidden;
+  $('anchor-help').textContent=mode==='auto'?'Keep shoulder, elbow and wrist in view.':
+    paused?(ready?'Anchors placed. Tap Resume live to begin tracking.':
+      a.elbow?'Tap the wrist on this frozen image.':'Tap the elbow on this frozen image.'):
+      ready?(tracker.lost?'Tracking lost. Freeze to recalibrate.':'Image anchors active · tracking is illustrative.'):
+      'Frame your arm, then Freeze to place two points.';
+  $('anchor-reset').disabled=mode!=='closeup'||!a.elbow&&!a.wrist;
+  $('anchor-hud').hidden=false;
   $('angle-caption').textContent=mode==='closeup'?'ELBOW / NOT MEASURED':'ELBOW / FLEXION';
   $('confidence-caption').textContent=mode==='closeup'?'ANCHOR MATCH*':'LANDMARK VISIBILITY';
 }
@@ -58,7 +82,7 @@ function makeNode(tag,attributes){
   return el;
 }
 function render(){
-  if(!lastPose?.ok||(mode==='auto'&&(!lastVideoSize.width||!lastVideoSize.height))){clearOverlay();return;}
+  if(!lastPose?.ok||(mode==='auto'&&(!lastVideoSize.width||!lastVideoSize.height))){clearOverlay();showFrozenMarkers();return;}
   const bounds=viewport.getBoundingClientRect(),width=bounds.width,height=bounds.height;
   svg.setAttribute('viewBox','0 0 '+width+' '+height);
   const armElbow={x:lastPose.elbow.x*width+calibration.x,y:lastPose.elbow.y*height+calibration.y};
@@ -100,6 +124,7 @@ function render(){
   let center=svg.querySelector('.joint-marker');
   if(!center){center=makeNode('circle',{class:'joint-marker',r:2.5});svg.appendChild(center);}
   center.setAttribute('cx',String(ex));center.setAttribute('cy',String(ey));
+  showFrozenMarkers();
 }
 svg.addEventListener('click',e=>{const id=e.target.closest?.('[data-id]')?.dataset.id;if(id)choose(id);});
 svg.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const id=e.target.closest?.('[data-id]')?.dataset.id;if(id){e.preventDefault();choose(id);}}});
@@ -108,6 +133,7 @@ function updateTracking(sample,time){
     smoother.reset();lastPose=null;clearOverlay();clearPoseMetrics();
     poseState.event('missing');status('lost','TRACKING LOST');notice(sample.reason);
     message(sample.reason+' Anatomy is hidden until tracking returns.');
+    updateAnchorHints();
     return;
   }
   const wasTracking=poseState.status==='tracking';
@@ -120,6 +146,7 @@ function updateTracking(sample,time){
     const sweep=$('scanline');sweep.classList.remove('active');void sweep.offsetWidth;sweep.classList.add('active');
   }
   render();
+  updateAnchorHints();
 }
 function snapshotFrame(){
   const source=!frozen.hidden?frozen:video;
@@ -135,26 +162,28 @@ function snapshotFrame(){
   sampleSize={width:targetW,height:targetH};
   return grayImage(sampleContext.getImageData(0,0,targetW,targetH));
 }
-function closeupPose(sample){
+function closeupPose(sample,{isFrozen=false}={}){
   const e=sample.elbow,w=sample.wrist;
   const pose={ok:true,elbow:{x:e.x/sampleSize.width,y:e.y/sampleSize.height},
     wrist:{x:w.x/sampleSize.width,y:w.y/sampleSize.height},confidence:sample.confidence,mode:'closeup'};
-  lastPose=pose;poseState.event('found');status('tracking','ANCHORS TRACKING');notice('');
-  setText('angle','N/A');setText('confidence',Math.round(sample.confidence*100)+'%*');
-  message('Tracking image features near your anchors. Not a measured joint angle or anatomical segmentation.');
-  render();
+  lastPose=pose;
+  if(isFrozen){status('paused','FRAME CALIBRATED');notice('Frozen frame calibrated. Resume to try live tracking.');}
+  else{poseState.event('found');status('tracking','ANCHORS TRACKING');notice('');}
+  setText('angle','N/A');setText('confidence',isFrozen?'—':Math.round(sample.confidence*100)+'%*');
+  message(isFrozen?'Calibration markers placed on a paused image; camera is off. Resume to track.':'Tracking image features near your anchors. Not a measured joint angle or anatomical segmentation.');
+  render();updateAnchorHints();
 }
 function updateCloseup(){
   const frame=snapshotFrame();if(!frame)return;
   if(!tracker.ready){
     lastPose=null;clearOverlay();clearPoseMetrics();
-    status('acquiring','SET TWO ANCHORS');notice('Tap elbow, then wrist in the camera image.');return;
+    status('acquiring','FREEZE TO CALIBRATE');notice('Freeze the camera, then tap elbow and wrist.');updateAnchorHints();return;
   }
   const sample=tracker.update(frame);
   if(!sample.ok){
     lastPose=null;clearOverlay();clearPoseMetrics();poseState.event('missing');
     status('lost','RECALIBRATE');notice(sample.reason+' Tap Reset anchors.');
-    message('Image-feature lock lost. Anatomy hidden until both anchors are reset.');return;
+    message('Image-feature lock lost. Freeze, Reset, and place anchors on a still frame.');updateAnchorHints();return;
   }
   closeupPose(sample);
 }
@@ -203,7 +232,7 @@ function halt(){
 async function start(){
   if(running||stream)return;
   const ticket=++session;
-  smoother.reset();poseLock.reset();lastPose=null;clearOverlay();resetMetrics();
+  smoother.reset();poseLock.reset();lastPose=null;clearOverlay();resetMetrics();setPhase('loading');
   poseState.event('start');status('acquiring','INITIALIZING');notice('Requesting camera…');
   message('Camera initializes locally. Allow permission when your browser asks.');
   ui.start.disabled=true;ui.resume.disabled=true;
@@ -212,7 +241,7 @@ async function start(){
   }
   try{
     const granted=await navigator.mediaDevices.getUserMedia({audio:false,video:{
-      facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30,max:30}}});
+      facingMode:{ideal:'environment'},width:{ideal:720},height:{ideal:1280},frameRate:{ideal:30,max:30}}});
     if(ticket!==session){granted.getTracks().forEach(t=>t.stop());return;}
     stream=granted;video.srcObject=granted;
     granted.getVideoTracks()[0]?.addEventListener('ended',()=>{if(ticket===session)stop({reason:'Camera disconnected. Activate again to retry.'});},{once:true});
@@ -225,14 +254,14 @@ async function start(){
       if(ticket!==session){engine.close();return;}
       landmarker=engine;
     }
-    ui.empty.hidden=true;video.hidden=false;frozen.hidden=true;
+    ui.empty.hidden=true;video.hidden=false;frozen.hidden=true;setPhase('live');
     const context=frozen.getContext('2d');context?.clearRect(0,0,frozen.width,frozen.height);
     running=true;ui.start.disabled=false;ui.stop.disabled=false;ui.pause.disabled=false;
     ui.resume.hidden=true;ui.pause.hidden=false;
     fpsStart=performance.now();frames=0;lastInferTime=0;
     status('acquiring',mode==='closeup'?'SET TWO ANCHORS':'FINDING ARM');
-    notice(mode==='closeup'?'Tap your elbow, then wrist in the camera preview.':'Keep shoulder, elbow and wrist visible');
-    message(mode==='closeup'?'Calibrate two visual anchors. Tracking is illustrative and may lose lock on smooth skin.':'Include the whole arm for automatic pose tracking.');
+    notice(mode==='closeup'?'Freeze the frame to mark elbow and wrist.':'Keep shoulder, elbow and wrist visible');
+    message(mode==='closeup'?'Freeze to place visual anchors. Tracking is illustrative, not anatomical detection.':'Include the whole arm for automatic pose tracking.');
     updateAnchorHints();
     raf=requestAnimationFrame(tick);
   }catch(error){
@@ -247,7 +276,7 @@ function failure(reason,ticket){
   if(ticket!==session)return;
   halt();smoother.reset();lastPose=null;clearOverlay();poseState.event('stop');
   status('lost','UNAVAILABLE');notice(reason);message(reason);
-  ui.empty.hidden=false;ui.start.disabled=false;ui.stop.disabled=true;ui.pause.disabled=true;ui.resume.hidden=true;ui.pause.hidden=false;
+  ui.empty.hidden=false;ui.start.disabled=false;ui.stop.disabled=true;ui.pause.disabled=true;ui.resume.hidden=true;ui.pause.hidden=false;setPhase('idle');
 }
 function stop({reason='Camera stopped. Activate X-RAY to begin again.'}={}){
   session++;halt();lastVideoSize={width:0,height:0};poseLock.reset();
@@ -255,7 +284,7 @@ function stop({reason='Camera stopped. Activate X-RAY to begin again.'}={}){
   smoother.reset();lastPose=null;poseState.event('stop');clearOverlay();resetMetrics();resetSelection();
   const context=frozen.getContext('2d');context?.clearRect(0,0,frozen.width,frozen.height);
   frozen.hidden=true;ui.empty.hidden=false;ui.start.disabled=false;ui.stop.disabled=true;
-  ui.pause.disabled=true;ui.pause.hidden=false;ui.resume.hidden=true;
+  ui.pause.disabled=true;ui.pause.hidden=false;ui.resume.hidden=true;setPhase('idle');closeSettings({restoreFocus:false});
   status('idle','CAMERA OFF');notice('');message(reason);
 }
 function pause(){
@@ -264,12 +293,14 @@ function pause(){
   frozen.width=Math.round(w*dpr);frozen.height=Math.round(h*dpr);
   const ctx=frozen.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
   const sourceW=video.videoWidth,sourceH=video.videoHeight,k=Math.max(w/sourceW,h/sourceH);
+  if(!sourceW||!sourceH)return;
   ctx.drawImage(video,(w-sourceW*k)/2,(h-sourceH*k)/2,sourceW*k,sourceH*k);
-  poseState.event('pause');halt();frozen.hidden=false;
+  poseState.event('pause');halt();frozen.hidden=false;setPhase('paused');
   ui.pause.hidden=true;ui.resume.hidden=false;ui.resume.disabled=false;
   status('paused','FRAME PAUSED');notice('Camera hardware released · current frame held in memory');
-  message(mode==='closeup'?'Camera off. You can set or reset anchors on the frozen frame.':'Camera off. Adjust alignment, or resume to reacquire tracking.');
-  render();
+  message(mode==='closeup'?'Camera off. Tap the elbow and wrist on the frozen image, then Resume.':'Camera off. Adjust alignment, or resume to reacquire tracking.');
+  if(mode==='closeup'){tracker.reset();anchorStep='elbow';lastPose=null;clearPoseMetrics();}
+  render();updateAnchorHints();
 }
 ui.start.addEventListener('click',start);ui.stop.addEventListener('click',()=>stop());
 document.querySelectorAll('[data-mode]').forEach(btn=>btn.addEventListener('click',()=>{
@@ -278,27 +309,26 @@ document.querySelectorAll('[data-mode]').forEach(btn=>btn.addEventListener('clic
   if(wasActive||!frozen.hidden)stop({reason:'Switching tracking mode.'});
   mode=btn.dataset.mode;tracker.reset();poseLock.reset();anchorStep='elbow';lastPose=null;
   document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));
-  updateAnchorHints();resetSelection();clearOverlay();
+  updateAnchorHints();resetSelection();clearOverlay();closeSettings({restoreFocus:false});
   message(mode==='closeup'?'Close-up lens: tap elbow and wrist after activating the camera.':'Full arm: show shoulder, elbow and wrist for automatic pose tracking.');
   if(wasActive)start();
 }));
 $('anchor-reset').addEventListener('click',()=>{
   tracker.reset();anchorStep='elbow';lastPose=null;clearOverlay();clearPoseMetrics();updateAnchorHints();
-  status('acquiring','SET TWO ANCHORS');notice('Tap your elbow, then your wrist.');
+  status(frozen.hidden?'acquiring':'paused',frozen.hidden?'FREEZE TO CALIBRATE':'TAP ELBOW');notice(frozen.hidden?'Freeze first to mark the arm.':'Tap the elbow on the still image.');
 });
 viewport.addEventListener('pointerup',event=>{
-  if(mode!=='closeup'||(!running&&frozen.hidden)||tracker.ready&&!tracker.lost)return;
+  if(mode!=='closeup'||frozen.hidden||tracker.ready)return;
   if(event.target.closest?.('button,a'))return;
   const rect=viewport.getBoundingClientRect();
   const x=event.clientX-rect.left,y=event.clientY-rect.top;
   // Retap elbow then wrist after a tracker loss, avoiding stale anchors.
-  if(tracker.lost){tracker.reset();anchorStep='elbow';}
   const frame=snapshotFrame();if(!frame)return;
   const result=tracker.setAnchor(anchorStep,frame,x/rect.width*frame.width,y/rect.height*frame.height);
-  if(!result.ok){notice(result.reason);return;}
+  if(!result.ok){notice(result.reason);message(result.reason);return;}
   anchorStep=anchorStep==='elbow'?'wrist':'elbow';updateAnchorHints();
-  if(tracker.ready){const a=tracker.anchors;closeupPose({ok:true,elbow:a.elbow,wrist:a.wrist,confidence:1});}
-  else {status('acquiring','SET WRIST ANCHOR');notice('Elbow set. Tap your wrist.');}
+  if(tracker.ready){const a=tracker.anchors;closeupPose({ok:true,elbow:a.elbow,wrist:a.wrist,confidence:1},{isFrozen:true});}
+  else {status('paused','TAP WRIST');notice('Elbow set. Tap your wrist on the still frame.');render();}
 });
 ui.pause.addEventListener('click',pause);ui.resume.addEventListener('click',start);
 document.querySelectorAll('[data-side]').forEach(btn=>btn.addEventListener('click',()=>{
@@ -331,4 +361,4 @@ window.addEventListener('resize',()=>{if(poseState.status==='paused')message('Pa
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&(stream||running))stop({reason:'Camera automatically stopped when the page was hidden.'});});
 window.addEventListener('pagehide',()=>stop());
 updateAnchorHints();
-window.__XRAY_EXPERIMENT__=Object.freeze({getState:()=>({status:poseState.status,mode,side,layer,selected,running,anchors:tracker.anchors,anchorReady:tracker.ready,liveTracks:stream?.getTracks().filter(t=>t.readyState==='live').length||0,hasPose:!!lastPose})});
+window.__XRAY_EXPERIMENT__=Object.freeze({getState:()=>({status:poseState.status,phase:app.dataset.phase,sheetOpen:!settings.hidden,mode,side,layer,selected,running,anchors:tracker.anchors,anchorReady:tracker.ready,liveTracks:stream?.getTracks().filter(t=>t.readyState==='live').length||0,hasPose:!!lastPose})});
