@@ -90,6 +90,7 @@ const studio=domain.create({provider});
   $('connective-entry').setAttribute('aria-pressed','false');
   $('connective-entry').textContent='Connective Studio';
   atlas.connectiveFilter?.(null,null,false);
+  atlas.connectiveEnable?.(false);
   atlas.setMobileFrame?.(false);
   atlas.setInspectorFrame?.(false,true);
   $('connective-left').hidden=true;$('connective-right').hidden=true;
@@ -138,8 +139,12 @@ const studio=domain.create({provider});
  const evidenceStatus=rec?.knowledgeEvidence?.status==='reference-supported'?'Reference-supported anatomy; no anatomist sign-off':'Anatomical reference not currently available';
  const pair=['anterior-cruciate-ligament','posterior-cruciate-ligament'];
  const compareReady=pair.includes(item.id)&&pair.every(id=>studio.getStructure(id)?.selectable);
+ const comparison=s.mode==='compare'&&s.comparison.length===2?'<section class="cs-compare" aria-label="ACL versus PCL comparison"><h3>ACL / PCL — DIFFERENT DIRECTIONS</h3>'+
+   s.comparison.map(id=>{const r=intelligence?.getAdapter(id)?.record;
+    return '<article><strong>'+esc(r?.name||id)+'</strong><p>'+esc(r?.primaryFunction||'Scientific description unavailable.')+'</p></article>';
+   }).join('')+'</section>':'';
  return '<header><span class="cs-overline">03 / ANATOMICAL INSPECTOR</span><h2>'+esc(item.name)+'</h2><p class="cs-subtitle">'+esc(typeNames[item.tissueType])+' / '+esc(regionNames[item.region])+'</p></header>'+
- '<div class="connective-status" role="status">'+esc(status)+'</div><p class="cs-evidence-note">'+esc(evidenceStatus)+'</p>'+
+ '<div class="connective-status" role="status">'+esc(status)+'</div><p class="cs-evidence-note">'+esc(evidenceStatus)+'</p>'+comparison+
  '<section class="cs-inspector-primary"><h3>PRIMARY FUNCTION</h3><p>'+esc(rec?.primaryFunction||item.significance||'Scientific record unavailable.')+'</p>'+
  '<h3>RELEVANT MOVEMENTS</h3><p>'+esc(rec?.movements?.join(' · ')||'Not documented.')+'</p></section>'+
  '<div class="cs-inspector-actions"><button type="button" data-cs-action="focus" '+(!item.selectable?'disabled':'')+'>Focus</button>'+
@@ -164,6 +169,9 @@ const studio=domain.create({provider});
  }
  function render(){
   if(!opened)return;
+  const search=document.getElementById('connective-search');
+  const restoreSearch=search&&document.activeElement===search;
+  const caret=restoreSearch?search.selectionStart:null;
   const s=studio.snapshot();
   left.hidden=false;right.hidden=false;mobile.hidden=false;
   left.innerHTML='<header class="cs-panel-header"><span class="cs-overline">BODY / LIVE · V14</span><h2>Connective Studio</h2><p>Explore what holds the body together.</p></header>'+
@@ -172,6 +180,11 @@ const studio=domain.create({provider});
    '<section class="cs-structure-section"><div class="cs-section-title">02 / STRUCTURE EXPLORER</div><label for="connective-search" class="cs-visually-hidden">Search structures</label><input id="connective-search" type="search" placeholder="Find a structure…" value="'+esc(s.query)+'" autocomplete="off"/>'+groupList()+'</section>'+
    '<footer class="cs-panel-footer">Structure information does not imply an available or anatomically verified mesh.</footer>';
   right.innerHTML=inspector();
+  if(restoreSearch){
+    const next=document.getElementById('connective-search');
+    next?.focus({preventScroll:true});
+    if(caret!=null)next?.setSelectionRange(Math.min(caret,next.value.length),Math.min(caret,next.value.length));
+  }
   renderGuides();
   mobile.innerHTML='<button type="button" data-cs-panel="structures" aria-pressed="'+(mobilePanel==='structures')+'">Structures</button><button type="button" data-cs-panel="inspector" aria-pressed="'+(mobilePanel==='inspector')+'">Inspect'+(s.selectedId?' · 1':'')+'</button><button type="button" data-cs-action="reset">Reset</button><button type="button" data-cs-action="close">Exit</button>';
   app.dataset.connectivePanel=mobilePanel;
