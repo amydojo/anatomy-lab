@@ -10,7 +10,7 @@ const bones={femur:make(0,1,0,.28,.6,.25),tibia:make(0,-.3,0,.22,.6,.22),fibula:
 test('V14: knee build creates exactly eight independent, finite illustrative meshes',()=>{
  const parts=api.buildKnee(bones),ids=api.records().map(p=>p.id);
  assert.equal(ids.length,8);
- assert.deepEqual(Object.keys(parts).sort(),ids.slice().sort());
+ assert.equal(Object.keys(parts).sort().join('|'),ids.slice().sort().join('|'));
  for(const id of ids){
   const p=parts[id];assert.equal(p.illustrative,true);
   assert.ok(p.vertices.length>=50&&p.faces.length>=50,id);
@@ -26,7 +26,7 @@ test('V14: missing bone source refuses geometry rather than fabricating provenan
 test('V14: coverage manifest must never call the eight illustrations source verified',()=>{
  const c=JSON.parse(fs.readFileSync(new URL('../atlas/assets/connective-coverage.json',import.meta.url),'utf8'));
  const ids=api.records().map(p=>p.id);
- assert.deepEqual(c.regions.knee.structures.map(p=>p.id).sort(),ids.sort());
+ assert.equal(c.regions.knee.structures.map(p=>p.id).sort().join('|'),ids.sort().join('|'));
  for(const p of c.regions.knee.structures){assert.equal(p.geometry_verified,false);assert.equal(p.illustrative,true);assert.equal(p.attachment_coordinates_validated,false);assert.equal(p.kinematics_validated,false);assert.equal(p.registration_error_mm,null);assert.equal(p.mesh_id,null);}
  for(const [region,d] of Object.entries(c.regions))if(region!=='knee')for(const p of d.structures)assert.equal(p.illustrative,false);
 });
