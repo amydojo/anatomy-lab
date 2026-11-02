@@ -5,6 +5,8 @@ export const STRUCTURES = Object.freeze({
   brachialis:{name:'Brachialis',group:'muscle',description:'A primary elbow flexor beneath biceps brachii. Its illustrated contour is not an individualized attachment map.'},
   brachioradialis:{name:'Brachioradialis',group:'muscle',description:'Assists elbow flexion, especially with the forearm in a neutral position.'},
   triceps:{name:'Triceps brachii',group:'muscle',description:'Extends the elbow. Posterior placement here is inferred, not measured by the camera.'},
+  flexors:{name:'Forearm flexor group',group:'muscle',description:'A simplified forearm muscle group; the camera does not identify individual muscles.'},
+  extensors:{name:'Forearm extensor group',group:'muscle',description:'A schematic extensor region, not a measured muscle boundary.'},
   humerus:{name:'Humerus',group:'bone',source:'right-humerus',description:'Upper-arm bone forming the proximal part of the elbow joint.'},
   radius:{name:'Radius',group:'bone',source:'right-radius',description:'Forearm bone on the thumb side. Rotation about the ulna is not captured by this 2D rig.'},
   ulna:{name:'Ulna',group:'bone',source:'right-ulna',description:'Forearm bone that forms the primary hinge articulation with the humerus.'},
@@ -117,4 +119,56 @@ export function rigGeometry(pose,videoSize,viewport,calibration={}){
  {id:'ligament',d:bonePath(add(mul(s,e,.89),n,-thickness*.54),add(mul(e,w,.20),m,-thickness*.49),thickness*.15)}
  ];
  return [...bones,...muscles,...connective].map(shape=>({...shape,group:STRUCTURES[shape.id].group}));
+}
+/* V2 pose lock: visibility alone is not anatomical confidence. The lock requires
+   plausible dimensions and multiple spatially consistent frames. */
+export function plausibleFullArm(sample){
+  if(!sample?.ok)return {ok:false,reason:sample?.reason||'Pose not detected'};
+  const a=sample.shoulder,b=sample.elbow,c=sample.wrist;
+  const upper=Math.hypot(a.x-b.x,a.y-b.y);
+  const lower=Math.hypot(c.x-b.x,c.y-b.y);
+  const span=Math.hypot(a.x-c.x,a.y-c.y);
+  if(upper<.115||lower<.115||upper>.85||lower>.85)
+    return {ok:false,reason:'Need a clear, full arm. Move back until shoulder, elbow and wrist are visible.'};
+  const ratio=upper/lower;
+  if(ratio<.42||ratio>2.4||sample.angle<22||sample.angle>180||span<.09)
+    return {ok:false,reason:'Implausible joint geometry; reposition the camera.'};
+  if((sample.confidence??0)<.62)
+    return {ok:false,reason:'Landmark visibility too low for a stable lock.'};
+  return {ok:true};
+}
+export function createPoseLock(required=5){
+  let count=0,previous=null,locked=false;
+  return {
+    update(sample){
+      const validity=plausibleFullArm(sample);
+      if(!validity.ok){count=0;previous=null;locked=false;return {ok:false,locked:false,reason:validity.reason};}
+      if(previous){
+        const delta=Math.max(...['shoulder','elbow','wrist'].map(k=>Math.hypot(sample[k].x-previous[k].x,sample[k].y-previous[k].y)));
+        const angleDelta=Math.abs(sample.angle-previous.angle);
+        if(delta>.075||angleDelta>28){count=0;locked=false;}
+      }
+      count++;previous=sample;
+      locked=count>=required;
+      return {ok:true,locked,count,required,reason:locked?'':'Hold your full arm steadily for tracking lock.'};
+    },
+    reset(){count=0;previous=null;locked=false;},
+    get locked(){return locked;}
+  };
+}
+/* No fabricated shoulder for a close-up. Only draw structures between the two
+   user-calibrated anchors, and do not report an elbow flexion angle. */
+export function closeupGeometry(elbow,wrist){
+  const vec=sub(wrist,elbow),length=Math.hypot(vec.x,vec.y);
+  if(length<30)return [];
+  const n=normal(unit(vec)),thickness=clamp(length*.095,7,24);
+  const shape=[
+    {id:'radius',d:bonePath(add(mul(elbow,wrist,.06),n,thickness*.34),add(mul(elbow,wrist,.96),n,thickness*.27),thickness*.30)},
+    {id:'ulna',d:bonePath(add(mul(elbow,wrist,.02),n,-thickness*.35),add(mul(elbow,wrist,.98),n,-thickness*.28),thickness*.29)},
+    {id:'brachioradialis',d:musclePath(mul(elbow,wrist,.03),mul(elbow,wrist,.77),thickness*.68,thickness*.78)},
+    {id:'flexors',d:musclePath(mul(elbow,wrist,.07),mul(elbow,wrist,.82),thickness*.92,-thickness*.66)},
+    {id:'extensors',d:musclePath(mul(elbow,wrist,.10),mul(elbow,wrist,.80),thickness*.67,thickness*.22)},
+    {id:'ligament',d:bonePath(add(elbow,n,-thickness*.65),add(mul(elbow,wrist,.18),n,-thickness*.38),thickness*.16)}
+  ];
+  return shape.map(p=>({...p,group:STRUCTURES[p.id].group}));
 }
