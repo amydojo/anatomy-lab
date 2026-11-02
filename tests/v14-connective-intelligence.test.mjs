@@ -100,3 +100,19 @@ test('Returned structures and evidence do not mutate canonical state',()=>{
  assert.notEqual(engine.getStructure('medial-meniscus').explanation.overview,'tampered');
  assert.notEqual(engine.getEvidence('medial-meniscus').references[0].title,'tampered');
 });
+
+test('Cross-branch coverage claims are checked rather than trusted',()=>{
+ const coverage={regions:{}};
+ for(const r of knowledge.structures)(coverage.regions[r.region]??={structures:[]}).structures.push({
+  id:r.id,mesh_id:null,geometry_verified:false,attachment_coordinates_validated:false,kinematics_validated:false
+ });
+ assert.equal(validateKnowledge(knowledge,coverage).length,0);
+ coverage.regions.knee.structures[0].geometry_verified=true;
+ assert.ok(validateKnowledge(knowledge,coverage).some(x=>x.code==='UNSUPPORTED_COVERAGE_GEOMETRY'));
+ coverage.regions.knee.structures[0].geometry_verified=false;
+ coverage.regions.knee.structures[0].kinematics_validated=true;
+ assert.ok(validateKnowledge(knowledge,coverage).some(x=>x.code==='UNSUPPORTED_COVERAGE_KINEMATICS'));
+ coverage.regions.knee.structures[0].kinematics_validated=false;
+ coverage.regions.knee.structures[0].registration_error_mm=-3;
+ assert.ok(validateKnowledge(knowledge,coverage).some(x=>x.code==='REGISTRATION_ERROR'));
+});
