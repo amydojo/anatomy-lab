@@ -20,6 +20,9 @@ test('V14: all eight real illustrative knee meshes and source-backed inspector',
  await expect(page.locator('#connective-right')).toContainText('EVIDENCE SOURCES');
  await expect(page.locator('#connective-right')).toContainText('NOT VERIFIED');
  await page.locator('[data-cs-action="isolate"]').click();
+ await page.locator('[data-cs-action="ghost"]').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().ghost)).toBe(false);
+ await page.locator('[data-cs-action="ghost"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().isolateId)).toBe('anterior-cruciate-ligament');
  await page.locator('[data-cs-action="compare"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().comparison.length)).toBe(2);
@@ -36,6 +39,8 @@ test('V14: independent filters, guided evidence and reset',async({page})=>{
  await expect(page.locator('[data-cs-select]')).toHaveCount(2);
  await page.locator('[data-cs-guide="stability"]').click();
  await expect(page.locator('#connective-guides')).toContainText('cruciate');
+ await page.locator('[data-cs-action="isolate-guide"]').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().comparison.length)).toBe(4);
  await page.locator('[data-cs-guide="movement"]').click();
  await expect(page.locator('#connective-guides')).toContainText('quadriceps');
  await page.locator('[data-cs-guide="load-distribution"]').click();

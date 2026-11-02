@@ -150,7 +150,7 @@ const studio=domain.create({provider});
  '<div class="cs-inspector-actions"><button type="button" data-cs-action="focus" '+(!item.selectable?'disabled':'')+'>Focus</button>'+
  '<button type="button" data-cs-action="isolate" '+(!item.selectable?'disabled':'')+'>Isolate</button>'+
  (compareReady?'<button type="button" data-cs-action="compare">Compare ACL / PCL</button>':'')+
- '<button type="button" data-cs-action="context">Context</button></div>'+
+ '<button type="button" data-cs-action="context">Context</button></div><button type="button" class="cs-ghost" data-cs-action="ghost" aria-pressed="'+s.ghost+'">Surrounding anatomy '+(s.ghost?'ghosted':'hidden')+'</button>'+
  '<button type="button" class="cs-disclosure" data-cs-action="details" aria-expanded="'+expanded+'">'+(expanded?'Hide scientific details −':'Attachments, relationships & evidence +')+'</button>'+
  (expanded?'<section class="cs-inspector-depth"><h3>ATTACHMENTS</h3><p>'+esc(rec?[rec.attachments?.proximal,rec.attachments?.distal,rec.attachments?.notes].filter(Boolean).join(' → '):'Knowledge unavailable')+'</p>'+
  '<h3>RELATED BONES</h3><p>'+esc(rec?.relatedBones?.join(', ')||'Not documented')+'</p>'+
@@ -165,7 +165,8 @@ const studio=domain.create({provider});
   const s=studio.snapshot();
   guides.hidden=!opened||s.region!=='knee';
   guides.innerHTML='<span class="cs-overline">KNEE / THREE PERSPECTIVES</span><div class="cs-guide-buttons">'+domain.guides.map(g=>'<button type="button" data-cs-guide="'+g.id+'" aria-pressed="'+(s.guideId===g.id)+'">'+esc(g.title)+'</button>').join('')+'</div>'+
-   (s.guideId?'<p>'+esc(intelligence?.getExploration(s.guideId)?.overview||'Lesson unavailable.')+'</p>':'');
+   (s.guideId?(()=>{const lesson=intelligence?.getExploration(s.guideId),available=(lesson?.structureIds||[]).filter(id=>studio.getStructure(id)?.selectable);
+ return '<p>'+esc(lesson?.overview||'Lesson unavailable.')+'</p><button type="button" class="cs-isolate-perspective" data-cs-action="isolate-guide" '+(available.length?'':'disabled')+'>Show available group · '+available.length+' structures</button>'})():'');
  }
  function render(){
   if(!opened)return;
@@ -176,7 +177,7 @@ const studio=domain.create({provider});
   left.hidden=false;right.hidden=false;mobile.hidden=false;
   left.innerHTML='<header class="cs-panel-header"><span class="cs-overline">BODY / LIVE · V14</span><h2>Connective Studio</h2><p>Explore what holds the body together.</p></header>'+
    regionSelector()+
-   '<section class="cs-tissue-section"><div class="cs-section-title">01 / VISIBLE TISSUES</div><div class="connective-tissue-grid" role="group" aria-label="Independently toggle visible tissues">'+types()+'</div><button type="button" class="cs-all-btn" data-cs-action="all-tissues">All tissues visible</button></section>'+
+   '<section class="cs-tissue-section"><div class="cs-section-title">01 / VISIBLE TISSUES</div><div class="connective-tissue-grid" role="group" aria-label="Independently toggle visible tissues">'+types()+'</div><button type="button" class="cs-all-btn" data-cs-action="all-tissues">All tissues visible</button><div class="cs-view-actions"><button type="button" data-cs-action="all">Show all</button>'+(window.innerWidth>850?'<button type="button" data-cs-action="reset">Reset view</button>':'')+'</div></section>'+
    '<section class="cs-structure-section"><div class="cs-section-title">02 / STRUCTURE EXPLORER</div><label for="connective-search" class="cs-visually-hidden">Search structures</label><input id="connective-search" type="search" placeholder="Find a structure…" value="'+esc(s.query)+'" autocomplete="off"/>'+groupList()+'</section>'+
    '<footer class="cs-panel-footer">Structure information does not imply an available or anatomically verified mesh.</footer>';
   right.innerHTML=inspector();
@@ -208,6 +209,13 @@ const studio=domain.create({provider});
   if(action==='focus'){if(s.selectedId)studio.focusStructure(s.selectedId);return;}
   if(action==='isolate'){if(s.selectedId)studio.isolateStructure(s.selectedId);return;}
   if(action==='compare'){studio.compareStructures(['anterior-cruciate-ligament','posterior-cruciate-ligament']);return;}
+  if(action==='ghost'){studio.setGhost(!s.ghost);return;}
+  if(action==='all'){studio.showAll();return;}
+  if(action==='isolate-guide'){
+   const ids=(intelligence?.getExploration(s.guideId)?.structureIds||[]).filter(id=>studio.getStructure(id)?.selectable);
+   if(ids.length>=2)studio.compareStructures(ids);else if(ids.length===1)studio.isolateStructure(ids[0]);
+   return;
+  }
   if(action==='context'){studio.revealContext();return;}
   if(action==='all-tissues'){for(const t of domain.types)studio.setTissueVisibility(t,true);return;}
  }
