@@ -129,21 +129,38 @@ const studio=domain.create({provider});
  function inspector(){
   const s=studio.snapshot(),item=studio.getStructure(s.selectedId);
   if(!item)return '<div class="connective-inspector-empty"><span class="cs-overline">03 / INSPECT</span><h2>Look closer.</h2><p>Select a structure to understand its location, function, relationships and evidence status.</p><p class="cs-muted">Only registered meshes can be focused or isolated in 3D.</p></div>';
-  const related=(item.relationships||[]).map(id=>studio.getStructure(id)).filter(Boolean);
-  const source=item.source;
-  const status=item.geometryStatus==='verified'?'Geometry labelled verified by registered provider — inspect its provenance':item.geometryStatus==='source-derived'?'Source-derived mesh · expert validation not established':item.geometryStatus==='illustrative'?'Illustrative geometry · not anatomically verified':'No registered 3D geometry';
-  return '<header><span class="cs-overline">03 / STRUCTURE INSPECTOR</span><h2>'+esc(item.name)+'</h2><p class="cs-subtitle">'+esc(typeNames[item.tissueType])+' / '+esc(regionNames[item.region])+'</p></header>'+
-   '<div class="connective-status" role="status">'+esc(status)+'</div>'+
-   '<section class="cs-inspector-primary"><h3>WHERE IT IS</h3><p>'+esc(item.location||'Location not documented.')+'</p><h3>WHY IT MATTERS</h3><p>'+esc(item.significance||'Function not yet documented.')+'</p></section>'+
-   '<div class="cs-inspector-actions"><button type="button" data-cs-action="focus" '+(!item.selectable?'disabled title="Requires registered geometry"':'')+'>Focus in 3D</button><button type="button" data-cs-action="isolate" '+(!item.selectable?'disabled title="Requires registered geometry"':'')+'>Isolate</button><button type="button" data-cs-action="context">Context</button></div>'+
-   '<button type="button" class="cs-disclosure" data-cs-action="details" aria-expanded="'+expanded+'">'+(expanded?'Hide scientific details −':'Attachments, relationships & evidence +')+'</button>'+
-   (expanded?'<section class="cs-inspector-depth"><h3>ATTACHMENTS & RELATIONSHIPS</h3><p>'+esc(item.attachments||'Attachment data unavailable.')+'</p><h3>RELATED STRUCTURES</h3><div class="cs-related">'+(related.length?related.map(x=>'<button type="button" data-cs-select="'+esc(x.id)+'">'+esc(x.name)+'</button>').join(''):'<span>Not yet mapped</span>')+'</div><h3>PROVENANCE</h3><p>'+esc(source?.label||'No citable source registered.')+'</p>'+(source?.url?'<a href="'+esc(source.url)+'" target="_blank" rel="noopener noreferrer">Open reference ↗</a>':'')+'<p class="cs-evidence-note">'+(source?.verified?'Source record reports text verified. Geometry validation is a separate claim.':'Textbook overview; individual assertions have not been passage-audited.')+'</p><h3>GEOMETRY STATUS</h3><p>'+esc(item.geometryStatus||'unavailable')+' · '+(item.selectable?'Mesh registered':'Not selectable in 3D')+'</p></section>':'');
+  const adapter=item.scientific,rec=adapter?.record;
+ const related=(adapter?.relationships||[]).map(x=>x.structure).filter(Boolean);
+ const refs=adapter?.evidence?.references||[];
+ const status=item.geometryStatus==='illustrative'?'ILLUSTRATIVE 3D — not anatomist-reviewed or clinically verified':
+  item.geometryStatus==='source-derived'?'SOURCE-DERIVED SURFACE — independent anatomical review pending':
+  item.geometryStatus==='verified'?'Geometry verification reported; inspect full source chain':'NO REGISTERED 3D GEOMETRY';
+ const evidenceStatus=rec?.knowledgeEvidence?.status==='reference-supported'?'Reference-supported anatomy; no anatomist sign-off':'Anatomical reference not currently available';
+ const pair=['anterior-cruciate-ligament','posterior-cruciate-ligament'];
+ const compareReady=pair.includes(item.id)&&pair.every(id=>studio.getStructure(id)?.selectable);
+ return '<header><span class="cs-overline">03 / ANATOMICAL INSPECTOR</span><h2>'+esc(item.name)+'</h2><p class="cs-subtitle">'+esc(typeNames[item.tissueType])+' / '+esc(regionNames[item.region])+'</p></header>'+
+ '<div class="connective-status" role="status">'+esc(status)+'</div><p class="cs-evidence-note">'+esc(evidenceStatus)+'</p>'+
+ '<section class="cs-inspector-primary"><h3>PRIMARY FUNCTION</h3><p>'+esc(rec?.primaryFunction||item.significance||'Scientific record unavailable.')+'</p>'+
+ '<h3>RELEVANT MOVEMENTS</h3><p>'+esc(rec?.movements?.join(' · ')||'Not documented.')+'</p></section>'+
+ '<div class="cs-inspector-actions"><button type="button" data-cs-action="focus" '+(!item.selectable?'disabled':'')+'>Focus</button>'+
+ '<button type="button" data-cs-action="isolate" '+(!item.selectable?'disabled':'')+'>Isolate</button>'+
+ (compareReady?'<button type="button" data-cs-action="compare">Compare ACL / PCL</button>':'')+
+ '<button type="button" data-cs-action="context">Context</button></div>'+
+ '<button type="button" class="cs-disclosure" data-cs-action="details" aria-expanded="'+expanded+'">'+(expanded?'Hide scientific details −':'Attachments, relationships & evidence +')+'</button>'+
+ (expanded?'<section class="cs-inspector-depth"><h3>ATTACHMENTS</h3><p>'+esc(rec?[rec.attachments?.proximal,rec.attachments?.distal,rec.attachments?.notes].filter(Boolean).join(' → '):'Knowledge unavailable')+'</p>'+
+ '<h3>RELATED BONES</h3><p>'+esc(rec?.relatedBones?.join(', ')||'Not documented')+'</p>'+
+ '<h3>RELATED MUSCLES</h3><p>'+esc(rec?.relatedMuscles?.join(', ')||'Not documented')+'</p>'+
+ '<h3>RELATED CONNECTIVE TISSUES</h3><div class="cs-related">'+(related.length?related.map(x=>'<button type="button" data-cs-select="'+esc(x.id)+'">'+esc(x.name)+'</button>').join(''):'Not mapped')+'</div>'+
+ '<h3>EVIDENCE SOURCES</h3>'+(refs.length?refs.map(x=>'<p>'+esc(x.title+' — '+x.section)+'</p><a href="'+esc(x.url)+'" target="_blank" rel="noopener noreferrer">Read source</a>').join(''):'<p>Reference unavailable.</p>')+
+ '<h3>UNRESOLVED SCIENTIFIC CLAIMS</h3><p>'+esc(rec?.unresolved?.join(' ')||'Scientific review pending.')+'</p>'+
+ '<h3>GEOMETRY VERIFICATION</h3><p>'+esc(status)+'</p><p>'+esc('Geometry verification: '+(adapter?.geometry?.geometryVerified===true?'reported verified':'NOT VERIFIED')+'. No verified attachment coordinates or kinematics.')+'</p></section>':'');
+
  }
  function renderGuides(){
   const s=studio.snapshot();
   guides.hidden=!opened||s.region!=='knee';
   guides.innerHTML='<span class="cs-overline">KNEE / THREE PERSPECTIVES</span><div class="cs-guide-buttons">'+domain.guides.map(g=>'<button type="button" data-cs-guide="'+g.id+'" aria-pressed="'+(s.guideId===g.id)+'">'+esc(g.title)+'</button>').join('')+'</div>'+
-   (s.guideId?'<p>'+esc(domain.guides.find(g=>g.id===s.guideId)?.description||'')+'</p>':'');
+   (s.guideId?'<p>'+esc(intelligence?.getExploration(s.guideId)?.overview||'Lesson unavailable.')+'</p>':'');
  }
  function render(){
   if(!opened)return;
@@ -159,7 +176,7 @@ const studio=domain.create({provider});
   mobile.innerHTML='<button type="button" data-cs-panel="structures" aria-pressed="'+(mobilePanel==='structures')+'">Structures</button><button type="button" data-cs-panel="inspector" aria-pressed="'+(mobilePanel==='inspector')+'">Inspect'+(s.selectedId?' · 1':'')+'</button><button type="button" data-cs-action="reset">Reset</button><button type="button" data-cs-action="close">Exit</button>';
   app.dataset.connectivePanel=mobilePanel;
   const hasGeometry=s.records.some(r=>r.region===s.region&&r.selectable);
-  const status=hasGeometry?'Registered geometry available for some structures':'No registered connective meshes in this region yet';
+  const status=!intelligence?knowledgeError:(hasGeometry?'Connective geometry shown for education; geometry verification pending':'No registered connective geometry in this region');
   const stage=$('scene-status');
   if(stage)stage.textContent=statusMessage||status.toUpperCase();
   if(window.innerWidth>850)atlas.setInspectorFrame?.(false,true);
@@ -177,6 +194,7 @@ const studio=domain.create({provider});
   if(action==='reset'){studio.resetView();atlas.recenter?.();render();return;}
   if(action==='focus'){if(s.selectedId)studio.focusStructure(s.selectedId);return;}
   if(action==='isolate'){if(s.selectedId)studio.isolateStructure(s.selectedId);return;}
+  if(action==='compare'){studio.compareStructures(['anterior-cruciate-ligament','posterior-cruciate-ligament']);return;}
   if(action==='context'){studio.revealContext();return;}
   if(action==='all-tissues'){for(const t of domain.types)studio.setTissueVisibility(t,true);return;}
  }
@@ -205,6 +223,13 @@ const studio=domain.create({provider});
   if(target?.matches?.('input,textarea,select,[contenteditable]'))return;
   if(e.key==='/'&&!e.shiftKey){e.preventDefault();$('connective-search')?.focus();}
  },true);
+ window.addEventListener('body:structure-selected',event=>{
+  if(!opened)return;
+  const id=event.detail?.id;
+  if(id&&studio.snapshot().selectedId!==id&&studio.getStructure(id)){
+   studio.selectStructure(id);expanded=false;mobilePanel='inspector';render();
+  }
+ });
  window.addEventListener('body:region-ready',()=>{if(opened){isChangingRegion=false;statusMessage='';refreshRenderer();render();}});
  window.addEventListener('body:connective-geometry-ready',()=>{if(opened){refreshRenderer();render();}});
  window.addEventListener('resize',()=>{if(opened){atlas.setMobileFrame?.(window.innerWidth<=850);render();}},{passive:true});

@@ -1,18 +1,19 @@
-# V14 integration gate (not release approval)
+# V14 Integration Gate · PR #37 — DRAFT
+Sources integrated as merge parents:
+- A #34 42d4a74f9153ab2c582ddabe81a4c4d9091639c2
+- B #35 6e79e2cbb4ca18923a3ec1fbdddb2c2166b25d61
+- C #36 546709f4abc8b8c729bb8a448e1d39950bc29fe9
 
-Source PRs: #34 geometry, #35 interaction, #36 intelligence. Integration base: V13 main ca9d26fe3f072e2e34c0401cb545a017c2fe7697.
+Controller: A BodyConnectiveMode mount + B atlas bridge, plus detail-aware connectiveEnable.
+Renderer: A eight procedural buffers, buffer cleanup and hit-testing, B filters and ghost/isolate
+normalized to singular ligament/tendon/fibrocartilage; source status explicitly illustrative.
+HTML: A atlas-connective.js, C connective-intelligence.js and B Studio scripts in deferred order.
 
-## Conflicts requiring manual reconciliation
-- assets/atlas/atlas-controller.js: preserve #34 BodyConnectiveMode mount and #35 __BODY_ATLAS__ connective bridge.
-- assets/atlas/atlas-renderer.js: preserve #34 illustrative knee mesh buffers, state and drawing; incorporate #35 filtering/ghosting without suppressing illustrated mesh visibility. Tissue taxonomy differs: #34 singular ligament/tendon/fibrocartilage vs #35 plural ligaments/tendons/fibrocartilage.
-- atlas/index.html: load atlas-connective.js before renderer, and connective-studio.css/core/ui in valid dependency order. Include intelligence adapter script before consuming it.
+C is the authoritative scientific knowledge registry. Eight knee IDs join by exact
+canonicalCoverageId/illustrative_geometry_id, no fuzzy display-name matching.
+C reference-supported knowledge does NOT imply geometrically verified source meshes.
 
-## Required checks before approval
-1. Merge each source branch into this branch, resolving conflicts with source-specific tests. No source branch rewrites.
-2. Ensure 8 illustrated knee structures are addressable and remain explicitly marked ILLUSTRATIVE, not verified geometry.
-3. Wire #36 intelligence records and evidence graph into #35 inspector, preserving canonical IDs and graceful fallback.
-4. Execute source, JS, Python, desktop Chromium, mobile Chromium, mobile WebKit, hosted preview regressions; record exact counts and artifacts.
-5. Inspect actual knee on iPhone and desktop: select ACL/PCL/MCL/LCL, quadriceps tendon/patellar ligament and both menisci; isolate, compare, reset, gestures, overlays and source disclosures.
-6. No production merge/deploy until full gates pass.
-
-This document is a coordination artifact only; presence of this file does NOT mean integration or testing completed.
+NO RELEASE APPROVAL: all 8 knee meshes remain illustrative, 18 other regions unavailable.
+Remaining gates: cross-platform browser regression, dedicated integration assertions,
+hosted exact-SHA visual interactions, scientific morphology/attachments reviewer sign-off.
+Do not merge into main; do not deploy production.
