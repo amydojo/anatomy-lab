@@ -26,7 +26,7 @@ test('V14: all eight real illustrative knee meshes and source-backed inspector',
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().isolateId)).toBe('anterior-cruciate-ligament');
  await page.locator('[data-cs-action="compare"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().comparison.length)).toBe(2);
- await page.locator('[data-cs-select="posterior-cruciate-ligament"]').click();
+ await page.locator('#connective-left [data-cs-select="posterior-cruciate-ligament"]').click();
  await expect(page.locator('#connective-right')).toContainText('posterior');
  expect(errors).toEqual([]);
 });
@@ -45,7 +45,7 @@ test('V14: independent filters, guided evidence and reset',async({page})=>{
  await expect(page.locator('#connective-guides')).toContainText('quadriceps');
  await page.locator('[data-cs-guide="load-distribution"]').click();
  await expect(page.locator('#connective-guides')).toContainText('menisci');
- await page.locator('[data-cs-action="reset"]').click();
+ await page.locator(page.viewportSize().width>850?'#connective-left [data-cs-action="reset"]':'#connective-mobile-nav [data-cs-action="reset"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().guideId)).toBe(null);
  expect(errors).toEqual([]);
 });
