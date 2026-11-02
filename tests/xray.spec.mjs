@@ -14,7 +14,7 @@ async function mockCamera(page){
    return {getTracks:()=>[track],getVideoTracks:()=>[track]};
   }}});
   for(const [key,value] of [['videoWidth',640],['videoHeight',480]])
-   Object.defineProperty(HTMLVideoElement.prototype,key,{configurable:true,get:()=>value});
+   Object.defineProperty(HTMLVideoElement.prototype,key,{configurable:true,get(){return this.srcObject?value:0;}});
   Object.defineProperty(HTMLMediaElement.prototype,'readyState',{configurable:true,get:()=>4});
   Object.defineProperty(HTMLMediaElement.prototype,'currentTime',{configurable:true,get:()=>performance.now()/1000});
   HTMLMediaElement.prototype.play=async function(){};
@@ -52,6 +52,11 @@ test('pause releases mock camera and resumes with a new stream',async({page})=>{
  await page.locator('#launch').click();
  await expect(page.locator('#status')).toHaveText('TRACKING ARM',{timeout:12000});
  await page.locator('#pause').click();await expect(page.locator('#status')).toHaveText('FRAME PAUSED');
+ await expect(page.locator('[data-id="biceps"]')).toBeVisible();
+ await page.locator('#scale').fill('120');
+ await expect(page.locator('[data-id="biceps"]')).toBeVisible();
+ await page.locator('[data-id="biceps"]').click();
+ await expect(page.locator('#structure-name')).toHaveText('Biceps brachii');
  expect(await page.evaluate(()=>globalThis.__tracks[0].readyState)).toBe('ended');
  await page.locator('#resume').click();await expect(page.locator('#status')).toHaveText('TRACKING ARM',{timeout:12000});
  expect(await page.evaluate(()=>globalThis.__tracks.length)).toBe(2);
