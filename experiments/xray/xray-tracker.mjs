@@ -71,6 +71,7 @@ export function makeCloseupTracker(){
     get lost(){return lost;},
     update(frame){
       if(!this.ready)return {ok:false,reason:'Tap your elbow, then wrist to set two anchors.'};
+      if(lost)return {ok:false,reason:'Anchor lock lost. Reset anchors and recalibrate.'};
       const next={};
       for(const key of ['elbow','wrist']){
         const a=anchors[key],match=matchPatch(frame,a.patch,a.x,a.y);
