@@ -146,6 +146,7 @@ function mount({model,render,U}){
  button.onclick=()=>{active=!active;panel.hidden=!active;button.setAttribute('aria-pressed',String(active));if(active)open(current);else syncState();};
  panel.querySelector('[data-close]').onclick=()=>{active=false;panel.hidden=true;button.setAttribute('aria-pressed','false');syncState();};
  window.addEventListener('body:region-ready',ev=>open(ev.detail.region));
+ window.addEventListener('body:structure-selected',ev=>{if(record[ev.detail?.id]&&current==='knee'){inspect(ev.detail.id);syncState();}});
  window.addEventListener('body:region-exited',()=>{active=false;open(null);});
  return Object.freeze({open,inspect});
 }
