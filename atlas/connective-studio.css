@@ -111,3 +111,8 @@
 @media(prefers-reduced-motion:reduce){
  .connective-explorer,.connective-inspector,.connective-guides{scroll-behavior:auto!important;transition:none!important}
 }
+
+.cs-ghost{border:1px solid #524037;background:none;color:#cbb4a2;border-radius:5px;min-height:40px;padding:8px 11px;width:100%;text-align:left;font-size:11px;margin:0 0 9px}
+.cs-ghost[aria-pressed=true]{border-color:#9b765c;color:#eac6a8}
+.cs-isolate-perspective{background:#2d2119;color:#ecd0b8;border:1px solid #866348;border-radius:6px;min-height:39px;padding:8px 12px;font-size:11px;margin-top:5px}
+.cs-isolate-perspective:disabled{opacity:.55;cursor:not-allowed}

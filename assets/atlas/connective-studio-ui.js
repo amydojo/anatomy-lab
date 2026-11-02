@@ -116,11 +116,13 @@
   if(!item)return '<div class="connective-inspector-empty"><span class="cs-overline">03 / INSPECT</span><h2>Look closer.</h2><p>Select a structure to understand its location, function, relationships and evidence status.</p><p class="cs-muted">Only registered meshes can be focused or isolated in 3D.</p></div>';
   const related=(item.relationships||[]).map(id=>studio.getStructure(id)).filter(Boolean);
   const source=item.source;
+  const comparables=related.filter(x=>x.selectable&&x.visible);
+  const comparisonEnabled=item.selectable&&item.visible&&comparables.length>=1;
   const status=item.geometryStatus==='verified'?'Geometry labelled verified by registered provider — inspect its provenance':item.geometryStatus==='source-derived'?'Source-derived mesh · expert validation not established':item.geometryStatus==='illustrative'?'Illustrative geometry · not anatomically verified':'No registered 3D geometry';
   return '<header><span class="cs-overline">03 / STRUCTURE INSPECTOR</span><h2>'+esc(item.name)+'</h2><p class="cs-subtitle">'+esc(typeNames[item.tissueType])+' / '+esc(regionNames[item.region])+'</p></header>'+
    '<div class="connective-status" role="status">'+esc(status)+'</div>'+
    '<section class="cs-inspector-primary"><h3>WHERE IT IS</h3><p>'+esc(item.location||'Location not documented.')+'</p><h3>WHY IT MATTERS</h3><p>'+esc(item.significance||'Function not yet documented.')+'</p></section>'+
-   '<div class="cs-inspector-actions"><button type="button" data-cs-action="focus" '+(!item.selectable?'disabled title="Requires registered geometry"':'')+'>Focus in 3D</button><button type="button" data-cs-action="isolate" '+(!item.selectable?'disabled title="Requires registered geometry"':'')+'>Isolate</button><button type="button" data-cs-action="context">Context</button></div>'+
+   '<div class="cs-inspector-actions"><button type="button" data-cs-action="focus" '+(!item.selectable?'disabled title="Requires registered geometry"':'')+'>Focus in 3D</button><button type="button" data-cs-action="isolate" '+(!item.selectable?'disabled title="Requires registered geometry"':'')+'>Isolate</button><button type="button" data-cs-action="compare" '+(!comparisonEnabled?'disabled title="Requires at least two registered related meshes"':'')+'>Compare related</button><button type="button" data-cs-action="all">Show all</button></div><button type="button" class="cs-ghost" data-cs-action="ghost" aria-pressed="'+s.ghost+'">Surrounding context '+(s.ghost?'visible as ghost':'hidden when isolating')+'</button>'+
    '<button type="button" class="cs-disclosure" data-cs-action="details" aria-expanded="'+expanded+'">'+(expanded?'Hide scientific details −':'Attachments, relationships & evidence +')+'</button>'+
    (expanded?'<section class="cs-inspector-depth"><h3>ATTACHMENTS & RELATIONSHIPS</h3><p>'+esc(item.attachments||'Attachment data unavailable.')+'</p><h3>RELATED STRUCTURES</h3><div class="cs-related">'+(related.length?related.map(x=>'<button type="button" data-cs-select="'+esc(x.id)+'">'+esc(x.name)+'</button>').join(''):'<span>Not yet mapped</span>')+'</div><h3>PROVENANCE</h3><p>'+esc(source?.label||'No citable source registered.')+'</p>'+(source?.url?'<a href="'+esc(source.url)+'" target="_blank" rel="noopener noreferrer">Open reference ↗</a>':'')+'<p class="cs-evidence-note">'+(source?.verified?'Source record reports text verified. Geometry validation is a separate claim.':'Textbook overview; individual assertions have not been passage-audited.')+'</p><h3>GEOMETRY STATUS</h3><p>'+esc(item.geometryStatus||'unavailable')+' · '+(item.selectable?'Mesh registered':'Not selectable in 3D')+'</p></section>':'');
  }
@@ -128,7 +130,10 @@
   const s=studio.snapshot();
   guides.hidden=!opened||s.region!=='knee';
   guides.innerHTML='<span class="cs-overline">KNEE / THREE PERSPECTIVES</span><div class="cs-guide-buttons">'+domain.guides.map(g=>'<button type="button" data-cs-guide="'+g.id+'" aria-pressed="'+(s.guideId===g.id)+'">'+esc(g.title)+'</button>').join('')+'</div>'+
-   (s.guideId?'<p>'+esc(domain.guides.find(g=>g.id===s.guideId)?.description||'')+'</p>':'');
+   (s.guideId?(()=>{
+    const guide=domain.guides.find(g=>g.id===s.guideId),items=guide.ids.map(id=>studio.getStructure(id)).filter(x=>x?.selectable&&x.visible);
+    return '<p>'+esc(guide.description)+'</p><button type="button" class="cs-isolate-perspective" data-cs-action="isolate-guide" '+(!items.length?'disabled title="Registered anatomy required"':'')+'>Isolate available group'+(items.length?' · '+items.length+' meshes':' · geometry pending')+'</button>';
+   })():'');
  }
  function render(){
   if(!opened)return;
@@ -163,6 +168,19 @@
   if(action==='focus'){if(s.selectedId)studio.focusStructure(s.selectedId);return;}
   if(action==='isolate'){if(s.selectedId)studio.isolateStructure(s.selectedId);return;}
   if(action==='context'){studio.revealContext();return;}
+  if(action==='ghost'){studio.setGhost(!s.ghost);return;}
+  if(action==='all'){studio.showAll();return;}
+  if(action==='compare'){
+   const item=studio.getStructure(s.selectedId);
+   if(item)studio.compareStructures([item.id,...item.relationships]);return;
+  }
+  if(action==='isolate-guide'){
+   const guide=domain.guides.find(x=>x.id===s.guideId);
+   const available=(guide?.ids||[]).filter(id=>studio.getStructure(id)?.selectable&&studio.getStructure(id)?.visible);
+   if(available.length>=2)studio.compareStructures(available);
+   else if(available.length===1)studio.isolateStructure(available[0]);
+   return;
+  }
   if(action==='all-tissues'){for(const t of domain.types)studio.setTissueVisibility(t,true);return;}
  }
  workspace.addEventListener('click',e=>{
