@@ -101,7 +101,19 @@ function validateKnowledge(data,coverage){
  if(coverage){
   const rows=Object.entries(coverage.regions||{}).flatMap(([region,entry])=>(entry.structures||[]).map(s=>({...s,region})));
   if(rows.length!==26)fail('INVENTORY_COUNT','coverage','Coverage inventory should list 26 targets');
-  for(const s of rows){const rec=byId[s.id];if(!rec)fail('INVENTORY_MISSING',s.id,'Coverage ID has no knowledge entry');else if(rec.region!==s.region)fail('INVENTORY_REGION',s.id,'Region mismatch with geometry operator inventory')}
+  for(const s of rows){
+   const rec=byId[s.id];
+   if(!rec)fail('INVENTORY_MISSING',s.id,'Coverage ID has no knowledge entry');
+   else if(rec.region!==s.region)fail('INVENTORY_REGION',s.id,'Region mismatch with geometry operator inventory');
+   if(s.geometry_verified===true&&!(s.mesh_id&&s.source_uri&&s.license&&s.sha256&&s.shared_coordinate_frame_validated===true&&s.anatomist_reviewed===true))
+     fail('UNSUPPORTED_COVERAGE_GEOMETRY',s.id,'Inventory asserts verified mesh without source, hash, shared frame and expert review');
+   if(s.attachment_coordinates_validated===true&&s.geometry_verified!==true)
+     fail('UNSUPPORTED_COVERAGE_ATTACHMENT',s.id,'Attachment claim requires geometry proof');
+   if(s.kinematics_validated===true&&s.attachment_coordinates_validated!==true)
+     fail('UNSUPPORTED_COVERAGE_KINEMATICS',s.id,'Kinematics claim requires attachment validation');
+   if(s.registration_error_mm!=null&&(!Number.isFinite(s.registration_error_mm)||s.registration_error_mm<0))
+     fail('REGISTRATION_ERROR',s.id,'Registration residual must be a nonnegative finite number or unresolved');
+  }
   for(const rec of items)if(!rows.some(s=>s.id===rec.id))fail('KNOWLEDGE_ORPHAN',rec.id,'No matching canonical coverage entry');
  }
  return errors;
