@@ -1,0 +1,408 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/amydojo/anatomy-lab/blob/main/atlas/assets/v14-connective-knowledge.schema.json",
+  "title": "BODY / LIVE V14 connective knowledge (independent of mesh verification)",
+  "type": "object",
+  "required": [
+    "schema",
+    "version",
+    "targetCount",
+    "sources",
+    "structures",
+    "relationships",
+    "explorations",
+    "policy"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "body-live/connective-knowledge-v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "targetCount": {
+      "const": 26
+    },
+    "sourceInventory": {
+      "type": "object"
+    },
+    "sources": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "title",
+          "url",
+          "section",
+          "publisher",
+          "verification"
+        ],
+        "properties": {
+          "title": {
+            "$ref": "#/$defs/nonempty"
+          },
+          "url": {
+            "type": "string",
+            "pattern": "^https://"
+          },
+          "section": {
+            "$ref": "#/$defs/nonempty"
+          },
+          "publisher": {
+            "$ref": "#/$defs/nonempty"
+          },
+          "verification": {
+            "$ref": "#/$defs/nonempty"
+          }
+        }
+      }
+    },
+    "structures": {
+      "type": "array",
+      "minItems": 26,
+      "maxItems": 26,
+      "items": {
+        "$ref": "#/$defs/structure"
+      }
+    },
+    "relationships": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/edge"
+      }
+    },
+    "explorations": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "region",
+          "title",
+          "structureIds",
+          "overview",
+          "detail",
+          "sourceRefs"
+        ]
+      }
+    },
+    "policy": {
+      "type": "object"
+    }
+  },
+  "$defs": {
+    "nonempty": {
+      "type": "string",
+      "minLength": 1
+    },
+    "edge": {
+      "type": "object",
+      "required": [
+        "from",
+        "to",
+        "type",
+        "direction",
+        "sourceRefs"
+      ],
+      "properties": {
+        "from": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "to": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "type": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "direction": {
+          "enum": [
+            "directed",
+            "symmetric"
+          ]
+        },
+        "sourceRefs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonempty"
+          }
+        }
+      }
+    },
+    "structure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "canonicalCoverageId",
+        "name",
+        "synonyms",
+        "region",
+        "laterality",
+        "tissueClass",
+        "attachments",
+        "anatomicalRelationships",
+        "functionIds",
+        "primaryFunction",
+        "movements",
+        "relatedBones",
+        "relatedMuscles",
+        "explanation",
+        "sourceRefs",
+        "knowledgeEvidence",
+        "geometry",
+        "validationStatus",
+        "unresolved"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "canonicalCoverageId": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "name": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "synonyms": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "region": {
+          "enum": [
+            "knee",
+            "shoulder",
+            "hip",
+            "ankle",
+            "wrist",
+            "spine"
+          ]
+        },
+        "laterality": {
+          "enum": [
+            "bilateral-template",
+            "axial-segmental"
+          ]
+        },
+        "tissueClass": {
+          "enum": [
+            "tendon",
+            "ligament",
+            "ligament-complex",
+            "fibrocartilage",
+            "fibrocartilage-complex",
+            "retinaculum",
+            "elastic-ligament"
+          ]
+        },
+        "attachments": {
+          "type": "object",
+          "required": [
+            "proximal",
+            "distal"
+          ],
+          "properties": {
+            "proximal": {
+              "$ref": "#/$defs/nonempty"
+            },
+            "distal": {
+              "$ref": "#/$defs/nonempty"
+            },
+            "notes": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "anatomicalRelationships": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "targetId",
+              "type",
+              "direction",
+              "sourceRefs"
+            ],
+            "properties": {
+              "targetId": {
+                "$ref": "#/$defs/nonempty"
+              },
+              "type": {
+                "$ref": "#/$defs/nonempty"
+              },
+              "direction": {
+                "enum": [
+                  "directed",
+                  "symmetric"
+                ]
+              },
+              "sourceRefs": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/$defs/nonempty"
+                }
+              }
+            }
+          }
+        },
+        "functionIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonempty"
+          }
+        },
+        "primaryFunction": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "movements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonempty"
+          }
+        },
+        "relatedBones": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonempty"
+          }
+        },
+        "relatedMuscles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonempty"
+          }
+        },
+        "explanation": {
+          "type": "object",
+          "required": [
+            "overview",
+            "detail"
+          ],
+          "properties": {
+            "overview": {
+              "$ref": "#/$defs/nonempty"
+            },
+            "detail": {
+              "$ref": "#/$defs/nonempty"
+            }
+          }
+        },
+        "sourceRefs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonempty"
+          }
+        },
+        "knowledgeEvidence": {
+          "type": "object",
+          "required": [
+            "status",
+            "confidence",
+            "anatomistReviewed",
+            "citationCheck"
+          ],
+          "properties": {
+            "status": {
+              "const": "reference-supported"
+            },
+            "confidence": {
+              "$ref": "#/$defs/nonempty"
+            },
+            "anatomistReviewed": {
+              "const": false
+            },
+            "citationCheck": {
+              "$ref": "#/$defs/nonempty"
+            }
+          }
+        },
+        "geometry": {
+          "type": "object",
+          "required": [
+            "status",
+            "meshId",
+            "sourceMeshId",
+            "license",
+            "provenanceHash",
+            "coordinateFrameValidated",
+            "geometryVerified",
+            "attachmentCoordinatesValidated",
+            "kinematicsValidated",
+            "anatomistReviewed"
+          ],
+          "properties": {
+            "status": {
+              "enum": [
+                "unverified",
+                "source-linked-unverified",
+                "verified"
+              ]
+            },
+            "meshId": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "sourceMeshId": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "license": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "provenanceHash": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "coordinateFrameValidated": {
+              "type": "boolean"
+            },
+            "geometryVerified": {
+              "type": "boolean"
+            },
+            "attachmentCoordinatesValidated": {
+              "type": "boolean"
+            },
+            "kinematicsValidated": {
+              "type": "boolean"
+            },
+            "anatomistReviewed": {
+              "type": "boolean"
+            }
+          }
+        },
+        "validationStatus": {
+          "$ref": "#/$defs/nonempty"
+        },
+        "unresolved": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonempty"
+          }
+        }
+      }
+    }
+  }
+}

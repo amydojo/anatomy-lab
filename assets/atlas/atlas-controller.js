@@ -755,7 +755,32 @@ function setup(){
   if(new URLSearchParams(location.search).get('evidence')==='1'){setEvidence('evidence');showEvidence();}
  }).catch(err=>fallback(err.message));
 }
+function connectiveEnable(enabled=true){
+ if(!enabled){model.setConnectiveState({enabled:false});render();return true;}
+ if(U.getRegion()!=='knee'||!model.hasDetail('knee'))return false;
+ try{if(!model.loadConnectiveIllustrations('knee'))return false;}
+ catch(err){console.warn('Illustrative knee geometry unavailable',err);return false;}
+ model.setConnectiveState({enabled:true,visible:{bones:true,muscles:true,ligament:true,tendon:true,fibrocartilage:true}});
+ render();return true;
+}
+// V14: minimal public renderer seam for standalone connective components.
+function connectiveFilter(filter,ids,ghost){model.setConnectiveFilter(filter,ids,ghost);render();return true;}
+function connectiveFocus(id){
+ if(state.data.view!=='detail'||!U.getRegion())return false;
+ const bounds=model.getStructureBounds(U.getRegion(),id);
+ if(!bounds||!U.selectById(id))return false;
+ const c=state.data.camera;
+ animateCamera({...c,target:bounds.center,frameSpan:Math.max(.35,Math.min(3.2,bounds.radius*3.8)),zoom:1.1},reduce()?0:360);
+ return true;
+}
+function connectiveOrientation(yaw,pitch){
+ if(state.data.view!=='detail')return false;
+ const c=state.data.camera;
+ animateCamera({...c,yaw:shortestYaw(c.yaw,Number(yaw)||0),pitch:Math.max(-1.3,Math.min(1.3,Number(pitch)||0))},reduce()?0:340);
+ return true;
+}
 const U=window.BodyAtlasUnified.create({state,model,loader,render,updateURL,resize,setExpanded,reduce,centerPoint,shortestYaw,enableControls,NOTE,LABEL,navigate:region=>choose(region)});
-window.__BODY_ATLAS__={getState:()=>({...state.snapshot(),renderer:model.stats(),unified:U.snapshot(),assetsLoaded:loaded,overviewLoaded,expansionLoaded,facialLoaded,osteologyLoaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,recenter,focusOsteology,clearOsteologyFocus,setInspectorFrame,setMobileFrame,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode};
+window.BodyConnectiveMode?.mount({model,render,U});
+window.__BODY_ATLAS__={getState:()=>({...state.snapshot(),renderer:model.stats(),unified:U.snapshot(),assetsLoaded:loaded,overviewLoaded,expansionLoaded,facialLoaded,osteologyLoaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,recenter,focusOsteology,clearOsteologyFocus,setInspectorFrame,setMobileFrame,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode,connectiveFilter,connectiveEnable,connectiveFocus,connectiveOrientation,connectiveSelect:id=>U.selectById(id),connectiveClear:()=>{U.clearSelection();render();},connectiveStructure:(region,id)=>model.getStructure(region,id),connectiveReset:()=>{model.setConnectiveFilter(null,null,false);U.reset();}};
 setup();
 })();

@@ -1,0 +1,124 @@
+/* V14 Connective Studio. Scoped; V13 layout is unchanged when closed. */
+#connective-left[hidden],#connective-right[hidden],#connective-guides[hidden],#connective-mobile-nav[hidden]{display:none!important}
+.connective-entry{border-color:#ad8065!important;color:#f0d1b9!important;white-space:nowrap}
+.app[data-connective-studio=true] .region-dock,
+.app[data-connective-studio=true] #overview-system-switch,
+.app[data-connective-studio=true] #atlas-sidebar,
+.app[data-connective-studio=true] #controlbar,
+.app[data-connective-studio=true] #desktop-studio,
+.app[data-connective-studio=true] #mobile-workbench,
+.app[data-connective-studio=true] .stage-bottom,
+.app[data-connective-studio=true] #joint-motion,
+.app[data-connective-studio=true] #structure-chip,
+.app[data-connective-studio=true] #hotspots,
+.app[data-connective-studio=true] .shoulder-rig-tools{display:none!important}
+.app[data-connective-studio=true] .workspace{display:grid;grid-template-columns:minmax(230px,272px) minmax(0,1fr) minmax(270px,330px);gap:0;min-height:0}
+.app[data-connective-studio=true] #atlas-stage{grid-column:2;grid-row:1;min-width:0;min-height:0}
+.connective-explorer,.connective-inspector{min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;background:#191512;color:#efebe7;padding:22px 19px;border-color:#43372f}
+.connective-explorer{grid-column:1;grid-row:1;border-right:1px solid #43372f}
+.connective-inspector{grid-column:3;grid-row:1;border-left:1px solid #43372f;padding:25px 21px}
+.cs-overline,.cs-section-title,.connective-region-label{display:block;color:#be9f8e;font-weight:760;font-size:10px;letter-spacing:.15em;line-height:1.5}
+.cs-panel-header h2{font:400 30px/1.03 Georgia,serif;letter-spacing:-.035em;margin:12px 0 6px}
+.cs-panel-header p,.connective-inspector-empty p{font-size:12px;color:#b8a9a0;line-height:1.6;margin:0 0 20px}
+.connective-region-label{margin-top:22px;margin-bottom:9px}
+#connective-region,#connective-search{display:block;width:100%;min-height:44px;color:#f4e8dd;background:#211b17;border:1px solid #635047;border-radius:7px;padding:11px 12px;appearance:auto}
+#connective-search{appearance:none;margin:10px 0 15px}
+.cs-tissue-section{border-top:1px solid #42362e;margin-top:21px;padding-top:20px}
+.connective-tissue-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:12px}
+.connective-tissue{display:flex;justify-content:space-between;align-items:center;text-align:left;gap:6px;background:#241d18;border:1px solid #504037;border-radius:8px;padding:9px 10px;font-size:11px;min-height:44px}
+.connective-tissue[aria-pressed=true]{background:#493327;border-color:#b58a6e;color:#fbe1ce}
+.connective-tissue[aria-pressed=false]{color:#8b8178}
+.connective-tissue span:last-child{font-size:10px;color:#d2a689}
+.cs-all-btn{background:none;border:0;border-bottom:1px solid #826451;border-radius:0;color:#d2b49b;padding:10px 2px 5px;margin-top:6px;font-size:11px}
+.cs-structure-section{border-top:1px solid #42362e;margin-top:21px;padding-top:20px}
+.connective-list{display:flex;flex-direction:column;gap:12px}
+.connective-group h3{display:flex;justify-content:space-between;color:#ad9688;font-size:10px;text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin:8px 0}
+.connective-group h3 span{font-variant-numeric:tabular-nums}
+.connective-group button{display:block;width:100%;border:0;border-top:1px solid #41352d;border-radius:0;padding:13px 5px;text-align:left;background:none;min-height:54px}
+.connective-group button:hover,.connective-group button:focus-visible{background:#35271f}
+.connective-group button[aria-current=true]{background:#443025;border-left:2px solid #d8a17b;padding-left:11px}
+.connective-list-name{display:block;font-size:13px;line-height:1.3;font-weight:550}
+.connective-item-state{display:block;color:#a69182;font-size:9px;letter-spacing:.10em;margin-top:5px}
+.connective-empty,.cs-panel-footer,.cs-evidence-note,.cs-muted{font-size:11px!important;color:#a89b90!important;line-height:1.55}
+.cs-panel-footer{margin:22px 0 0;border-top:1px solid #42352b;padding:14px 0}
+.connective-inspector header h2{font:400 clamp(27px,2.6vw,37px)/1.08 Georgia,serif;letter-spacing:-.03em;margin:13px 0 5px}
+.cs-subtitle{margin:0 0 17px;color:#c8a68d;font-size:11px}
+.connective-status{border-top:1px solid #72533f;border-bottom:1px solid #72533f;padding:11px 0;font-size:11px;color:#dec1a8;line-height:1.5}
+.cs-inspector-primary{padding-top:14px}
+.cs-inspector-primary h3,.cs-inspector-depth h3{font-size:9px;color:#ac927f;letter-spacing:.16em;margin:22px 0 7px}
+.cs-inspector-primary p,.cs-inspector-depth p{font-size:13px;color:#e2d7cb;line-height:1.62;margin:0 0 5px}
+.cs-inspector-actions{display:flex;flex-wrap:wrap;gap:7px;padding:20px 0}
+.cs-inspector-actions button{border:1px solid #85634c;background:#443025;border-radius:7px;min-height:44px;padding:8px 12px;font-size:11px}
+.cs-inspector-actions button:first-child{background:#d9aa87;color:#1d130f;border-color:#e5c1a5;font-weight:700}
+.cs-inspector-actions button:disabled{background:#29231e;border-color:#4a3a30;color:#8c7d70;cursor:not-allowed}
+.cs-disclosure{width:100%;text-align:left;border:0;border-top:1px solid #514138;border-bottom:1px solid #514138;border-radius:0;background:transparent;padding:15px 0;min-height:44px;color:#ddbb9f;font-size:12px}
+.cs-inspector-depth{padding:3px 0 20px}
+.cs-inspector-depth a{display:inline-block;margin:12px 0;color:#e4b58d;text-underline-offset:3px}
+.cs-related{display:flex;flex-wrap:wrap;gap:7px}
+.cs-related button{border-radius:4px;border:1px solid #695344;background:#2a201b;min-height:40px;padding:8px 10px;font-size:11px}
+.cs-visually-hidden{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+.connective-inspector-empty{padding-top:36px}
+.connective-inspector-empty h2{font:400 35px/1.1 Georgia,serif;letter-spacing:-.03em;margin:15px 0}
+.connective-guides{position:absolute;top:60px;left:50%;transform:translateX(-50%);z-index:5;width:min(620px,calc(100% - 28px));text-align:center;pointer-events:auto}
+.connective-guides .cs-overline{font-size:9px;color:#e1c7b2}
+.cs-guide-buttons{display:flex;gap:6px;justify-content:center;margin:8px auto;max-width:540px}
+.cs-guide-buttons button{flex:1;min-height:42px;background:#221a16ea;border:1px solid #775c48;color:#f3dfcf;border-radius:6px;font-size:12px;white-space:nowrap;padding:8px}
+.cs-guide-buttons button[aria-pressed=true]{background:#ddad87;color:#22150f;border-color:#edc8ac}
+.connective-guides p{max-width:480px;margin:10px auto 0;color:#f1e2d5;background:#201811df;padding:8px 12px;font-size:11px;line-height:1.5}
+.app[data-connective-studio=true] .stage-meta{top:15px;left:18px;right:18px}
+.connective-mobile-nav{display:none}
+.app[data-connective-studio=true] .topbar .masthead{display:none}
+.app[data-connective-studio=true] #evidence-toggle{display:none}
+@media(max-width:1000px) and (min-width:851px){
+ .app[data-connective-studio=true] .workspace{grid-template-columns:230px minmax(0,1fr) 270px}
+ .connective-explorer,.connective-inspector{padding-left:14px;padding-right:14px}
+}
+@media(max-width:850px){
+ .app[data-connective-studio=true] .topbar{height:58px;flex-basis:58px;padding-left:13px;padding-right:13px}
+ .connective-entry{font-size:11px;min-height:42px;padding:8px 11px}
+ .app[data-connective-studio=true] .workspace{display:block;position:relative;overflow:hidden}
+ .app[data-connective-studio=true] #atlas-stage{position:absolute;inset:0;width:100%;height:100%;min-height:0}
+ .app[data-connective-studio=true] .stage-meta{top:13px;left:12px;right:12px;font-size:8px;gap:8px}
+ .app[data-connective-studio=true] .stage-meta span:last-child{max-width:53%;font-size:8px}
+ .connective-guides{top:56px;width:calc(100% - 18px)}
+ .connective-guides .cs-overline{font-size:8px}
+ .cs-guide-buttons{gap:4px}
+ .cs-guide-buttons button{font-size:10px;padding:8px 4px;min-height:44px}
+ .connective-guides p{font-size:10px;max-width:290px;line-height:1.35}
+ .connective-explorer,.connective-inspector{position:absolute;z-index:12;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));height:min(43dvh,450px);overflow:auto;box-shadow:0 -8px 30px #0e0a08a8;border:1px solid #6a5140;border-bottom:0;border-radius:15px 15px 0 0;padding:17px 17px 22px;background:#1c1714}
+ .app[data-connective-panel=structures] #connective-right{display:none}
+ .app[data-connective-panel=inspector] #connective-left{display:none}
+ .connective-inspector{padding-top:19px}
+ .cs-panel-header{display:flex;justify-content:space-between;align-items:end;gap:10px}
+ .cs-panel-header h2{font-size:24px;margin:3px 0}
+ .cs-panel-header p{font-size:10px;margin:0;max-width:105px}
+ .connective-region-label{margin-top:14px}
+ .cs-tissue-section,.cs-structure-section{margin-top:14px;padding-top:13px}
+ .connective-tissue-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-top:9px}
+ .connective-tissue{font-size:10px;min-height:44px;padding:8px 7px}
+ .connective-group button{min-height:48px}
+ .connective-mobile-nav{display:grid;grid-template-columns:1.1fr 1.1fr 1fr .8fr;position:absolute;bottom:0;left:0;right:0;z-index:14;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));background:#1b1511;border-top:1px solid #70543d;gap:6px}
+ .connective-mobile-nav button{min-height:48px;border:1px solid #654b3c;border-radius:7px;background:#31231b;font-size:11px;color:#dfc3af}
+ .connective-mobile-nav button[aria-pressed=true]{background:#d7a47f;color:#1d120d;font-weight:750}
+ .connective-inspector header h2{font-size:27px}
+ .cs-inspector-primary h3,.cs-inspector-depth h3{margin-top:15px}
+ .cs-inspector-primary p,.cs-inspector-depth p{font-size:12px}
+ .cs-inspector-actions{padding:13px 0}
+ .cs-inspector-actions button{flex:1;padding:7px 8px}
+ .cs-inspector-actions button:disabled{opacity:.75}
+ .connective-status{padding:9px 0}
+}
+@media(prefers-reduced-motion:reduce){
+ .connective-explorer,.connective-inspector,.connective-guides{scroll-behavior:auto!important;transition:none!important}
+}
+
+.app[data-connective-studio=true] #connective-toggle,
+.app[data-connective-studio=true] #connective-workbench{display:none!important}
+@media(max-width:850px){
+ .app[data-connective-studio=true] .connective-explorer,
+ .app[data-connective-studio=true] .connective-inspector{height:min(40dvh,380px)}
+ .app[data-connective-studio=true] #atlas-stage{touch-action:none}
+}
+@media(prefers-reduced-motion:reduce){
+ .app[data-connective-studio=true] *{scroll-behavior:auto!important;transition-duration:.01ms!important}
+}
