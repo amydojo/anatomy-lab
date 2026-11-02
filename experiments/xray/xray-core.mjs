@@ -63,7 +63,7 @@ export function createTrackingState(){
       else if(event==='start'&&(status==='idle'||status==='lost'||status==='paused'))status='acquiring';
       else if(event==='found'&&['acquiring','tracking','lost'].includes(status))status='tracking';
       else if(event==='missing'&&['acquiring','tracking','lost'].includes(status))status='lost';
-      else if(event==='pause'&&status==='tracking')status='paused';
+      else if(event==='pause'&&['acquiring','tracking','lost'].includes(status))status='paused';
       return status;
     },
     get status(){return status;}
