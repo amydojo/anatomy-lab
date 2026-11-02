@@ -1,0 +1,33 @@
+name: V14 connective anatomical intelligence
+on:
+  push:
+    branches: ['feat/v14-connective-intelligence']
+  pull_request:
+    branches: [main]
+    paths:
+      - 'assets/atlas/connective-intelligence.js'
+      - 'atlas/assets/v14-connective-knowledge*'
+      - 'scripts/validate_v14_connective.mjs'
+      - 'scripts/tests/test_v14_connective_knowledge.py'
+      - 'tests/v14-connective-intelligence.test.mjs'
+      - '.github/workflows/v14-connective-intelligence.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  anatomical-intelligence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate V14 anatomical knowledge and provenance state
+        run: node scripts/validate_v14_connective.mjs
+      - name: Exercise graph traversal, evidence and contradiction checks
+        run: node --test tests/v14-connective-intelligence.test.mjs
+      - name: Preserve V13 JavaScript source gate
+        run: npm test
+      - name: Run all Python scientific/source checks
+        run: python3 -m unittest discover -s scripts/tests
