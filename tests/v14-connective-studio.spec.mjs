@@ -58,6 +58,8 @@ test('V14: desktop panels frame the real WebGL viewport and exiting restores V13
  expect(dims[1].width).toBeGreaterThan(500);
  await page.screenshot({path:'artifacts/v14-desktop-'+testInfo.project.name+'.png',fullPage:true});
  await page.locator('#connective-entry').click();
- await expect(page.locator('#atlas-sidebar')).toBeVisible();
+ await expect(page.locator('#atlas-app')).toHaveAttribute('data-connective-studio','false');
+ await expect(page.locator('#desktop-studio')).toBeVisible();
+ await expect(page.locator('#connective-left')).toBeHidden();
  expect(errors).toEqual([]);
 });

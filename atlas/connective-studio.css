@@ -116,3 +116,6 @@
 .cs-ghost[aria-pressed=true]{border-color:#9b765c;color:#eac6a8}
 .cs-isolate-perspective{background:#2d2119;color:#ecd0b8;border:1px solid #866348;border-radius:6px;min-height:39px;padding:8px 12px;font-size:11px;margin-top:5px}
 .cs-isolate-perspective:disabled{opacity:.55;cursor:not-allowed}
+
+.cs-view-actions{display:flex;gap:7px;margin-top:10px}
+.cs-view-actions button{min-height:42px;background:#31231c;border:1px solid #654d3d;border-radius:6px;padding:8px 10px;font-size:11px;flex:1;color:#e6c7ae}
