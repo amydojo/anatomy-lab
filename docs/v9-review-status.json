@@ -1,0 +1,88 @@
+{
+  "schema": "body-live/external-anatomy-review-v1",
+  "reviewed_revision": "2bd65647984ff3b4354931005e1c246fb377e968",
+  "review_initiated": "2026-10-29",
+  "reference": "docs/v9-independent-source-review.md",
+  "technical_source_audit": {
+    "status": "completed",
+    "scope": "repository provenance, current V9 source list, published external-source metadata and release-gate audit",
+    "not_human_signoff": true
+  },
+  "candidate_meshes": {
+    "facial_v3": {
+      "status": "research_candidate_only",
+      "integrated": false,
+      "rights_cleared": false,
+      "frame_registered": false,
+      "independently_verified": false
+    },
+    "openear_ossicles": {
+      "status": "research_candidate_only",
+      "integrated": false,
+      "rights_cleared": false,
+      "frame_registered": false,
+      "independently_verified": false
+    },
+    "coccyx_external": {
+      "status": "no_isolated_source_accepted",
+      "integrated": false,
+      "rights_cleared": false,
+      "frame_registered": false,
+      "independently_verified": false
+    }
+  },
+  "approvals": {
+    "anatomical_identity": {
+      "status": "pending_independent_human_review",
+      "reviewer": null,
+      "evidence": [],
+      "signed_at": null
+    },
+    "osteology_206_inventory": {
+      "status": "pending_independent_human_review",
+      "reviewer": null,
+      "evidence": [],
+      "signed_at": null
+    },
+    "head_neck_and_ear": {
+      "status": "pending_independent_human_review",
+      "reviewer": null,
+      "evidence": [],
+      "signed_at": null
+    },
+    "musculature": {
+      "status": "pending_independent_human_review",
+      "reviewer": null,
+      "evidence": [],
+      "signed_at": null
+    },
+    "biomechanics": {
+      "status": "pending_independent_human_review",
+      "reviewer": null,
+      "evidence": [],
+      "signed_at": null
+    },
+    "licensing": {
+      "status": "pending_rights_review",
+      "reviewer": null,
+      "evidence": [],
+      "signed_at": null
+    },
+    "whole_application_regression": {
+      "status": "failed",
+      "run_id": 40942980128,
+      "pass": 414,
+      "fail": 18
+    },
+    "real_device_a11y": {
+      "status": "pending_validation",
+      "reviewer": null,
+      "evidence": [],
+      "signed_at": null
+    }
+  },
+  "release_approved": false,
+  "expert_validated": false,
+  "clinical_use_approved": false,
+  "disclaimer": "This is an independent evidence and software review; no credentialed human specialist has signed off."
+}

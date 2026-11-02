@@ -1,0 +1,49 @@
+name: V8.2 regional motion quality
+on:
+  push:
+    branches: [feat/v8-2-regional-kinematics]
+  pull_request:
+    branches: [feat/v8-0-unified-specimen]
+permissions:
+  contents: read
+concurrency:
+  group: v8-2-quality-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  region-motion:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Verify regional source anatomy and no-drift kinematics
+        run: npm test
+      - run: npx playwright install chromium webkit
+      - name: Exercise all regional motion rigs, muscle layers and mobile continuity
+        run: npx playwright test tests/v8-motion.spec.mjs tests/v7-atlas.spec.mjs tests/v8-atlas.spec.mjs --reporter=line
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v8-2-region-motion-qa
+          path: artifacts/
+          if-no-files-found: ignore
+  whole-app:
+    needs: region-motion
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install chromium webkit
+      - name: Cross-browser all-app regression
+        run: npm run test:e2e

@@ -1,0 +1,59 @@
+name: V12 Atlas stabilization and regression
+on:
+  push:
+    branches: [fix/v12-atlas-stabilization-qa]
+  pull_request:
+    branches: [feat/v11-pelvis-temporal-registration]
+permissions:
+  contents: read
+concurrency:
+  group: v12-atlas-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-and-focused:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Anatomy integrity and license source gates
+        run: npm test
+      - run: npx playwright install chromium webkit
+      - name: V12 rendering, navigation, mobile, and nerve regressions
+        run: npx playwright test tests/v12-stabilization.spec.mjs --reporter=line
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v12-stabilization-evidence
+          path: |
+            test-results/
+            artifacts/report/
+          if-no-files-found: ignore
+  full-regression:
+    needs: source-and-focused
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install chromium webkit
+      - name: Full legacy and expanded anatomy regression
+        run: npm run test:e2e
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v12-full-regression-evidence
+          path: |
+            test-results/
+            artifacts/report/
+          if-no-files-found: ignore

@@ -1,0 +1,55 @@
+name: V8 unified anatomy quality
+on:
+  push:
+    branches: [feat/v8-0-unified-specimen]
+  pull_request:
+    branches: [feat/v7-0-whole-body-atlas]
+permissions:
+  contents: read
+concurrency:
+  group: v8-quality-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  focused:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Validate V8 source, SHA, and anatomy registry
+        run: npm test
+      - run: npx playwright install chromium webkit
+      - name: New overview and all six detailed anatomy regions
+        run: npx playwright test tests/v8-atlas.spec.mjs tests/v7-atlas.spec.mjs --reporter=line
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v8-focused-visuals
+          path: artifacts/v8-*.png
+          if-no-files-found: ignore
+  regression:
+    needs: focused
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install chromium webkit
+      - name: Whole app regression and legacy interaction safety
+        run: npm run test:e2e
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v8-whole-app-screens
+          path: artifacts/
+          if-no-files-found: ignore

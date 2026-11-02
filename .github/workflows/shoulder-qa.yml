@@ -1,0 +1,28 @@
+name: Shoulder focused integration QA
+on:
+  push:
+    branches: [feat/v6-6-sourced-shoulder, feat/v6-7-shoulder-muscle-rig, feat/v6-8-coordinated-shoulder]
+permissions:
+  contents: read
+jobs:
+  shoulder:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npm test
+      - run: npx playwright install chromium webkit
+      - name: Shoulder-only browser regression
+        run: npx playwright test tests/v6-atlas.spec.mjs --grep "[Ss]houlder" --reporter=line
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v6-shoulder-screens
+          path: artifacts/v6-shoulder-*.png
+          if-no-files-found: warn

@@ -1,0 +1,39 @@
+name: V13 release candidate
+on:
+  push:
+    branches: ['release/v13-rc', 'feat/v13-progressive-anatomy-inspector']
+  pull_request:
+    branches: ['feat/v13-progressive-anatomy-inspector']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: v13-release-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+jobs:
+  regression:
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium-mobile, webkit-mobile, desktop-chromium]
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: npm test
+      - run: python3 -m unittest discover -s scripts/tests
+      - run: npm run test:e2e -- --project=${{ matrix.browser }}
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v13-release-evidence-${{ matrix.browser }}
+          path: |
+            artifacts/
+            test-results/
+          if-no-files-found: ignore

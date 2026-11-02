@@ -1,0 +1,263 @@
+{
+  "schema": "body-live/hip-source-proof-v1",
+  "source": "BodyParts3D 4.0 \u00a9 DBCLS",
+  "attribution": "BodyParts3D, \u00a9 The Database Center for Life Science, CC Attribution 4.0 International",
+  "license_url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html",
+  "distribution": "https://github.com/ashemag/human-atlas",
+  "pinned_commit": "1c38bf35c254a891200d3cedecfd57abebe83d8d",
+  "inputs": {
+    "atlas": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/atlas.json",
+      "git_blob_sha1": "0f81b5621479a0c0548f4683c316f33bd4d6545b",
+      "sha256": "c359f4bcd2cba90b7411d66d5e9fc04dc81294d46cd5c1e8b212c824f2e5bbee",
+      "bytes": 1335285
+    },
+    "body-1.bin": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-1.bin",
+      "git_blob_sha1": "b2a0a781478031ca966f57d73d6bd0b8652edcf7",
+      "sha256": "aa077a4675f0d0dd3c9b0af39dc8cf6bcb348c3bf7d283478d4206ce30a5a0de",
+      "bytes": 4526484
+    },
+    "body-11.bin": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-11.bin",
+      "git_blob_sha1": "f437a61bfd8c976108abf3e3a607784af3eb3575",
+      "sha256": "e8c1afe7f30fe710ad164ec9cd2287a32881606e7eb590af47d76b3f84405027",
+      "bytes": 4037528
+    },
+    "body-13.bin": {
+      "url": "https://raw.githubusercontent.com/ashemag/human-atlas/1c38bf35c254a891200d3cedecfd57abebe83d8d/public/models/body-13.bin",
+      "git_blob_sha1": "24a9953b6677cf07cd6beea9f221a0690c6efa44",
+      "sha256": "4c51b6be85d5b705d2b52b79b9ad1cdae0b65ad03c9402a2f2673c7633fd94f3",
+      "bytes": 4004548
+    }
+  },
+  "parts": {
+    "hipBone": {
+      "fma": "FMA16586",
+      "source_name": "Right hip bone",
+      "chunk": 11,
+      "vertex_count": 1036,
+      "triangle_count": 1898,
+      "bbox_metres": {
+        "min": [
+          -0.14487199485301971,
+          0.8302642107009888,
+          -0.09888122230768204
+        ],
+        "max": [
+          -0.002790299942716956,
+          1.035980224609375,
+          0.03901899978518486
+        ]
+      }
+    },
+    "femur": {
+      "fma": "FMA24474",
+      "source_name": "Right femur",
+      "chunk": 13,
+      "vertex_count": 480,
+      "triangle_count": 930,
+      "bbox_metres": {
+        "min": [
+          -0.14996400475502014,
+          0.4462611973285675,
+          -0.05046980082988739
+        ],
+        "max": [
+          -0.03189430013298988,
+          0.9118542075157166,
+          0.011939000338315964
+        ]
+      }
+    },
+    "sacrum": {
+      "fma": "FMA16202",
+      "source_name": "Sacrum",
+      "chunk": 13,
+      "vertex_count": 2771,
+      "triangle_count": 5058,
+      "bbox_metres": {
+        "min": [
+          -0.05948539823293686,
+          0.8609741926193237,
+          -0.10725375264883041
+        ],
+        "max": [
+          0.05816299840807915,
+          1.0053112506866455,
+          -0.018603600561618805
+        ]
+      }
+    },
+    "maximus": {
+      "fma": "FMA22328",
+      "source_name": "Right gluteus maximus",
+      "chunk": 1,
+      "vertex_count": 1328,
+      "triangle_count": 1236,
+      "bbox_metres": {
+        "min": [
+          -0.1454010009765625,
+          0.7458562254905701,
+          -0.11986629664897919
+        ],
+        "max": [
+          0.001520909951068461,
+          1.010668158531189,
+          -0.02198849990963936
+        ]
+      }
+    },
+    "medius": {
+      "fma": "FMA22330",
+      "source_name": "Right gluteus medius",
+      "chunk": 1,
+      "vertex_count": 1129,
+      "triangle_count": 1370,
+      "bbox_metres": {
+        "min": [
+          -0.14973600208759308,
+          0.866854190826416,
+          -0.08306580036878586
+        ],
+        "max": [
+          -0.0596994012594223,
+          1.029014229774475,
+          0.001998000079765916
+        ]
+      }
+    },
+    "minimus": {
+      "fma": "FMA22332",
+      "source_name": "Right gluteus minimus",
+      "chunk": 1,
+      "vertex_count": 1346,
+      "triangle_count": 1432,
+      "bbox_metres": {
+        "min": [
+          -0.14508399367332458,
+          0.8614321947097778,
+          -0.0536280982196331
+        ],
+        "max": [
+          -0.06770840287208557,
+          1.0013662576675415,
+          0.0022770001087337732
+        ]
+      }
+    },
+    "piriformis": {
+      "fma": "FMA22340",
+      "source_name": "Right piriformis",
+      "chunk": 1,
+      "vertex_count": 511,
+      "triangle_count": 614,
+      "bbox_metres": {
+        "min": [
+          -0.1370600014925003,
+          0.8841671943664551,
+          -0.08791779726743698
+        ],
+        "max": [
+          -0.02573220059275627,
+          0.9505141973495483,
+          -0.02798140048980713
+        ]
+      }
+    },
+    "obturator": {
+      "fma": "FMA22324",
+      "source_name": "Right obturator internus",
+      "chunk": 1,
+      "vertex_count": 1084,
+      "triangle_count": 1250,
+      "bbox_metres": {
+        "min": [
+          -0.11904600262641907,
+          0.848484218120575,
+          -0.0706569030880928
+        ],
+        "max": [
+          -0.0215332992374897,
+          0.9056051969528198,
+          0.007096000015735626
+        ]
+      }
+    },
+    "gemellusSuperior": {
+      "fma": "FMA22334",
+      "source_name": "Right gemellus superior",
+      "chunk": 1,
+      "vertex_count": 409,
+      "triangle_count": 306,
+      "bbox_metres": {
+        "min": [
+          -0.12519100308418274,
+          0.8762931823730469,
+          -0.06683029979467392
+        ],
+        "max": [
+          -0.04533490166068077,
+          0.9032992124557495,
+          -0.021958399564027786
+        ]
+      }
+    },
+    "gemellusInferior": {
+      "fma": "FMA22336",
+      "source_name": "Right gemellus inferior",
+      "chunk": 1,
+      "vertex_count": 393,
+      "triangle_count": 460,
+      "bbox_metres": {
+        "min": [
+          -0.12586499750614166,
+          0.8590121865272522,
+          -0.07611779868602753
+        ],
+        "max": [
+          -0.05552909895777702,
+          0.880990207195282,
+          -0.022174900397658348
+        ]
+      }
+    },
+    "quadratus": {
+      "fma": "FMA22338",
+      "source_name": "Right quadratus femoris",
+      "chunk": 1,
+      "vertex_count": 743,
+      "triangle_count": 780,
+      "bbox_metres": {
+        "min": [
+          -0.12718699872493744,
+          0.8217651844024658,
+          -0.057343900203704834
+        ],
+        "max": [
+          -0.05657060071825981,
+          0.8679652214050293,
+          -0.04213130101561546
+        ]
+      }
+    }
+  },
+  "transform": {
+    "origin_metres": [
+      -0.057,
+      0.895,
+      -0.045
+    ],
+    "scale": 10.0,
+    "source_axes": "source metres, Y-up; uniform transform for all anatomical components"
+  },
+  "anatomist_reviewed": false,
+  "biomechanics_validated": false,
+  "nerve_path": "Not in imported source subset; schematic educational approximation",
+  "joint_pivot": "Estimated display origin; not landmark measured",
+  "notes": [
+    "Reference-pose anatomy; muscles are static and concealed in motion inspection.",
+    "Joint animation uses a schematic fixed ball-and-socket pivot and Euler rotations.",
+    "No claim that nerve path or muscle attachments are reviewed; no diagnosis or stress estimates."
+  ]
+}

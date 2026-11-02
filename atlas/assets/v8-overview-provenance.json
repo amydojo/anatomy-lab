@@ -1,0 +1,223 @@
+{
+  "schema": "body-live/overview-v8-provenance-v1",
+  "source_commit": "1c38bf35c254a891200d3cedecfd57abebe83d8d",
+  "license": "CC BY 4.0",
+  "anatomist_reviewed": false,
+  "kinematics_validated": false,
+  "original_bones": 78,
+  "additional_bones": 59,
+  "unique_muscles": 149,
+  "bilateral_added": {
+    "bones": 25,
+    "muscles": 54
+  },
+  "bilateral_source_sha256": {
+    "atlas.json": "c359f4bcd2cba90b7411d66d5e9fc04dc81294d46cd5c1e8b212c824f2e5bbee",
+    "body-1.bin": "aa077a4675f0d0dd3c9b0af39dc8cf6bcb348c3bf7d283478d4206ce30a5a0de",
+    "body-3.bin": "6febb76b50423331f66802a63bb43f04f99ce08129837015910eed43d0719268",
+    "body-4.bin": "0509e6c996fe5b935ace770a5dbf2d83a474330b7e541a844052a080bbf814bb",
+    "body-12.bin": "61a6c8da89bb20df50c575964ac81aa4090eabfc2cb27ad2155aea325f31c6c0",
+    "body-13.bin": "4c51b6be85d5b705d2b52b79b9ad1cdae0b65ad03c9402a2f2673c7633fd94f3"
+  },
+  "additional_lab_muscles": {
+    "hip": 8,
+    "shoulder": 9,
+    "knee": 5
+  },
+  "source_lab_sha256": {
+    "hip": "ee3cfcee35f9c0103705b8093e8625a79548ff912b8abe7369b81b072ffbddc3",
+    "shoulder": "46929c912b4323ffa1622201dd67237eb7161e9dff696904d4361e34cf6b3fbc",
+    "knee": "f86acd81d3c60929caadfece7a5886a573adf40d91de26ad23b628729e14f7bc"
+  },
+  "region_counts": {
+    "skull": {
+      "bones": 14,
+      "muscles": 16
+    },
+    "neck": {
+      "bones": 8,
+      "muscles": 14
+    },
+    "thorax": {
+      "bones": 30,
+      "muscles": 11
+    },
+    "elbow": {
+      "bones": 3,
+      "muscles": 10
+    },
+    "wrist": {
+      "bones": 15,
+      "muscles": 10
+    },
+    "ankle": {
+      "bones": 14,
+      "muscles": 12
+    }
+  },
+  "detail_sha256": {
+    "skull": "db163e067391b0d736d47e3e472402d5432b87a81d143f2da4860e06a25800a5",
+    "neck": "bb0c6e2aabbee322995f340656e1bc83aeb7510b7a5d1b898d054d65f2aa67c6",
+    "thorax": "ab2a4d8ef8c32cecc33428fcf712a19ae43ac94209881f9c084c3eb84ef40f18",
+    "elbow": "b95077904da9ff164ce483b0a54113a920bad36369805a576b3e313a217cd5c4",
+    "wrist": "261844080e58237a139cd724c8cfb793caab2d58a9783174d82d267ecb1e8324",
+    "ankle": "6431d766c671a80af1a9cc15a740c4195b8ae909fc32850a2b2db34e2d8f2653"
+  },
+  "overview_sha256": "862f5d29c322d94a918e37519009208cfb2e6e367782d3532a55d55030fdbcab",
+  "reused_region_parts": {
+    "frontal-bone": [
+      "skull"
+    ],
+    "occipital-bone": [
+      "skull"
+    ],
+    "sphenoid-bone": [
+      "skull"
+    ],
+    "mandible": [
+      "skull"
+    ],
+    "left-parietal-bone": [
+      "skull"
+    ],
+    "left-temporal-bone": [
+      "skull"
+    ],
+    "right-parietal-bone": [
+      "skull"
+    ],
+    "right-temporal-bone": [
+      "skull"
+    ],
+    "atlas": [
+      "neck"
+    ],
+    "axis": [
+      "neck"
+    ],
+    "third-cervical-vertebra": [
+      "neck"
+    ],
+    "fourth-cervical-vertebra": [
+      "neck"
+    ],
+    "fifth-cervical-vertebra": [
+      "neck"
+    ],
+    "sixth-cervical-vertebra": [
+      "neck"
+    ],
+    "seventh-cervical-vertebra": [
+      "neck"
+    ],
+    "left-first-rib": [
+      "thorax"
+    ],
+    "left-second-rib": [
+      "thorax"
+    ],
+    "left-third-rib": [
+      "thorax"
+    ],
+    "left-fourth-rib": [
+      "thorax"
+    ],
+    "left-fifth-rib": [
+      "thorax"
+    ],
+    "left-sixth-rib": [
+      "thorax"
+    ],
+    "left-seventh-rib": [
+      "thorax"
+    ],
+    "left-eighth-rib": [
+      "thorax"
+    ],
+    "left-ninth-rib": [
+      "thorax"
+    ],
+    "left-tenth-rib": [
+      "thorax"
+    ],
+    "left-eleventh-rib": [
+      "thorax"
+    ],
+    "left-twelfth-rib": [
+      "thorax"
+    ],
+    "right-first-rib": [
+      "thorax"
+    ],
+    "right-second-rib": [
+      "thorax"
+    ],
+    "right-third-rib": [
+      "thorax"
+    ],
+    "right-fourth-rib": [
+      "thorax"
+    ],
+    "right-fifth-rib": [
+      "thorax"
+    ],
+    "right-sixth-rib": [
+      "thorax"
+    ],
+    "right-seventh-rib": [
+      "thorax"
+    ],
+    "right-eighth-rib": [
+      "thorax"
+    ],
+    "right-ninth-rib": [
+      "thorax"
+    ],
+    "right-tenth-rib": [
+      "thorax"
+    ],
+    "right-eleventh-rib": [
+      "thorax"
+    ],
+    "right-twelfth-rib": [
+      "thorax"
+    ],
+    "body-of-sternum": [
+      "thorax"
+    ],
+    "third-thoracic-vertebra": [
+      "thorax"
+    ],
+    "fifth-thoracic-vertebra": [
+      "thorax"
+    ],
+    "seventh-thoracic-vertebra": [
+      "thorax"
+    ],
+    "right-humerus": [
+      "elbow"
+    ],
+    "right-radius": [
+      "elbow",
+      "wrist"
+    ],
+    "right-ulna": [
+      "elbow",
+      "wrist"
+    ],
+    "right-tibia": [
+      "ankle"
+    ],
+    "right-fibula": [
+      "ankle"
+    ]
+  },
+  "geometry": "exact source frame; simplification only; no mirroring or synthesized meshes",
+  "incomplete": [
+    "Limited bilateral hand/foot anatomy: no finger or toe phalanges yet",
+    "Unrepresented facial/jaw muscles",
+    "Missing tendons and ligaments",
+    "No anatomist-reviewed muscle attachments",
+    "Reference-source sciatic nerve not spatially verified across these meshes"
+  ]
+}

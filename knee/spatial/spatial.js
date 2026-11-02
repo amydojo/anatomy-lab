@@ -22,6 +22,7 @@ const DATA={
 const DISPLAY_ORDER=['femur','tibia','fibula','patella','menisci','acl','pcl','collateral','tendon'];
 const PALETTES={femur:DATA.femur.color,tibia:DATA.tibia.color,fibula:DATA.fibula.color,patella:DATA.patella.color,menisci:DATA.menisci.color,acl:DATA.acl.color,pcl:DATA.pcl.color,collateral:DATA.collateral.color,tendon:DATA.tendon.color};
 let sourcedMeshes=null;
+let atlasTravelMix=1; // keep sourced bones visible as illustrative tissues are introduced
 let attachmentGraph=null;
 let sourceStatus='Schematic geometry · source loading';
 const study={stage:'idle',guess:null,originalDepth:0};
@@ -172,6 +173,7 @@ function alpha(id){
  let a=(id==='femur'||id==='tibia'||id==='fibula'||id==='patella')?.97:.9;
  if(state.selected&&state.selected!==id)a=state.isolate?.12:.49;
  if(state.isolate&&state.selected===id)a=1;
+ if(atlasTravelMix<1&&!['femur','tibia','fibula','patella'].includes(id))a*=atlasTravelMix;
  return a;
 }
 function render(){
@@ -485,5 +487,19 @@ window.addEventListener('resize',resize,{passive:true});
 if(typeof ResizeObserver==='function')new ResizeObserver(resize).observe(document.querySelector('.stage'));
 updateInspector();setDepth(0);resize();
 loadSourceGeometry();
-window.__BODY_SPATIAL__={getState:()=>({...state,landmarkCount:attachmentGraph?Object.keys(attachmentGraph.anchors).length:0,attachedEdges:attachmentGraph?selectedConnections():[],studyStage:study.stage,studyGuess:study.guess,sourceStatus,sourcedBoneCount:sourcedMeshes?Object.keys(sourcedMeshes).length:0,gestures:undefined,hits:undefined,frame:undefined}),select,setFlex,setDepth,reset};
+// Camera contract: shared BodyParts3D reference orientation, measured in the
+// knee's own uniform display units. Do not change bones' source transforms.
+function prepareAtlasEntry(camera){
+ if(!sourcedMeshes||!camera||!Number.isFinite(camera.zoom)||camera.zoom<=0)return false;
+ stop();state.flex=0;state.depth=0;state.selected=null;state.isolate=false;
+ state.focus='joint';state.follow=false;
+ state.anchorY=Number.isFinite(camera.anchorY)?camera.anchorY:.5;
+ state.yaw=camera.yaw;state.pitch=camera.pitch;state.zoom=camera.zoom;
+ state.frameSpan=camera.frameSpan||2.65;atlasTravelMix=0;
+ updateFocusButton();updateInspector();render();return true;
+}
+function setAtlasEntryMix(value){
+ atlasTravelMix=clamp(Number(value)||0,0,1);render();
+}
+window.__BODY_SPATIAL__={prepareAtlasEntry,setAtlasEntryMix,getState:()=>({...state,landmarkCount:attachmentGraph?Object.keys(attachmentGraph.anchors).length:0,attachedEdges:attachmentGraph?selectedConnections():[],studyStage:study.stage,studyGuess:study.guess,sourceStatus,sourcedBoneCount:sourcedMeshes?Object.keys(sourcedMeshes).length:0,gestures:undefined,hits:undefined,frame:undefined}),select,setFlex,setDepth,reset};
 })();

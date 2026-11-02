@@ -1,0 +1,21 @@
+/* V13 progressive anatomy inspector: readable, compact, safe-area aware. */
+@media(max-width:850px){
+ #mobile-inspect{color:#f5eee8;padding:4px 2px 8px;max-height:min(48dvh,390px);overflow:auto;overscroll-behavior:contain}
+ #mobile-inspect .mobile-panel-heading{display:flex;justify-content:space-between;align-items:center;letter-spacing:.14em;font-size:10px;color:#c6a99b}
+ #mobile-inspect-name{display:block;font-size:clamp(19px,5vw,25px);line-height:1.15;letter-spacing:-.025em;margin:12px 0 6px;font-weight:600}
+ #mobile-inspect-description{font-size:13px;line-height:1.5;color:#e0d4ca;margin:0 0 12px;max-width:42ch}
+ #mobile-inspect-expand{width:100%;min-height:42px;border:1px solid rgba(224,194,177,.28);background:rgba(255,255,255,.055);border-radius:11px;color:#f5e7df;font:inherit;font-size:13px;text-align:left;padding:10px 14px}
+ #mobile-inspect-details{padding:12px 2px 0;font-size:12px;line-height:1.55;color:#d8c8bf}
+ #mobile-inspect-type{font-size:10px;text-transform:uppercase;letter-spacing:.13em;color:#d7a991}
+ #mobile-inspect-context{max-width:44ch}
+ #mobile-inspect-motion{border:1px solid #bd806b;border-radius:10px;padding:10px 14px;background:#5c3329;color:#fff;font:inherit}
+ #mobile-inspect :focus-visible{outline:2px solid #e6b19a;outline-offset:3px}
+}
+@media(min-width:851px){
+ #studio-anatomy-expand,#studio-anatomy-motion{min-height:44px;border:1px solid #886449;border-radius:10px;background:#39261b;color:#f5eee8;padding:10px 14px;font:inherit}
+ #studio-anatomy-details{font-size:13px;line-height:1.55;color:#d8c8bf}
+ #studio-anatomy-type{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#d7a991}
+ #studio-anatomy-expand:focus-visible,#studio-anatomy-motion:focus-visible{outline:2px solid #e6b19a;outline-offset:3px}
+}
+
+.app #mobile-move .shoulder-rig-tools,.app #studio-motion .shoulder-rig-tools{position:static;display:flex!important;margin-top:12px;flex-wrap:wrap}
