@@ -48,24 +48,37 @@ function render(){
   const bounds=viewport.getBoundingClientRect(),width=bounds.width,height=bounds.height;
   svg.setAttribute('viewBox','0 0 '+width+' '+height);
   const shapes=rigGeometry(lastPose,{width:video.videoWidth,height:video.videoHeight},{width,height},calibration);
-  const frag=document.createDocumentFragment();
+  const visible=new Set();
+  // Keep hit targets stable across inference frames. Replacing elements every
+  // frame causes touch/click gestures to detach before Safari can dispatch them.
   for(const item of shapes){
     if(item.group!==layer)continue;
-    const shape=makeNode('path',{d:item.d,'data-id':item.id,'data-group':item.group,
-      class:'shape'+(selected===item.id?' selected':''),role:'button',tabindex:'0',
-      'aria-label':'Inspect '+STRUCTURES[item.id].name,
-      'fill-opacity':selected===item.id?Math.min(1,opacity+.14):opacity,
-      'stroke-opacity':opacity});
-    const title=makeNode('title',{});title.textContent=STRUCTURES[item.id].name;shape.appendChild(title);
-    frag.appendChild(shape);
+    visible.add(item.id);
+    let shape=svg.querySelector('[data-id="'+item.id+'"]');
+    if(!shape){
+      shape=makeNode('path',{'data-id':item.id,'data-group':item.group,
+        class:'shape',role:'button',tabindex:'0',
+        'aria-label':'Inspect '+STRUCTURES[item.id].name});
+      const title=makeNode('title',{});title.textContent=STRUCTURES[item.id].name;
+      shape.appendChild(title);svg.appendChild(shape);
+    }
+    shape.setAttribute('d',item.d);
+    shape.setAttribute('fill-opacity',String(selected===item.id?Math.min(1,opacity+.14):opacity));
+    shape.setAttribute('stroke-opacity',String(opacity));
+    shape.classList.toggle('selected',selected===item.id);
   }
-  // The positional marker is meaningful only during valid pose tracking.
+  for(const old of svg.querySelectorAll('.shape'))
+    if(!visible.has(old.dataset.id))old.remove();
   const e=lastPose.elbow,scale=Math.max(width/video.videoWidth,height/video.videoHeight);
   const ex=(width-video.videoWidth*scale)/2+e.x*video.videoWidth*scale+calibration.x;
   const ey=(height-video.videoHeight*scale)/2+e.y*video.videoHeight*scale+calibration.y;
-  frag.appendChild(makeNode('circle',{class:'joint-ring',cx:ex,cy:ey,r:Math.max(12,width*.024)}));
-  frag.appendChild(makeNode('circle',{class:'joint-marker',cx:ex,cy:ey,r:2.5}));
-  svg.replaceChildren(frag);
+  let ring=svg.querySelector('.joint-ring');
+  if(!ring){ring=makeNode('circle',{class:'joint-ring'});svg.appendChild(ring);}
+  ring.setAttribute('cx',String(ex));ring.setAttribute('cy',String(ey));
+  ring.setAttribute('r',String(Math.max(12,width*.024)));
+  let center=svg.querySelector('.joint-marker');
+  if(!center){center=makeNode('circle',{class:'joint-marker',r:2.5});svg.appendChild(center);}
+  center.setAttribute('cx',String(ex));center.setAttribute('cy',String(ey));
 }
 svg.addEventListener('click',e=>{const id=e.target.closest?.('[data-id]')?.dataset.id;if(id)choose(id);});
 svg.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const id=e.target.closest?.('[data-id]')?.dataset.id;if(id){e.preventDefault();choose(id);}}});
