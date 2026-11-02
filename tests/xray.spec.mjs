@@ -106,9 +106,9 @@ test('close-up two-tap calibration tracks illustrative forearm, without false el
  await expect(page.locator('[data-id="flexors"]')).toBeVisible();
  await page.locator('#pause').click();
  await expect(page.locator('#status')).toHaveText('FRAME PAUSED');
- await page.locator('#anchor-reset').click();
- await expect(page.locator('#status')).toHaveText('TAP ELBOW');
+ await expect(page.locator('#anchor-reset')).toBeDisabled();
  await expect(page.locator('[data-id]')).toHaveCount(0);
+ await expect.poll(async()=>page.evaluate(()=>window.__XRAY_EXPERIMENT__.getState().anchorReady)).toBe(false);
  expect(await page.evaluate(()=>globalThis.__tracks.at(-1).readyState)).toBe('ended');
  expect(errors).toEqual([]);
 });
