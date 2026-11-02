@@ -1,0 +1,35 @@
+name: V14 Connective Studio regression
+on:
+  push:
+    branches: ['feat/v14-connective-interaction-studio']
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  regression:
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [desktop-chromium, chromium-mobile, webkit-mobile]
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: npm test
+      - run: python3 -m unittest discover -s scripts/tests
+      - run: npm run test:e2e -- --project=${{ matrix.browser }}
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v14-connective-evidence-${{ matrix.browser }}
+          path: |
+            artifacts/
+            test-results/
+          if-no-files-found: ignore
