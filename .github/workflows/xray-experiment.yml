@@ -26,6 +26,7 @@ jobs:
       - run: node --test tests/xray-core.test.mjs
       - run: node --check experiments/xray/xray.mjs
       - run: node --check experiments/xray/xray-core.mjs
+      - run: node --check experiments/xray/xray-tracker.mjs
   browser:
     strategy:
       fail-fast: false
