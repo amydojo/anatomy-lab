@@ -10,6 +10,16 @@
  const typeNames={bones:'Bones',muscles:'Muscles',ligaments:'Ligaments',tendons:'Tendons',fibrocartilage:'Fibrocartilage'};
  const regionNames={knee:'Knee',shoulder:'Shoulder',hip:'Hip',ankle:'Ankle',wrist:'Wrist',spine:'Spine'};
  let intelligence=null,knowledgeError='Loading anatomical references…';
+ let geometryEvidence=null,geometryEvidenceError='Geometry provenance loading…',geometryEvidenceRequested=false;
+ window.__BODY_GEOMETRY_EVIDENCE__=()=>geometryEvidence;
+ function loadGeometryEvidence(){
+  if(geometryEvidenceRequested)return;
+  geometryEvidenceRequested=true;
+  fetch('assets/v14-knee-geometry-evidence.json').then(r=>{if(!r.ok)throw Error('HTTP '+r.status);return r.json();}).then(data=>{
+   if(data.schema!=='body-live/v14-knee-geometry-evidence-v1'||!Array.isArray(data.connective_targets)||data.connective_targets.length!==8)throw Error('Invalid provenance schema');
+   geometryEvidence=data;render();
+  }).catch(err=>{geometryEvidenceError='Provenance unavailable: '+err.message+'; NOT VERIFIED';render();});
+ }
  let opened=false,mobilePanel='structures',expanded=false,previousFocus=null,statusMessage='',isChangingRegion=false,regionTicket=0;
  const renderProvider=()=>window.BodyConnectiveGeometryProvider||null;
  function knowledgeRows(){
@@ -75,7 +85,7 @@ const studio=domain.create({provider});
  }
  function openStudio(){
   if(opened)return;
-  opened=true;previousFocus=document.activeElement;
+  opened=true;previousFocus=document.activeElement;loadGeometryEvidence();
   app.dataset.connectiveStudio='true';
   $('connective-entry').setAttribute('aria-pressed','true');
   $('connective-entry').textContent='← Return to atlas';
@@ -135,6 +145,9 @@ const studio=domain.create({provider});
   const adapter=item.scientific,rec=adapter?.record;
  const related=(adapter?.relationships||[]).map(x=>x.structure).filter(Boolean);
  const refs=adapter?.evidence?.references||[];
+ const geometryEntry=geometryEvidence?.connective_targets?.find(x=>x.id===item.id);
+ const boneProof=geometryEvidence?.source_reference;
+ const geometryDisclosure=geometryEntry?'Original connective mesh: NOT ACQUIRED. '+geometryEntry.blocker:'Provenance: '+geometryEvidenceError;
  const status=item.geometryStatus==='illustrative'?'ILLUSTRATIVE 3D — not anatomist-reviewed or clinically verified':
   item.geometryStatus==='source-derived'?'SOURCE-DERIVED SURFACE — independent anatomical review pending':
   item.geometryStatus==='verified'?'Geometry verification reported; inspect full source chain':'NO REGISTERED 3D GEOMETRY';
@@ -146,7 +159,7 @@ const studio=domain.create({provider});
     return '<article><strong>'+esc(r?.name||id)+'</strong><p>'+esc(r?.primaryFunction||'Scientific description unavailable.')+'</p></article>';
    }).join('')+'</section>':'';
  return '<header><span class="cs-overline">03 / ANATOMICAL INSPECTOR</span><h2>'+esc(item.name)+'</h2><p class="cs-subtitle">'+esc(typeNames[item.tissueType])+' / '+esc(regionNames[item.region])+'</p></header>'+
- '<div class="connective-status" role="status">'+esc(status)+'</div><p class="cs-evidence-note">'+esc(evidenceStatus)+'</p>'+comparison+
+ '<div class="connective-status" role="status">'+esc(status)+'</div><p class="cs-evidence-note">'+esc(evidenceStatus)+'</p><p class="cs-evidence-note" data-geometry-proof="unverified">'+esc(geometryDisclosure)+'</p>'+comparison+
  '<section class="cs-inspector-primary"><h3>PRIMARY FUNCTION</h3><p>'+esc(rec?.primaryFunction||item.significance||'Scientific record unavailable.')+'</p>'+
  '<h3>RELEVANT MOVEMENTS</h3><p>'+esc(rec?.movements?.join(' · ')||'Not documented.')+'</p></section>'+
  '<div class="cs-inspector-actions"><button type="button" data-cs-action="focus" '+(!item.selectable?'disabled':'')+'>Focus</button>'+
@@ -160,7 +173,10 @@ const studio=domain.create({provider});
  '<h3>RELATED CONNECTIVE TISSUES</h3><div class="cs-related">'+(related.length?related.map(x=>'<button type="button" data-cs-select="'+esc(x.id)+'">'+esc(x.name)+'</button>').join(''):'Not mapped')+'</div>'+
  '<h3>EVIDENCE SOURCES</h3>'+(refs.length?refs.map(x=>'<p>'+esc(x.title+' — '+x.section)+'</p><a href="'+esc(x.url)+'" target="_blank" rel="noopener noreferrer">Read source</a>').join(''):'<p>Reference unavailable.</p>')+
  '<h3>UNRESOLVED SCIENTIFIC CLAIMS</h3><p>'+esc(rec?.unresolved?.join(' ')||'Scientific review pending.')+'</p>'+
- '<h3>GEOMETRY VERIFICATION</h3><p>'+esc(status)+'</p><p>'+esc('Geometry verification: '+(adapter?.geometry?.geometryVerified===true?'reported verified':'NOT VERIFIED')+'. No verified attachment coordinates or kinematics.')+'</p></section>':'');
+ '<h3>GEOMETRY VERIFICATION</h3><p>'+esc(status)+'</p><p>'+esc('Geometry verification: '+(adapter?.geometry?.geometryVerified===true?'reported verified':'NOT VERIFIED')+'. No verified attachment coordinates or kinematics.')+'</p>'+
+ '<h3>ORIGINAL ASSET AND REGISTRATION</h3><p>'+esc(geometryDisclosure)+'</p><p>'+esc(geometryEntry?'Hash: unavailable · Matrix: unavailable · Landmark RMS: NOT MEASURED · Holdout RMS: NOT MEASURED · Laterality: right-hand illustrative template':'Source provenance still loading or unavailable')+'</p>'+
+ '<h3>SHARED BONE REFERENCE</h3><p>'+esc(boneProof?boneProof.dataset+' · '+boneProof.bone_references.map(x=>x.name+' ('+x.id+')').join(', ')+'. Shared scale '+boneProof.transform.scale_to_scene+'. Bone transform-fidelity is NOT ligament registration.':'Bone provenance pending')+'</p>'+
+ (boneProof?'<a href="'+esc(boneProof.license_uri)+'" target="_blank" rel="noopener noreferrer">Official source license and attribution</a>':'')+'</section>':'');
 
  }
  // The perspective lesson is shown in the guides band on desktop and inside the structure sheet on

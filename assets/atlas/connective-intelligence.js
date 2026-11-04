@@ -105,7 +105,7 @@ function validateKnowledge(data,coverage){
    const rec=byId[s.id];
    if(!rec)fail('INVENTORY_MISSING',s.id,'Coverage ID has no knowledge entry');
    else if(rec.region!==s.region)fail('INVENTORY_REGION',s.id,'Region mismatch with geometry operator inventory');
-   if(s.geometry_verified===true&&!(s.mesh_id&&s.source_uri&&s.license&&s.sha256&&s.shared_coordinate_frame_validated===true&&s.anatomist_reviewed===true))
+   if(s.geometry_verified===true&&!(s.mesh_id&&s.source_uri&&s.license&&/^[a-f0-9]{64}$/i.test(s.sha256||'')&&s.registration_record&&s.shared_coordinate_frame_validated===true&&s.anatomist_reviewed===true))
      fail('UNSUPPORTED_COVERAGE_GEOMETRY',s.id,'Inventory asserts verified mesh without source, hash, shared frame and expert review');
    if(s.attachment_coordinates_validated===true&&s.geometry_verified!==true)
      fail('UNSUPPORTED_COVERAGE_ATTACHMENT',s.id,'Attachment claim requires geometry proof');
@@ -122,7 +122,7 @@ function geometryFor(record,coverage){
  const raw=coverage?.regions?.[record.region]?.structures?.find(x=>x.id===record.canonicalCoverageId);
  const out=clone(record.geometry);
  if(!raw)return {...out,inventoryMatch:false,availability:'not-reported'};
- const sourceReady=!!(raw.mesh_id&&raw.source_uri&&raw.license&&raw.sha256);
+ const sourceReady=!!(raw.mesh_id&&raw.source_uri&&raw.license&&/^[a-f0-9]{64}$/i.test(raw.sha256||''));
  const proven=sourceReady&&raw.geometry_verified===true&&raw.attachment_coordinates_validated===true&&raw.kinematics_validated===true&&raw.anatomist_reviewed===true&&raw.shared_coordinate_frame_validated===true;
  return {...out,inventoryMatch:true,availability:sourceReady?'source-linked':'pending-source-mesh',
   status:proven?'verified':sourceReady?'source-linked-unverified':'unverified',
