@@ -97,46 +97,60 @@ for(const [w,h] of [...MOBILE,...DESKTOP]){
   test.setTimeout(180000);
   test.skip(!projectViewports(info).some(v=>v[0]===w&&v[1]===h),'viewport belongs to another project');
   const errors=await enter(page,w,h);
-  // Settle the camera BEFORE locating a target: clearing selection later must never move the camera,
-  // or the coordinates found below would be stale (seen in WebKit CI at 390x844).
-  await page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.resetView());
-  await frames(page);
   const fp=await footprint(page);
+  // Read-only search: hitTestAt() is the same raycast pickAt() uses but never selects, renders, writes
+  // history or touches the camera, so thousands of probes leave application state untouched.
   const target=await page.evaluate(([fp,ids])=>{
-   // Spiral outward from the footprint centre and stop at the first connective structure that a
-   // real tap could reach (picked by the renderer AND topmost element is the model canvas).
-   const c=document.getElementById('atlas-canvas').getBoundingClientRect();
-   // Origins: the anatomy footprint centre first, then the canvas centre with a wider search (desktop
-   // framing shows a large body whose footprint centre is not over the joint).
-   const origins=[[(fp.x+fp.r)/2,(fp.y+fp.b)/2,70,3],[c.x+c.width/2,c.y+c.height/2,170,5]],pts=[];
-   for(const [ox,oy,R,step] of origins){
-    const local=[];for(let dy=-R;dy<=R;dy+=step)for(let dx=-R;dx<=R;dx+=step)local.push([ox+dx,oy+dy]);
-    local.sort((p,q)=>Math.hypot(p[0]-ox,p[1]-oy)-Math.hypot(q[0]-ox,q[1]-oy));pts.push(...local);
-   }
-   // pickAt SELECTS and syncs the URL. Probing thousands of points must not hammer history (WebKit throws a
-   // SecurityError after 100 replaceState calls per 10 s), so history writes are suspended only while probing.
-   const {replaceState,pushState}=history;
-   history.replaceState=()=>{};history.pushState=()=>{};
-   let found=null;
-   try{
-    for(const [x,y] of pts){
-     if(x<fp.x-4||x>fp.r+4||y<fp.y-4||y>fp.b+4)continue;
-     const id=window.__BODY_ATLAS__.pickAt(x-c.x,y-c.y);
-     if(!ids.includes(id))continue;
-     const el=document.elementFromPoint(x,y);
-     found={id,x,y,top:el?.id||el?.tagName};break;
+   const A=window.__BODY_ATLAS__,c=document.getElementById('atlas-canvas').getBoundingClientRect();
+   const hit=(x,y)=>A.hitTestAt(x-c.x,y-c.y);
+   const x0=Math.max(Math.floor(fp.x),Math.ceil(c.x)),x1=Math.min(Math.ceil(fp.r),Math.floor(c.right));
+   const y0=Math.max(Math.floor(fp.y),Math.ceil(c.y)),y1=Math.min(Math.ceil(fp.b),Math.floor(c.bottom));
+   const mx=c.x+c.width/2,my=c.y+c.height/2,cands=[];
+   for(let y=y0;y<=y1;y+=2)for(let x=x0;x<=x1;x+=2){const id=hit(x,y);if(ids.includes(id))cands.push({id,x,y});}
+   // Robustness of a candidate = the largest radius R (px) for which all eight neighbours at distance R
+   // pick the same structure. Taps use integer CSS pixels because touch coordinates are integer-snapped.
+   const radius=({id,x,y})=>{
+    let best=-1;
+    for(const R of [1,2,3,4,5,6]){
+     const ok=[[-R,-R],[0,-R],[R,-R],[-R,0],[R,0],[-R,R],[0,R],[R,R]].every(([ox,oy])=>hit(x+ox,y+oy)===id);
+     if(!ok)break;best=R;
     }
-    window.__BODY_ATLAS__.pickAt(-50,-50);// a miss clears the renderer highlight
-    window.__BODY_CONNECTIVE_STUDIO__.setRegion('knee');// ...and this clears Studio's selectedId (no camera change)
-   }finally{history.replaceState=replaceState;history.pushState=pushState;}
-   return found;
+    return best;
+   };
+   let best=null;
+   for(const cand of cands){
+    const r=radius(cand),d=Math.hypot(cand.x-mx,cand.y-my);
+    if(!best||r>best.r||(r===best.r&&d<best.d))best={...cand,r,d};
+   }
+   const zones={};for(const k of cands)zones[k.id]=(zones[k.id]||0)+1;
+   if(!best)return {none:true,candidates:cands.length,zones};
+   const el=document.elementFromPoint(best.x,best.y);
+   return {id:best.id,x:best.x,y:best.y,zoneRadius:best.r,top:el?.id||el?.tagName,candidates:cands.length,zones};
   },[fp,KNEE]);
-  expect(target,'a connective structure can be hit at a visible, practical position').toBeTruthy();
+  expect(target.none?JSON.stringify(target):'found','a connective structure can be hit at a visible position').toBe('found');
   expect(target.top,'the tap point is the model canvas, not a control').toBe('atlas-canvas');
-  // The probe must not leave the structure selected, otherwise the assertion below would pass without the tap.
-  expect(await page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().selectedId),'selection is clear before the real tap').not.toBe(target.id);
+  // A tap must land on a zone that survives +/-1 px of coordinate rounding.
+  expect(target.zoneRadius,'hit zone must tolerate 1 px of touch-coordinate rounding: '+JSON.stringify(target)).toBeGreaterThanOrEqual(1);
+  info.annotations.push({type:'tap-target',description:JSON.stringify(target)});
+  // Nothing was selected by the probe, so no cleanup is needed and the coordinates cannot be stale.
+  expect(await page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().selectedId),'nothing selected before the real tap').toBeNull();
+  await page.evaluate(()=>{
+   const log=window.__tapLog=[];const cv=document.getElementById('atlas-canvas');
+   for(const t of ['pointerdown','pointerup','pointercancel','click','touchstart','touchend'])
+    cv.addEventListener(t,e=>log.push({t,x:e.clientX??e.changedTouches?.[0]?.clientX,y:e.clientY??e.changedTouches?.[0]?.clientY,pt:e.pointerType,dp:e.defaultPrevented}),true);
+   window.addEventListener('body:structure-selected',e=>log.push({t:'structure-selected',id:e.detail?.id}));
+  });
   if(info.project.use.hasTouch)await page.touchscreen.tap(target.x,target.y);else await page.mouse.click(target.x,target.y);
-  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().selectedId)).toBe(target.id);
+  try{
+   await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().selectedId)).toBe(target.id);
+  }catch(e){
+   // Enough in the CI log to tell "tap never reached the canvas" from "reached it but selected nothing".
+   const d=await page.evaluate(([x,y])=>{const el=document.elementFromPoint(x,y),vv=window.visualViewport,r=document.getElementById('atlas-canvas').getBoundingClientRect();
+    return {events:window.__tapLog,topAtTap:el?.id||el?.tagName,hitNow:window.__BODY_ATLAS__.hitTestAt(x-r.x,y-r.y),
+     camera:window.__BODY_ATLAS__.getState().camera,
+     visualViewport:vv?{scale:vv.scale,offsetLeft:vv.offsetLeft,offsetTop:vv.offsetTop,w:vv.width,h:vv.height}:null};},[target.x,target.y]);
+   throw new Error(e.message+'\nTAP DIAGNOSTICS '+JSON.stringify({target,...d}));
+  }
   expect(errors).toEqual([]);
  });
 }
