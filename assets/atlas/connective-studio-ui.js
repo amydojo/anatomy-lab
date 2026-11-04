@@ -80,7 +80,7 @@ const studio=domain.create({provider});
   $('connective-entry').setAttribute('aria-pressed','true');
   $('connective-entry').textContent='← Return to atlas';
   mobilePanel='structures';studio.setRegion('knee');
-  atlas.setMobileFrame?.(window.innerWidth<=850);
+  atlas.setMobileFrame?.(false);
   chooseWhenReady('knee');
   refreshRenderer();render();
  }
@@ -253,7 +253,7 @@ const studio=domain.create({provider});
  });
  window.addEventListener('body:region-ready',()=>{if(opened){isChangingRegion=false;statusMessage='';refreshRenderer();render();}});
  window.addEventListener('body:connective-geometry-ready',()=>{if(opened){refreshRenderer();render();}});
- window.addEventListener('resize',()=>{if(opened){atlas.setMobileFrame?.(window.innerWidth<=850);render();}},{passive:true});
+ window.addEventListener('resize',()=>{if(opened){atlas.setMobileFrame?.(false);render();}},{passive:true});
  studio.subscribe(()=>{if(opened){refreshRenderer();render();}});
 if(window.BodyConnectiveIntelligence){
  window.BodyConnectiveIntelligence.load({knowledgeUrl:'/atlas/assets/v14-connective-knowledge.json',coverageUrl:'/atlas/assets/connective-coverage.json'})
