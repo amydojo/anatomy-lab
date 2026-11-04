@@ -1,4 +1,4 @@
-# BODY / LIVE — X-RAY Experiment 001
+# BODY / LIVE — X-RAY Experiment 001\n\n> V3 rescue notes and acceptance protocol are appended below.
 
 Route: /experiments/xray/  
 Branch: experiment/ar-xray-elbow, isolated from V14.  
@@ -41,3 +41,50 @@ Detection uses requestAnimationFrame, bounds inference to approximately 29 itera
 - Manual anchors only support the elbow-to-wrist image segment. No upper-arm muscle or joint-angle claims in close-up mode.
 - P0 next improvement: camera test clips with **separately consented** material and real iPhone Safari validation for tapping behavior, image tracking, thermal/FPS, orientation and camera resume. No user screen recordings are committed as fixtures.
 - Future: world-landmark depth, person segmentation and occlusion, accurate camera calibration, medically reviewed skinned 3D geometry. This prototype is not ready for a clinical interpretation or a production release.
+
+---
+
+# X-RAY V3 rescue — implementation and acceptance report
+
+**Branch:** `experiment/ar-xray-elbow`; **draft PR:** #38. Never merge without physical iPhone acceptance.
+**Scope:** This camera prototype draws a 2D instructional illustration; it is NOT a scan, tissue measurement, or anatomical registration.
+
+## User flow
+1. Open the HTTPS preview in Safari and allow rear-camera access.
+2. Keep the forearm visible. Tap **Freeze frame**; the current cover-cropped video is copied into an ephemeral canvas and all live camera tracks stop.
+3. Tap the elbow, then wrist. Each accepted tap shows a labeled visible marker, including on low-texture skin. If the points are too close, retap the wrist.
+4. **ILLUSTRATION READY** appears with forearm-only anatomical silhouettes aligned between the points. Select a colored structure to see a visible name and information; Layers opens muscle, bone, and schematic connective options.
+5. **Resume live** is optional. A texture patch near each manually placed anchor must match across frames. Matching failure hides the live geometry and presents **Freeze & recalibrate**. Smooth skin still supports the frozen educational display, but not a claim of live tracking.
+6. Full arm / Auto is optional; it requires shoulder, elbow and wrist, loads MediaPipe only in that mode, and offers a one-tap return to Close-up / Tap when initialization fails.
+
+## Confirmed source defects repaired (code-level evidence)
+- V2 tracker `setAnchor` required variance >= .00024 and contrast >= .085 even for a stationary instructional overlay; ordinary smooth skin could reject both taps. V3 accepts valid manual points independently of tracking texture and reports whether live matching is supported.
+- V2 close-up rendered only after `tracker.ready`; rejected calibration thus necessarily suppressed anatomy. V3 renders the frozen illustration once two sufficiently spaced manual anchors exist.
+- V2 awaited camera permission, `video.play()`, and MediaPipe creation without bounded timeouts. V3 bounds camera, preview and pose initialization, cleans up late-acquired tracks, and provides a close-up fallback if pose initialization fails.
+- V2 runtime tracking exceptions invoked `stop()`, displaying generic **CAMERA OFF**; V3 uses a visible **START FAILED** recovery state while releasing the stream.
+- V2 declared **TRACKING ARM** before checking rendered shapes; V3 only uses that status when its geometry renderer actually displays shapes.
+- V2 held structure details entirely behind the settings sheet, making selection feedback hard to see. V3 puts the selected structure name directly in the camera view.
+
+## Hypotheses, mitigations, not proven from this environment
+- Object-fit cropping / viewport misalignment on the reported iPhone may also contribute to edge-offset overlays. V3 shares an explicit `coverTransform` between frame sampling and freeze capture and unit-tests round-trips for 0/90/180/270 degrees and mirroring, but the browser's orientation-specific camera feed still needs real iPhone validation.
+- The live matcher searches small grayscale patches and may drift, especially after permission restart, major movement, camera autofocus, lighting changes, or smooth skin. Tracking quality is **not** medically or device validated. V3 forces loss-and-recalibration instead of falsely retaining geometry.
+- GPU delegate failure / remote model download may explain the loading phase in the reported video. Source code supports that possibility, but no runtime logs from the physical recording were available to assign a specific cause.
+- The 3 November recording itself was not accessible as an attachment to this task, so this is a source-level diagnosis using the user-reported timestamps, not a verified frame-by-frame video assessment.
+
+## Test evidence and remaining gate
+- Unit tests: anchor acceptance, insufficient anchor spacing, source/viewport transform with mirroring and rotation, pose gates, geometry provenance.
+- Playwright: mobile Chromium, mobile WebKit and desktop Chromium mocked-camera regression suite, plus a **locally rendered realistic forearm fixture** captured by a genuine HTML Canvas. The fixture's visible pixels are used for freeze/selection and alignment; screenshots saved to `artifacts/xray-v3-<project>-before.png` and `artifacts/xray-v3-<project>-calibrated.png` in GitHub Actions artifacts. This is **not** real iPhone performance proof.
+- Additional recovery tests: pose model creation fails on both GPU and CPU, user can switch to close-up; changed camera image loses lock and exposes **Freeze & recalibrate**. Check GitHub Actions conclusions for the exact commit before claiming a passing gate.
+- No user footage, image capture or camera pixels leave the browser. The CI fixture is entirely synthetic.
+
+## Physical iPhone Safari acceptance protocol — required
+1. Open the exact-SHA Vercel preview on a physical iPhone over HTTPS; permit rear camera. Confirm camera fills the viewport and status/control rows do not cover the elbow/wrist.
+2. With only forearm and elbow in view (shoulder excluded), Freeze. Confirm a **visible frozen image** remains after Safari camera indicator turns off.
+3. Tap elbow once, confirm **ELBOW PLACED** and exactly one marker. Tap wrist once, confirm **ILLUSTRATION READY**, two markers and three or more legible forearm structures on Muscle layer. Try smooth skin, not only textured clothing.
+4. Tap a structure; confirm the structure label appears without opening the sheet. Switch to Bone and Connective; check each layer's visible silhouettes and selection.
+5. Resume live with the arm held steady; if live image matching is reliable, overlay must follow the two points. If not, confirm **IMAGE MATCH LOST** and that anatomy is hidden rather than floating at the edge; tap Freeze & recalibrate and repeat.
+6. Switch to Full arm / Auto with shoulder visible; test CPU fallback/recovery, camera permission deny/retry, backgrounding, portrait/landscape, and page reload. Verify no lingering camera indicator or stuck spinner.
+7. Record browser + model/version, exact preview SHA, pass/fail and time-coded video for any remaining defect. Do not merge the draft PR based solely on CI.
+
+## Non-goals
+No MRI/X-ray output, real internal tissue detection, clinical angle, measured joint range of motion, 3D depth, or accuracy-certified anatomical overlay. Full-arm 2D projection is not medical registration.
