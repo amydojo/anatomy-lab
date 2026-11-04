@@ -112,7 +112,7 @@ function mount({model,render,U}){
  let active=false,current=null,visible={bones:true,muscles:false,ligament:true,tendon:true,fibrocartilage:true},selected=null;
  const note=panel.querySelector('.connective-evidence'),tissues=panel.querySelector('.connective-tissues'),items=panel.querySelector('.connective-items'),report=panel.querySelector('.connective-report');
  const names={bones:'Bones',muscles:'Muscles',ligament:'Ligaments',tendon:'Tendons',fibrocartilage:'Fibrocartilage'};
- const syncState=()=>{model.setConnectiveState({enabled:active&&current==='knee',visible,isolated:selected});render();};
+ const syncState=()=>{if(document.getElementById('atlas-app')?.dataset.connectiveStudio==='true')return;model.setConnectiveState({enabled:active&&current==='knee',visible,isolated:selected});render();};
  function inspect(id){
   const p=record[id];if(!p)return;
   selected=id;
