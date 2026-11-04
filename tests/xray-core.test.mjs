@@ -149,3 +149,36 @@ test('cover mapping round-trips portrait crop, quarter rotations and mirror',()=
  assert.ok(coverTransform(1280,720,390,844).offsetX<0);
  assert.equal(coverTransform(360,780,390,844).offsetX,0);
 });
+
+/* V3 integrity: calibration may never push the illustration outside the camera area the user can see. */
+import {pathBounds,usableArea,visibleRatio,constrainCalibration,CALIBRATION_LIMITS} from '../experiments/xray/xray-core.mjs';
+test('pathBounds reads every coordinate of generated bone and muscle paths',()=>{
+  const b=pathBounds(closeupGeometry({x:100,y:100},{x:300,y:260}).find(s=>s.id==='flexors').d);
+  assert.ok(b.minX<300&&b.maxX>100&&b.minY<260&&b.maxY>100);
+  assert.ok(Number.isFinite(b.minX+b.maxX+b.minY+b.maxY));
+  assert.equal(pathBounds('M 0 0 Z').maxX,0);assert.equal(pathBounds(''),null);
+});
+test('usableArea subtracts head and dock bands and never returns a negative box',()=>{
+  const a=usableArea({width:390,height:844},{headBottom:60,dockTop:700});
+  assert.deepEqual(a,{left:0,top:60,right:390,bottom:700});
+  const squeezed=usableArea({width:390,height:300},{headBottom:200,dockTop:150});
+  assert.ok(squeezed.bottom>=squeezed.top);
+});
+test('visibleRatio is the fraction of a shape box inside the usable area',()=>{
+  const area={left:0,top:60,right:390,bottom:700};
+  assert.equal(visibleRatio({minX:10,minY:100,maxX:50,maxY:140},area),1);
+  assert.equal(visibleRatio({minX:10,minY:720,maxX:50,maxY:760},area),0);
+  assert.ok(Math.abs(visibleRatio({minX:10,minY:680,maxX:50,maxY:720},area)-.5)<1e-9);
+});
+test('constrainCalibration keeps the elbow anchor inside the usable area with a margin',()=>{
+  const area={left:0,top:60,right:390,bottom:700};
+  const out=constrainCalibration({scale:1,rotation:0,x:100,y:100},{x:380,y:690},area);
+  assert.equal(out.clamped,true);
+  assert.ok(380+out.calibration.x<=390-CALIBRATION_LIMITS.edgeMarginPx);
+  assert.ok(690+out.calibration.y<=700-CALIBRATION_LIMITS.edgeMarginPx);
+  const ok=constrainCalibration({scale:1,rotation:0,x:10,y:-10},{x:200,y:300},area);
+  assert.equal(ok.clamped,false);assert.equal(ok.calibration.x,10);
+  const bad=constrainCalibration({scale:9,rotation:200,x:NaN,y:Infinity},{x:200,y:300},area);
+  assert.ok(bad.calibration.scale<=1.5&&Math.abs(bad.calibration.rotation)<=45);
+  assert.ok(Number.isFinite(bad.calibration.x)&&Number.isFinite(bad.calibration.y));
+});
