@@ -267,3 +267,43 @@ test('V3 realistic forearm fixture: frozen taps show anatomy, inspector works, c
  expect(await page.evaluate(()=>window.__XRAY_EXPERIMENT__.getState().liveTracks)).toBe(0);
  expect(errors).toEqual([]);
 });
+
+test('failed pose initialization gives actionable close-up fallback, no CAMERA OFF dead end',async({page})=>{
+ await mockCamera(page);
+ await page.route('**/vision_bundle.mjs',r=>r.fulfill({
+  status:200,contentType:'text/javascript',headers:{'access-control-allow-origin':'*'},
+  body:"export const FilesetResolver={forVisionTasks:async()=>({})};export const PoseLandmarker={createFromOptions:async()=>{throw Error('unsupported graphics backend')}};"
+ }));
+ await page.goto('/experiments/xray/');await page.locator('#launch').click();
+ await page.locator('#open-settings').click();await page.locator('[data-mode="auto"]').click();
+ await expect(page.locator('#status')).toHaveText('START FAILED',{timeout:12000});
+ await expect(page.locator('#message')).toContainText('unsupported graphics backend');
+ await expect(page.locator('#quick-closeup')).toBeVisible();
+ expect(await page.evaluate(()=>window.__XRAY_EXPERIMENT__.getState().liveTracks)).toBe(0);
+ await page.locator('#quick-closeup').click();
+ await expect(page.locator('#status')).toHaveText('FREEZE TO CALIBRATE');
+ await expect(page.locator('[data-mode="closeup"]')).toHaveAttribute('aria-pressed','true');
+ await page.locator('#pause').click();
+ await expect(page.locator('#status')).toHaveText('FRAME PAUSED');
+});
+test('loss after live resume explicitly shows Freeze & recalibrate, not false tracking',async({page})=>{
+ await mockCamera(page);await page.goto('/experiments/xray/');
+ await page.locator('#launch').click();await page.locator('#pause').click();
+ const vp=page.locator('#viewport'),box=await vp.boundingBox();
+ await vp.click({position:{x:box.width*.25,y:box.height*.35}});
+ await vp.click({position:{x:box.width*.7,y:box.height*.7}});
+ await expect(page.locator('#status')).toHaveText('ILLUSTRATION READY');
+ await page.locator('#resume').click();
+ await expect(page.locator('#status')).toHaveText('ANCHORS TRACKING',{timeout:12000});
+ await page.evaluate(()=>{
+  CanvasRenderingContext2D.prototype.getImageData=function(x,y,w,h){
+   return {data:new Uint8ClampedArray(w*h*4),width:w,height:h};
+  };
+ });
+ await expect(page.locator('#status')).toHaveText('IMAGE MATCH LOST',{timeout:12000});
+ await expect(page.locator('#pause')).toHaveText('Freeze & recalibrate');
+ await expect(page.locator('[data-id]')).toHaveCount(0);
+ await page.locator('#pause').click();
+ await expect(page.locator('#status')).toHaveText('FRAME PAUSED');
+ await expect(page.locator('#anchor-help')).toContainText('Tap your elbow');
+});

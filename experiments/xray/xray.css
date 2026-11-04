@@ -51,6 +51,7 @@ a{color:inherit;text-decoration:none}
 .empty-state p{max-width:310px;color:#dbc4b4;line-height:1.6;margin:0 0 25px;font-size:13px}
 .launch{width:min(290px,88%);display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border:0;border-radius:100px;background:var(--apricot);color:#24130e;font-size:14px;font-weight:800;min-height:54px}
 .privacy-intro{font-size:10px;color:#c8ad99;margin-top:17px}
+.quick-closeup{color:#ffdfc3;background:transparent;border:1px solid #b39379;border-radius:22px;padding:11px 17px;min-height:44px;margin-top:12px}
 .tracking-notice{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;pointer-events:none}
 .camera-dock{position:absolute;left:0;right:0;bottom:0;z-index:12;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(0deg,rgba(11,8,7,.96) 0,rgba(11,8,7,.82) 59%,rgba(11,8,7,0) 100%);pointer-events:none}
 .camera-dock>*{pointer-events:auto}

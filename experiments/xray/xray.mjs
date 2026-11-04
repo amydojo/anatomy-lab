@@ -269,7 +269,7 @@ async function start(){
   smoother.reset();poseLock.reset();lastPose=null;clearOverlay();resetMetrics();setPhase('loading');
   poseState.event('start');status('acquiring','INITIALIZING');notice('Requesting camera…');
   message('Camera initializes locally. Allow permission when your browser asks.');
-  ui.start.disabled=true;ui.resume.disabled=true;
+  ui.start.disabled=true;ui.resume.disabled=true;$('quick-closeup').hidden=true;
   if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia){
     failure('An HTTPS connection and a browser supporting camera access are required.',ticket);return;
   }
@@ -324,6 +324,7 @@ function failure(reason,ticket){
   if(landmarker){landmarker.close();landmarker=null;}
   pipeline.lastError=reason;trace('failure',reason);
   status('lost','START FAILED');notice(reason);message(reason);
+  $('quick-closeup').hidden=mode!=='auto';
   ui.empty.hidden=false;ui.start.disabled=false;ui.stop.disabled=true;ui.pause.disabled=true;ui.resume.hidden=true;ui.pause.hidden=false;setPhase('idle');
 }
 function stop({reason='Camera stopped. Activate X-RAY to begin again.'}={}){
@@ -333,7 +334,7 @@ function stop({reason='Camera stopped. Activate X-RAY to begin again.'}={}){
   const context=frozen.getContext('2d');context?.clearRect(0,0,frozen.width,frozen.height);
   frozen.hidden=true;ui.empty.hidden=false;ui.start.disabled=false;ui.stop.disabled=true;
   ui.pause.disabled=true;ui.pause.hidden=false;ui.resume.hidden=true;setPhase('idle');closeSettings({restoreFocus:false});
-  status('idle','CAMERA OFF');notice('');message(reason);
+  status('idle','CAMERA OFF');notice('');message(reason);$('quick-closeup').hidden=true;
 }
 function pause(){
   if(!running)return;
@@ -352,6 +353,11 @@ function pause(){
   render();updateAnchorHints();
 }
 ui.start.addEventListener('click',start);ui.stop.addEventListener('click',()=>stop());
+$('quick-closeup').addEventListener('click',()=>{
+  mode='closeup';tracker.reset();poseLock.reset();anchorStep='elbow';lastPose=null;
+  document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));
+  $('quick-closeup').hidden=true;resetSelection();clearOverlay();start();
+});
 document.querySelectorAll('[data-mode]').forEach(btn=>btn.addEventListener('click',()=>{
   if(mode===btn.dataset.mode)return;
   const wasActive=running||!!stream,wasFrozen=!frozen.hidden;
