@@ -62,3 +62,40 @@ The evaluateVerification evidence policy requires source/license/hash/coordinate
     npm run test:e2e -- --project=desktop-chromium tests/v14-geometry-evidence.spec.mjs
 
 The dedicated GitHub workflow runs source checks plus desktop Chromium, mobile Chromium and mobile WebKit regressions and stores output audit JSON and illustrative orbit screenshots as artifacts. CI pass means software integrity, not final anatomical approval. No merge or deploy is authorized.
+
+## Registration gate and tolerance policy (hardened)
+
+scripts/geometry/registration.mjs decides only whether a registration **candidate** is *eligible to be shown to a
+qualified anatomist*. evaluateVerification always returns verified:false; software never creates a verified status.
+Promotion to geometry_verified:true is a deliberate human edit of the coverage manifest, and
+scripts/validate_connective_coverage.cjs re-runs the same gate against a retained registration_record before accepting it.
+
+What the gate enforces (each has a negative test in tests/v14-geometry-registration.test.mjs):
+
+- **Rigid transform:** 16 finite numbers, bottom row 0 0 0 1, orthonormal rotation, determinant +1 (no scale, shear or mirror).
+- **Residuals are recomputed**, never trusted: the candidate retains fit and holdout landmark coordinates (metres, both frames);
+  RMS is recomputed from the matrix and must equal the reported fields and satisfy the policy below.
+- **Chirality:** at least 4 fit landmarks that span a volume. Three or coplanar landmarks cannot distinguish a mirrored
+  (left/right) solution from a rotation and are refused.
+- **Independent holdouts:** at least 2, distinct IDs, and each at least the policy separation from every fit landmark and
+  from each other, in both coordinate frames. Re-labelled copies of fit points are rejected.
+- **Laterality:** source and target laterality must agree, and the source must equal the laterality in trusted evidence
+  (expected_laterality). Midline data is not accepted for a lateralised structure.
+- **Hashes:** the upstream original file hash and the converted working-mesh hash are stored separately.
+  original_bytes_verified is true only when the original bytes were supplied and hashed; otherwise the candidate is not eligible.
+  The registered mesh carries mesh_sha256; post-registration edits are detected.
+- **Review is inert metadata unless bound:** the reviewer must be on atlas/assets/qualified-reviewers.json (empty by design),
+  the review document bytes must hash to review_record_sha256, and the review must name this exact candidate digest.
+  A fabricated review record cannot make anything eligible.
+
+### Tolerance policy
+
+REGISTRATION_POLICY (body-live/registration-policy-v1) holds provisional **engineering screening** values
+(fit RMS ≤ 2 mm, holdout RMS ≤ 5 mm, holdout separation ≥ 5 mm, fit volume ≥ 100 mm³). They exist to reject gross errors
+such as mirroring, wrong units or the wrong bone. They are **NOT clinically validated accuracy thresholds**, passing them is not
+evidence that a ligament, tendon or meniscus is anatomically correct, and changing them requires an explicit reviewed change.
+
+### Still not done
+
+No ACL/PCL mesh has been acquired; no landmark protocol exists for those structures; no qualified reviewer is on the roster;
+the importer still consumes JSON meshes (a documented conversion step is recorded, but format converters are not implemented).
