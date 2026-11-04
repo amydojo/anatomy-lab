@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {makePatch,grayImage,matchPatch,makeCloseupTracker} from '../experiments/xray/xray-tracker.mjs';
-import {ARM,STRUCTURES,angleDegrees,readArm,createSmoother,createTrackingState,coverPoint,rigGeometry,plausibleFullArm,createPoseLock,closeupGeometry} from '../experiments/xray/xray-core.mjs';
+import {ARM,STRUCTURES,angleDegrees,readArm,createSmoother,createTrackingState,coverPoint,rigGeometry,plausibleFullArm,createPoseLock,closeupGeometry,coverTransform} from '../experiments/xray/xray-core.mjs';
 
 function landmarks({wrist={x:.72,y:.48},visibility=.94,side='right'}={}){
   const pose=Array.from({length:33},()=>({x:.5,y:.5,visibility:0,presence:0}));
@@ -118,9 +118,34 @@ test('texture tracker locates translated image features without fabricating a po
  assert.equal(t.lost,true);
  t.reset();assert.equal(t.ready,false);
 });
-test('tracker refuses low-information imagery',()=>{
+test('blank skin allows frozen illustrated placement but never false live tracking',()=>{
  const blank=syntheticFrame(0,true),t=makeCloseupTracker();
- assert.equal(t.setAnchor('elbow',blank,40,40).ok,false);
+ assert.equal(t.setAnchor('elbow',blank,40,40).ok,true);
+ assert.equal(t.anchors.elbow.trackable,false);
+ assert.equal(t.setAnchor('wrist',blank,130,55).ok,true);
+ assert.equal(t.ready,true);assert.equal(t.trackable,false);
+ assert.match(t.update(blank).reason,/texture/i);
+ assert.equal(t.update(blank).ok,false);
  assert.equal(makePatch(blank,1,1),null);
  assert.equal(matchPatch(blank,{data:new Float32Array(169),radius:6,x:40,y:40,variance:0,contrast:0},40,40).ok,false);
+});
+test('invalid and overly close anchors request a retap without erasing elbow',()=>{
+ const t=makeCloseupTracker(),f=syntheticFrame();
+ assert.equal(t.setAnchor('elbow',f,-1,30).ok,false);
+ assert.equal(t.setAnchor('elbow',f,55,45).ok,true);
+ assert.equal(t.setAnchor('wrist',f,60,48).ok,false);
+ assert.ok(t.anchors.elbow);assert.equal(t.anchors.wrist,undefined);
+ assert.equal(t.setAnchor('wrist',f,140,55).ok,true);
+});
+test('cover mapping round-trips portrait crop, quarter rotations and mirror',()=>{
+ for(const rotation of [0,90,180,270])for(const mirror of [false,true]){
+   const t=coverTransform(640,480,390,844,{rotation,mirror});
+   for(const p of [{x:.10,y:.12},{x:.76,y:.66}]){
+     const projected=t.toViewport(p),restored=t.toSource(projected);
+     assert.ok(Math.abs(p.x-restored.x)<1e-10);
+     assert.ok(Math.abs(p.y-restored.y)<1e-10);
+   }
+ }
+ assert.ok(coverTransform(1280,720,390,844).offsetX<0);
+ assert.equal(coverTransform(720,1280,390,844).offsetX,0);
 });

@@ -59,19 +59,30 @@ export function makeCloseupTracker(){
     reset(){anchors={};initialDistance=null;lost=false;},
     setAnchor(name,frame,x,y){
       if(!['elbow','wrist'].includes(name))throw Error('Unknown anchor');
-      const patch=makePatch(frame,x,y);
-      if(!patch||patch.variance<.00024||patch.contrast<.085)return {ok:false,reason:'Tap a well-lit edge or textured area beside the joint.'};
-      anchors[name]={patch,x:patch.x,y:patch.y};
+      if(!Number.isFinite(x)||!Number.isFinite(y)||x<0||y<0||x>=frame.width||y>=frame.height)
+        return {ok:false,reason:'Tap within the visible frozen camera image.'};
+      // Two anatomical *illustration* anchors must work even on smooth skin.
+      // A high-contrast patch is optional and is needed only for live image matching.
+      const candidate=makePatch(frame,x,y);
+      const patch=candidate&&candidate.variance>=.00024&&candidate.contrast>=.085?candidate:null;
+      anchors[name]={patch,x:Math.round(x),y:Math.round(y),trackable:!!patch};
       initialDistance=anchors.elbow&&anchors.wrist?Math.hypot(anchors.elbow.x-anchors.wrist.x,anchors.elbow.y-anchors.wrist.y):null;
+      if(name==='wrist'&&initialDistance!==null&&initialDistance<18){
+        delete anchors.wrist;initialDistance=null;
+        return {ok:false,reason:'Elbow and wrist are too close. Tap farther along your forearm.'};
+      }
       lost=false;
-      return {ok:true,ready:!!initialDistance};
+      return {ok:true,ready:this.ready,trackable:this.trackable};
     },
-    get anchors(){return {elbow:anchors.elbow&&{x:anchors.elbow.x,y:anchors.elbow.y},wrist:anchors.wrist&&{x:anchors.wrist.x,y:anchors.wrist.y}};},
-    get ready(){return !!initialDistance&&initialDistance>=18;},
+    get anchors(){return {elbow:anchors.elbow&&{x:anchors.elbow.x,y:anchors.elbow.y,trackable:anchors.elbow.trackable},
+      wrist:anchors.wrist&&{x:anchors.wrist.x,y:anchors.wrist.y,trackable:anchors.wrist.trackable}};},
+    get ready(){return Number.isFinite(initialDistance)&&initialDistance>=18;},
+    get trackable(){return this.ready&&!!anchors.elbow?.patch&&!!anchors.wrist?.patch;},
     get lost(){return lost;},
     update(frame){
       if(!this.ready)return {ok:false,reason:'Tap your elbow, then wrist to set two anchors.'};
-      if(lost)return {ok:false,reason:'Anchor lock lost. Reset anchors and recalibrate.'};
+      if(!this.trackable)return {ok:false,reason:'The illustrated placement is valid, but these points lack image texture for reliable live matching. Freeze to select more distinct edges.'};
+      if(lost)return {ok:false,reason:'Image matching lost. Freeze and recalibrate.'};
       const next={};
       for(const key of ['elbow','wrist']){
         const a=anchors[key],match=matchPatch(frame,a.patch,a.x,a.y);

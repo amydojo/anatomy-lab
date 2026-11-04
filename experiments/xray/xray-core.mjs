@@ -69,10 +69,45 @@ export function createTrackingState(){
     get status(){return status;}
   };
 }
-export function coverPoint(p,videoWidth,videoHeight,width,height){
-  const factor=Math.max(width/videoWidth,height/videoHeight);
-  const left=(width-videoWidth*factor)/2,top=(height-videoHeight*factor)/2;
-  return {x:left+p.x*videoWidth*factor,y:top+p.y*videoHeight*factor};
+// Explicit object-fit:cover transform, in CSS pixels; mirror/rotation are opt-in.
+ // HTML video returns orientation-correct dimensions on modern Safari, so the app
+ // uses rotation=0 unless a source is known to require a transform.
+export function coverTransform(sourceWidth,sourceHeight,width,height,{mirror=false,rotation=0}={}){
+  if([sourceWidth,sourceHeight,width,height].some(v=>!Number.isFinite(v)||v<=0))
+    throw Error('Invalid cover dimensions');
+  const turn=((rotation%360)+360)%360;
+  if(![0,90,180,270].includes(turn))throw Error('Only quarter-turn video rotations are supported');
+  const rotatedWidth=turn%180?sourceHeight:sourceWidth;
+  const rotatedHeight=turn%180?sourceWidth:sourceHeight;
+  const scale=Math.max(width/rotatedWidth,height/rotatedHeight);
+  const offsetX=(width-rotatedWidth*scale)/2,offsetY=(height-rotatedHeight*scale)/2;
+  function rotate(u,v){
+    if(turn===90)return {u:1-v,v:u};
+    if(turn===180)return {u:1-u,v:1-v};
+    if(turn===270)return {u:v,v:1-u};
+    return {u,v};
+  }
+  function inverseRotate(u,v){
+    if(turn===90)return {u:v,v:1-u};
+    if(turn===180)return {u:1-u,v:1-v};
+    if(turn===270)return {u:1-v,v:u};
+    return {u,v};
+  }
+  return {
+    scale,offsetX,offsetY,displayWidth:rotatedWidth*scale,displayHeight:rotatedHeight*scale,
+    toViewport(p){
+      let {u,v}=rotate(p.x,p.y);if(mirror)u=1-u;
+      return {x:offsetX+u*rotatedWidth*scale,y:offsetY+v*rotatedHeight*scale};
+    },
+    toSource(p){
+      let u=(p.x-offsetX)/(rotatedWidth*scale),v=(p.y-offsetY)/(rotatedHeight*scale);
+      if(mirror)u=1-u;
+      const out=inverseRotate(u,v);return {x:out.u,y:out.v};
+    }
+  };
+}
+export function coverPoint(p,videoWidth,videoHeight,width,height,options={}){
+  return coverTransform(videoWidth,videoHeight,width,height,options).toViewport(p);
 }
 const add=(p,v,n=1)=>({x:p.x+v.x*n,y:p.y+v.y*n});
 const sub=(a,b)=>({x:a.x-b.x,y:a.y-b.y});
