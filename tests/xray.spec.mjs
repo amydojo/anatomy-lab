@@ -317,3 +317,152 @@ test('loss after live resume explicitly shows Freeze & recalibrate, not false tr
  await expect(page.locator('#status')).toHaveText('FRAME PAUSED');
  await expect(page.locator('#anchor-help')).toContainText('Tap your elbow');
 });
+
+
+// ───────── V3 integrity (synthetic camera only: NOT real iPhone validation) ─────────
+const usableFromDom=page=>page.evaluate(()=>{
+ const vp=document.getElementById('viewport').getBoundingClientRect(),dock=document.getElementById('camera-dock').getBoundingClientRect();
+ const head=document.querySelector('.viewport-head').getBoundingClientRect();
+ return {left:vp.left,right:vp.right,top:Math.max(vp.top,head.bottom),bottom:dock.hidden||!dock.height?vp.bottom:Math.min(vp.bottom,dock.top)};
+});
+async function calibrateCloseup(page,[ex,ey],[wx,wy]){
+ await page.locator('#launch').click();await page.locator('#pause').click();
+ const vp=page.locator('#viewport'),box=await vp.boundingBox();
+ await vp.click({position:{x:box.width*ex,y:typeof ey==='function'?ey(box):box.height*ey}});
+ await vp.click({position:{x:box.width*wx,y:typeof wy==='function'?wy(box):box.height*wy}});
+ await expect(page.locator('#status')).toHaveText('ILLUSTRATION READY');
+}
+const setSlider=async(page,id,value)=>{
+ await page.locator('#open-settings').click();
+ if(!(await page.locator('.calibration').evaluate(d=>d.open)))await page.locator('.calibration summary').click();
+ await page.locator('#'+id).fill(String(value));
+ await page.locator('#close-settings').click();
+};
+test('calibration offsets cannot push the illustration under the dock or out of the camera area',async({page})=>{
+ await mockCamera(page);await page.goto('/experiments/xray/');
+ const dockTop=()=>page.evaluate(()=>document.getElementById('camera-dock').getBoundingClientRect().top);
+ await page.locator('#launch').click();const dt=await dockTop();await page.locator('#pause').click();
+ const vpTop=await page.evaluate(()=>document.getElementById('viewport').getBoundingClientRect().top);
+ await calibrateCloseup2(page,dt-vpTop);
+ for(const [id,value] of [['shift-y',100],['shift-x',100]])await setSlider(page,id,value);
+ const area=await usableFromDom(page);
+ const targets=await page.evaluate(()=>window.__XRAY_EXPERIMENT__.probeTargets());
+ expect(targets.length).toBeGreaterThan(0);
+ for(const t of targets){
+  expect(t.visibleRatio,t.id+' stays at least half inside the usable area').toBeGreaterThanOrEqual(.5);
+  expect(t.box.maxY,t.id+' must not extend past the dock').toBeLessThanOrEqual(area.bottom-vpTop+t.box.height);
+ }
+ const st=await page.evaluate(()=>window.__XRAY_EXPERIMENT__.getState());
+ expect(st.calibration.requested.y).toBe(100);
+ expect(st.calibration.effective.y).toBeLessThan(100);
+ expect(st.calibration.clamped).toBe(true);
+ await expect(page.locator('#tracking-notice')).toContainText(/limited|kept in view/i);
+ const ring=await page.evaluate(()=>{const r=document.querySelector('.joint-ring');return {y:Number(r.getAttribute('cy'))};});
+ expect(ring.y).toBeLessThanOrEqual(area.bottom-vpTop);
+});
+async function calibrateCloseup2(page,dockOffset){
+ const vp=page.locator('#viewport'),box=await vp.boundingBox();
+ await vp.click({position:{x:box.width*.3,y:dockOffset-70}});
+ await vp.click({position:{x:box.width*.7,y:dockOffset-150}});
+ await expect(page.locator('#status')).toHaveText('ILLUSTRATION READY');
+}
+test('structures are reachable with normal pointer input and have accessible names',async({page})=>{
+ await mockCamera(page);await page.goto('/experiments/xray/');
+ await calibrateCloseup(page,[.27,.33],[.7,.58]);
+ const targets=await page.evaluate(()=>window.__XRAY_EXPERIMENT__.probeTargets());
+ const area=await usableFromDom(page);
+ const flex=targets.find(t=>t.id==='flexors');
+ expect(flex.hit&&flex.practical).toBe(true);
+ expect(flex.y).toBeGreaterThan(area.top);expect(flex.y).toBeLessThan(area.bottom);
+ expect(flex.x).toBeGreaterThan(area.left);expect(flex.x).toBeLessThan(area.right);
+ await tapStructure(page,'flexors');
+ await expect(page.locator('#peek-title')).toHaveText('Forearm flexor group');
+ await page.locator('[data-id="extensors"]').focus();await page.keyboard.press('Enter');
+ await expect(page.locator('#peek-title')).toHaveText(/extensor/i);
+ for(const el of await page.locator('[data-id]').all()){
+  await expect(el).toHaveAttribute('role','button');await expect(el).toHaveAttribute('tabindex','0');
+  expect((await el.getAttribute('aria-label'))||'').toMatch(/^Inspect \S/);
+ }
+});
+test('foreground anatomy stays legible: opacity has a floor and dock/peek never hide the selected structure',async({page})=>{
+ await mockCamera(page);await page.goto('/experiments/xray/');
+ await calibrateCloseup(page,[.27,.33],[.7,.58]);
+ await page.locator('#open-settings').click();await page.locator('#opacity').fill('35');await page.locator('#close-settings').click();
+ const op=await page.evaluate(()=>Number(document.querySelector('[data-id="flexors"]').getAttribute('fill-opacity')));
+ expect(op).toBeGreaterThanOrEqual(.35);
+ await expect(page.locator('#opacity')).toHaveAttribute('min','35');
+ await tapStructure(page,'flexors');
+ const sel=await page.evaluate(()=>window.__XRAY_EXPERIMENT__.probeTargets().find(t=>t.id==='flexors'));
+ expect(sel.hit,'selected structure remains the top element after the peek card opens').toBe(true);
+});
+test('diagnostics export is structured, bounded and contains no camera imagery',async({page})=>{
+ await mockCamera(page);const requests=[];page.on('request',r=>requests.push({m:r.method(),u:r.url()}));
+ await page.goto('/experiments/xray/');
+ await calibrateCloseup(page,[.27,.33],[.7,.58]);
+ await page.locator('#resume').click();
+ await expect.poll(()=>page.evaluate(()=>window.__XRAY_EXPERIMENT__.getState().pipeline.frameReceived)).toBeGreaterThan(1);
+ await page.locator('#open-settings').click();
+ await page.locator('#pipeline-debug summary').click();
+ await page.locator('#copy-diagnostics').click();
+ const text=await page.locator('#diagnostics-output').textContent();
+ const d=JSON.parse(text);
+ expect(d.schema).toBe('xray-diagnostics/1');
+ expect(d.privacy).toMatch(/no camera pixels/i);
+ for(const key of ['viewport','dock','head','calibration','tracker','pipeline','shapes','environment','events'])expect(d,key).toHaveProperty(key);
+ expect(d.shapes.every(s=>'visibleRatio' in s&&'hit' in s&&'box' in s)).toBe(true);
+ expect(text.length).toBeLessThan(8000);
+ expect(text).not.toMatch(/data:image|base64|blob:/i);
+ expect(d.events.length).toBeLessThanOrEqual(60);
+ // Nothing is uploaded: only same-origin GETs.
+ const origin=new URL(page.url()).origin;
+ expect(requests.filter(r=>r.m!=='GET'||!r.u.startsWith(origin))).toEqual([]);
+});
+test('close-up lock follows a known texture shift, loses honestly on blank frames and only recovers by recalibrating',async({page})=>{
+ await mockCamera(page);await page.goto('/experiments/xray/');
+ await calibrateCloseup(page,[.27,.33],[.7,.58]);
+ await page.locator('#resume').click();
+ await expect(page.locator('#status')).toHaveText('ANCHORS TRACKING',{timeout:12000});
+ const frame=()=>page.evaluate(()=>window.__XRAY_EXPERIMENT__.getState());
+ const before=await frame();
+ await page.evaluate(()=>{globalThis.__texture={mode:'noise',dx:6,dy:-4};});
+ await expect.poll(async()=>{const s=await frame();return Math.round(s.anchors.elbow.x-before.anchors.elbow.x)+','+Math.round(s.anchors.elbow.y-before.anchors.elbow.y);},{timeout:12000}).toBe('-6,4');
+ await expect(page.locator('#status')).toHaveText('ANCHORS TRACKING');
+ const moved=await frame();
+ expect(moved.anchors.wrist.x-before.anchors.wrist.x).toBeCloseTo(-6,0);
+ expect(moved.geometryCount).toBeGreaterThan(0);
+ await page.evaluate(()=>{globalThis.__texture={mode:'blank',dx:0,dy:0};});
+ await expect(page.locator('#status')).toHaveText('IMAGE MATCH LOST',{timeout:12000});
+ await expect(page.locator('[data-id]')).toHaveCount(0);
+ await expect(page.locator('#pause')).toHaveText('Freeze & recalibrate');
+ expect((await frame()).pipeline.recent.some(e=>e.stage==='trackingLoss')).toBe(true);
+ await page.evaluate(()=>{globalThis.__texture={mode:'noise',dx:0,dy:0};});
+ const at=(await frame()).pipeline.frameReceived;
+ await expect.poll(async()=>(await frame()).pipeline.frameReceived).toBeGreaterThan(at+8);
+ await expect(page.locator('#status')).toHaveText('IMAGE MATCH LOST');
+ expect((await frame()).geometryCount).toBe(0);
+ await page.locator('#pause').click();
+ await expect(page.locator('#anchor-help')).toContainText('Tap your elbow');
+ const vp=page.locator('#viewport'),box=await vp.boundingBox();
+ await vp.click({position:{x:box.width*.27,y:box.height*.33}});
+ await vp.click({position:{x:box.width*.7,y:box.height*.58}});
+ await expect(page.locator('#status')).toHaveText('ILLUSTRATION READY');
+ await page.locator('#resume').click();
+ await expect(page.locator('#status')).toHaveText('ANCHORS TRACKING',{timeout:12000});
+});
+test('full-arm lock needs five consecutive plausible frames, drops on landmark loss and re-locks only after five good frames',async({page})=>{
+ await mockCamera(page);await page.goto('/experiments/xray/');
+ await page.locator('#launch').click();await page.locator('#open-settings').click();await page.locator('[data-mode="auto"]').click();
+ const st=()=>page.evaluate(()=>window.__XRAY_EXPERIMENT__.getState());
+ await expect(page.locator('#status')).toHaveText('TRACKING ARM',{timeout:12000});
+ expect((await st()).pipeline.frameReceived,'lock needs five consecutive frames').toBeGreaterThanOrEqual(5);
+ await page.evaluate(()=>{globalThis.__testPose[14].visibility=.1;});
+ await expect(page.locator('#status')).toHaveText('TRACKING LOST');
+ await expect(page.locator('[data-id]')).toHaveCount(0);
+ const lostAt=(await st()).pipeline.frameReceived;
+ await expect.poll(async()=>(await st()).pipeline.frameReceived).toBeGreaterThan(lostAt+6);
+ await expect(page.locator('#status'),'stays lost while landmarks are bad').toHaveText('TRACKING LOST');
+ const restoredAt=(await st()).pipeline.frameReceived;
+ await page.evaluate(()=>{globalThis.__testPose[14].visibility=.96;});
+ await expect(page.locator('#status')).toHaveText('TRACKING ARM',{timeout:12000});
+ expect((await st()).pipeline.frameReceived-restoredAt,'re-lock requires about five good frames').toBeGreaterThanOrEqual(5);
+});
