@@ -97,6 +97,10 @@ for(const [w,h] of [...MOBILE,...DESKTOP]){
   test.setTimeout(180000);
   test.skip(!projectViewports(info).some(v=>v[0]===w&&v[1]===h),'viewport belongs to another project');
   const errors=await enter(page,w,h);
+  // Settle the camera BEFORE locating a target: clearing selection later must never move the camera,
+  // or the coordinates found below would be stale (seen in WebKit CI at 390x844).
+  await page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.resetView());
+  await frames(page);
   const fp=await footprint(page);
   const target=await page.evaluate(([fp,ids])=>{
    // Spiral outward from the footprint centre and stop at the first connective structure that a
@@ -123,7 +127,7 @@ for(const [w,h] of [...MOBILE,...DESKTOP]){
      found={id,x,y,top:el?.id||el?.tagName};break;
     }
     window.__BODY_ATLAS__.pickAt(-50,-50);// a miss clears the renderer highlight
-    window.__BODY_CONNECTIVE_STUDIO__.resetView();// ...and this clears Studio's selectedId, which the probe also set
+    window.__BODY_CONNECTIVE_STUDIO__.setRegion('knee');// ...and this clears Studio's selectedId (no camera change)
    }finally{history.replaceState=replaceState;history.pushState=pushState;}
    return found;
   },[fp,KNEE]);
