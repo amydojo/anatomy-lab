@@ -96,7 +96,7 @@ test('close-up two-tap calibration tracks illustrative forearm, without false el
  expect(await page.evaluate(()=>globalThis.__tracks.at(-1).readyState)).toBe('ended');
  const vp=page.locator('#viewport'),rect=await vp.boundingBox();
  await vp.click({position:{x:rect.width*.27,y:rect.height*.41}});
- await expect(page.locator('#status')).toHaveText('TAP WRIST');
+ await expect(page.locator('#status')).toHaveText('ELBOW PLACED');
  await vp.click({position:{x:rect.width*.72,y:rect.height*.61}});
  await expect(page.locator('#status')).toHaveText('ILLUSTRATION READY');
  await expect(page.locator('[data-id="flexors"]')).toBeVisible();

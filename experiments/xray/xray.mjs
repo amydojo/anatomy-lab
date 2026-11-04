@@ -15,6 +15,7 @@ let sampleSize={width:0,height:0};
 let selected=null,lastPose=null,raf=0,lastFrameTime=-1,lastInferTime=0,frames=0,fpsStart=0,session=0,running=false;
 let calibration={scale:1,rotation:0,x:0,y:0};
 let lastVideoSize={width:0,height:0};
+let fullArmHadVisibleLock=false;
 const ui={start:$('launch'),stop:$('stop'),pause:$('pause'),resume:$('resume'),empty:$('empty'),message:$('message'),notice:$('tracking-notice')};
 const app=$('app'),settings=$('settings-sheet'),backdrop=$('sheet-backdrop');
 const pipeline={frameReceived:0,anchorAccepted:0,geometryComputed:0,geometryDisplayed:0,
@@ -160,7 +161,7 @@ svg.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const id=e.t
 function updateTracking(sample,time){
   if(!sample.ok){
     smoother.reset();lastPose=null;clearOverlay();clearPoseMetrics();
-    poseState.event('missing');status('lost',poseLock.locked?'TRACKING LOST':'FINDING FULL ARM');notice(sample.reason);
+    poseState.event('missing');status('lost',fullArmHadVisibleLock?'TRACKING LOST':'FINDING FULL ARM');notice(sample.reason);
     message(sample.reason+' Anatomy is hidden until tracking returns.');
     updateAnchorHints();
     return;
@@ -173,7 +174,9 @@ function updateTracking(sample,time){
   message('Tracking '+side+' elbow. Bend your arm and tap a '+layer+' to inspect it. Angle is estimated in 2D.');
   // The mobile-first lens intentionally has no scanline element. Tracking lock
   // must never depend on a cosmetic animation being present.
-  const shown=render();status(shown?'tracking':'lost',shown?'TRACKING ARM':'ALIGNMENT UNAVAILABLE');
+  const shown=render();
+  if(shown)fullArmHadVisibleLock=true;
+  status(shown?'tracking':'lost',shown?'TRACKING ARM':'ALIGNMENT UNAVAILABLE');
   updateAnchorHints();
 }
 function snapshotFrame(){
@@ -266,7 +269,7 @@ function halt(){
 async function start(){
   if(running||stream)return;
   const ticket=++session;
-  smoother.reset();poseLock.reset();lastPose=null;clearOverlay();resetMetrics();setPhase('loading');
+  smoother.reset();poseLock.reset();fullArmHadVisibleLock=false;lastPose=null;clearOverlay();resetMetrics();setPhase('loading');
   poseState.event('start');status('acquiring','INITIALIZING');notice('Requesting camera…');
   message('Camera initializes locally. Allow permission when your browser asks.');
   ui.start.disabled=true;ui.resume.disabled=true;$('quick-closeup').hidden=true;
