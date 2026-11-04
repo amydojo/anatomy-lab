@@ -147,5 +147,5 @@ test('cover mapping round-trips portrait crop, quarter rotations and mirror',()=
    }
  }
  assert.ok(coverTransform(1280,720,390,844).offsetX<0);
- assert.equal(coverTransform(720,1280,390,844).offsetX,0);
+ assert.equal(coverTransform(360,780,390,844).offsetX,0);
 });

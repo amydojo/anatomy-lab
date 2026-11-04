@@ -31,6 +31,10 @@
     <span class="privacy-intro">On-device illustration · Not a medical scan</span>
    </div>
    <div class="tracking-notice" id="tracking-notice" role="status" hidden></div>
+   <button id="selection-peek" class="selection-peek" type="button" aria-label="Open selected anatomical structure details" hidden>
+    <span class="selection-peek-label">ILLUSTRATED STRUCTURE</span>
+    <strong id="peek-title"></strong><span id="peek-summary"></span>
+   </button>
    <div class="camera-dock" id="camera-dock">
     <div class="dock-hint" id="anchor-hud" aria-live="polite"><span id="anchor-help">Freeze to mark your elbow and wrist.</span></div>
     <div class="dock-controls">
@@ -91,6 +95,10 @@
     <span><small>INFERENCE</small><strong id="fps">— FPS</strong></span>
    </div>
    <div class="signal"><p id="message" role="status">Open camera, freeze a frame, and mark elbow then wrist.</p></div>
+   <details id="pipeline-debug" class="pipeline-debug"><summary>Diagnostic pipeline</summary>
+    <p>Local counters: frame received → anchor accepted → geometry computed → geometry displayed. Does not send camera images.</p>
+    <pre id="pipeline-log">No frames yet</pre>
+   </details>
    <p class="disclaimer"><strong>NOT A MEDICAL SCAN.</strong> This is an illustrative overlay on estimated or manually marked image positions. It is not diagnostic and does not reveal actual tissue under your skin. No video is saved or uploaded. Close-up tracking can fail on smooth skin or movement. In Full arm mode, MediaPipe loads third-party model assets and may send service metrics under its privacy policy.</p>
   </aside>
  </main>
