@@ -77,6 +77,14 @@ Detection uses requestAnimationFrame, bounds inference to approximately 29 itera
 - Additional recovery tests: pose model creation fails on both GPU and CPU, user can switch to close-up; changed camera image loses lock and exposes **Freeze & recalibrate**. Check GitHub Actions conclusions for the exact commit before claiming a passing gate.
 - No user footage, image capture or camera pixels leave the browser. The CI fixture is entirely synthetic.
 
+## Integrity repairs after independent review (still synthetic-camera validation only)
+- **Calibration is constrained.** The Horizontal/Vertical sliders still show what was requested, but render() limits the effective offset so the elbow anchor stays inside the usable camera area (viewport minus header band and control dock, 12 px margin). A limited offset is shown as 100 → 62 beside the slider and as a notice. Scale/rotation are clamped to their slider ranges.
+- **"Displayed" now means visible.** geometryDisplayed counts only shapes with at least half their box inside the usable area; if none qualify, geometry is removed and geometryOffscreen is recorded. Previously any DOM shape counted.
+- **Practical hit targets.** __XRAY_EXPERIMENT__.probeTargets() hit-tests each structure and reports whether a 12 px square around the point still hits it. Tests tap those points with ordinary mouse/touch input (no force).
+- **Legibility.** The opacity slider floor is 35 % (was 10 %).
+- **Field diagnostics without imagery.** Diagnostic pipeline → Copy diagnostics produces xray-diagnostics/1 JSON: device and visual-viewport sizes, safe-area insets, header/dock rectangles, camera track settings, calibration (requested vs effective), tracker flags, normalised frame statistics (mean/min/max luminance), per-structure hit probes and a 60-event ring. No pixels, frames or landmark streams; nothing is uploaded. Paste it into the PR when reporting an iPhone failure.
+- **What the new tests are not.** Texture-shift, blank-frame and landmark-loss tests use a synthetic camera. They prove the state machine (lock → loss → no silent recovery → explicit recalibration; five consecutive frames to re-lock) and the layout contract in emulation. They are **not** real iPhone validation; the physical acceptance protocol above is still required.
+
 ## Physical iPhone Safari acceptance protocol — required
 1. Open the exact-SHA Vercel preview on a physical iPhone over HTTPS; permit rear camera. Confirm camera fills the viewport and status/control rows do not cover the elbow/wrist.
 2. With only forearm and elbow in view (shoulder excluded), Freeze. Confirm a **visible frozen image** remains after Safari camera indicator turns off.
@@ -84,7 +92,8 @@ Detection uses requestAnimationFrame, bounds inference to approximately 29 itera
 4. Tap a structure; confirm the structure label appears without opening the sheet. Switch to Bone and Connective; check each layer's visible silhouettes and selection.
 5. Resume live with the arm held steady; if live image matching is reliable, overlay must follow the two points. If not, confirm **IMAGE MATCH LOST** and that anatomy is hidden rather than floating at the edge; tap Freeze & recalibrate and repeat.
 6. Switch to Full arm / Auto with shoulder visible; test CPU fallback/recovery, camera permission deny/retry, backgrounding, portrait/landscape, and page reload. Verify no lingering camera indicator or stuck spinner.
-7. Record browser + model/version, exact preview SHA, pass/fail and time-coded video for any remaining defect. Do not merge the draft PR based solely on CI.
+7. Open *Diagnostic pipeline → Copy diagnostics* after any failure and attach the JSON.
+8. Record browser + model/version, exact preview SHA, pass/fail and time-coded video for any remaining defect. Do not merge the draft PR based solely on CI.
 
 ## Non-goals
 No MRI/X-ray output, real internal tissue detection, clinical angle, measured joint range of motion, 3D depth, or accuracy-certified anatomical overlay. Full-arm 2D projection is not medical registration.
