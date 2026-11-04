@@ -6,7 +6,7 @@ async function mockCamera(page){
  await page.addInitScript(()=>{
   globalThis.__testPose=Array.from({length:33},()=>({x:.5,y:.5,visibility:0,presence:0}));
   [[12,.52,.23],[14,.52,.51],[16,.73,.51]].forEach(([i,x,y])=>{globalThis.__testPose[i]={x,y,visibility:.96,presence:1};});
-  globalThis.__tracks=[];
+  globalThis.__tracks=[];globalThis.__texture={mode:'noise',dx:0,dy:0};
   Object.defineProperty(HTMLMediaElement.prototype,'srcObject',{configurable:true,get(){return this.__mockSource||null;},set(value){this.__mockSource=value;}});
   Object.defineProperty(navigator,'mediaDevices',{configurable:true,value:{getUserMedia:async()=>{
    const track={readyState:'live',stop(){this.readyState='ended';},addEventListener(){}};
@@ -24,9 +24,11 @@ async function mockCamera(page){
   // without uploading personal footage or relying on hardware in CI.
   CanvasRenderingContext2D.prototype.getImageData=function(x,y,w,h){
    const data=new Uint8ClampedArray(w*h*4);
+   // __texture lets a test move or remove the synthetic texture deterministically (still NOT real camera footage).
+   const tex=globalThis.__texture||{mode:'noise',dx:0,dy:0};
    for(let row=0;row<h;row++)for(let col=0;col<w;col++){
-    const hash=Math.sin(col*12.9898+row*78.233)*43758.5453;
-    const v=Math.round((hash-Math.floor(hash))*255),i=(row*w+col)*4;
+    const hash=Math.sin((col+tex.dx)*12.9898+(row+tex.dy)*78.233)*43758.5453;
+    const v=tex.mode==='blank'?0:Math.round((hash-Math.floor(hash))*255),i=(row*w+col)*4;
     data[i]=v;data[i+1]=v;data[i+2]=v;data[i+3]=255;
    }
    return {data,width:w,height:h};
@@ -169,6 +171,15 @@ test('P0 frozen frame allows calibration without a live stream and sheet remains
 });
 
 
+// Real pointer interaction at a probed, practical target. Fails if the target is covered or too small.
+async function tapStructure(page,id){
+ const target=await page.evaluate(i=>window.__XRAY_EXPERIMENT__.probeTargets().find(t=>t.id===i),id);
+ expect(target,'structure '+id+' must be present').toBeTruthy();
+ expect(target.hit,id+' must be the topmost element at its probe point').toBe(true);
+ expect(target.practical,id+' needs a practical (touch-sized) hit area').toBe(true);
+ if(await page.evaluate(()=>matchMedia('(pointer:coarse)').matches))await page.touchscreen.tap(target.x,target.y);
+ else await page.mouse.click(target.x,target.y);
+}
 // V3 visual integration: real canvas pixels showing a locally drawn forearm.
 // Unlike generic hash-based getImageData mocks, the freeze canvas and tracker
 // both sample the *same* visible image, exercising real object-fit cropping.
@@ -245,7 +256,9 @@ test('V3 realistic forearm fixture: frozen taps show anatomy, inspector works, c
  await expect(page.locator('[data-id="biceps"]')).toHaveCount(0);
  expect(await page.evaluate(()=>window.__XRAY_EXPERIMENT__.getState().pipeline.geometryDisplayed)).toBeGreaterThan(0);
  await page.screenshot({path:prefix+'-calibrated.png'});
- await page.locator('[data-id="flexors"]').click({force:true});
+ // Normal interaction: a real pointer event at a point the app proves is visible, inside the
+ // usable camera area and actually hit-tested to the shape (no Playwright force / actionability bypass).
+ await tapStructure(page,'flexors');
  await expect(page.locator('#selection-peek')).toBeVisible();
  await expect(page.locator('#peek-title')).toHaveText('Forearm flexor group');
  await page.locator('#selection-peek').click();
@@ -257,10 +270,11 @@ test('V3 realistic forearm fixture: frozen taps show anatomy, inspector works, c
  await expect.poll(async()=>page.evaluate(()=>window.__XRAY_EXPERIMENT__.getState().pipeline.frameReceived)).toBeGreaterThan(0);
  // Live image matching may succeed or fail; it cannot masquerade as tracking
  // without rendered geometry, and must always provide a clear recalibration route.
- const current=await page.locator('#status').textContent();
- expect(['ANCHORS TRACKING','IMAGE MATCH LOST','REACQUIRING ANCHORS']).toContain(current);
+ // Deterministic for a static fixture: live matching works exactly when both anchors have texture.
+ await expect.poll(()=>page.evaluate(()=>window.__XRAY_EXPERIMENT__.getState().pipeline.frameReceived)).toBeGreaterThan(1);
  const state=await page.evaluate(()=>window.__XRAY_EXPERIMENT__.getState());
- if(current==='ANCHORS TRACKING')expect(state.geometryCount).toBeGreaterThan(0);
+ await expect(page.locator('#status')).toHaveText(state.anchorTrackable?'ANCHORS TRACKING':'IMAGE MATCH LOST');
+ expect(state.geometryCount>0).toBe(state.anchorTrackable);
  await page.locator('#pause').click();
  await expect(page.locator('#status')).toHaveText('FRAME PAUSED');
  await expect(page.locator('.calibration-point')).toHaveCount(0);
@@ -295,11 +309,7 @@ test('loss after live resume explicitly shows Freeze & recalibrate, not false tr
  await expect(page.locator('#status')).toHaveText('ILLUSTRATION READY');
  await page.locator('#resume').click();
  await expect(page.locator('#status')).toHaveText('ANCHORS TRACKING',{timeout:12000});
- await page.evaluate(()=>{
-  CanvasRenderingContext2D.prototype.getImageData=function(x,y,w,h){
-   return {data:new Uint8ClampedArray(w*h*4),width:w,height:h};
-  };
- });
+ await page.evaluate(()=>{globalThis.__texture={mode:'blank',dx:0,dy:0};});
  await expect(page.locator('#status')).toHaveText('IMAGE MATCH LOST',{timeout:12000});
  await expect(page.locator('#pause')).toHaveText('Freeze & recalibrate');
  await expect(page.locator('[data-id]')).toHaveCount(0);
