@@ -112,7 +112,7 @@ function mount({model,render,U}){
  let active=false,current=null,visible={bones:true,muscles:false,ligament:true,tendon:true,fibrocartilage:true},selected=null;
  const note=panel.querySelector('.connective-evidence'),tissues=panel.querySelector('.connective-tissues'),items=panel.querySelector('.connective-items'),report=panel.querySelector('.connective-report');
  const names={bones:'Bones',muscles:'Muscles',ligament:'Ligaments',tendon:'Tendons',fibrocartilage:'Fibrocartilage'};
- const syncState=()=>{model.setConnectiveState({enabled:active&&current==='knee',visible,isolated:selected});render();};
+ const syncState=()=>{if(document.getElementById('atlas-app')?.dataset.connectiveStudio==='true')return;model.setConnectiveState({enabled:active&&current==='knee',visible,isolated:selected});render();};
  function inspect(id){
   const p=record[id];if(!p)return;
   selected=id;
@@ -148,6 +148,11 @@ function mount({model,render,U}){
  window.addEventListener('body:region-ready',ev=>open(ev.detail.region));
  window.addEventListener('body:structure-selected',ev=>{if(record[ev.detail?.id]&&current==='knee'){inspect(ev.detail.id);syncState();}});
  window.addEventListener('body:region-exited',()=>{active=false;open(null);});
+ // Studio owns connective state while open. Return the legacy workbench to a known inactive state on
+ // both edges so its toggle, panel and renderer flag can never disagree after Studio exit or reentry.
+ const resetLegacy=()=>{active=false;selected=null;visible={bones:true,muscles:false,ligament:true,tendon:true,fibrocartilage:true};panel.hidden=true;button.setAttribute('aria-pressed','false');};
+ window.addEventListener('body:connective-studio-open',resetLegacy);
+ window.addEventListener('body:connective-studio-closed',()=>{resetLegacy();open(current);});
  return Object.freeze({open,inspect});
 }
 window.BodyConnectiveMode=Object.freeze({buildKnee,mount,info:id=>record[id]||null,records:()=>Object.values(record)});

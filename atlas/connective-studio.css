@@ -60,6 +60,7 @@
 .connective-inspector-empty{padding-top:36px}
 .connective-inspector-empty h2{font:400 35px/1.1 Georgia,serif;letter-spacing:-.03em;margin:15px 0}
 .connective-guides{position:absolute;top:60px;left:50%;transform:translateX(-50%);z-index:5;width:min(620px,calc(100% - 28px));text-align:center;pointer-events:auto}
+.app[data-connective-studio=true] .connective-guides{grid-column:2;grid-row:1}
 .connective-guides .cs-overline{font-size:9px;color:#e1c7b2}
 .cs-guide-buttons{display:flex;gap:6px;justify-content:center;margin:8px auto;max-width:540px}
 .cs-guide-buttons button{flex:1;min-height:42px;background:#221a16ea;border:1px solid #775c48;color:#f3dfcf;border-radius:6px;font-size:12px;white-space:nowrap;padding:8px}
@@ -73,19 +74,40 @@
  .app[data-connective-studio=true] .workspace{grid-template-columns:230px minmax(0,1fr) 270px}
  .connective-explorer,.connective-inspector{padding-left:14px;padding-right:14px}
 }
+/* V14 mobile layout contract: every mobile Studio rectangle is derived from these four values.
+ * Stage, sheet, dock and guides are anchored to the workspace edges with them, so there is no
+ * height arithmetic to drift out of sync. Safe areas are part of the dock/side values. */
+.app[data-connective-studio=true]{--cs-guides-h:0px;--cs-dock-h:0px;--cs-sheet-h:0px;--cs-sheet-w:0px}
+@media(max-width:850px){
+ .app[data-connective-studio=true]{
+  --cs-guides-h:52px;
+  --cs-dock-h:calc(65px + env(safe-area-inset-bottom,0px)); /* 8+48+8 padding/button + 1px border */
+  --cs-sheet-h:min(34dvh,380px);
+ }
+}
+/* Perspective lesson: guides band on desktop, structure sheet on mobile. */
+.cs-guide-lesson{display:none}
+@media(max-width:850px){
+ .cs-guide-lesson{display:block;margin-top:14px;padding:10px 12px;background:#251c16;border:1px solid #6a5140;border-radius:8px}
+ .cs-guide-lesson p{margin:0 0 8px;font-size:12px;line-height:1.45;color:#f1e2d5}
+ .cs-guide-lesson .cs-isolate-perspective{display:block;width:100%;min-height:44px}
+}
+@media(max-width:850px) and (max-height:700px) and (orientation:portrait){
+ .app[data-connective-studio=true]{--cs-sheet-h:min(36dvh,380px)}
+}
 @media(max-width:850px){
  .app[data-connective-studio=true] .topbar{height:58px;flex-basis:58px;padding-left:13px;padding-right:13px}
  .connective-entry{font-size:11px;min-height:42px;padding:8px 11px}
  .app[data-connective-studio=true] .workspace{display:block;position:relative;overflow:hidden}
- .app[data-connective-studio=true] #atlas-stage{position:absolute;inset:0;width:100%;height:100%;min-height:0}
+ .app[data-connective-studio=true] #atlas-stage{position:absolute;inset:var(--cs-guides-h) 0 calc(var(--cs-sheet-h) + var(--cs-dock-h)) 0;width:auto;height:auto;min-height:0}
  .app[data-connective-studio=true] .stage-meta{top:13px;left:12px;right:12px;font-size:8px;gap:8px}
  .app[data-connective-studio=true] .stage-meta span:last-child{max-width:53%;font-size:8px}
- .connective-guides{top:56px;width:calc(100% - 18px)}
- .connective-guides .cs-overline{font-size:8px}
+ .app[data-connective-studio=true] .connective-guides{top:0;left:0;right:0;transform:none;width:auto;height:var(--cs-guides-h);padding:4px 9px 0;overflow:hidden;z-index:13}
+ .connective-guides .cs-overline{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
  .cs-guide-buttons{gap:4px}
  .cs-guide-buttons button{font-size:10px;padding:8px 4px;min-height:44px}
- .connective-guides p{font-size:10px;max-width:290px;line-height:1.35}
- .connective-explorer,.connective-inspector{position:absolute;z-index:12;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));height:min(43dvh,450px);overflow:auto;box-shadow:0 -8px 30px #0e0a08a8;border:1px solid #6a5140;border-bottom:0;border-radius:15px 15px 0 0;padding:17px 17px 22px;background:#1c1714}
+ .connective-guides p,.connective-guides .cs-isolate-perspective{display:none}
+ .connective-explorer,.connective-inspector{position:absolute;z-index:12;left:0;right:0;bottom:var(--cs-dock-h);height:var(--cs-sheet-h);overflow:auto;box-shadow:0 -8px 30px #0e0a08a8;border:1px solid #6a5140;border-bottom:0;border-radius:15px 15px 0 0;padding:17px 17px 22px;background:#1c1714}
  .app[data-connective-panel=structures] #connective-right{display:none}
  .app[data-connective-panel=inspector] #connective-left{display:none}
  .connective-inspector{padding-top:19px}
@@ -115,8 +137,6 @@
 .app[data-connective-studio=true] #connective-toggle,
 .app[data-connective-studio=true] #connective-workbench{display:none!important}
 @media(max-width:850px){
- .app[data-connective-studio=true] .connective-explorer,
- .app[data-connective-studio=true] .connective-inspector{height:min(40dvh,380px)}
  .app[data-connective-studio=true] #atlas-stage{touch-action:none}
 }
 @media(prefers-reduced-motion:reduce){
@@ -135,3 +155,16 @@
 .cs-isolate-perspective:disabled{opacity:.55;cursor:not-allowed}
 .cs-view-actions{display:flex;gap:7px;margin-top:10px}
 .cs-view-actions button{min-height:44px;background:#31231c;border:1px solid #654d3d;border-radius:6px;padding:8px 10px;font-size:11px;flex:1;color:#e6c7ae}
+
+/* Short landscape phones: the sheet moves beside the model instead of covering it. */
+@media(max-width:850px) and (orientation:landscape) and (max-height:520px){
+ .app[data-connective-studio=true]{
+  --cs-sheet-h:0px;
+  --cs-sheet-w:calc(min(46%,380px) + env(safe-area-inset-right,0px));
+ }
+ .app[data-connective-studio=true] #atlas-stage{inset:var(--cs-guides-h) var(--cs-sheet-w) var(--cs-dock-h) 0}
+ .app[data-connective-studio=true] .connective-guides{right:var(--cs-sheet-w);padding-left:calc(9px + env(safe-area-inset-left,0px))}
+ .app[data-connective-studio=true] .connective-explorer,
+ .app[data-connective-studio=true] .connective-inspector{top:0;left:auto;right:0;bottom:var(--cs-dock-h);width:var(--cs-sheet-w);height:auto;
+  border-radius:15px 0 0 0;border-left:1px solid #6a5140;border-bottom:0;padding-right:calc(17px + env(safe-area-inset-right,0px))}
+}

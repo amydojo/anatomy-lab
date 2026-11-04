@@ -96,6 +96,13 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   }
   return applySelection(hit);
  }
+ // Read-only raycast: the id pickAt WOULD select, with no selection, render, URL or camera side effects.
+ // Lets tests and diagnostics locate real tap targets without mutating application state.
+ function hitTestAt(x,y){
+  if(state.data.view!=='detail'||!region||returning)return null;
+  const hit=model.hitTest(state.data.camera,region,state.data.layer,motion,x,y,secondary);
+  return hit?hit.id:null;
+ }
  function applySelection(hit){
   selected=hit;
   const regionalInfo=hit.id==='bicepsShort'&&hit.region==='shoulder'
@@ -377,7 +384,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   return true;
  }
  return Object.freeze({choose,back,travelKnee,isActive,getRegion,getReveal,getMotion,getSecondaryMotion,getSelected,getTransitionFrom,
-  snapshot,depthChange,setMode,reset,recenter,neutral,setMotion,setSecondaryMotion,pickAt,selectById,clearSelection,showSelected,nextRegion,interrupt});
+  snapshot,depthChange,setMode,reset,recenter,neutral,setMotion,setSecondaryMotion,pickAt,hitTestAt,selectById,clearSelection,showSelected,nextRegion,interrupt});
 }
 window.BodyAtlasUnified=Object.freeze({create});
 })();
