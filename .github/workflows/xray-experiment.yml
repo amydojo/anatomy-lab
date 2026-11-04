@@ -1,0 +1,53 @@
+name: X-RAY experimental prototype
+on:
+  push:
+    branches: ['experiment/ar-xray-elbow']
+  pull_request:
+    branches: [main]
+    paths:
+      - 'experiments/xray/**'
+      - 'tests/xray*'
+      - '.github/workflows/xray-experiment.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: xray-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/xray-core.test.mjs
+      - run: node --check experiments/xray/xray.mjs
+      - run: node --check experiments/xray/xray-core.mjs
+      - run: node --check experiments/xray/xray-tracker.mjs
+  browser:
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium-mobile, webkit-mobile, desktop-chromium]
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: npm run test:e2e -- tests/xray.spec.mjs --project=${{ matrix.browser }}
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xray-${{ matrix.browser }}-evidence
+          path: |
+            artifacts/
+            test-results/
+          if-no-files-found: ignore
