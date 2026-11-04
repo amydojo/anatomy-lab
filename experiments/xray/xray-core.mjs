@@ -207,3 +207,48 @@ export function closeupGeometry(elbow,wrist){
   ];
   return shape.map(p=>({...p,group:STRUCTURES[p.id].group}));
 }
+
+/* ── V3 integrity: keep the illustration inside the camera area the person can actually see ──
+   Pure helpers so the policy is unit-testable without a browser. Distances are CSS pixels in
+   viewport coordinates. */
+export const CALIBRATION_LIMITS=Object.freeze({scale:[.65,1.5],rotation:[-45,45],edgeMarginPx:12,minVisibleRatio:.5});
+const finiteOr=(n,fallback)=>Number.isFinite(Number(n))?Number(n):fallback;
+/** Bounding box of every coordinate pair in a generated absolute path ("M x y L x y Q ... Z"). */
+export function pathBounds(d){
+  const nums=String(d||'').match(/-?\d+(?:\.\d+)?(?:e-?\d+)?/gi);
+  if(!nums||nums.length<2)return null;
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  for(let i=0;i+1<nums.length;i+=2){
+    const x=Number(nums[i]),y=Number(nums[i+1]);
+    if(x<minX)minX=x;if(x>maxX)maxX=x;if(y<minY)minY=y;if(y>maxY)maxY=y;
+  }
+  return Number.isFinite(minX+minY+maxX+maxY)?{minX,minY,maxX,maxY}:null;
+}
+/** The part of the viewport not covered by the header band (top) or the control dock (bottom). */
+export function usableArea(viewport,{headBottom=0,dockTop=viewport.height}={}){
+  const top=clamp(finiteOr(headBottom,0),0,viewport.height);
+  const bottom=clamp(finiteOr(dockTop,viewport.height),top,viewport.height);
+  return {left:0,top,right:viewport.width,bottom};
+}
+export function visibleRatio(box,area){
+  if(!box)return 0;
+  const w=box.maxX-box.minX,h=box.maxY-box.minY,total=Math.max(w,0)*Math.max(h,0);
+  const iw=Math.min(box.maxX,area.right)-Math.max(box.minX,area.left);
+  const ih=Math.min(box.maxY,area.bottom)-Math.max(box.minY,area.top);
+  if(iw<=0||ih<=0)return 0;
+  return total>0?clamp(iw*ih/total,0,1):1;
+}
+/** Sanitise slider calibration and limit x/y so the (uncalibrated) elbow anchor, once shifted, stays
+    inside the usable area. clamped tells the UI the requested offset was reduced. */
+export function constrainCalibration(calibration,anchor,area){
+  const L=CALIBRATION_LIMITS,m=L.edgeMarginPx;
+  const next={scale:clamp(finiteOr(calibration.scale,1),...L.scale),rotation:clamp(finiteOr(calibration.rotation,0),...L.rotation),
+    x:finiteOr(calibration.x,0),y:finiteOr(calibration.y,0)};
+  const lowX=area.left+m-anchor.x,highX=area.right-m-anchor.x;
+  const lowY=area.top+m-anchor.y,highY=area.bottom-m-anchor.y;
+  const bx=lowX<=highX?[lowX,highX]:[(lowX+highX)/2,(lowX+highX)/2];
+  const by=lowY<=highY?[lowY,highY]:[(lowY+highY)/2,(lowY+highY)/2];
+  const x=clamp(next.x,...bx),y=clamp(next.y,...by);
+  const clamped=x!==finiteOr(calibration.x,0)||y!==finiteOr(calibration.y,0);
+  return {calibration:{...next,x,y},clamped};
+}
