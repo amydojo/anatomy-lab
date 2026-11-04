@@ -74,7 +74,7 @@
     </div>
    </div>
    <div class="control-block"><div class="control-head"><label for="opacity">LAYER OPACITY</label><output id="opacity-value">84%</output></div>
-    <input id="opacity" type="range" min="10" max="100" value="84" step="1">
+    <input id="opacity" type="range" min="35" max="100" value="84" step="1">
    </div>
    <details class="calibration"><summary>Advanced alignment <span>Adjust →</span></summary>
     <p>Manual image alignment only. This does not reveal true muscle boundaries or joint depth.</p>
@@ -99,6 +99,9 @@
    <details id="pipeline-debug" class="pipeline-debug"><summary>Diagnostic pipeline</summary>
     <p>Local counters: frame received → anchor accepted → geometry computed → geometry displayed. Does not send camera images.</p>
     <pre id="pipeline-log">No frames yet</pre>
+    <button type="button" id="copy-diagnostics" class="sheet-close">Copy diagnostics</button>
+    <p>Diagnostics contain device sizes, tracker state and event names only. No camera pixels.</p>
+    <pre id="diagnostics-output" aria-label="Diagnostics JSON"></pre>
    </details>
    <p class="disclaimer"><strong>NOT A MEDICAL SCAN.</strong> This is an illustrative overlay on estimated or manually marked image positions. It is not diagnostic and does not reveal actual tissue under your skin. No video is saved or uploaded. Close-up tracking can fail on smooth skin or movement. In Full arm mode, MediaPipe loads third-party model assets and may send service metrics under its privacy policy.</p>
   </aside>
