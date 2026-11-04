@@ -1,4 +1,4 @@
-import {STRUCTURES,readArm,createSmoother,createTrackingState,createPoseLock,rigGeometry,closeupGeometry,coverTransform} from './xray-core.mjs';
+import {STRUCTURES,readArm,createSmoother,createTrackingState,createPoseLock,rigGeometry,closeupGeometry,coverTransform,pathBounds,usableArea,visibleRatio,constrainCalibration,CALIBRATION_LIMITS} from './xray-core.mjs';
 import {grayImage,makeCloseupTracker} from './xray-tracker.mjs';
 
 // A deliberately independent prototype: do not couple camera state to V13 Atlas globals.
@@ -9,21 +9,28 @@ const poseState=createTrackingState(),smoother=createSmoother(),poseLock=createP
 const NS='http://www.w3.org/2000/svg';
 const CDN='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.0';
 const MODEL='https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task';
+const MIN_OPACITY=.35;// foreground anatomy must stay legible; the slider floor matches (index.html)
 let landmarker=null,stream=null,side='right',layer='muscle',opacity=.84,mode='closeup',anchorStep='elbow';
 const sampleCanvas=document.createElement('canvas'),sampleContext=sampleCanvas.getContext('2d',{willReadFrequently:true});
 let sampleSize={width:0,height:0};
 let selected=null,lastPose=null,raf=0,lastFrameTime=-1,lastInferTime=0,frames=0,fpsStart=0,session=0,running=false;
-let calibration={scale:1,rotation:0,x:0,y:0};
+// requested is what the sliders say; calibration is the effective value after render() has kept the
+// illustration inside the visible camera area. Geometry always uses the effective one.
+let requested={scale:1,rotation:0,x:0,y:0},calibration={...requested},calibrationClamped=false,lastFrameStats=null;
+const CLAMP_NOTE='Alignment offset limited to keep the illustration in view.';
 let lastVideoSize={width:0,height:0};
 let fullArmHadVisibleLock=false;
 const ui={start:$('launch'),stop:$('stop'),pause:$('pause'),resume:$('resume'),empty:$('empty'),message:$('message'),notice:$('tracking-notice')};
 const app=$('app'),settings=$('settings-sheet'),backdrop=$('sheet-backdrop');
-const pipeline={frameReceived:0,anchorAccepted:0,geometryComputed:0,geometryDisplayed:0,
+const pipeline={frameReceived:0,anchorAccepted:0,geometryComputed:0,geometryDisplayed:0,geometryOffscreen:0,
   lastError:null,lastEvent:'idle',recent:[]};
+// Privacy-safe event ring for field diagnosis: step names, short text and timestamps only. Never pixels.
+const eventRing=[];
+function ring(stage,detail=''){eventRing.push({t:Math.round(performance.now()),stage,detail:String(detail).slice(0,120)});if(eventRing.length>60)eventRing.shift();}
 function trace(step,detail=''){
   if(Object.hasOwn(pipeline,step)&&typeof pipeline[step]==='number')pipeline[step]++;
   pipeline.lastEvent=step+(detail?' · '+detail:'');
-  pipeline.recent.push({stage:step,detail});
+  pipeline.recent.push({stage:step,detail});ring(step,detail);
   if(pipeline.recent.length>12)pipeline.recent.shift();
   const log=$('pipeline-log');
   if(log&&!$('pipeline-debug').hidden)log.textContent=
@@ -46,9 +53,9 @@ backdrop.addEventListener('click',()=>closeSettings());
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!settings.hidden)closeSettings();});
 const setText=(id,text)=>{$(id).textContent=text;};
 function message(text){ui.message.textContent=text;}
-function notice(text){ui.notice.hidden=!text;ui.notice.textContent=text||'';}
+function notice(text){const t=text||(calibrationClamped?CLAMP_NOTE:'');ui.notice.hidden=!t;ui.notice.textContent=t;}
 function status(code,label){
-  setText('status',label);
+  ring('status',label);setText('status',label);
   $('status-dot').dataset.status=code;
 }
 function clearOverlay(){svg.replaceChildren();}
@@ -108,18 +115,36 @@ function makeNode(tag,attributes){
   for(const [k,v] of Object.entries(attributes))el.setAttribute(k,String(v));
   return el;
 }
+function usableForViewport(width,height){
+  const vp=viewport.getBoundingClientRect(),head=document.querySelector('.viewport-head'),dock=$('camera-dock');
+  const headBottom=head&&head.offsetHeight?head.getBoundingClientRect().bottom-vp.top:0;
+  const dockTop=dock&&dock.offsetHeight?dock.getBoundingClientRect().top-vp.top:height;
+  return usableArea({width,height},{headBottom,dockTop});
+}
+// Uncalibrated elbow position in viewport pixels: the single source for both the geometry and the ring.
+function elbowBase(width,height){
+  const e=lastPose.elbow;
+  if(mode==='closeup')return {x:e.x*width,y:e.y*height};
+  const scale=Math.max(width/lastVideoSize.width,height/lastVideoSize.height);
+  return {x:(width-lastVideoSize.width*scale)/2+e.x*lastVideoSize.width*scale,y:(height-lastVideoSize.height*scale)/2+e.y*lastVideoSize.height*scale};
+}
 function render(){
   if(!lastPose?.ok||(mode==='auto'&&(!lastVideoSize.width||!lastVideoSize.height))){clearOverlay();showFrozenMarkers();return false;}
   const bounds=viewport.getBoundingClientRect(),width=bounds.width,height=bounds.height;
   svg.setAttribute('viewBox','0 0 '+width+' '+height);
-  const armElbow={x:lastPose.elbow.x*width+calibration.x,y:lastPose.elbow.y*height+calibration.y};
+  const area=usableForViewport(width,height),base=elbowBase(width,height);
+  const fit=constrainCalibration(requested,base,area);
+  calibration=fit.calibration;
+  if(fit.clamped!==calibrationClamped){calibrationClamped=fit.clamped;notice(fit.clamped?CLAMP_NOTE:(ui.notice.textContent===CLAMP_NOTE?'':ui.notice.textContent));if(fit.clamped)ring('calibrationClamped','requested '+Math.round(requested.x)+','+Math.round(requested.y)+' → '+Math.round(calibration.x)+','+Math.round(calibration.y));}
+  for(const key of ['x','y']){const out=$('shift-'+key+'-value');if(out)out.textContent=String(Math.round(requested[key]))+(calibrationClamped&&Math.round(calibration[key])!==Math.round(requested[key])?' → '+Math.round(calibration[key]):'');}
+  const armElbow={x:base.x+calibration.x,y:base.y+calibration.y};
   const baseWrist={x:lastPose.wrist.x*width,y:lastPose.wrist.y*height};
   const rotation=calibration.rotation*Math.PI/180;
   const dx=baseWrist.x-lastPose.elbow.x*width,dy=baseWrist.y-lastPose.elbow.y*height;
   const closeWrist={x:armElbow.x+calibration.scale*(dx*Math.cos(rotation)-dy*Math.sin(rotation)),
     y:armElbow.y+calibration.scale*(dx*Math.sin(rotation)+dy*Math.cos(rotation))};
   const shapes=mode==='closeup'?closeupGeometry(armElbow,closeWrist):rigGeometry(lastPose,lastVideoSize,{width,height},calibration);
-  const visible=new Set();
+  const visible=new Set();let inView=0;
   if(shapes.some(s=>s.group===layer))trace('geometryComputed',mode+'/'+layer);
   // Keep hit targets stable across inference frames. Replacing elements every
   // frame causes touch/click gestures to detach before Safari can dispatch them.
@@ -138,23 +163,88 @@ function render(){
     shape.setAttribute('fill-opacity',String(selected===item.id?Math.min(1,opacity+.14):opacity));
     shape.setAttribute('stroke-opacity',String(opacity));
     shape.classList.toggle('selected',selected===item.id);
+    if(visibleRatio(pathBounds(item.d),area)>=CALIBRATION_LIMITS.minVisibleRatio)inView++;
   }
   for(const old of svg.querySelectorAll('.shape'))
     if(!visible.has(old.dataset.id))old.remove();
-  const e=lastPose.elbow;
-  const scale=mode==='auto'?Math.max(width/lastVideoSize.width,height/lastVideoSize.height):1;
-  const ex=mode==='closeup'?e.x*width+calibration.x:(width-lastVideoSize.width*scale)/2+e.x*lastVideoSize.width*scale+calibration.x;
-  const ey=mode==='closeup'?e.y*height+calibration.y:(height-lastVideoSize.height*scale)/2+e.y*lastVideoSize.height*scale+calibration.y;
-  let ring=svg.querySelector('.joint-ring');
-  if(!ring){ring=makeNode('circle',{class:'joint-ring'});svg.appendChild(ring);}
-  ring.setAttribute('cx',String(ex));ring.setAttribute('cy',String(ey));
-  ring.setAttribute('r',String(Math.max(12,width*.024)));
+  // Displayed means actually inside the camera area the person can see, not merely present in the DOM.
+  if(visible.size&&!inView){
+    for(const old of svg.querySelectorAll('.shape'))old.remove();
+    trace('geometryOffscreen',visible.size+' '+layer+' shapes outside usable area');
+  }
+  let ringEl=svg.querySelector('.joint-ring');
+  if(!ringEl){ringEl=makeNode('circle',{class:'joint-ring'});svg.appendChild(ringEl);}
+  const ex=armElbow.x,ey=armElbow.y;
+  ringEl.setAttribute('cx',String(ex));ringEl.setAttribute('cy',String(ey));
+  ringEl.setAttribute('r',String(Math.max(12,width*.024)));
   let center=svg.querySelector('.joint-marker');
   if(!center){center=makeNode('circle',{class:'joint-marker',r:2.5});svg.appendChild(center);}
   center.setAttribute('cx',String(ex));center.setAttribute('cy',String(ey));
   showFrozenMarkers();
-  if(visible.size){trace('geometryDisplayed',visible.size+' '+layer+' shapes');return true;}
+  if(inView){trace('geometryDisplayed',inView+' '+layer+' shapes in view');return true;}
   return false;
+}
+// Hit-test every rendered structure at practical points. practical = a 12 px square around the point
+// still hits the same shape, i.e. a fingertip-sized target. Used by tests and by diagnostics.
+function probeTargets(){
+  const vp=viewport.getBoundingClientRect(),width=vp.width,height=vp.height,area=usableForViewport(width,height);
+  const R=6,offsets=[[-R,-R],[0,-R],[R,-R],[-R,0],[R,0],[-R,R],[0,R],[R,R]];
+  const hitAt=(shape,x,y)=>{
+    if(x<area.left||x>area.right||y<area.top||y>area.bottom)return false;
+    if(!shape.isPointInFill(new DOMPoint(x,y)))return false;
+    return document.elementFromPoint(vp.left+x,vp.top+y)===shape;
+  };
+  return [...svg.querySelectorAll('.shape')].map(shape=>{
+    const box=pathBounds(shape.getAttribute('d')),out={id:shape.dataset.id,hit:false,practical:false,x:0,y:0,
+      visibleRatio:Math.round(visibleRatio(box,area)*100)/100,
+      box:box?{minX:Math.round(box.minX),minY:Math.round(box.minY),maxX:Math.round(box.maxX),maxY:Math.round(box.maxY),height:Math.round(box.maxY-box.minY)}:null};
+    if(!box)return out;
+    let best=null;
+    const x0=Math.max(box.minX,area.left),x1=Math.min(box.maxX,area.right),y0=Math.max(box.minY,area.top),y1=Math.min(box.maxY,area.bottom);
+    for(let y=y0;y<=y1;y+=4)for(let x=x0;x<=x1;x+=4){
+      if(!hitAt(shape,x,y))continue;
+      const around=offsets.filter(([ox,oy])=>hitAt(shape,x+ox,y+oy)).length;
+      if(!best||around>best.around){best={x,y,around};if(around===offsets.length)break;}
+    }
+    if(best){out.hit=true;out.practical=best.around===offsets.length;out.x=Math.round((vp.left+best.x)*10)/10;out.y=Math.round((vp.top+best.y)*10)/10;}
+    return out;
+  });
+}
+function rectOf(el){
+  if(!el||!el.offsetHeight)return null;
+  const r=el.getBoundingClientRect();
+  return {x:Math.round(r.left),y:Math.round(r.top),w:Math.round(r.width),h:Math.round(r.height)};
+}
+function safeAreaInsets(){
+  const probe=document.createElement('div');
+  probe.style.cssText='position:fixed;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)';
+  document.body.appendChild(probe);const c=getComputedStyle(probe);
+  const out={top:parseFloat(c.paddingTop)||0,right:parseFloat(c.paddingRight)||0,bottom:parseFloat(c.paddingBottom)||0,left:parseFloat(c.paddingLeft)||0};
+  probe.remove();return out;
+}
+/* Everything needed to diagnose an on-device failure (wrong tracking, hidden geometry, unreachable
+   targets) from one pasted JSON blob. Scalars, rectangles and event names only: no pixels, no
+   landmark streams, no camera frames, nothing is sent anywhere. */
+function diagnostics(){
+  const vv=window.visualViewport,track=stream?.getVideoTracks?.()[0],tr=tracker.anchors;
+  const settings=track?.getSettings?.()||{};
+  return {schema:'xray-diagnostics/1',generatedAt:new Date().toISOString(),
+    privacy:'No camera pixels, frames or landmark streams are included. Scalar geometry and counters only; nothing is uploaded.',
+    environment:{userAgent:navigator.userAgent,secureContext:window.isSecureContext,dpr:window.devicePixelRatio||1,
+      inner:{w:innerWidth,h:innerHeight},screen:{w:screen.width,h:screen.height},orientation:screen.orientation?.type||null,
+      visualViewport:vv?{w:Math.round(vv.width),h:Math.round(vv.height),scale:vv.scale,offsetTop:Math.round(vv.offsetTop)}:null,
+      safeArea:safeAreaInsets(),coarsePointer:matchMedia('(pointer:coarse)').matches},
+    viewport:rectOf(viewport),dock:rectOf($('camera-dock')),head:rectOf(document.querySelector('.viewport-head')),
+    state:{mode,side,layer,phase:app.dataset.phase,status:poseState.status,opacity,selected},
+    camera:{track:{width:settings.width??null,height:settings.height??null,frameRate:settings.frameRate??null,facingMode:settings.facingMode??null,readyState:track?.readyState??null},
+      video:{...lastVideoSize},sample:{...sampleSize},frameStats:lastFrameStats},
+    calibration:{requested:{...requested},effective:{...calibration},clamped:calibrationClamped},
+    tracker:{ready:tracker.ready,trackable:tracker.trackable,lost:tracker.lost,
+      anchors:{elbow:tr.elbow?{x:tr.elbow.x,y:tr.elbow.y,trackable:tr.elbow.trackable}:null,wrist:tr.wrist?{x:tr.wrist.x,y:tr.wrist.y,trackable:tr.wrist.trackable}:null}},
+    pipeline:{frameReceived:pipeline.frameReceived,anchorAccepted:pipeline.anchorAccepted,geometryComputed:pipeline.geometryComputed,
+      geometryDisplayed:pipeline.geometryDisplayed,geometryOffscreen:pipeline.geometryOffscreen,lastError:pipeline.lastError,lastEvent:pipeline.lastEvent},
+    shapes:probeTargets().map(({id,hit,practical,visibleRatio:ratio,box})=>({id,hit,practical,visibleRatio:ratio,box})),
+    events:[...eventRing]};
 }
 svg.addEventListener('click',e=>{const id=e.target.closest?.('[data-id]')?.dataset.id;if(id)choose(id);});
 svg.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const id=e.target.closest?.('[data-id]')?.dataset.id;if(id){e.preventDefault();choose(id);}}});
@@ -191,7 +281,10 @@ function snapshotFrame(){
   const fit=coverTransform(videoW,videoH,targetW,targetH);
   sampleContext.drawImage(source,fit.offsetX,fit.offsetY,fit.displayWidth,fit.displayHeight);
   sampleSize={width:targetW,height:targetH};
-  return grayImage(sampleContext.getImageData(0,0,targetW,targetH));
+  const image=grayImage(sampleContext.getImageData(0,0,targetW,targetH));
+  let lo=1,hi=0,sum=0;for(const v of image.gray){if(v<lo)lo=v;if(v>hi)hi=v;sum+=v;}
+  lastFrameStats={mean:Math.round(sum/image.gray.length*1000)/1000,min:Math.round(lo*1000)/1000,max:Math.round(hi*1000)/1000};// scalars only
+  return image;
 }
 function closeupPose(sample,{isFrozen=false}={}){
   const e=sample.elbow,w=sample.wrist;
@@ -401,16 +494,16 @@ document.querySelectorAll('[data-layer]').forEach(btn=>btn.addEventListener('cli
   document.querySelectorAll('[data-layer]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));
   resetSelection();render();
 }));
-$('opacity').addEventListener('input',e=>{opacity=Number(e.target.value)/100;setText('opacity-value',e.target.value+'%');render();});
+$('opacity').addEventListener('input',e=>{opacity=Math.max(MIN_OPACITY,Number(e.target.value)/100);setText('opacity-value',Math.round(opacity*100)+'%');render();});
 const calibrations=[['scale',v=>v/100,v=>v+'%'],['rotation',v=>v,v=>v+'°'],['shift-x',v=>v,v=>String(v)],['shift-y',v=>v,v=>String(v)]];
 for(const [id,convert,format] of calibrations){
  $(id).addEventListener('input',e=>{
    const v=Number(e.target.value),key=id==='shift-x'?'x':id==='shift-y'?'y':id;
-   calibration[key]=convert(v);setText(id+'-value',format(v));render();
+   requested[key]=convert(v);setText(id+'-value',format(v));render();
  });
 }
 $('reset').addEventListener('click',()=>{
- calibration={scale:1,rotation:0,x:0,y:0};
+ requested={scale:1,rotation:0,x:0,y:0};calibration={...requested};calibrationClamped=false;notice(ui.notice.textContent===CLAMP_NOTE?'':ui.notice.textContent);
  for(const [id,,format] of calibrations){
    $(id).value=id==='scale'?100:0;setText(id+'-value',format(Number($(id).value)));
  }
@@ -425,4 +518,10 @@ $('pipeline-debug').addEventListener('toggle',()=>trace('inspect'));
 window.__XRAY_EXPERIMENT__=Object.freeze({getState:()=>({status:poseState.status,phase:app.dataset.phase,
   sheetOpen:!settings.hidden,mode,side,layer,selected,running,anchors:tracker.anchors,anchorReady:tracker.ready,
   anchorTrackable:tracker.trackable,liveTracks:stream?.getTracks().filter(t=>t.readyState==='live').length||0,
-  hasPose:!!lastPose,geometryCount:svg.querySelectorAll('.shape').length,pipeline:{...pipeline,recent:[...pipeline.recent]}})});
+  hasPose:!!lastPose,geometryCount:svg.querySelectorAll('.shape').length,sampleSize:{...sampleSize},
+  calibration:{requested:{...requested},effective:{...calibration},clamped:calibrationClamped},
+  pipeline:{...pipeline,recent:[...pipeline.recent]}}),probeTargets,diagnostics});
+$('copy-diagnostics').addEventListener('click',async()=>{
+  const text=JSON.stringify(diagnostics(),null,1);$('diagnostics-output').textContent=text;
+  try{await navigator.clipboard.writeText(text);}catch{/* clipboard may be unavailable; the text stays selectable */}
+});
