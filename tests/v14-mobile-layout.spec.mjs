@@ -109,17 +109,28 @@ for(const [w,h] of [...MOBILE,...DESKTOP]){
     const local=[];for(let dy=-R;dy<=R;dy+=step)for(let dx=-R;dx<=R;dx+=step)local.push([ox+dx,oy+dy]);
     local.sort((p,q)=>Math.hypot(p[0]-ox,p[1]-oy)-Math.hypot(q[0]-ox,q[1]-oy));pts.push(...local);
    }
-   for(const [x,y] of pts){
-    if(x<fp.x-4||x>fp.r+4||y<fp.y-4||y>fp.b+4)continue;
-    const id=window.__BODY_ATLAS__.pickAt(x-c.x,y-c.y);
-    if(!ids.includes(id))continue;
-    const el=document.elementFromPoint(x,y);
-    return {id,x,y,top:el?.id||el?.tagName};
-   }
-   return null;
+   // pickAt SELECTS and syncs the URL. Probing thousands of points must not hammer history (WebKit throws a
+   // SecurityError after 100 replaceState calls per 10 s), so history writes are suspended only while probing.
+   const {replaceState,pushState}=history;
+   history.replaceState=()=>{};history.pushState=()=>{};
+   let found=null;
+   try{
+    for(const [x,y] of pts){
+     if(x<fp.x-4||x>fp.r+4||y<fp.y-4||y>fp.b+4)continue;
+     const id=window.__BODY_ATLAS__.pickAt(x-c.x,y-c.y);
+     if(!ids.includes(id))continue;
+     const el=document.elementFromPoint(x,y);
+     found={id,x,y,top:el?.id||el?.tagName};break;
+    }
+    window.__BODY_ATLAS__.pickAt(-50,-50);// a miss clears the renderer highlight
+    window.__BODY_CONNECTIVE_STUDIO__.resetView();// ...and this clears Studio's selectedId, which the probe also set
+   }finally{history.replaceState=replaceState;history.pushState=pushState;}
+   return found;
   },[fp,KNEE]);
   expect(target,'a connective structure can be hit at a visible, practical position').toBeTruthy();
   expect(target.top,'the tap point is the model canvas, not a control').toBe('atlas-canvas');
+  // The probe must not leave the structure selected, otherwise the assertion below would pass without the tap.
+  expect(await page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().selectedId),'selection is clear before the real tap').not.toBe(target.id);
   if(info.project.use.hasTouch)await page.touchscreen.tap(target.x,target.y);else await page.mouse.click(target.x,target.y);
   await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().selectedId)).toBe(target.id);
   expect(errors).toEqual([]);
