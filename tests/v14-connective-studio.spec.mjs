@@ -94,3 +94,25 @@ test('V14: desktop layout preserves V13 exit and inspector',async({page},info)=>
  await expect(page.locator('#connective-left')).toBeHidden();
  expect(errors).toEqual([]);
 });
+
+test('V14 hardening: mobile model viewport remains uncovered and focus preserves overlay',async({page},info)=>{
+ await page.setViewportSize({width:390,height:844});
+ const errors=await enter(page);
+ const stage=await page.locator('#atlas-stage').boundingBox();
+ const sheet=await page.locator('#connective-left').boundingBox();
+ expect(stage).toBeTruthy();expect(sheet).toBeTruthy();
+ expect(stage.y+stage.height).toBeLessThanOrEqual(sheet.y+2);
+ expect(stage.height).toBeGreaterThan(230);
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.connectiveEnabled)).toBe(true);
+ await page.screenshot({path:'artifacts/v14-hardening-unobstructed-'+info.project.name+'.png',fullPage:true});
+ await page.locator('#connective-left [data-cs-select="anterior-cruciate-ligament"]').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.connectiveEnabled)).toBe(true);
+ await page.locator('#connective-right [data-cs-action="focus"]').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.connectiveEnabled)).toBe(true);
+ await page.screenshot({path:'artifacts/v14-hardening-focused-'+info.project.name+'.png',fullPage:true});
+ await page.locator('#connective-entry').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.connectiveEnabled)).toBe(false);
+ await page.locator('#connective-entry').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.connectiveEnabled)).toBe(true);
+ expect(errors).toEqual([]);
+});
