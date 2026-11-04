@@ -98,7 +98,7 @@ test('close-up two-tap calibration tracks illustrative forearm, without false el
  await vp.click({position:{x:rect.width*.27,y:rect.height*.41}});
  await expect(page.locator('#status')).toHaveText('TAP WRIST');
  await vp.click({position:{x:rect.width*.72,y:rect.height*.61}});
- await expect(page.locator('#status')).toHaveText('FRAME CALIBRATED');
+ await expect(page.locator('#status')).toHaveText('ILLUSTRATION READY');
  await expect(page.locator('[data-id="flexors"]')).toBeVisible();
  await expect(page.locator('[data-id="biceps"]')).toHaveCount(0);
  await expect(page.locator('#angle')).toHaveText('N/A');
@@ -165,5 +165,105 @@ test('P0 frozen frame allows calibration without a live stream and sheet remains
  await expect(page.locator('#settings-sheet')).toBeVisible();
  await page.keyboard.press('Escape');
  await expect(page.locator('#settings-sheet')).toBeHidden();
+ expect(errors).toEqual([]);
+});
+
+
+// V3 visual integration: real canvas pixels showing a locally drawn forearm.
+// Unlike generic hash-based getImageData mocks, the freeze canvas and tracker
+// both sample the *same* visible image, exercising real object-fit cropping.
+async function mockVisibleArmFixture(page){
+ await page.addInitScript(()=>{
+  const fixture=document.createElement('canvas');fixture.width=720;fixture.height=1280;
+  const ctx=fixture.getContext('2d');
+  const bg=ctx.createLinearGradient(0,0,720,1280);bg.addColorStop(0,'#3d3431');bg.addColorStop(1,'#161d24');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,720,1280);
+  const arm=new Path2D();
+  arm.moveTo(173,0);arm.bezierCurveTo(235,100,260,170,246,268);
+  arm.bezierCurveTo(230,340,267,420,282,535);
+  arm.bezierCurveTo(318,755,403,976,422,1098);
+  arm.bezierCurveTo(439,1190,524,1206,567,1142);
+  arm.bezierCurveTo(610,1064,510,824,465,607);
+  arm.bezierCurveTo(432,447,390,312,405,248);
+  arm.bezierCurveTo(429,133,372,42,340,0);arm.closePath();
+  ctx.shadowColor='#000a';ctx.shadowBlur=55;ctx.shadowOffsetX=20;ctx.shadowOffsetY=15;
+  const skin=ctx.createLinearGradient(160,340,580,1050);
+  skin.addColorStop(0,'#b77a5d');skin.addColorStop(.36,'#dfaa8c');skin.addColorStop(.64,'#d29372');skin.addColorStop(1,'#9c624b');
+  ctx.fillStyle=skin;ctx.fill(arm);ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;
+  ctx.save();ctx.clip(arm);
+  const light=ctx.createLinearGradient(190,260,500,900);
+  light.addColorStop(0,'#f3c4a02e');light.addColorStop(.5,'#ffe0b14d');light.addColorStop(1,'#4a251b24');
+  ctx.fillStyle=light;ctx.fillRect(0,0,720,1280);
+  let seed=2053;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
+  for(let i=0;i<10000;i++){
+    const x=rnd()*720,y=rnd()*1280;
+    ctx.fillStyle=rnd()>.48?'#6d352714':'#fff8db1b';
+    ctx.fillRect(x,y,.5+rnd()*2,.5+rnd()*2);
+  }
+  ctx.restore();
+  ctx.strokeStyle='#efc2a355';ctx.lineWidth=2;ctx.beginPath();
+  ctx.moveTo(315,450);ctx.bezierCurveTo(340,625,420,816,482,1030);ctx.stroke();
+  const originalDraw=CanvasRenderingContext2D.prototype.drawImage;
+  CanvasRenderingContext2D.prototype.drawImage=function(source,...rest){
+    if(source instanceof HTMLVideoElement)return originalDraw.call(this,fixture,...rest);
+    return originalDraw.call(this,source,...rest);
+  };
+  globalThis.__tracks=[];
+  Object.defineProperty(HTMLMediaElement.prototype,'srcObject',{configurable:true,
+    get(){return this.__mockSource||null;},set(value){this.__mockSource=value;}});
+  Object.defineProperty(navigator,'mediaDevices',{configurable:true,value:{getUserMedia:async()=>{
+    const track={readyState:'live',stop(){this.readyState='ended';},addEventListener(){}};
+    globalThis.__tracks.push(track);
+    return {getTracks:()=>[track],getVideoTracks:()=>[track]};
+  }}});
+  for(const [key,value] of [['videoWidth',720],['videoHeight',1280]])
+   Object.defineProperty(HTMLVideoElement.prototype,key,{configurable:true,get(){return this.srcObject?value:0;}});
+  Object.defineProperty(HTMLMediaElement.prototype,'readyState',{configurable:true,get:()=>4});
+  Object.defineProperty(HTMLMediaElement.prototype,'currentTime',{configurable:true,get:()=>performance.now()/1000});
+  HTMLMediaElement.prototype.play=async function(){};
+  HTMLMediaElement.prototype.pause=function(){};
+ });
+}
+test('V3 realistic forearm fixture: frozen taps show anatomy, inspector works, camera recovers',async({page},testInfo)=>{
+ await mockVisibleArmFixture(page);
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/experiments/xray/');
+ await page.locator('#launch').click();
+ await page.locator('#pause').click();
+ await expect(page.locator('#status')).toHaveText('FRAME PAUSED');
+ const {mkdir}=await import('node:fs/promises');await mkdir('artifacts',{recursive:true});
+ const prefix='artifacts/xray-v3-'+testInfo.project.name;
+ await page.screenshot({path:prefix+'-before.png'});
+ const vp=page.locator('#viewport'),box=await vp.boundingBox();
+ await vp.click({position:{x:box.width*.42,y:box.height*.29}});
+ await expect(page.locator('.calibration-point')).toHaveCount(1);
+ await expect(page.locator('#status')).toHaveText('ELBOW PLACED');
+ await vp.click({position:{x:box.width*.65,y:box.height*.77}});
+ await expect(page.locator('.calibration-point')).toHaveCount(2);
+ await expect(page.locator('#status')).toHaveText('ILLUSTRATION READY');
+ await expect(page.locator('[data-id="flexors"]')).toBeVisible();
+ await expect(page.locator('[data-id="biceps"]')).toHaveCount(0);
+ expect(await page.evaluate(()=>window.__XRAY_EXPERIMENT__.getState().pipeline.geometryDisplayed)).toBeGreaterThan(0);
+ await page.screenshot({path:prefix+'-calibrated.png'});
+ await page.locator('[data-id="flexors"]').click({force:true});
+ await expect(page.locator('#selection-peek')).toBeVisible();
+ await expect(page.locator('#peek-title')).toHaveText('Forearm flexor group');
+ await page.locator('#selection-peek').click();
+ await expect(page.locator('#settings-sheet')).toBeVisible();
+ await page.locator('[data-layer="bone"]').click();
+ await page.locator('#close-settings').click();
+ await expect(page.locator('[data-id="radius"]')).toBeVisible();
+ await page.locator('#resume').click();
+ await expect.poll(async()=>page.evaluate(()=>window.__XRAY_EXPERIMENT__.getState().pipeline.frameReceived)).toBeGreaterThan(0);
+ // Live image matching may succeed or fail; it cannot masquerade as tracking
+ // without rendered geometry, and must always provide a clear recalibration route.
+ const current=await page.locator('#status').textContent();
+ expect(['ANCHORS TRACKING','IMAGE MATCH LOST','REACQUIRING ANCHORS']).toContain(current);
+ const state=await page.evaluate(()=>window.__XRAY_EXPERIMENT__.getState());
+ if(current==='ANCHORS TRACKING')expect(state.geometryCount).toBeGreaterThan(0);
+ await page.locator('#pause').click();
+ await expect(page.locator('#status')).toHaveText('FRAME PAUSED');
+ await expect(page.locator('.calibration-point')).toHaveCount(0);
+ expect(await page.evaluate(()=>window.__XRAY_EXPERIMENT__.getState().liveTracks)).toBe(0);
  expect(errors).toEqual([]);
 });
