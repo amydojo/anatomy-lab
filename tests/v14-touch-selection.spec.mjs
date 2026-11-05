@@ -73,6 +73,13 @@ const survey=(page)=>page.evaluate(([ids,touch])=>{
  return out;
 },[KNEE,TOUCH]);
 
+
+/* Enough in the CI log to tell "pointer type/size differed" from "plan differed" from "UI never opened". */
+const installTapLog=page=>page.evaluate(()=>{const log=window.__tapLog=[];const cv=document.getElementById('atlas-canvas');
+ for(const t of ['pointerdown','pointerup','pointercancel','click'])cv.addEventListener(t,e=>log.push({t,x:e.clientX,y:e.clientY,pt:e.pointerType,w:e.width,h:e.height}),true);});
+const tapDiag=(page,x,y,touch)=>page.evaluate(([x,y,touch])=>{const c=document.getElementById('atlas-canvas').getBoundingClientRect(),A=window.__BODY_ATLAS__,p=A.touchPlanAt(x-c.x,y-c.y,touch);
+ return {events:(window.__tapLog||[]).slice(-8),planNow:p&&{kind:p.kind,id:p.id,R:p.radius,options:p.options?.map(o=>o.id),cands:p.candidates?.map(k=>[k.id,+k.distance.toFixed(1),k.occludedBy,Math.round(Math.min(k.footprint.w,k.footprint.h))])},
+  selected:A.getState().unified.selected,chooserHidden:document.getElementById('touch-pick')?.hidden??null,canvas:{x:c.x,y:c.y}};},[x,y,touch]);
 const chooser=page=>page.locator('#touch-pick.choose');
 async function expectChooserSafe(page){
  const box=await page.locator('#touch-pick').boundingBox();
@@ -97,6 +104,7 @@ for(const [w,h] of [...MOBILE,...DESKTOP]){
   const S=await survey(page);
   info.annotations.push({type:'survey',description:JSON.stringify({scanned:S.scanned,ms:Math.round(S.ms),exact:Object.keys(S.exact).length,select:S.select.length,choose:S.choose.length,none:S.none.length})});
   expect(await selectedId(page),'nothing selected before any tap').toBeNull();
+  await installTapLog(page);
   const cam0=await cameraKey(page);
 
   if(!touch){
@@ -132,7 +140,8 @@ for(const [w,h] of [...MOBILE,...DESKTOP]){
   expect(off,'a robust unambiguous offset-tap point exists: '+JSON.stringify({sel:S.select.length,ch:S.choose.length})).toBeTruthy();
   expect(await page.evaluate(([x,y])=>window.__BODY_ATLAS__.hitTestAt(x-document.getElementById('atlas-canvas').getBoundingClientRect().x,y-document.getElementById('atlas-canvas').getBoundingClientRect().y),[off.x,off.y]),'the offset point truly misses every triangle').toBeNull();
   await tapXY(page,off.x,off.y);
-  await expect.poll(()=>selectedId(page),'offset tap at '+off.d.toFixed(1)+' px from '+off.id).toBe(off.id);
+  try{await expect.poll(()=>selectedId(page),{message:'offset tap at '+off.d.toFixed(1)+' px from '+off.id,timeout:4000}).toBe(off.id);}
+  catch(e){throw new Error(e.message+'\nOFFSET DIAGNOSTICS '+JSON.stringify({off,...await tapDiag(page,off.x,off.y,TOUCH)}));}
   await expect(page.locator('#touch-pick.choose')).toBeHidden();
   expect(await cameraKey(page),'a tap never moves the camera').toBe(cam0);
   info.annotations.push({type:'offset-tap',description:JSON.stringify({id:off.id,distancePx:+off.d.toFixed(1),radius:off.R})});
@@ -239,7 +248,14 @@ for(const [w,h] of [[390,844],[844,390],[1440,900]]){
   const c0=await cameraKey(page);
   // rotate (drag) then zoom (wheel): real pointer gestures through the same orbit handler
   await page.mouse.move(cx,cy);await page.mouse.down();await page.mouse.move(cx+34,cy+12,{steps:6});await page.mouse.move(cx+58,cy+18,{steps:6});await page.mouse.up();await frames(page);
-  for(let i=0;i<6;i++)await page.mouse.wheel(0,-120);
+  try{for(let i=0;i<6;i++)await page.mouse.wheel(0,-120);}
+  catch(e){
+   // Playwright cannot send a wheel in mobile WebKit ("Mouse wheel is not supported in mobile WebKit"). Fall back to a
+   // WheelEvent dispatched on the canvas: it drives the SAME wheel handler, but is synthetic and is labelled as such.
+   if(!/not supported in mobile WebKit/.test(e.message))throw e;
+   info.annotations.push({type:'zoom-input',description:'synthetic WheelEvent on #atlas-canvas (mobile WebKit has no mouse.wheel)'});
+   await page.evaluate(([x,y])=>{const cv=document.getElementById('atlas-canvas');for(let i=0;i<6;i++)cv.dispatchEvent(new WheelEvent('wheel',{deltaY:-120,clientX:x,clientY:y,bubbles:true,cancelable:true}));},[cx,cy]);
+  }
   await frames(page);
   expect(await cameraKey(page),'camera really moved').not.toBe(c0);
   expect(await selectedId(page),'camera gestures select nothing').toBeNull();
