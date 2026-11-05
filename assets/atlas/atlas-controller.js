@@ -148,8 +148,8 @@ function drawPins(){
 }
 // Tapping the actual source-backed skeleton should work like tapping a hotspot,
  // without claiming we have reconstructed unlabeled or missing anatomy.
-function pickAt(x,y){
- if(U.isActive()&&state.data.view==='detail')return U.pickAt(x,y);
+function pickAt(x,y,opts){
+ if(U.isActive()&&state.data.view==='detail')return U.pickAt(x,y,opts);
  if(state.data.view!=='overview'||!source||model.getStatus()!=='ready')return null;
  const canvas=$('atlas-canvas'),w=canvas.clientWidth,h=canvas.clientHeight;
  if(!w||!h)return null;
@@ -786,6 +786,6 @@ function connectiveOrientation(yaw,pitch){
 }
 const U=window.BodyAtlasUnified.create({state,model,loader,render,updateURL,resize,setExpanded,reduce,centerPoint,shortestYaw,enableControls,NOTE,LABEL,navigate:region=>choose(region)});
 window.BodyConnectiveMode?.mount({model,render,U});
-window.__BODY_ATLAS__={hitTestAt:(x,y)=>U.isActive()&&state.data.view==='detail'?U.hitTestAt(x,y):null,getState:()=>({...state.snapshot(),renderer:model.stats(),unified:U.snapshot(),assetsLoaded:loaded,overviewLoaded,expansionLoaded,facialLoaded,osteologyLoaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,recenter,focusOsteology,clearOsteologyFocus,setInspectorFrame,setMobileFrame,setFrameOwner,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode,connectiveFilter,connectiveEnable,connectiveFocus,connectiveOrientation,connectiveSelect:id=>U.selectById(id),connectiveClear:()=>{U.clearSelection();render();},connectiveStructure:(region,id)=>model.getStructure(region,id),connectiveReset:()=>{model.setConnectiveFilter(null,null,false);U.reset();}};
+window.__BODY_ATLAS__={touchCandidatesAt:(x,y,r)=>U.isActive()&&state.data.view==='detail'?U.touchCandidatesAt(x,y,r):null,touchPlanAt:(x,y,o)=>U.isActive()&&state.data.view==='detail'?U.touchPlanAt(x,y,o):null,hitTestAt:(x,y)=>U.isActive()&&state.data.view==='detail'?U.hitTestAt(x,y):null,getState:()=>({...state.snapshot(),renderer:model.stats(),unified:U.snapshot(),assetsLoaded:loaded,overviewLoaded,expansionLoaded,facialLoaded,osteologyLoaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,recenter,focusOsteology,clearOsteologyFocus,setInspectorFrame,setMobileFrame,setFrameOwner,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode,connectiveFilter,connectiveEnable,connectiveFocus,connectiveOrientation,connectiveSelect:id=>U.selectById(id),connectiveClear:()=>{U.clearSelection();render();},connectiveStructure:(region,id)=>model.getStructure(region,id),connectiveReset:()=>{model.setConnectiveFilter(null,null,false);U.reset();}};
 setup();
 })();

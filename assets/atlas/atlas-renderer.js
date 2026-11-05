@@ -562,8 +562,31 @@ function create(canvas,onContextLost=()=>{}){
   detail.set(region,meshes);detailData.set(region,data);
   return true;
  }
- function hitTest(camera,region,layer,flex,x,y,secondary=0){
-  if(!detail.has(region)||!Number.isFinite(x)||!Number.isFinite(y))return null;
+ // 2-D picking maths shared by the exact pick and the touch tolerance search (CSS pixels).
+ function triContains(a,b,c,x,y){
+  const den=(b.y-c.y)*(a.x-c.x)+(c.x-b.x)*(a.y-c.y);
+  if(Math.abs(den)<1e-8)return false;
+  const u=((b.y-c.y)*(x-c.x)+(c.x-b.x)*(y-c.y))/den;
+  const v=((c.y-a.y)*(x-c.x)+(a.x-c.x)*(y-c.y))/den;
+  return u>=-.0001&&v>=-.0001&&u+v<=1.0001;
+ }
+ function nearestOnSegment(ax,ay,bx,by,x,y){
+  const dx=bx-ax,dy=by-ay,l=dx*dx+dy*dy;
+  const t=l<1e-12?0:Math.max(0,Math.min(1,((x-ax)*dx+(y-ay)*dy)/l));
+  const px=ax+dx*t,py=ay+dy*t;
+  return {x:px,y:py,d:Math.hypot(x-px,y-py)};
+ }
+ // Interpolated depth (larger z = closer to the viewer, as in the exact pick) at a point on/near a triangle.
+ function triDepth(a,b,c,x,y){
+  const den=(b.y-c.y)*(a.x-c.x)+(c.x-b.x)*(a.y-c.y);
+  if(Math.abs(den)<1e-8)return (a.z+b.z+c.z)/3;
+  const u=Math.max(0,Math.min(1,((b.y-c.y)*(x-c.x)+(c.x-b.x)*(y-c.y))/den));
+  const v=Math.max(0,Math.min(1-u,((c.y-a.y)*(x-c.x)+(a.x-c.x)*(y-c.y))/den));
+  return u*a.z+v*b.z+(1-u-v)*c.z;
+ }
+ // Every mesh that exact picking considers (layer, filter, isolation and visibility rules), already projected.
+ function pickSet(camera,region,layer,flex,secondary){
+  if(!detail.has(region))return null;
   const width=canvas.clientWidth,height=canvas.clientHeight;
   if(!width||!height)return null;
   const core=window.BodySpatialCore;if(!core)return null;
@@ -578,15 +601,8 @@ function create(canvas,onContextLost=()=>{}){
   const extendedPose=window.BodyExtendedRegions?.has(region)&&detailData.has(region)
    ?M.poseExtended(region,detailData.get(region),flex,secondary):null;
   const jointPose=shoulderPose||lowerPose||extendedPose;
-  let nearest=null,front=-Infinity;
   const projection={...camera,width,height};
-  const within=(a,b,c)=>{
-   const den=(b.y-c.y)*(a.x-c.x)+(c.x-b.x)*(a.y-c.y);
-   if(Math.abs(den)<1e-8)return false;
-   const u=((b.y-c.y)*(x-c.x)+(c.x-b.x)*(y-c.y))/den;
-   const v=((c.y-a.y)*(x-c.x)+(a.x-c.x)*(y-c.y))/den;
-   return u>=-.0001&&v>=-.0001&&u+v<=1.0001;
-  };
+  const out=[];
   for(const mesh of pieces){
    if(!allowed(mesh)||(connectiveIsolated&&!connectiveIsolated.has(mesh.id)))continue;
    if(mesh.connective){if(!connectiveState.enabled||!connectiveState.visible[mesh.connectiveKind])continue;}
@@ -613,6 +629,16 @@ function create(canvas,onContextLost=()=>{}){
     }
     return core.project(p,projection);
    });
+   out.push({mesh,mapped});
+  }
+  return out;
+ }
+ function hitTest(camera,region,layer,flex,x,y,secondary=0){
+  if(!Number.isFinite(x)||!Number.isFinite(y))return null;
+  const set=pickSet(camera,region,layer,flex,secondary);if(!set)return null;
+  let nearest=null,front=-Infinity;
+  const within=(a,b,c)=>triContains(a,b,c,x,y);
+  for(const {mesh,mapped} of set){
    for(const face of mesh.faces){
     const a=mapped[face[0]],b=mapped[face[1]],c=mapped[face[2]];
     if(!a||!b||!c||!within(a,b,c))continue;
@@ -621,6 +647,49 @@ function create(canvas,onContextLost=()=>{}){
    }
   }
   return nearest;
+ }
+ // Touch tolerance search. Read-only: reports every pickable structure whose PROJECTED geometry lies within
+ // `radius` CSS px of the point, with its CSS-pixel distance, the depth at its nearest visible point and the
+ // structure (if any) that hides that point. Distances are screen-space, never 3-D. The caller decides policy.
+ function touchCandidates(camera,region,layer,flex,x,y,secondary=0,radius=24){
+  if(!Number.isFinite(x)||!Number.isFinite(y))return null;
+  const set=pickSet(camera,region,layer,flex,secondary);if(!set)return null;
+  const R=Math.max(0,Number(radius)||0),found=[];
+  for(const {mesh,mapped} of set){
+   let best=null;
+   for(const face of mesh.faces){
+    const a=mapped[face[0]],b=mapped[face[1]],c=mapped[face[2]];
+    if(!a||!b||!c)continue;
+    if(x<Math.min(a.x,b.x,c.x)-R||x>Math.max(a.x,b.x,c.x)+R||y<Math.min(a.y,b.y,c.y)-R||y>Math.max(a.y,b.y,c.y)+R)continue;
+    let d,qx=x,qy=y;
+    if(triContains(a,b,c,x,y))d=0;
+    else{
+     const e=[nearestOnSegment(a.x,a.y,b.x,b.y,x,y),nearestOnSegment(b.x,b.y,c.x,c.y,x,y),nearestOnSegment(c.x,c.y,a.x,a.y,x,y)].sort((m,n)=>m.d-n.d)[0];
+     d=e.d;qx=e.x;qy=e.y;
+    }
+    if(d>R)continue;
+    if(!best||d<best.d-1e-9)best={d,qx,qy,a,b,c};
+   }
+   if(!best)continue;
+   // Occlusion: is the nearest point of this structure hidden by a nearer surface of another structure?
+   const depth=triDepth(best.a,best.b,best.c,best.qx,best.qy);
+   let occludedBy=null,top=depth+.002;
+   for(const other of set){
+    if(other.mesh===mesh||(other.mesh.id===mesh.id))continue;
+    for(const face of other.mesh.faces){
+     const a=other.mapped[face[0]],b=other.mapped[face[1]],c=other.mapped[face[2]];
+     if(!a||!b||!c||!triContains(a,b,c,best.qx,best.qy))continue;
+     const z=triDepth(a,b,c,best.qx,best.qy);
+     if(z>top){top=z;occludedBy=other.mesh.id;}
+    }
+   }
+   // On-screen footprint of the whole structure (CSS px). Used to decide whether it is a small touch target.
+   let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+   for(const p of mapped){if(!p)continue;if(p.x<x0)x0=p.x;if(p.x>x1)x1=p.x;if(p.y<y0)y0=p.y;if(p.y>y1)y1=p.y;}
+   found.push({id:mesh.id,name:mesh.name,fma:mesh.fma,tissue:mesh.tissue,region,connective:!!mesh.connective,
+    distance:best.d,depth,occludedBy,nearest:{x:best.qx,y:best.qy},footprint:{x:x0,y:y0,w:Math.max(0,x1-x0),h:Math.max(0,y1-y0)}});
+  }
+  return found.sort((m,n)=>m.distance-n.distance||n.depth-m.depth);
  }
  function shoulderDiagnostics(flex=0){
   if(!shoulderGraph||!detail.has('shoulder'))return null;
@@ -671,7 +740,7 @@ function create(canvas,onContextLost=()=>{}){
   }finally{rebuilding=false;}
  }
  function dispose(){destroyed=true;status='disposed';cleanup();model=null;overviewData=null;expansionData=null;facialData=null;osteologyData=null;shoulderGraph=null;detailData.clear();}
- return Object.freeze({load,loadOverview,loadExpansion,loadFacial,loadOsteology,setOsteologyFocus,setOverviewSystem,getOverviewSystem:()=>overviewSystem,registry:()=>registry,loadDetail,loadConnectiveIllustrations,setConnectiveState,touchDetail,hasDetail:region=>detail.has(region),render,hitTest,shoulderDiagnostics,resize,getStatus:()=>status,getViewBounds:viewBounds,getStructure,getStructureBounds,setConnectiveFilter,restore,dispose,stats:()=>({connectiveMeshes:[...connectiveDetail.values()].reduce((n,p)=>n+p.length,0),connectiveEnabled:connectiveState.enabled,partCount:buffers.length,overviewBones:overviewBones.length,overviewMuscles:overviewMuscles.length,expansionBones:expansionData?Object.keys(expansionData.bones).length:0,expansionMuscles:expansionData?Object.keys(expansionData.muscles).length:0,expansionConnective:expansionData?Object.keys(expansionData.connective).length:0,facialMuscles:facialData?Object.keys(facialData.parts).length:0,facialDetailMeshes:facialDetail.length,osteologyBones:osteologyData?Object.keys(osteologyData.bones).length:0,osteologyFocus,overviewSystem,registry:registry.stats(),triangles:[...buffers,...overviewBones,...overviewMuscles].reduce((n,b)=>n+b.count/3,0),webgl:status==='ready',detailRegions:[...detail.keys()],detailMeshes:[...detail.values()].reduce((n,items)=>n+items.length,0),riggedShoulderMuscles:(detail.get('shoulder')||[]).filter(p=>p.skinWeights).length,riggedHipMuscles:(detail.get('hip')||[]).filter(p=>p.skinWeights).length,riggedKneeMuscles:(detail.get('knee')||[]).filter(p=>p.skinWeights).length,coordinatedShoulder:!!shoulderGraph,expandedRegions:[...detail.keys()].filter(id=>window.BodyExtendedRegions?.has(id)),expandedMeshes:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>!x.tissue).length,0),expandedMuscles:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>x.tissue).length,0)})});
+ return Object.freeze({load,loadOverview,loadExpansion,loadFacial,loadOsteology,setOsteologyFocus,setOverviewSystem,getOverviewSystem:()=>overviewSystem,registry:()=>registry,loadDetail,loadConnectiveIllustrations,setConnectiveState,touchDetail,hasDetail:region=>detail.has(region),render,hitTest,touchCandidates,shoulderDiagnostics,resize,getStatus:()=>status,getViewBounds:viewBounds,getStructure,getStructureBounds,setConnectiveFilter,restore,dispose,stats:()=>({connectiveMeshes:[...connectiveDetail.values()].reduce((n,p)=>n+p.length,0),connectiveEnabled:connectiveState.enabled,partCount:buffers.length,overviewBones:overviewBones.length,overviewMuscles:overviewMuscles.length,expansionBones:expansionData?Object.keys(expansionData.bones).length:0,expansionMuscles:expansionData?Object.keys(expansionData.muscles).length:0,expansionConnective:expansionData?Object.keys(expansionData.connective).length:0,facialMuscles:facialData?Object.keys(facialData.parts).length:0,facialDetailMeshes:facialDetail.length,osteologyBones:osteologyData?Object.keys(osteologyData.bones).length:0,osteologyFocus,overviewSystem,registry:registry.stats(),triangles:[...buffers,...overviewBones,...overviewMuscles].reduce((n,b)=>n+b.count/3,0),webgl:status==='ready',detailRegions:[...detail.keys()],detailMeshes:[...detail.values()].reduce((n,items)=>n+items.length,0),riggedShoulderMuscles:(detail.get('shoulder')||[]).filter(p=>p.skinWeights).length,riggedHipMuscles:(detail.get('hip')||[]).filter(p=>p.skinWeights).length,riggedKneeMuscles:(detail.get('knee')||[]).filter(p=>p.skinWeights).length,coordinatedShoulder:!!shoulderGraph,expandedRegions:[...detail.keys()].filter(id=>window.BodyExtendedRegions?.has(id)),expandedMeshes:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>!x.tissue).length,0),expandedMuscles:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>x.tissue).length,0)})});
 }
 window.BodyAtlasRenderer=Object.freeze({create});
 })();

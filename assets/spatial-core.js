@@ -123,7 +123,8 @@
        else{
          lastTap={time:now,x:e.clientX,y:e.clientY};
          const bounds=canvas.getBoundingClientRect();
-         pick(e.clientX-bounds.left,e.clientY-bounds.top);
+         // pointerType/contact let touch pickers add finger tolerance; mouse keeps exact picking.
+         pick(e.clientX-bounds.left,e.clientY-bounds.top,{pointerType:e.pointerType,contact:Math.max(e.width||0,e.height||0)});
        }
      }
      if(pointers.size===1){
