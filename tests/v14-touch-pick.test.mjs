@@ -16,11 +16,13 @@ test('mouse and pen never receive tolerance (desktop precision is preserved)',()
  assert.equal(JSON.stringify(TP.decide([cand('a',3)],0)),JSON.stringify({kind:'none',reason:'no-tolerance'}));
 });
 test('touch radius is adaptive and clamped to 12-24 CSS px',()=>{
- assert.equal(TP.radiusFor({pointerType:'touch'}),16,'unknown contact (iOS Safari) uses the default');
- assert.equal(TP.radiusFor({pointerType:'touch',contact:1}),16);
- assert.equal(TP.radiusFor({pointerType:'touch',contact:2}),12,'tiny contact clamps up to the minimum');
+ assert.equal(TP.radiusFor({pointerType:'touch'}),16,'unknown contact uses the default');
+ // WebKit CI reports width/height 2 for every touch and Chromium reports 1-2: placeholders, never a fingertip size.
+ for(const c of [0,1,2,4,7.9])assert.equal(TP.radiusFor({pointerType:'touch',contact:c}),16,'placeholder contact '+c+' must not shrink the radius');
+ assert.equal(TP.radiusFor({pointerType:'touch',contact:8}),14);
  assert.equal(TP.radiusFor({pointerType:'touch',contact:20}),20);
  assert.equal(TP.radiusFor({pointerType:'touch',contact:80}),24,'large contact clamps to the maximum');
+ assert.equal(TP.radiusFor({pointerType:'touch',contact:Infinity}),16);
 });
 test('one small candidate within the radius is selected, with the others offered as alternatives',()=>{
  const d=TP.decide([cand('mcl',6),cand('tibia',22,{footprint:big})],16);

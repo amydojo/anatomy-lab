@@ -8,7 +8,8 @@ const MOBILE=[[390,844],[375,667],[320,568],[844,390],[667,375]];
 const DESKTOP=[[1440,900]];
 const KNEE=['anterior-cruciate-ligament','posterior-cruciate-ligament','medial-collateral-ligament','lateral-collateral-ligament','medial-meniscus','lateral-meniscus','patellar-ligament','quadriceps-tendon'];
 const CHROME='.topbar,#connective-guides,#connective-mobile-nav,#connective-left,#connective-right,.stage-meta';
-const TOUCH={pointerType:'touch',contact:0};
+// contact 2 = what WebKit reports for every touch (Chromium 1-2); the survey must plan with the value the real tap carries.
+const TOUCH={pointerType:'touch',contact:2};
 const frames=page=>page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(r,120)))));
 const projectViewports=info=>info.project.name==='desktop-chromium'?DESKTOP:MOBILE;
 async function enter(page,w,h){

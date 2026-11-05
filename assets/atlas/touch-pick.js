@@ -11,7 +11,8 @@
  const POLICY=Object.freeze({
   radiusMin:12,          // CSS px, never search less than this for a touch
   radiusMax:24,          // CSS px, never search more than this (half of a 48 px touch target)
-  radiusDefault:16,      // CSS px, used when the browser reports no contact size (iOS Safari reports none)
+  radiusDefault:16,      // CSS px, used when the browser reports no usable contact size
+  minRealContact:8,      // CSS px: smaller reported pointer width/height is a placeholder, not a fingertip
   smallTarget:44,        // CSS px: a structure gets tolerance only if its on-screen footprint is below this in some axis
   confidentMargin:8,     // CSS px: runner-up must be at least this much farther than the winner...
   confidentRatio:1.75,   // ...and at least this many times as far, otherwise the choice is ambiguous
@@ -25,7 +26,9 @@
  function radiusFor(o){
   if(!touchLike(o))return 0;
   const contact=Number(o.contact);
-  const r=Number.isFinite(contact)&&contact>1?10+contact/2:POLICY.radiusDefault;
+  // Contact sizes of 0-2 CSS px are placeholders (Chromium reports 1-2, WebKit reports 2 for every touch), not a measured
+  // fingertip. Believing them shrank the radius to 12 in WebKit CI. A real fingertip is >= ~8 px, so only those adapt.
+  const r=Number.isFinite(contact)&&contact>=POLICY.minRealContact?10+contact/2:POLICY.radiusDefault;
   return clamp(Math.round(r),POLICY.radiusMin,POLICY.radiusMax);
  }
  const isSmall=c=>!!c.footprint&&Math.min(c.footprint.w,c.footprint.h)<POLICY.smallTarget;

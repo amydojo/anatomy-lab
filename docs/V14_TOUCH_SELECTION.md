@@ -14,7 +14,7 @@ Connective structures project to a few CSS pixels on a phone. Picking is exact-t
 ## Algorithm
 1. **Exact triangle first.** Unchanged. A tap that lands on any structure selects exactly what it selected before, in every pointer type.
 2. Only a **touch that misses** continues. Mouse and pen never get tolerance (desktop precision unchanged).
-3. **Radius** (CSS px): 16 by default (iOS Safari reports no contact size); with a reported contact size `c > 1`, `10 + c/2`; always clamped to 12-24.
+3. **Radius** (CSS px): 16 by default; with a reported contact size `c >= 8` CSS px, `10 + c/2`; always clamped to 12-24. Reported sizes under 8 are placeholders (Chromium reports 1-2, WebKit reports 2 for every touch) and are ignored; believing them shrank the radius to 12 in WebKit CI.
 4. **Candidates**: structures eligible for exact picking right now (current layer, filter, isolation and visibility rules), with projected distance <= radius. Distance is point-to-projected-triangle in CSS px, never 3-D.
 5. **Occlusion**: a candidate whose nearest point is covered by a nearer surface of another structure (interpolated depth, 0.002 tolerance) is dropped. Hidden, filtered or isolated-out structures are never in the set.
 6. **Small targets only**: a structure gets tolerance only if its on-screen footprint is under 44 CSS px in some axis. Grazing a large bone is an empty tap.
