@@ -1,0 +1,59 @@
+name: V14 Operator C - verified geometry evidence gate
+on:
+  push:
+    branches: ['feat/v14-knee-verified-geometry']
+  pull_request:
+    branches: ['integration/v14-connective']
+permissions:
+  contents: read
+concurrency:
+  group: v14-knee-provenance-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-and-registration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: node scripts/validate_connective_coverage.cjs
+      - run: node scripts/validate_v14_connective.mjs --coverage atlas/assets/connective-coverage.json
+      - run: node scripts/audit_v14_connective_sources.cjs
+      - run: node scripts/verify_knee_bone_reference.mjs --out artifacts/v14-knee-bone-reference-audit.json
+      - run: node --test tests/v14-geometry-registration.test.mjs
+      - run: npm test
+      - run: python3 -m unittest discover -s scripts/tests
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v14-knee-registration-source-audit
+          path: artifacts/
+          if-no-files-found: ignore
+  browser:
+    needs: source-and-registration
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop-chromium, chromium-mobile, webkit-mobile]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: npm run test:e2e -- --project=${{ matrix.project }} tests/v14-geometry-evidence.spec.mjs tests/v14-connective.spec.mjs tests/v14-connective-studio.spec.mjs tests/v14-connective-integrated.spec.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v14-knee-geometry-browser-${{ matrix.project }}
+          path: |
+            test-results/
+            artifacts/
+          if-no-files-found: ignore

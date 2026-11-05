@@ -87,6 +87,9 @@ test('Geometry cannot become verified based on a citation or a partial inventory
  invalid(x=>x.structures[0].geometry.attachmentCoordinatesValidated=true,'UNSUPPORTED_ATTACHMENT');
  invalid(x=>x.structures[0].geometry.kinematicsValidated=true,'UNSUPPORTED_KINEMATICS');
  const inventory={regions:{knee:{structures:[{id:'quadriceps-tendon',mesh_id:'mesh123',source_uri:'https://example.com',sha256:'abcdef',license:'CC BY 4.0',geometry_verified:true}]}}};
+ // A truncated/non-hex hash is not a source link at all (runtime hash check mirrors the offline gate).
+ assert.equal(create(knowledge,inventory,{allowInvalid:true}).getGeometryStatus('quadriceps-tendon').status,'unverified');
+ inventory.regions.knee.structures[0].sha256='a'.repeat(64);
  const withPartial=create(knowledge,inventory,{allowInvalid:true});
  assert.equal(withPartial.getGeometryStatus('quadriceps-tendon').status,'source-linked-unverified');
  assert.equal(withPartial.getGeometryStatus('quadriceps-tendon').geometryVerified,false);
