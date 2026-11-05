@@ -1,0 +1,5 @@
+{
+ "schema": "body-live/qualified-reviewers-v1",
+ "note": "Roster of qualified anatomical reviewers. EMPTY BY DESIGN: no connective geometry can be promoted to verified until a human maintainer adds a reviewer here through a reviewed change. Entries are {id, name, qualified:true}. Software validation never edits this file.",
+ "reviewers": []
+}

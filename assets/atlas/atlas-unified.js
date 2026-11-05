@@ -96,11 +96,19 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   }
   return applySelection(hit);
  }
+ // Read-only raycast: the id pickAt WOULD select, with no selection, render, URL or camera side effects.
+ // Lets tests and diagnostics locate real tap targets without mutating application state.
+ function hitTestAt(x,y){
+  if(state.data.view!=='detail'||!region||returning)return null;
+  const hit=model.hitTest(state.data.camera,region,state.data.layer,motion,x,y,secondary);
+  return hit?hit.id:null;
+ }
  function applySelection(hit){
   selected=hit;
   const regionalInfo=hit.id==='bicepsShort'&&hit.region==='shoulder'
     ? ['Biceps brachii · short head','Source-derived shoulder muscle surface. Attachment and motion validation remain pending.'] : null;
-  const [name,desc]=regionalInfo||INFORMATION[hit.id]||(window.BodyExtendedRegions.has(hit.region)?
+  const connectiveInfo=window.BodyConnectiveMode?.info(hit.id);
+  const [name,desc]=connectiveInfo?[connectiveInfo.name,[connectiveInfo.tissue.toUpperCase(),connectiveInfo.attachments,connectiveInfo.role,connectiveInfo.verification,connectiveInfo.license,connectiveInfo.limitations].join(' · ')]:regionalInfo||INFORMATION[hit.id]||(window.BodyExtendedRegions.has(hit.region)?
     [hit.name||hit.id.split('-').map(x=>x[0].toUpperCase()+x.slice(1)).join(' '),
      hit.tissue?'Licensed BodyParts3D 4.0 muscle surface. Where joints move, inferred proximity-to-bone attachment weights are illustrative, not verified physiology.':
      'Real BodyParts3D 4.0 bone surface in a registered reference pose. Selection and any illustrative motion are not an expert-verified diagnosis or biomechanical model.']:
@@ -110,7 +118,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   $('structure-details-name').textContent=name;
   $('structure-details-description').textContent=desc;
   $('structure-details').hidden=false;
-  render();updateURL({replace:true});return hit.id;
+  render();updateURL({replace:true});window.dispatchEvent(new CustomEvent('body:structure-selected',{detail:{id:hit.id}}));return hit.id;
  }
  function selectById(id){
   if(!region||state.data.view!=='detail')return false;
@@ -376,7 +384,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   return true;
  }
  return Object.freeze({choose,back,travelKnee,isActive,getRegion,getReveal,getMotion,getSecondaryMotion,getSelected,getTransitionFrom,
-  snapshot,depthChange,setMode,reset,recenter,neutral,setMotion,setSecondaryMotion,pickAt,selectById,clearSelection,showSelected,nextRegion,interrupt});
+  snapshot,depthChange,setMode,reset,recenter,neutral,setMotion,setSecondaryMotion,pickAt,hitTestAt,selectById,clearSelection,showSelected,nextRegion,interrupt});
 }
 window.BodyAtlasUnified=Object.freeze({create});
 })();

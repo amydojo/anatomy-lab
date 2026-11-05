@@ -1,0 +1,2240 @@
+{
+  "schema": "body-live/connective-knowledge-v1",
+  "version": 1,
+  "targetCount": 26,
+  "sourceInventory": {
+    "path": "atlas/assets/connective-coverage.json",
+    "branch": "feat/connective-anatomy-regional-foundation",
+    "mode": "join-by-canonicalCoverageId; do-not-infer-mesh"
+  },
+  "sources": {
+    "knee": {
+      "title": "Anatomy, Bony Pelvis and Lower Limb, Knee",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK500017/",
+      "section": "Structure and Function — Ligaments; Muscles; Menisci",
+      "publisher": "NCBI Bookshelf",
+      "accessed": "2026-11-01",
+      "verification": "bibliographic link and located section; not anatomist sign-off"
+    },
+    "meniscus": {
+      "title": "Knee Meniscal Tears",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK431067/",
+      "section": "Anatomy and Physiology — medial and lateral meniscal attachment differences",
+      "publisher": "NCBI Bookshelf",
+      "accessed": "2026-11-01",
+      "verification": "bibliographic link and located section; not anatomist sign-off"
+    },
+    "medial": {
+      "title": "Anatomy, Knee Medial Meniscus",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK537276/",
+      "section": "Structure and Function",
+      "publisher": "NCBI Bookshelf",
+      "accessed": "2026-11-01",
+      "verification": "bibliographic link and located section; not anatomist sign-off"
+    },
+    "lateral": {
+      "title": "Anatomy, Knee Lateral Meniscus",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK519494/",
+      "section": "Structure and Function",
+      "publisher": "NCBI Bookshelf",
+      "accessed": "2026-11-01",
+      "verification": "bibliographic link and located section; not anatomist sign-off"
+    },
+    "cuff": {
+      "title": "Anatomy, Rotator Cuff",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK441844/",
+      "section": "Muscles — rotator cuff origins, insertions and actions",
+      "publisher": "NCBI Bookshelf",
+      "accessed": "2026-11-01",
+      "verification": "bibliographic link and located section; not anatomist sign-off"
+    },
+    "shoulder": {
+      "title": "Shoulder Arthrogram",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK580562/",
+      "section": "Anatomy and Physiology — Glenoid labrum and associated variants",
+      "publisher": "NCBI Bookshelf",
+      "accessed": "2026-11-01",
+      "verification": "bibliographic link and located section; not anatomist sign-off"
+    },
+    "hip": {
+      "title": "Anatomy, Bony Pelvis and Lower Limb, Hip",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK526019/",
+      "section": "Structure and Function — capsular ligaments",
+      "publisher": "NCBI Bookshelf",
+      "accessed": "2026-11-01",
+      "verification": "bibliographic link and located section; not anatomist sign-off"
+    },
+    "hipjoint": {
+      "title": "Anatomy, Bony Pelvis and Lower Limb, Hip Joint",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK470555/",
+      "section": "Structure and Function — acetabular labrum",
+      "publisher": "NCBI Bookshelf",
+      "accessed": "2026-11-01",
+      "verification": "bibliographic link and located section; not anatomist sign-off"
+    },
+    "achilles": {
+      "title": "Anatomy, Bony Pelvis and Lower Limb: Achilles Tendon",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK499917/",
+      "section": "Introduction; Structure and Function",
+      "publisher": "NCBI Bookshelf",
+      "accessed": "2026-11-01",
+      "verification": "bibliographic link and located section; not anatomist sign-off"
+    },
+    "ankle": {
+      "title": "Anatomy, Bony Pelvis and Lower Limb: Ankle Joint",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK545158/",
+      "section": "Introduction; Structure and Function — ankle collateral ligaments",
+      "publisher": "NCBI Bookshelf",
+      "accessed": "2026-11-01",
+      "verification": "bibliographic link and located section; not anatomist sign-off"
+    },
+    "lateralankle": {
+      "title": "Lateral Ankle Instability",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK538215/",
+      "section": "Anatomy — anterior talofibular and calcaneofibular ligament",
+      "publisher": "NCBI Bookshelf",
+      "accessed": "2026-11-01",
+      "verification": "bibliographic link and located section; not anatomist sign-off"
+    },
+    "retinaculum": {
+      "title": "Anatomy, Shoulder and Upper Limb, Wrist Flexor Retinaculum",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK545198/",
+      "section": "Introduction; Structure and Function",
+      "publisher": "NCBI Bookshelf",
+      "accessed": "2026-11-01",
+      "verification": "bibliographic link and located section; not anatomist sign-off"
+    },
+    "wrist": {
+      "title": "Wrist and Hand — Musculoskeletal Diseases 2026–2029",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK624301/",
+      "section": "4.7 Intrinsic Wrist Ligaments; 4.8 TFCC",
+      "publisher": "NCBI Bookshelf",
+      "accessed": "2026-11-01",
+      "verification": "bibliographic link and located section; not anatomist sign-off"
+    },
+    "tfcc": {
+      "title": "Diagnostic Imaging of the Wrist",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK554525/",
+      "section": "Wrist anatomy — TFCC and scapholunate ligament",
+      "publisher": "NCBI Bookshelf",
+      "accessed": "2026-11-01",
+      "verification": "bibliographic link and located section; not anatomist sign-off"
+    },
+    "spine": {
+      "title": "Anatomy, Back, Cervical Vertebrae",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK459200/",
+      "section": "Ligaments of the Vertebral Column",
+      "publisher": "NCBI Bookshelf",
+      "accessed": "2026-11-01",
+      "verification": "bibliographic link and located section; not anatomist sign-off"
+    },
+    "disc": {
+      "title": "Anatomy, Back, Intervertebral Discs",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK470583/",
+      "section": "Structure and Function; Other Issues",
+      "publisher": "NCBI Bookshelf",
+      "accessed": "2026-11-01",
+      "verification": "bibliographic link and located section; not anatomist sign-off"
+    }
+  },
+  "structures": [
+    {
+      "id": "quadriceps-tendon",
+      "canonicalCoverageId": "quadriceps-tendon",
+      "name": "Quadriceps tendon",
+      "synonyms": [
+        "Quadriceps femoris tendon"
+      ],
+      "region": "knee",
+      "laterality": "bilateral-template",
+      "tissueClass": "tendon",
+      "attachments": {
+        "proximal": "Converging quadriceps femoris tendon",
+        "distal": "Superior pole and anterior aspect of patella",
+        "notes": null
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "patellar-ligament",
+          "type": "extensor-chain-partners",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "knee"
+          ]
+        }
+      ],
+      "functionIds": [
+        "knee-extensor-mechanism"
+      ],
+      "primaryFunction": "Transfers quadriceps pull to the patella to help extend the knee.",
+      "movements": [
+        "knee extension"
+      ],
+      "relatedBones": [
+        "patella",
+        "femur"
+      ],
+      "relatedMuscles": [
+        "rectus femoris",
+        "vastus medialis",
+        "vastus lateralis",
+        "vastus intermedius"
+      ],
+      "explanation": {
+        "overview": "Transfers quadriceps pull to the patella to help extend the knee.",
+        "detail": "Rectus femoris and the three vasti converge into the quadriceps tendon; the patella forms the intermediate bony link before the patellar ligament reaches the tibial tuberosity."
+      },
+      "sourceRefs": [
+        "knee"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "patellar-ligament",
+      "canonicalCoverageId": "patellar-ligament",
+      "name": "Patellar ligament",
+      "synonyms": [
+        "Patellar tendon"
+      ],
+      "region": "knee",
+      "laterality": "bilateral-template",
+      "tissueClass": "ligament",
+      "attachments": {
+        "proximal": "Patellar apex and inferior border",
+        "distal": "Tibial tuberosity",
+        "notes": null
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "quadriceps-tendon",
+          "type": "extensor-chain-partners",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "knee"
+          ]
+        }
+      ],
+      "functionIds": [
+        "knee-extensor-mechanism"
+      ],
+      "primaryFunction": "Transfers force from the patella to the tibia during active knee extension.",
+      "movements": [
+        "knee extension"
+      ],
+      "relatedBones": [
+        "patella",
+        "tibia"
+      ],
+      "relatedMuscles": [
+        "quadriceps femoris"
+      ],
+      "explanation": {
+        "overview": "Transfers force from the patella to the tibia during active knee extension.",
+        "detail": "This strong anterior band is commonly called the patellar tendon; it continues the extensor mechanism below the patella, but its named attachments are patella and tibia."
+      },
+      "sourceRefs": [
+        "knee"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "medial-collateral-ligament",
+      "canonicalCoverageId": "medial-collateral-ligament",
+      "name": "Medial collateral ligament",
+      "synonyms": [
+        "MCL",
+        "Tibial collateral ligament"
+      ],
+      "region": "knee",
+      "laterality": "bilateral-template",
+      "tissueClass": "ligament",
+      "attachments": {
+        "proximal": "Medial femoral epicondyle",
+        "distal": "Medial proximal tibia, including the medial condylar region",
+        "notes": null
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "lateral-collateral-ligament",
+          "type": "functional-counterparts",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "knee"
+          ]
+        },
+        {
+          "targetId": "medial-meniscus",
+          "type": "deep-fibers-attach-to",
+          "direction": "directed",
+          "sourceRefs": [
+            "meniscus",
+            "medial"
+          ]
+        }
+      ],
+      "functionIds": [
+        "knee-stability"
+      ],
+      "primaryFunction": "Resists excessive valgus opening on the inner knee.",
+      "movements": [
+        "valgus restraint"
+      ],
+      "relatedBones": [
+        "femur",
+        "tibia"
+      ],
+      "relatedMuscles": [],
+      "explanation": {
+        "overview": "Resists excessive valgus opening on the inner knee.",
+        "detail": "The tibial collateral ligament spans femur to tibia. Its deep fibers are connected to the medial meniscus, unlike the fibular collateral ligament and lateral meniscus."
+      },
+      "sourceRefs": [
+        "knee",
+        "meniscus"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "lateral-collateral-ligament",
+      "canonicalCoverageId": "lateral-collateral-ligament",
+      "name": "Lateral collateral ligament",
+      "synonyms": [
+        "LCL",
+        "Fibular collateral ligament"
+      ],
+      "region": "knee",
+      "laterality": "bilateral-template",
+      "tissueClass": "ligament",
+      "attachments": {
+        "proximal": "Lateral femoral epicondyle",
+        "distal": "Lateral aspect of fibular head",
+        "notes": null
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "medial-collateral-ligament",
+          "type": "functional-counterparts",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "knee"
+          ]
+        }
+      ],
+      "functionIds": [
+        "knee-stability"
+      ],
+      "primaryFunction": "Resists excessive varus opening on the outer knee.",
+      "movements": [
+        "varus restraint"
+      ],
+      "relatedBones": [
+        "femur",
+        "fibula"
+      ],
+      "relatedMuscles": [],
+      "explanation": {
+        "overview": "Resists excessive varus opening on the outer knee.",
+        "detail": "The fibular collateral ligament spans femur to fibula, not the tibia. It does not directly attach to the lateral meniscus."
+      },
+      "sourceRefs": [
+        "knee",
+        "lateral"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "anterior-cruciate-ligament",
+      "canonicalCoverageId": "anterior-cruciate-ligament",
+      "name": "Anterior cruciate ligament",
+      "synonyms": [
+        "ACL"
+      ],
+      "region": "knee",
+      "laterality": "bilateral-template",
+      "tissueClass": "ligament",
+      "attachments": {
+        "proximal": "Anterior intercondylar region of tibia, posterior to anterior meniscal attachment",
+        "distal": "Posteromedial surface of lateral femoral condyle",
+        "notes": null
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "posterior-cruciate-ligament",
+          "type": "functional-counterparts",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "knee"
+          ]
+        },
+        {
+          "targetId": "medial-meniscus",
+          "type": "adjacent-to-anterior-tibial-meniscal-attachment",
+          "direction": "directed",
+          "sourceRefs": [
+            "knee"
+          ]
+        }
+      ],
+      "functionIds": [
+        "knee-stability"
+      ],
+      "primaryFunction": "Primarily restrains anterior translation of the tibia relative to the femur.",
+      "movements": [
+        "anterior tibial translation restraint",
+        "rotational stability"
+      ],
+      "relatedBones": [
+        "tibia",
+        "femur"
+      ],
+      "relatedMuscles": [],
+      "explanation": {
+        "overview": "Primarily restrains anterior translation of the tibia relative to the femur.",
+        "detail": "The ACL runs superiorly, posteriorly and laterally from the anterior tibial intercondylar area to the inner-facing surface of the lateral femoral condyle; it crosses the PCL but has different attachments."
+      },
+      "sourceRefs": [
+        "knee"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "posterior-cruciate-ligament",
+      "canonicalCoverageId": "posterior-cruciate-ligament",
+      "name": "Posterior cruciate ligament",
+      "synonyms": [
+        "PCL"
+      ],
+      "region": "knee",
+      "laterality": "bilateral-template",
+      "tissueClass": "ligament",
+      "attachments": {
+        "proximal": "Posterior intercondylar region of tibia",
+        "distal": "Anterolateral surface of medial femoral condyle",
+        "notes": null
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "anterior-cruciate-ligament",
+          "type": "functional-counterparts",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "knee"
+          ]
+        }
+      ],
+      "functionIds": [
+        "knee-stability"
+      ],
+      "primaryFunction": "Primarily restrains posterior translation of the tibia relative to the femur.",
+      "movements": [
+        "posterior tibial translation restraint"
+      ],
+      "relatedBones": [
+        "tibia",
+        "femur"
+      ],
+      "relatedMuscles": [],
+      "explanation": {
+        "overview": "Primarily restrains posterior translation of the tibia relative to the femur.",
+        "detail": "The PCL courses superiorly, anteriorly and medially from posterior tibia to the medial femoral condyle. Its attachment is distinct from the ACL insertion on the lateral condyle."
+      },
+      "sourceRefs": [
+        "knee"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "medial-meniscus",
+      "canonicalCoverageId": "medial-meniscus",
+      "name": "Medial meniscus",
+      "synonyms": [],
+      "region": "knee",
+      "laterality": "bilateral-template",
+      "tissueClass": "fibrocartilage",
+      "attachments": {
+        "proximal": "Anterior horn at anterior medial tibial intercondylar area",
+        "distal": "Posterior horn at posterior medial tibial intercondylar area",
+        "notes": null
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "lateral-meniscus",
+          "type": "functional-counterparts",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "knee"
+          ]
+        }
+      ],
+      "functionIds": [
+        "knee-load-distribution"
+      ],
+      "primaryFunction": "Helps distribute tibiofemoral load and improves joint surface congruence.",
+      "movements": [
+        "adaptation during knee flexion and extension"
+      ],
+      "relatedBones": [
+        "femur",
+        "tibia"
+      ],
+      "relatedMuscles": [],
+      "explanation": {
+        "overview": "Helps distribute tibiofemoral load and improves joint surface congruence.",
+        "detail": "A more C-shaped fibrocartilage wedge between medial femoral condyle and medial tibial plateau. Its capsule and deep MCL connections reduce its mobility compared with the lateral meniscus."
+      },
+      "sourceRefs": [
+        "medial",
+        "meniscus"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "lateral-meniscus",
+      "canonicalCoverageId": "lateral-meniscus",
+      "name": "Lateral meniscus",
+      "synonyms": [],
+      "region": "knee",
+      "laterality": "bilateral-template",
+      "tissueClass": "fibrocartilage",
+      "attachments": {
+        "proximal": "Anterior horn in anterior lateral tibial intercondylar area",
+        "distal": "Posterior horn in posterior lateral tibial intercondylar area",
+        "notes": null
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "medial-meniscus",
+          "type": "functional-counterparts",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "knee"
+          ]
+        },
+        {
+          "targetId": "posterior-cruciate-ligament",
+          "type": "adjacent-in-posterior-intercondylar-region",
+          "direction": "directed",
+          "sourceRefs": [
+            "lateral"
+          ]
+        }
+      ],
+      "functionIds": [
+        "knee-load-distribution"
+      ],
+      "primaryFunction": "Helps distribute tibiofemoral load and improves joint surface congruence.",
+      "movements": [
+        "adaptation during knee flexion and extension"
+      ],
+      "relatedBones": [
+        "femur",
+        "tibia"
+      ],
+      "relatedMuscles": [
+        "popliteus (adjacent tendon)"
+      ],
+      "explanation": {
+        "overview": "Helps distribute tibiofemoral load and improves joint surface congruence.",
+        "detail": "This more nearly circular fibrocartilage wedge lies on the lateral tibial plateau beneath the lateral femoral condyle. Popliteus-related posterolateral separation allows greater movement; it is not attached to the LCL."
+      },
+      "sourceRefs": [
+        "lateral",
+        "meniscus"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "supraspinatus-tendon",
+      "canonicalCoverageId": "supraspinatus-tendon",
+      "name": "Supraspinatus tendon",
+      "synonyms": [],
+      "region": "shoulder",
+      "laterality": "bilateral-template",
+      "tissueClass": "tendon",
+      "attachments": {
+        "proximal": "Supraspinatus muscle from supraspinous fossa",
+        "distal": "Superior facet of humeral greater tubercle",
+        "notes": null
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "infraspinatus-tendon",
+          "type": "adjacent-cuff-tendons",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "cuff"
+          ]
+        },
+        {
+          "targetId": "glenoid-labrum",
+          "type": "joint-stability-partners",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "cuff",
+            "shoulder"
+          ]
+        }
+      ],
+      "functionIds": [
+        "shoulder-dynamic-stability"
+      ],
+      "primaryFunction": "Helps initiate shoulder abduction and maintain humeral head position.",
+      "movements": [
+        "arm abduction"
+      ],
+      "relatedBones": [
+        "scapula",
+        "humerus"
+      ],
+      "relatedMuscles": [
+        "supraspinatus"
+      ],
+      "explanation": {
+        "overview": "Helps initiate shoulder abduction and maintain humeral head position.",
+        "detail": "The superior rotator-cuff tendon passes over the glenohumeral joint and blends with nearby cuff tissues."
+      },
+      "sourceRefs": [
+        "cuff"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "infraspinatus-tendon",
+      "canonicalCoverageId": "infraspinatus-tendon",
+      "name": "Infraspinatus tendon",
+      "synonyms": [],
+      "region": "shoulder",
+      "laterality": "bilateral-template",
+      "tissueClass": "tendon",
+      "attachments": {
+        "proximal": "Infraspinatus muscle from infraspinous fossa",
+        "distal": "Middle facet of humeral greater tubercle",
+        "notes": null
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "supraspinatus-tendon",
+          "type": "adjacent-cuff-tendons",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "cuff"
+          ]
+        },
+        {
+          "targetId": "subscapularis-tendon",
+          "type": "functional-cuff-partners",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "cuff"
+          ]
+        }
+      ],
+      "functionIds": [
+        "shoulder-dynamic-stability"
+      ],
+      "primaryFunction": "Transmits infraspinatus pull for external rotation and dynamic shoulder stability.",
+      "movements": [
+        "arm external rotation"
+      ],
+      "relatedBones": [
+        "scapula",
+        "humerus"
+      ],
+      "relatedMuscles": [
+        "infraspinatus"
+      ],
+      "explanation": {
+        "overview": "Transmits infraspinatus pull for external rotation and dynamic shoulder stability.",
+        "detail": "This posterior cuff tendon attaches below the supraspinatus insertion and blends with adjacent rotator-cuff fibers."
+      },
+      "sourceRefs": [
+        "cuff"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "subscapularis-tendon",
+      "canonicalCoverageId": "subscapularis-tendon",
+      "name": "Subscapularis tendon",
+      "synonyms": [],
+      "region": "shoulder",
+      "laterality": "bilateral-template",
+      "tissueClass": "tendon",
+      "attachments": {
+        "proximal": "Subscapularis muscle from anterior subscapular fossa",
+        "distal": "Humeral lesser tubercle",
+        "notes": null
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "infraspinatus-tendon",
+          "type": "functional-cuff-partners",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "cuff"
+          ]
+        }
+      ],
+      "functionIds": [
+        "shoulder-dynamic-stability"
+      ],
+      "primaryFunction": "Transmits subscapularis pull for internal rotation and anterior dynamic stability.",
+      "movements": [
+        "arm internal rotation"
+      ],
+      "relatedBones": [
+        "scapula",
+        "humerus"
+      ],
+      "relatedMuscles": [
+        "subscapularis"
+      ],
+      "explanation": {
+        "overview": "Transmits subscapularis pull for internal rotation and anterior dynamic stability.",
+        "detail": "The anterior cuff inserts on the lesser, not the greater, humeral tubercle."
+      },
+      "sourceRefs": [
+        "cuff"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "glenoid-labrum",
+      "canonicalCoverageId": "glenoid-labrum",
+      "name": "Glenoid labrum",
+      "synonyms": [],
+      "region": "shoulder",
+      "laterality": "bilateral-template",
+      "tissueClass": "fibrocartilage",
+      "attachments": {
+        "proximal": "Peripheral rim of scapular glenoid cavity",
+        "distal": "Circumferential fibrocartilaginous rim; no distal bony insertion",
+        "notes": "Rim-like attachment rather than origin/insertion pair."
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "supraspinatus-tendon",
+          "type": "joint-stability-partners",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "cuff",
+            "shoulder"
+          ]
+        }
+      ],
+      "functionIds": [
+        "shoulder-socket-stability"
+      ],
+      "primaryFunction": "Deepens the glenoid socket and contributes to glenohumeral stability.",
+      "movements": [
+        "glenohumeral motion support"
+      ],
+      "relatedBones": [
+        "scapula",
+        "humerus"
+      ],
+      "relatedMuscles": [
+        "long head of biceps (associated tendon)"
+      ],
+      "explanation": {
+        "overview": "Deepens the glenoid socket and contributes to glenohumeral stability.",
+        "detail": "The labrum encircles the glenoid and provides an attachment region for capsuloligamentous structures and the long head of biceps."
+      },
+      "sourceRefs": [
+        "shoulder"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "iliofemoral-ligament",
+      "canonicalCoverageId": "iliofemoral-ligament",
+      "name": "Iliofemoral ligament",
+      "synonyms": [
+        "Y ligament of Bigelow"
+      ],
+      "region": "hip",
+      "laterality": "bilateral-template",
+      "tissueClass": "ligament",
+      "attachments": {
+        "proximal": "Anterior inferior iliac spine region",
+        "distal": "Anterior femoral intertrochanteric line",
+        "notes": null
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "ischiofemoral-ligament",
+          "type": "capsular-stability-partners",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "hip"
+          ]
+        },
+        {
+          "targetId": "acetabular-labrum",
+          "type": "joint-stability-partners",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "hip",
+            "hipjoint"
+          ]
+        }
+      ],
+      "functionIds": [
+        "hip-capsular-stability"
+      ],
+      "primaryFunction": "Reinforces the anterior hip capsule and limits excess extension.",
+      "movements": [
+        "hip extension restraint",
+        "external rotation restraint"
+      ],
+      "relatedBones": [
+        "ilium",
+        "femur"
+      ],
+      "relatedMuscles": [],
+      "explanation": {
+        "overview": "Reinforces the anterior hip capsule and limits excess extension.",
+        "detail": "The Y-shaped iliofemoral ligament connects anterior pelvis to proximal femur and contributes to upright hip restraint."
+      },
+      "sourceRefs": [
+        "hip"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "ischiofemoral-ligament",
+      "canonicalCoverageId": "ischiofemoral-ligament",
+      "name": "Ischiofemoral ligament",
+      "synonyms": [],
+      "region": "hip",
+      "laterality": "bilateral-template",
+      "tissueClass": "ligament",
+      "attachments": {
+        "proximal": "Posterior acetabular rim / ischial part of capsule",
+        "distal": "Femoral neck capsule with fibers winding anteriorly toward proximal femur",
+        "notes": null
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "iliofemoral-ligament",
+          "type": "capsular-stability-partners",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "hip"
+          ]
+        }
+      ],
+      "functionIds": [
+        "hip-capsular-stability"
+      ],
+      "primaryFunction": "Supports the posterior hip capsule and resists some internal rotation.",
+      "movements": [
+        "internal rotation restraint"
+      ],
+      "relatedBones": [
+        "ischium",
+        "femur"
+      ],
+      "relatedMuscles": [],
+      "explanation": {
+        "overview": "Supports the posterior hip capsule and resists some internal rotation.",
+        "detail": "Fibers spiral from the posterior acetabular margin around the femoral neck; precise distal fiber attachments vary by description."
+      },
+      "sourceRefs": [
+        "hip"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Fine distal band separation and source-to-mesh attachment landmarks require anatomical review."
+      ]
+    },
+    {
+      "id": "acetabular-labrum",
+      "canonicalCoverageId": "acetabular-labrum",
+      "name": "Acetabular labrum",
+      "synonyms": [],
+      "region": "hip",
+      "laterality": "bilateral-template",
+      "tissueClass": "fibrocartilage",
+      "attachments": {
+        "proximal": "Acetabular bony rim",
+        "distal": "Circumferential fibrocartilaginous ring; no distal bony insertion",
+        "notes": "Rim-like anatomy; origin/insertion convention not applicable."
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "iliofemoral-ligament",
+          "type": "joint-stability-partners",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "hip",
+            "hipjoint"
+          ]
+        }
+      ],
+      "functionIds": [
+        "hip-socket-stability"
+      ],
+      "primaryFunction": "Deepens the acetabular socket and helps maintain joint fluid sealing and stability.",
+      "movements": [
+        "hip joint congruence during movement"
+      ],
+      "relatedBones": [
+        "hip bone",
+        "femur"
+      ],
+      "relatedMuscles": [],
+      "explanation": {
+        "overview": "Deepens the acetabular socket and helps maintain joint fluid sealing and stability.",
+        "detail": "The labrum attaches around the hip socket rim and interacts with the femoral head during movement; it is not a tendon spanning two bones."
+      },
+      "sourceRefs": [
+        "hipjoint"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "achilles-tendon",
+      "canonicalCoverageId": "achilles-tendon",
+      "name": "Calcaneal tendon",
+      "synonyms": [
+        "Achilles tendon",
+        "Tendo calcaneus"
+      ],
+      "region": "ankle",
+      "laterality": "bilateral-template",
+      "tissueClass": "tendon",
+      "attachments": {
+        "proximal": "Conjoined distal tendons of gastrocnemius and soleus",
+        "distal": "Posterior calcaneal tuberosity",
+        "notes": null
+      },
+      "anatomicalRelationships": [],
+      "functionIds": [
+        "ankle-plantarflexion"
+      ],
+      "primaryFunction": "Transmits calf muscle force to the heel during plantarflexion.",
+      "movements": [
+        "ankle plantarflexion"
+      ],
+      "relatedBones": [
+        "calcaneus"
+      ],
+      "relatedMuscles": [
+        "gastrocnemius",
+        "soleus"
+      ],
+      "explanation": {
+        "overview": "Transmits calf muscle force to the heel during plantarflexion.",
+        "detail": "The Achilles or calcaneal tendon joins the gastrocnemius and soleus to the posterior heel."
+      },
+      "sourceRefs": [
+        "achilles"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "anterior-talofibular-ligament",
+      "canonicalCoverageId": "anterior-talofibular-ligament",
+      "name": "Anterior talofibular ligament",
+      "synonyms": [
+        "ATFL"
+      ],
+      "region": "ankle",
+      "laterality": "bilateral-template",
+      "tissueClass": "ligament",
+      "attachments": {
+        "proximal": "Anterior margin of lateral malleolus (fibula)",
+        "distal": "Lateral anterior talus",
+        "notes": null
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "calcaneofibular-ligament",
+          "type": "lateral-ankle-complex-partners",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "lateralankle"
+          ]
+        }
+      ],
+      "functionIds": [
+        "ankle-lateral-stability"
+      ],
+      "primaryFunction": "Resists anterior talar translation and inversion especially in plantarflexion.",
+      "movements": [
+        "inversion restraint",
+        "anterior talar translation restraint"
+      ],
+      "relatedBones": [
+        "fibula",
+        "talus"
+      ],
+      "relatedMuscles": [],
+      "explanation": {
+        "overview": "Resists anterior talar translation and inversion especially in plantarflexion.",
+        "detail": "The ATFL is one component of the lateral ankle ligament complex; the posterior talofibular ligament is another component not separately inventoried in this 26-structure scope."
+      },
+      "sourceRefs": [
+        "lateralankle"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "calcaneofibular-ligament",
+      "canonicalCoverageId": "calcaneofibular-ligament",
+      "name": "Calcaneofibular ligament",
+      "synonyms": [
+        "CFL"
+      ],
+      "region": "ankle",
+      "laterality": "bilateral-template",
+      "tissueClass": "ligament",
+      "attachments": {
+        "proximal": "Distal fibula near lateral malleolus",
+        "distal": "Lateral calcaneus",
+        "notes": null
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "anterior-talofibular-ligament",
+          "type": "lateral-ankle-complex-partners",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "lateralankle"
+          ]
+        },
+        {
+          "targetId": "deltoid-ligament",
+          "type": "opposite-ankle-stabilizers",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "ankle"
+          ]
+        }
+      ],
+      "functionIds": [
+        "ankle-lateral-stability"
+      ],
+      "primaryFunction": "Resists inversion, including at the subtalar joint.",
+      "movements": [
+        "inversion restraint",
+        "subtalar inversion restraint"
+      ],
+      "relatedBones": [
+        "fibula",
+        "calcaneus"
+      ],
+      "relatedMuscles": [],
+      "explanation": {
+        "overview": "Resists inversion, including at the subtalar joint.",
+        "detail": "The CFL crosses from fibula to calcaneus and participates with the talofibular ligaments in the lateral ankle ligament complex."
+      },
+      "sourceRefs": [
+        "lateralankle"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "deltoid-ligament",
+      "canonicalCoverageId": "deltoid-ligament",
+      "name": "Deltoid ligament complex",
+      "synonyms": [
+        "Medial collateral ligament of ankle"
+      ],
+      "region": "ankle",
+      "laterality": "bilateral-template",
+      "tissueClass": "ligament-complex",
+      "attachments": {
+        "proximal": "Medial malleolus of tibia",
+        "distal": "Medial talus, calcaneus and navicular via component bands",
+        "notes": null
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "calcaneofibular-ligament",
+          "type": "opposite-ankle-stabilizers",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "ankle"
+          ]
+        }
+      ],
+      "functionIds": [
+        "ankle-medial-stability"
+      ],
+      "primaryFunction": "Resists excessive eversion and supports the medial ankle.",
+      "movements": [
+        "eversion restraint"
+      ],
+      "relatedBones": [
+        "tibia",
+        "talus",
+        "calcaneus",
+        "navicular"
+      ],
+      "relatedMuscles": [],
+      "explanation": {
+        "overview": "Resists excessive eversion and supports the medial ankle.",
+        "detail": "Multiple deep and superficial bands link the medial malleolus to hindfoot and midfoot sites. The complex is not one narrow cord."
+      },
+      "sourceRefs": [
+        "ankle"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "flexor-retinaculum",
+      "canonicalCoverageId": "flexor-retinaculum",
+      "name": "Flexor retinaculum",
+      "synonyms": [
+        "Transverse carpal ligament"
+      ],
+      "region": "wrist",
+      "laterality": "bilateral-template",
+      "tissueClass": "retinaculum",
+      "attachments": {
+        "proximal": "Scaphoid tubercle and trapezium ridge (radial attachment)",
+        "distal": "Pisiform and hook of hamate (ulnar attachment)",
+        "notes": "Two-sided transverse attachment, not a proximal/distal tendon."
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "scapholunate-ligament",
+          "type": "distinct-wrist-support-structures",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "retinaculum",
+            "wrist"
+          ]
+        }
+      ],
+      "functionIds": [
+        "wrist-carpal-tunnel"
+      ],
+      "primaryFunction": "Forms the palmar roof of the carpal tunnel.",
+      "movements": [
+        "flexor tendon retention during wrist/finger movement"
+      ],
+      "relatedBones": [
+        "scaphoid",
+        "trapezium",
+        "pisiform",
+        "hamate"
+      ],
+      "relatedMuscles": [
+        "long finger/thumb flexor tendons (pass deep)"
+      ],
+      "explanation": {
+        "overview": "Forms the palmar roof of the carpal tunnel.",
+        "detail": "A transverse fibrous band anchors across the carpal arch and retains flexor tendons while the median nerve passes underneath."
+      },
+      "sourceRefs": [
+        "retinaculum"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "scapholunate-ligament",
+      "canonicalCoverageId": "scapholunate-ligament",
+      "name": "Scapholunate interosseous ligament",
+      "synonyms": [
+        "SLIL",
+        "Scapholunate ligament"
+      ],
+      "region": "wrist",
+      "laterality": "bilateral-template",
+      "tissueClass": "ligament",
+      "attachments": {
+        "proximal": "Scaphoid",
+        "distal": "Lunate",
+        "notes": null
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "flexor-retinaculum",
+          "type": "distinct-wrist-support-structures",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "retinaculum",
+            "wrist"
+          ]
+        },
+        {
+          "targetId": "triangular-fibrocartilage",
+          "type": "distinct-wrist-stabilizers",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "wrist"
+          ]
+        }
+      ],
+      "functionIds": [
+        "wrist-intercarpal-stability"
+      ],
+      "primaryFunction": "Couples scaphoid and lunate movement and contributes to wrist stability.",
+      "movements": [
+        "intercarpal motion control"
+      ],
+      "relatedBones": [
+        "scaphoid",
+        "lunate"
+      ],
+      "relatedMuscles": [],
+      "explanation": {
+        "overview": "Couples scaphoid and lunate movement and contributes to wrist stability.",
+        "detail": "The dorsal component is especially important biomechanically; this ligament is different from the TFCC at the ulnar side of the wrist."
+      },
+      "sourceRefs": [
+        "wrist",
+        "tfcc"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "triangular-fibrocartilage",
+      "canonicalCoverageId": "triangular-fibrocartilage",
+      "name": "Triangular fibrocartilage complex",
+      "synonyms": [
+        "TFCC"
+      ],
+      "region": "wrist",
+      "laterality": "bilateral-template",
+      "tissueClass": "fibrocartilage-complex",
+      "attachments": {
+        "proximal": "Distal radius sigmoid-notch side and associated radioulnar ligaments",
+        "distal": "Ulnar fovea/styloid and neighboring ulnocarpal ligaments",
+        "notes": null
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "scapholunate-ligament",
+          "type": "distinct-wrist-stabilizers",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "wrist"
+          ]
+        }
+      ],
+      "functionIds": [
+        "wrist-ulnar-load-stability"
+      ],
+      "primaryFunction": "Supports distal radioulnar stability and transmits load at the ulnar wrist.",
+      "movements": [
+        "forearm pronation and supination stability",
+        "ulnocarpal loading"
+      ],
+      "relatedBones": [
+        "radius",
+        "ulna",
+        "triquetrum",
+        "lunate"
+      ],
+      "relatedMuscles": [
+        "extensor carpi ulnaris (adjacent sheath)"
+      ],
+      "explanation": {
+        "overview": "Supports distal radioulnar stability and transmits load at the ulnar wrist.",
+        "detail": "The TFCC is a complex with a central articular disc and multiple supporting ligaments, not an isolated triangular piece."
+      },
+      "sourceRefs": [
+        "wrist",
+        "tfcc"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "anterior-longitudinal-ligament",
+      "canonicalCoverageId": "anterior-longitudinal-ligament",
+      "name": "Anterior longitudinal ligament",
+      "synonyms": [
+        "ALL"
+      ],
+      "region": "spine",
+      "laterality": "axial-segmental",
+      "tissueClass": "ligament",
+      "attachments": {
+        "proximal": "Longitudinal anterior vertebral body surface, upper cervical region",
+        "distal": "Anterior vertebral bodies and discs through sacral levels",
+        "notes": null
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "posterior-longitudinal-ligament",
+          "type": "longitudinal-spine-stabilizers",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "spine"
+          ]
+        }
+      ],
+      "functionIds": [
+        "spine-longitudinal-stability"
+      ],
+      "primaryFunction": "Limits excessive spinal extension.",
+      "movements": [
+        "spinal extension restraint"
+      ],
+      "relatedBones": [
+        "vertebral bodies",
+        "intervertebral discs"
+      ],
+      "relatedMuscles": [],
+      "explanation": {
+        "overview": "Limits excessive spinal extension.",
+        "detail": "A broad band spans anterior vertebral bodies and intervertebral discs through the spine. Specific upper attachments vary with spinal level."
+      },
+      "sourceRefs": [
+        "spine"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "posterior-longitudinal-ligament",
+      "canonicalCoverageId": "posterior-longitudinal-ligament",
+      "name": "Posterior longitudinal ligament",
+      "synonyms": [
+        "PLL"
+      ],
+      "region": "spine",
+      "laterality": "axial-segmental",
+      "tissueClass": "ligament",
+      "attachments": {
+        "proximal": "Posterior vertebral bodies within canal, from upper cervical region",
+        "distal": "Posterior vertebral bodies and discs extending toward sacrum",
+        "notes": null
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "anterior-longitudinal-ligament",
+          "type": "longitudinal-spine-stabilizers",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "spine"
+          ]
+        },
+        {
+          "targetId": "ligamentum-flavum",
+          "type": "spinal-canal-boundary-partners",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "spine"
+          ]
+        }
+      ],
+      "functionIds": [
+        "spine-longitudinal-stability"
+      ],
+      "primaryFunction": "Provides posterior longitudinal support along vertebral bodies and discs.",
+      "movements": [
+        "spinal flexion restraint (contributory)"
+      ],
+      "relatedBones": [
+        "vertebral bodies",
+        "intervertebral discs"
+      ],
+      "relatedMuscles": [],
+      "explanation": {
+        "overview": "Provides posterior longitudinal support along vertebral bodies and discs.",
+        "detail": "The PLL lies inside the vertebral canal behind vertebral bodies; superiorly it continues as the tectorial membrane."
+      },
+      "sourceRefs": [
+        "spine",
+        "disc"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "ligamentum-flavum",
+      "canonicalCoverageId": "ligamentum-flavum",
+      "name": "Ligamentum flavum",
+      "synonyms": [
+        "Ligamenta flava"
+      ],
+      "region": "spine",
+      "laterality": "axial-segmental",
+      "tissueClass": "elastic-ligament",
+      "attachments": {
+        "proximal": "Lamina of an adjacent superior vertebra",
+        "distal": "Lamina of neighboring inferior vertebra",
+        "notes": "Segmental repeated paired bands, not one continuous central ligament."
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "posterior-longitudinal-ligament",
+          "type": "spinal-canal-boundary-partners",
+          "direction": "symmetric",
+          "sourceRefs": [
+            "spine"
+          ]
+        }
+      ],
+      "functionIds": [
+        "spine-posterior-stability"
+      ],
+      "primaryFunction": "Resists separation of vertebral laminae during spinal flexion.",
+      "movements": [
+        "spinal flexion restraint"
+      ],
+      "relatedBones": [
+        "vertebral laminae"
+      ],
+      "relatedMuscles": [],
+      "explanation": {
+        "overview": "Resists separation of vertebral laminae during spinal flexion.",
+        "detail": "Paired yellow elastic ligaments connect adjacent laminae and form part of the posterior boundary of the spinal canal."
+      },
+      "sourceRefs": [
+        "spine"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    },
+    {
+      "id": "intervertebral-disc",
+      "canonicalCoverageId": "intervertebral-disc",
+      "name": "Intervertebral disc",
+      "synonyms": [
+        "IVD"
+      ],
+      "region": "spine",
+      "laterality": "axial-segmental",
+      "tissueClass": "fibrocartilage-complex",
+      "attachments": {
+        "proximal": "Inferior endplate of upper vertebral body",
+        "distal": "Superior endplate of adjoining vertebral body",
+        "notes": "Between adjacent vertebral endplates; no disc at atlas-axis (C1–C2)."
+      },
+      "anatomicalRelationships": [
+        {
+          "targetId": "anterior-longitudinal-ligament",
+          "type": "supported-by",
+          "direction": "directed",
+          "sourceRefs": [
+            "disc"
+          ]
+        },
+        {
+          "targetId": "posterior-longitudinal-ligament",
+          "type": "supported-by",
+          "direction": "directed",
+          "sourceRefs": [
+            "disc"
+          ]
+        }
+      ],
+      "functionIds": [
+        "spine-load-distribution"
+      ],
+      "primaryFunction": "Distributes compressive load and permits controlled segmental motion.",
+      "movements": [
+        "spinal flexion",
+        "spinal extension",
+        "lateral bending",
+        "rotation"
+      ],
+      "relatedBones": [
+        "vertebral bodies",
+        "vertebral endplates"
+      ],
+      "relatedMuscles": [],
+      "explanation": {
+        "overview": "Distributes compressive load and permits controlled segmental motion.",
+        "detail": "An annulus fibrosus surrounds a nucleus pulposus between neighboring vertebral bodies. There is no intervertebral disc at C1–C2."
+      },
+      "sourceRefs": [
+        "disc"
+      ],
+      "knowledgeEvidence": {
+        "status": "reference-supported",
+        "confidence": "textbook-secondary",
+        "anatomistReviewed": false,
+        "citationCheck": "source-and-section-listed"
+      },
+      "geometry": {
+        "status": "unverified",
+        "meshId": null,
+        "sourceMeshId": null,
+        "license": null,
+        "provenanceHash": null,
+        "coordinateFrameValidated": false,
+        "geometryVerified": false,
+        "attachmentCoordinatesValidated": false,
+        "kinematicsValidated": false,
+        "anatomistReviewed": false
+      },
+      "validationStatus": "automated-check-required; anatomy-review-pending",
+      "unresolved": [
+        "Anatomist review and patient-independent mesh attachment coordinates pending."
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "from": "quadriceps-tendon",
+      "to": "patellar-ligament",
+      "type": "extensor-chain-partners",
+      "direction": "symmetric",
+      "sourceRefs": [
+        "knee"
+      ]
+    },
+    {
+      "from": "anterior-cruciate-ligament",
+      "to": "posterior-cruciate-ligament",
+      "type": "functional-counterparts",
+      "direction": "symmetric",
+      "sourceRefs": [
+        "knee"
+      ]
+    },
+    {
+      "from": "medial-collateral-ligament",
+      "to": "lateral-collateral-ligament",
+      "type": "functional-counterparts",
+      "direction": "symmetric",
+      "sourceRefs": [
+        "knee"
+      ]
+    },
+    {
+      "from": "medial-meniscus",
+      "to": "lateral-meniscus",
+      "type": "functional-counterparts",
+      "direction": "symmetric",
+      "sourceRefs": [
+        "knee"
+      ]
+    },
+    {
+      "from": "medial-collateral-ligament",
+      "to": "medial-meniscus",
+      "type": "deep-fibers-attach-to",
+      "direction": "directed",
+      "sourceRefs": [
+        "meniscus",
+        "medial"
+      ]
+    },
+    {
+      "from": "lateral-meniscus",
+      "to": "posterior-cruciate-ligament",
+      "type": "adjacent-in-posterior-intercondylar-region",
+      "direction": "directed",
+      "sourceRefs": [
+        "lateral"
+      ]
+    },
+    {
+      "from": "anterior-cruciate-ligament",
+      "to": "medial-meniscus",
+      "type": "adjacent-to-anterior-tibial-meniscal-attachment",
+      "direction": "directed",
+      "sourceRefs": [
+        "knee"
+      ]
+    },
+    {
+      "from": "supraspinatus-tendon",
+      "to": "infraspinatus-tendon",
+      "type": "adjacent-cuff-tendons",
+      "direction": "symmetric",
+      "sourceRefs": [
+        "cuff"
+      ]
+    },
+    {
+      "from": "infraspinatus-tendon",
+      "to": "subscapularis-tendon",
+      "type": "functional-cuff-partners",
+      "direction": "symmetric",
+      "sourceRefs": [
+        "cuff"
+      ]
+    },
+    {
+      "from": "glenoid-labrum",
+      "to": "supraspinatus-tendon",
+      "type": "joint-stability-partners",
+      "direction": "symmetric",
+      "sourceRefs": [
+        "cuff",
+        "shoulder"
+      ]
+    },
+    {
+      "from": "iliofemoral-ligament",
+      "to": "ischiofemoral-ligament",
+      "type": "capsular-stability-partners",
+      "direction": "symmetric",
+      "sourceRefs": [
+        "hip"
+      ]
+    },
+    {
+      "from": "iliofemoral-ligament",
+      "to": "acetabular-labrum",
+      "type": "joint-stability-partners",
+      "direction": "symmetric",
+      "sourceRefs": [
+        "hip",
+        "hipjoint"
+      ]
+    },
+    {
+      "from": "anterior-talofibular-ligament",
+      "to": "calcaneofibular-ligament",
+      "type": "lateral-ankle-complex-partners",
+      "direction": "symmetric",
+      "sourceRefs": [
+        "lateralankle"
+      ]
+    },
+    {
+      "from": "calcaneofibular-ligament",
+      "to": "deltoid-ligament",
+      "type": "opposite-ankle-stabilizers",
+      "direction": "symmetric",
+      "sourceRefs": [
+        "ankle"
+      ]
+    },
+    {
+      "from": "flexor-retinaculum",
+      "to": "scapholunate-ligament",
+      "type": "distinct-wrist-support-structures",
+      "direction": "symmetric",
+      "sourceRefs": [
+        "retinaculum",
+        "wrist"
+      ]
+    },
+    {
+      "from": "scapholunate-ligament",
+      "to": "triangular-fibrocartilage",
+      "type": "distinct-wrist-stabilizers",
+      "direction": "symmetric",
+      "sourceRefs": [
+        "wrist"
+      ]
+    },
+    {
+      "from": "anterior-longitudinal-ligament",
+      "to": "posterior-longitudinal-ligament",
+      "type": "longitudinal-spine-stabilizers",
+      "direction": "symmetric",
+      "sourceRefs": [
+        "spine"
+      ]
+    },
+    {
+      "from": "ligamentum-flavum",
+      "to": "posterior-longitudinal-ligament",
+      "type": "spinal-canal-boundary-partners",
+      "direction": "symmetric",
+      "sourceRefs": [
+        "spine"
+      ]
+    },
+    {
+      "from": "intervertebral-disc",
+      "to": "anterior-longitudinal-ligament",
+      "type": "supported-by",
+      "direction": "directed",
+      "sourceRefs": [
+        "disc"
+      ]
+    },
+    {
+      "from": "intervertebral-disc",
+      "to": "posterior-longitudinal-ligament",
+      "type": "supported-by",
+      "direction": "directed",
+      "sourceRefs": [
+        "disc"
+      ]
+    }
+  ],
+  "explorations": [
+    {
+      "id": "stability",
+      "region": "knee",
+      "title": "Stability",
+      "structureIds": [
+        "anterior-cruciate-ligament",
+        "posterior-cruciate-ligament",
+        "medial-collateral-ligament",
+        "lateral-collateral-ligament"
+      ],
+      "overview": "The cruciate ligaments mainly restrain forward/backward tibial translation; the collateral ligaments resist excessive inward/outward joint opening.",
+      "detail": "ACL: anterior tibial translation; PCL: posterior tibial translation; MCL: valgus stress; LCL: varus stress. These restraints work alongside other capsule and muscle structures.",
+      "sourceRefs": [
+        "knee"
+      ]
+    },
+    {
+      "id": "movement",
+      "region": "knee",
+      "title": "Movement",
+      "structureIds": [
+        "quadriceps-tendon",
+        "patellar-ligament"
+      ],
+      "overview": "The quadriceps pull on the patella through their common tendon; the patellar ligament transfers that force to the tibial tuberosity to extend the knee.",
+      "detail": "Together with the patella, these two tissues create the extensor mechanism. A simplified hinge animation cannot validate tendon excursion or patellar tracking.",
+      "sourceRefs": [
+        "knee"
+      ]
+    },
+    {
+      "id": "load-distribution",
+      "region": "knee",
+      "title": "Load distribution",
+      "structureIds": [
+        "medial-meniscus",
+        "lateral-meniscus"
+      ],
+      "overview": "The two fibrocartilage menisci improve contact congruence and distribute load between the femur and tibia.",
+      "detail": "The medial meniscus is more C-shaped and connected to the deep MCL; the lateral meniscus is more circular and comparatively mobile, without direct LCL attachment. Shock attenuation is a qualitative role, not a simulation of force reduction.",
+      "sourceRefs": [
+        "medial",
+        "lateral",
+        "meniscus"
+      ]
+    }
+  ],
+  "policy": {
+    "purpose": "Education only; not diagnosis or patient-specific anatomy",
+    "evidenceSeparateFromGeometry": true,
+    "textEvidenceDoesNotValidateMesh": true,
+    "geometryValidationRequires": [
+      "verified mesh identity",
+      "provenance hash",
+      "license",
+      "shared coordinate-frame proof",
+      "attachment landmark review"
+    ],
+    "anatomistReviewed": false
+  }
+}

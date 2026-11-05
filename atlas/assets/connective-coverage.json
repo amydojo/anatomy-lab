@@ -1,0 +1,535 @@
+{
+  "schema": "body-live/connective-coverage-v1",
+  "release_status": "knee-illustrative-preview-other-regions-inventory-only",
+  "geometry_source": "Knee: authored procedural conceptual surfaces registered to the coordinate frame of licensed V13 source bones at runtime. NOT sourced or verified anatomical surface meshes; other regions: no target meshes.",
+  "scientific_scope": "Educational topological relationships only; endpoints are anatomical descriptions, not validated 3D attachment coordinates.",
+  "source_policy": {
+    "license_review_required": true,
+    "source_mesh_id_required": true,
+    "provenance_hash_required": true,
+    "shared_coordinate_frame_required": true,
+    "anatomist_review_required_for_clinical_claims": true
+  },
+  "regions": {
+    "knee": {
+      "status": "illustrative-preview-source-registration-required",
+      "structures": [
+        {
+          "id": "quadriceps-tendon",
+          "name": "Quadriceps tendon",
+          "relationships": [
+            "quadriceps muscle group",
+            "superior patella"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": true,
+          "illustrative_geometry_id": "quadriceps-tendon",
+          "illustrative_morphology_validated": false,
+          "registration_method": "Bone-bounding-box heuristics, runtime canonical V13 coordinate frame; anatomical landmark endpoints UNVALIDATED",
+          "transform_matrix": null
+        },
+        {
+          "id": "patellar-ligament",
+          "name": "Patellar ligament (patellar tendon)",
+          "relationships": [
+            "patellar apex",
+            "tibial tuberosity"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": true,
+          "illustrative_geometry_id": "patellar-ligament",
+          "illustrative_morphology_validated": false,
+          "registration_method": "Bone-bounding-box heuristics, runtime canonical V13 coordinate frame; anatomical landmark endpoints UNVALIDATED",
+          "transform_matrix": null
+        },
+        {
+          "id": "medial-collateral-ligament",
+          "name": "Medial collateral ligament",
+          "relationships": [
+            "medial femoral epicondyle",
+            "medial tibia"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": true,
+          "illustrative_geometry_id": "medial-collateral-ligament",
+          "illustrative_morphology_validated": false,
+          "registration_method": "Bone-bounding-box heuristics, runtime canonical V13 coordinate frame; anatomical landmark endpoints UNVALIDATED",
+          "transform_matrix": null
+        },
+        {
+          "id": "lateral-collateral-ligament",
+          "name": "Lateral collateral ligament",
+          "relationships": [
+            "lateral femoral epicondyle",
+            "fibular head"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": true,
+          "illustrative_geometry_id": "lateral-collateral-ligament",
+          "illustrative_morphology_validated": false,
+          "registration_method": "Bone-bounding-box heuristics, runtime canonical V13 coordinate frame; anatomical landmark endpoints UNVALIDATED",
+          "transform_matrix": null
+        },
+        {
+          "id": "anterior-cruciate-ligament",
+          "name": "Anterior cruciate ligament",
+          "relationships": [
+            "anterior tibial intercondylar area",
+            "posteromedial lateral femoral condyle"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": true,
+          "illustrative_geometry_id": "anterior-cruciate-ligament",
+          "illustrative_morphology_validated": false,
+          "registration_method": "Bone-bounding-box heuristics, runtime canonical V13 coordinate frame; anatomical landmark endpoints UNVALIDATED",
+          "transform_matrix": null
+        },
+        {
+          "id": "posterior-cruciate-ligament",
+          "name": "Posterior cruciate ligament",
+          "relationships": [
+            "posterior tibial intercondylar area",
+            "anterolateral medial femoral condyle"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": true,
+          "illustrative_geometry_id": "posterior-cruciate-ligament",
+          "illustrative_morphology_validated": false,
+          "registration_method": "Bone-bounding-box heuristics, runtime canonical V13 coordinate frame; anatomical landmark endpoints UNVALIDATED",
+          "transform_matrix": null
+        },
+        {
+          "id": "medial-meniscus",
+          "name": "Medial meniscus",
+          "relationships": [
+            "medial tibial plateau",
+            "medial femoral condyle"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": true,
+          "illustrative_geometry_id": "medial-meniscus",
+          "illustrative_morphology_validated": false,
+          "registration_method": "Bone-bounding-box heuristics, runtime canonical V13 coordinate frame; anatomical landmark endpoints UNVALIDATED",
+          "transform_matrix": null
+        },
+        {
+          "id": "lateral-meniscus",
+          "name": "Lateral meniscus",
+          "relationships": [
+            "lateral tibial plateau",
+            "lateral femoral condyle"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": true,
+          "illustrative_geometry_id": "lateral-meniscus",
+          "illustrative_morphology_validated": false,
+          "registration_method": "Bone-bounding-box heuristics, runtime canonical V13 coordinate frame; anatomical landmark endpoints UNVALIDATED",
+          "transform_matrix": null
+        }
+      ]
+    },
+    "shoulder": {
+      "status": "pending-source-mesh-and-registration",
+      "structures": [
+        {
+          "id": "supraspinatus-tendon",
+          "name": "Supraspinatus tendon",
+          "relationships": [
+            "supraspinatus muscle",
+            "greater tubercle"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
+        },
+        {
+          "id": "infraspinatus-tendon",
+          "name": "Infraspinatus tendon",
+          "relationships": [
+            "infraspinatus muscle",
+            "greater tubercle"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
+        },
+        {
+          "id": "subscapularis-tendon",
+          "name": "Subscapularis tendon",
+          "relationships": [
+            "subscapularis muscle",
+            "lesser tubercle"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
+        },
+        {
+          "id": "glenoid-labrum",
+          "name": "Glenoid labrum",
+          "relationships": [
+            "glenoid rim",
+            "glenohumeral capsule"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
+        }
+      ]
+    },
+    "hip": {
+      "status": "pending-source-mesh-and-registration",
+      "structures": [
+        {
+          "id": "iliofemoral-ligament",
+          "name": "Iliofemoral ligament",
+          "relationships": [
+            "anterior inferior iliac spine region",
+            "intertrochanteric line"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
+        },
+        {
+          "id": "ischiofemoral-ligament",
+          "name": "Ischiofemoral ligament",
+          "relationships": [
+            "ischial acetabular rim",
+            "femoral neck capsule"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
+        },
+        {
+          "id": "acetabular-labrum",
+          "name": "Acetabular labrum",
+          "relationships": [
+            "acetabular rim",
+            "femoral head articulation"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
+        }
+      ]
+    },
+    "ankle": {
+      "status": "pending-source-mesh-and-registration",
+      "structures": [
+        {
+          "id": "achilles-tendon",
+          "name": "Calcaneal tendon",
+          "relationships": [
+            "gastrocnemius-soleus complex",
+            "posterior calcaneus"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
+        },
+        {
+          "id": "anterior-talofibular-ligament",
+          "name": "Anterior talofibular ligament",
+          "relationships": [
+            "lateral malleolus",
+            "talus"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
+        },
+        {
+          "id": "calcaneofibular-ligament",
+          "name": "Calcaneofibular ligament",
+          "relationships": [
+            "lateral malleolus",
+            "calcaneus"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
+        },
+        {
+          "id": "deltoid-ligament",
+          "name": "Deltoid ligament complex",
+          "relationships": [
+            "medial malleolus",
+            "talus/navicular/calcaneus"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
+        }
+      ]
+    },
+    "wrist": {
+      "status": "pending-source-mesh-and-registration",
+      "structures": [
+        {
+          "id": "flexor-retinaculum",
+          "name": "Flexor retinaculum",
+          "relationships": [
+            "carpal arch",
+            "carpal tunnel"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
+        },
+        {
+          "id": "scapholunate-ligament",
+          "name": "Scapholunate ligament",
+          "relationships": [
+            "scaphoid",
+            "lunate"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
+        },
+        {
+          "id": "triangular-fibrocartilage",
+          "name": "Triangular fibrocartilage complex",
+          "relationships": [
+            "distal ulna",
+            "ulnar carpus"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
+        }
+      ]
+    },
+    "spine": {
+      "status": "pending-source-mesh-and-registration",
+      "structures": [
+        {
+          "id": "anterior-longitudinal-ligament",
+          "name": "Anterior longitudinal ligament",
+          "relationships": [
+            "anterior vertebral bodies",
+            "intervertebral discs"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
+        },
+        {
+          "id": "posterior-longitudinal-ligament",
+          "name": "Posterior longitudinal ligament",
+          "relationships": [
+            "posterior vertebral bodies",
+            "intervertebral discs"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
+        },
+        {
+          "id": "ligamentum-flavum",
+          "name": "Ligamentum flavum",
+          "relationships": [
+            "adjacent vertebral laminae"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
+        },
+        {
+          "id": "intervertebral-disc",
+          "name": "Intervertebral disc",
+          "relationships": [
+            "adjacent vertebral endplates"
+          ],
+          "mesh_id": null,
+          "source_uri": null,
+          "license": null,
+          "sha256": null,
+          "registration_error_mm": null,
+          "geometry_verified": false,
+          "attachment_coordinates_validated": false,
+          "kinematics_validated": false,
+          "illustrative": false,
+          "illustrative_geometry_id": null
+        }
+      ]
+    }
+  }
+}
