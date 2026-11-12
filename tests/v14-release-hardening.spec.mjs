@@ -51,9 +51,10 @@ test('V14 hardening: focus, isolate, ghost, compare, hide/show, reset and V13 ex
  const initialZoom=await page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.zoom);
  await page.locator('#connective-left [data-cs-select="anterior-cruciate-ligament"]').click();
  await page.locator('#connective-mobile-nav [data-cs-panel="inspector"]').click();
- // Selecting a small structure must actually magnify it on narrow viewports, not just shift its center.
- await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.zoom)).toBeGreaterThan(initialZoom*1.3);
+ // Selection preserves the camera; magnification requires an explicit Focus.
+ expect(await page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.zoom)).toBeCloseTo(initialZoom,3);
  await page.locator('#connective-right [data-cs-action="focus"]').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.zoom)).toBeGreaterThan(initialZoom*1.3);
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.connectiveEnabled)).toBe(true);
  await page.locator('#connective-right [data-cs-action="isolate"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().mode)).toBe('isolate');
