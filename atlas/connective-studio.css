@@ -175,7 +175,7 @@
 .connective-peek,.cs-mobile-location{display:none}
 @media(max-width:850px){
  .app[data-connective-studio=true]{--cs-guides-h:0px;--cs-sheet-h:86px}
- .app[data-connective-studio=true][data-connective-sheet=open]{--cs-sheet-h:min(44dvh,370px)}
+ .app[data-connective-studio=true][data-connective-sheet=open]{--cs-sheet-h:min(34dvh,290px)}
  .app[data-connective-studio=true] .topbar{height:51px;flex-basis:51px}
  .app[data-connective-studio=true] #connective-entry{display:none!important}
  .app[data-connective-studio=true] .cs-mobile-location{display:block;margin-left:auto;font-size:10px;letter-spacing:.13em;font-weight:700;color:#d5b39c;white-space:nowrap}
