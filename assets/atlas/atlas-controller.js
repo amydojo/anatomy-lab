@@ -775,7 +775,15 @@ function connectiveFocus(id){
  const bounds=model.getStructureBounds(U.getRegion(),id);
  if(!bounds||!U.selectById(id))return false;
  const c=state.data.camera;
- animateCamera({...c,target:bounds.center,frameSpan:Math.max(.35,Math.min(3.2,bounds.radius*3.8)),zoom:1.1},reduce()?0:360);
+ const frameSpan=Math.max(.35,Math.min(3.2,bounds.radius*3.8));
+ const canvas=$('atlas-canvas'),w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);
+ // WebGL scales to min(width/3.25,height/frameSpan) * zoom. On phones the WIDTH usually wins,
+ // so reducing frameSpan alone does not zoom in (the previous hard-coded 1.1 could even zoom OUT).
+ // Frame the chosen surface at about 22% of the shorter stage dimension, bounded by the orbit's 4x limit.
+ const pixelsPerZoom=Math.max(1,Math.min(w/3.25,h/frameSpan));
+ const targetDiameter=Math.min(w,h)*.22;
+ const zoom=Math.min(4,Math.max(1.6,targetDiameter/(2*Math.max(.08,bounds.radius)*pixelsPerZoom)));
+ animateCamera({...c,target:bounds.center,frameSpan,zoom},reduce()?0:360);
  return true;
 }
 function connectiveOrientation(yaw,pitch){

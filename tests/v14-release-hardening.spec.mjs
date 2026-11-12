@@ -44,7 +44,10 @@ test('V14 hardening: focus, isolate, ghost, compare, hide/show, reset and V13 ex
  test.skip(info.project.name!=='chromium-mobile','Covered on mobile Chromium; normal V13 regression covers desktop');
  await page.setViewportSize({width:390,height:844});
  const errors=await enter(page);
+ const initialZoom=await page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.zoom);
  await page.locator('#connective-left [data-cs-select="anterior-cruciate-ligament"]').click();
+ // Selecting a small structure must actually magnify it on narrow viewports, not just shift its center.
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.zoom)).toBeGreaterThan(initialZoom*1.3);
  await page.locator('#connective-right [data-cs-action="focus"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.connectiveEnabled)).toBe(true);
  await page.locator('#connective-right [data-cs-action="isolate"]').click();
