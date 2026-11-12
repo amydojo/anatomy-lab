@@ -63,6 +63,7 @@ test('V14 hardening: focus, isolate, ghost, compare, hide/show, reset and V13 ex
  await page.locator('#connective-right [data-cs-action="compare"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().comparison.length)).toBe(2);
  await page.locator('#connective-mobile-nav [data-cs-panel="structures"]').click();
+ await page.locator('.cs-advanced summary').click();
  await page.locator('#connective-left [data-cs-tissue="ligaments"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().visibility.ligaments)).toBe(false);
  await page.locator('#connective-left [data-cs-tissue="ligaments"]').click();

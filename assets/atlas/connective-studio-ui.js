@@ -242,9 +242,11 @@ const studio=domain.create({provider});
   if(window.innerWidth>850)atlas.setInspectorFrame?.(false,true);
  }
  function select(id){
+  const onPhone=window.innerWidth<=850;
+  if(onPhone)mobileSheet='peek'; // settle the sheet BEFORE the selection subscription renders
   const record=studio.selectStructure(id);if(!record)return;
   expanded=false;
-  if(window.innerWidth<=850)mobileSheet='peek';else{mobilePanel='inspector';if(record.selectable)studio.focusStructure(id);}
+  if(!onPhone){mobilePanel='inspector';if(record.selectable)studio.focusStructure(id);}
   render();
  }
  function perform(action){
@@ -254,7 +256,7 @@ const studio=domain.create({provider});
   if(action==='peek-browse'){mobilePanel='structures';mobileSheet='open';render();return;}
   if(action==='peek-details'){mobilePanel='inspector';mobileSheet='open';render();return;}
   if(action==='details'){expanded=!expanded;render();return;}
-  if(action==='reset'){studio.resetView();mobileSheet='peek';mobilePanel='structures';render();return;}
+  if(action==='reset'){mobileSheet='peek';mobilePanel='structures';studio.resetView();render();return;}
   if(action==='focus'){if(s.selectedId)studio.focusStructure(s.selectedId);return;}
   if(action==='isolate'){if(s.selectedId)studio.isolateStructure(s.selectedId);return;}
   if(action==='compare'){studio.compareStructures(['anterior-cruciate-ligament','posterior-cruciate-ligament']);return;}
@@ -294,7 +296,8 @@ const studio=domain.create({provider});
   if(!opened)return;
   const id=event.detail?.id;
   if(id&&studio.snapshot().selectedId!==id&&studio.getStructure(id)){
-   studio.selectStructure(id);expanded=false;if(window.innerWidth<=850)mobileSheet='peek';else mobilePanel='inspector';render();
+   if(window.innerWidth<=850)mobileSheet='peek';else mobilePanel='inspector';
+   studio.selectStructure(id,{syncRenderer:false});expanded=false;render();
   }
  });
  window.addEventListener('body:region-ready',()=>{if(opened){isChangingRegion=false;statusMessage='';refreshRenderer();render();}});
