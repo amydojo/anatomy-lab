@@ -196,6 +196,8 @@ const studio=domain.create({provider});
  function render(){
   if(!opened)return;
   const search=document.getElementById('connective-search');
+  const priorAdvanced=left.querySelector('.cs-advanced')?.open;
+  const priorLeftScroll=left.scrollTop,priorRightScroll=right.scrollTop;
   const restoreSearch=search&&document.activeElement===search;
   const caret=restoreSearch?search.selectionStart:null;
   const s=studio.snapshot();
@@ -213,7 +215,9 @@ const studio=domain.create({provider});
     mobileGuideContent+'<section class="cs-other-regions">'+regionSelector()+'<p class="cs-muted">Other regions are reference-only until their connective meshes are available.</p></section></details>'+
     '<footer class="cs-panel-footer">Knee connective surfaces are illustrative, not clinically verified.</footer>';
   left.innerHTML=mobileScreen?phoneExplorer:desktopExplorer;
+  if(priorAdvanced&&mobileScreen&&left.querySelector('.cs-advanced'))left.querySelector('.cs-advanced').open=true;
   right.innerHTML=inspector();
+  left.scrollTop=priorLeftScroll;right.scrollTop=priorRightScroll;
   if(mobileScreen){const primary=right.querySelector('.cs-inspector-primary'),actions=right.querySelector('.cs-inspector-actions'),status=right.querySelector('.connective-status');if(primary&&actions&&status)status.before(primary,actions);}
   if(restoreSearch){
     const next=document.getElementById('connective-search');
@@ -277,9 +281,6 @@ const studio=domain.create({provider});
  workspace.addEventListener('input',e=>{
   if(!opened||e.target.id!=='connective-search')return;
   studio.setQuery(e.target.value);
-  const list=$('connective-structure-list'),replacement=document.createElement('div');
-  replacement.innerHTML=groupList();
-  if(list)list.replaceWith(replacement.firstChild);
  });
  topButton.addEventListener('click',()=>opened?closeStudio():openStudio());
  document.addEventListener('keydown',e=>{
@@ -299,7 +300,21 @@ const studio=domain.create({provider});
  window.addEventListener('body:region-ready',()=>{if(opened){isChangingRegion=false;statusMessage='';refreshRenderer();render();}});
  window.addEventListener('body:connective-geometry-ready',()=>{if(opened){refreshRenderer();render();}});
  window.addEventListener('resize',()=>{if(opened){atlas.setMobileFrame?.(false,'studio');render();}},{passive:true});
- studio.subscribe(()=>{if(opened){refreshRenderer();render();}});
+ // Avoid WebGL redraws and replacing the search field on every keystroke.
+ let lastGeometryKey=null,lastQuery=null;
+ studio.subscribe(s=>{
+  if(!opened)return;
+  const geometryKey=JSON.stringify([s.region,s.mode,s.isolateId,s.comparison,s.ghost,s.visibility]);
+  const changedGeometry=geometryKey!==lastGeometryKey,queryOnly=!changedGeometry&&s.query!==lastQuery;
+  lastGeometryKey=geometryKey;lastQuery=s.query;
+  if(queryOnly&&document.activeElement?.id==='connective-search'){
+   const list=$('connective-structure-list'),temp=document.createElement('div');temp.innerHTML=groupList();
+   if(list)list.replaceWith(temp.firstChild);
+   return;
+  }
+  if(changedGeometry)refreshRenderer();
+  render();
+ });
 if(window.BodyConnectiveIntelligence){
  window.BodyConnectiveIntelligence.load({knowledgeUrl:'/atlas/assets/v14-connective-knowledge.json',coverageUrl:'/atlas/assets/connective-coverage.json'})
  .then(engine=>{intelligence=engine;knowledgeError='';studio.setProvider(provider);if(opened){refreshRenderer();render();}})
