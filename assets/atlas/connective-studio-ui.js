@@ -190,7 +190,9 @@ const studio=domain.create({provider});
  }
  function renderGuides(){
   const s=studio.snapshot();
-  guides.hidden=!opened||s.region!=='knee'||window.innerWidth<=850;
+  const showDesktopGuides=opened&&s.region==='knee'&&window.innerWidth>850;
+  guides.hidden=!showDesktopGuides;
+  if(!showDesktopGuides){guides.innerHTML='';return;}
   guides.innerHTML='<span class="cs-overline">KNEE / THREE PERSPECTIVES</span><div class="cs-guide-buttons">'+domain.guides.map(g=>'<button type="button" data-cs-guide="'+g.id+'" aria-pressed="'+(s.guideId===g.id)+'">'+esc(g.title)+'</button>').join('')+'</div>'+guideLesson(s,window.innerWidth>850);
  }
  function render(){
@@ -228,11 +230,12 @@ const studio=domain.create({provider});
   const chosen=s.selectedId?studio.getStructure(s.selectedId):null;
   locationLabel.textContent=(regionNames[s.region]||s.region).toUpperCase()+' / CONNECTIVE';
   peek.hidden=!mobileScreen;
-  if(mobileScreen){
+  if(mobileScreen&&mobileSheet==='peek'){
    peek.innerHTML='<div class="cs-peek-copy"><span class="cs-overline">'+esc(regionNames[s.region])+(chosen?' / SELECTED':' / EXPLORE')+'</span><strong>'+esc(chosen?.name||'Explore the anatomy')+'</strong><span class="cs-peek-note">'+(chosen?(chosen.geometryStatus==='illustrative'?'Illustrative 3D · educational':'Reference information only'):'Tap a structure, or browse the list')+'</span></div>'+
     (chosen?.selectable?'<button type="button" data-cs-action="focus" aria-label="Focus selected anatomy">Focus</button>':'')+
     '<button type="button" class="cs-peek-primary" data-cs-action="'+(chosen?'peek-details':'peek-browse')+'">'+(chosen?'Details':'Browse')+'</button>';
   }
+  if(mobileScreen&&mobileSheet!=='peek')peek.innerHTML='';
   mobile.innerHTML='<button type="button" data-cs-panel="structures" aria-pressed="'+(mobileSheet==='open'&&mobilePanel==='structures')+'" aria-expanded="'+(mobileSheet==='open'&&mobilePanel==='structures')+'" aria-controls="connective-left">Explore</button><button type="button" data-cs-panel="inspector" aria-pressed="'+(mobileSheet==='open'&&mobilePanel==='inspector')+'" aria-expanded="'+(mobileSheet==='open'&&mobilePanel==='inspector')+'" aria-controls="connective-right" '+(s.selectedId?'':'disabled')+'>Details</button><button type="button" data-cs-action="reset">Reset</button><button type="button" data-cs-action="close">Exit</button>';
   app.dataset.connectivePanel=mobilePanel;
   const hasGeometry=s.records.some(r=>r.region===s.region&&r.selectable);
