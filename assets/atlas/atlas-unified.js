@@ -121,7 +121,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   return touchPlan(x,y,opts);
  }
  // ---- compact touch UI: snap ring, "Not it?" correction, nearby-structures chooser -------------------------------
- let touchEl=null,ringEl=null,touchTimer=0,ringTimer=0,shownAt=0;
+ let touchEl=null,ringEl=null,touchTimer=0,ringTimer=0;
  function displayName(c){
   return window.BodyConnectiveMode?.info(c.id)?.name||INFORMATION[c.id]?.[0]||c.name||c.id.split('-').map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');
  }
@@ -132,10 +132,13 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   touchEl.setAttribute('role','group');
   ringEl=document.createElement('div');ringEl.id='touch-ring';ringEl.className='touch-ring';ringEl.hidden=true;ringEl.setAttribute('aria-hidden','true');
   stage.append(ringEl,touchEl);
+  // A canvas tap can synthesize a click on a newly appearing chooser without a pointerdown on that chooser.
+  // Arm only genuine interactions that BEGIN on it; do not block a fast second tap with a 350ms timer.
+  touchEl.addEventListener('pointerdown',()=>{touchEl._pointerArmed=true;},true);
+  touchEl.addEventListener('touchstart',()=>{touchEl._pointerArmed=true;},{capture:true,passive:true});
   touchEl.addEventListener('click',e=>{
-   // The browser's synthesized click after a tap lands where the finger just was. The chooser appears under it, so a
-   // click this soon after showing is that ghost click, never a deliberate choice.
-   if(performance.now()-shownAt<350)return;
+   if(!touchEl._pointerArmed&&e.detail!==0)return; // detail=0 allows keyboard and assistive activation
+   touchEl._pointerArmed=false;
    const other=e.target.closest('[data-touch-other]');
    if(other){const list=touchEl._options||[];showChooser(list,touchEl._x,touchEl._y);return;}
    const b=e.target.closest('button[data-touch-id]');if(!b)return;
@@ -146,7 +149,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
  }
  function hideTouchUI(){
   clearTimeout(touchTimer);clearTimeout(ringTimer);
-  if(touchEl)touchEl.hidden=true;
+  if(touchEl){touchEl.hidden=true;touchEl._pointerArmed=false;}
   if(ringEl)ringEl.hidden=true;
  }
  function place(el,x,y){
@@ -175,28 +178,30 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   if(!plan.alternatives.length){touchEl.hidden=true;return;}
   touchEl._options=[plan.candidate,...plan.alternatives];touchEl._x=x;touchEl._y=y;
   touchEl.className='touch-pick confirm';
+  touchEl._pointerArmed=false;touchEl.style.maxHeight='';
+  touchEl.setAttribute('aria-label','Nearby structure correction');
   touchEl.innerHTML='';
   const label=document.createElement('span');label.textContent=displayName(plan.candidate);
   const btn=document.createElement('button');btn.type='button';btn.dataset.touchOther='1';btn.textContent='Not it?';
   btn.setAttribute('aria-label','Choose a different nearby structure');
-  touchEl.append(label,btn);touchEl.hidden=false;shownAt=performance.now();place(touchEl,x,y);
+  touchEl.append(label,btn);touchEl.hidden=false;place(touchEl,x,y);
   clearTimeout(touchTimer);touchTimer=setTimeout(()=>{touchEl.hidden=true;},4200);
  }
  function showChooser(options,x,y){
   ensureTouchUI();
   clearTimeout(touchTimer);
   touchEl._options=options;touchEl._x=x;touchEl._y=y;
-  touchEl.className='touch-pick choose';touchEl.innerHTML='';
+  touchEl.className='touch-pick choose';touchEl.innerHTML='';touchEl._pointerArmed=false;
   touchEl.setAttribute('aria-label','Nearby structures. Choose one.');
   for(const c of options){
    const b=document.createElement('button');b.type='button';b.dataset.touchId=c.id;b.textContent=displayName(c);
    touchEl.append(b);
   }
-  touchEl.hidden=false;shownAt=performance.now();ringEl.hidden=true;
-  // Short stages (small landscape phones, tall bottom sheets): compact the list, and as a last resort drop the farthest option.
-  const avail=$('atlas-canvas').getBoundingClientRect().height-16;
-  if(touchEl.offsetHeight>avail)touchEl.classList.add('dense');
-  while(touchEl.offsetHeight>avail&&touchEl.querySelectorAll('button').length>2)touchEl.lastElementChild.remove();
+  touchEl.hidden=false;ringEl.hidden=true;
+  // Keep EVERY plausible option and full-size finger targets. Scroll inside the stage instead of silently dropping choices.
+  const avail=Math.max(44,$('atlas-canvas').getBoundingClientRect().height-16);
+  touchEl.style.maxHeight=avail+'px';
+  touchEl.classList.toggle('dense',touchEl.scrollHeight>avail);
   place(touchEl,x,y);
  }
  // Read-only raycast: the id pickAt WOULD select, with no selection, render, URL or camera side effects.

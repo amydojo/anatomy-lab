@@ -137,7 +137,8 @@
 .app[data-connective-studio=true] #connective-toggle,
 .app[data-connective-studio=true] #connective-workbench{display:none!important}
 @media(max-width:850px){
- .app[data-connective-studio=true] #atlas-stage{touch-action:none}
+ .app[data-connective-studio=true] #atlas-stage{touch-action:pan-y}
+.app[data-connective-studio=true] #atlas-canvas{touch-action:none}
 }
 @media(prefers-reduced-motion:reduce){
  .app[data-connective-studio=true] *{scroll-behavior:auto!important;transition-duration:.01ms!important}

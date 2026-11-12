@@ -154,13 +154,13 @@ for(const [w,h] of [...MOBILE,...DESKTOP]){
    await tapXY(page,withAlt.x,withAlt.y);
    await expect.poll(()=>selectedId(page)).toBe(withAlt.id);
    const other=page.locator('#touch-pick [data-touch-other]');
-   await expect(other).toBeVisible();await page.waitForTimeout(420);
+   await expect(other).toBeVisible();
    await other.tap();
    await expect(chooser(page)).toBeVisible();
    const labels=await chooser(page).locator('button').count();
    expect(labels).toBeGreaterThanOrEqual(2);
    const alt=chooser(page).locator('button[data-touch-id="'+withAlt.alt[0]+'"]');
-   await expect(alt).toBeVisible();await page.waitForTimeout(420);await alt.tap();
+   await expect(alt).toBeVisible();await alt.tap();
    await expect.poll(()=>selectedId(page),'correction picks the alternative').toBe(withAlt.alt[0]);
    await expect(page.locator('#touch-pick')).toBeHidden();
   }
@@ -183,10 +183,15 @@ for(const [w,h] of [...MOBILE,...DESKTOP]){
   const shown=await chooser(page).locator('button').evaluateAll(b=>b.map(x=>x.dataset.touchId));
   expect(shown.slice().sort(),'chooser lists exactly the plausible candidates').toEqual(crowd.options.slice().sort());
   await expectChooserSafe(page);
+  const tapHeights=await chooser(page).locator('button').evaluateAll(buttons=>buttons.map(b=>Math.round(b.getBoundingClientRect().height)));
+  expect(Math.min(...tapHeights),'all nearby choices retain a 44px touch target').toBeGreaterThanOrEqual(44);
+  // A stray synthesized click with no pointerdown on the chooser must not select an option.
+  await page.evaluate(()=>document.querySelector('#touch-pick button')?.dispatchEvent(new MouseEvent('click',{bubbles:true,detail:1})));
+  expect(await selectedId(page)).toBeNull();
+  await expect(chooser(page)).toBeVisible();
   expect(await cameraKey(page)).toBe(cam0);
   // choosing works with one more tap and dismisses the chooser
   const pick=shown[shown.length-1];
-  await page.waitForTimeout(420);
   await chooser(page).locator('button[data-touch-id="'+pick+'"]').tap();
   await expect.poll(()=>selectedId(page)).toBe(pick);
   await expect(page.locator('#touch-pick')).toBeHidden();
