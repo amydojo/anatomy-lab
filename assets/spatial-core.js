@@ -26,13 +26,17 @@
    return {x:camera.width*(Number.isFinite(camera.anchorX)?camera.anchorX:.50)+x*scale*perspective,
      y:camera.height*(Number.isFinite(camera.anchorY)?camera.anchorY:.50)-(y2-.04)*scale*perspective,z:z2,world:view};
  }
- function attachOrbit(canvas,{state,render,pick,onInteract=()=>{},onDoubleTap=()=>{},getBounds=()=>null,minZoom=.7,maxZoom=2.5}){
+ function attachOrbit(canvas,{state,render,pick,onInteract=()=>{},onDoubleTap=()=>{},getBounds=()=>null,minZoom=.7,maxZoom=2.5,deepZoomEnabled=()=>false,deepMaxZoom=14}){
    const pointers=new Map();
    let origin=null,travel=false,scheduled=0,lastTap=null,gestureStarted=false;
    // Region extents are source-derived. Never let focal-point zoom/pan escape
    // the inspected specimen or push the synthetic perspective through the mesh.
    const bounds=()=>{try{return getBounds();}catch{return null;}};
+   const deepZoom=()=>{try{return !!deepZoomEnabled();}catch{return false;}};
    const zoomLimit=()=>{
+    // The old whole-region cap (often 1.95x) is correct for V13 overview, but prevents
+    // deliberate inspection of small connective structures in the V14 Studio.
+    if(deepZoom())return Math.max(minZoom,Math.min(16,deepMaxZoom));
     const r=bounds()?.radius;
     return Math.min(maxZoom,!Number.isFinite(r)?2.1:r<.55?3.3:r<1.1?2.35:1.95);
    };
@@ -73,7 +77,9 @@
      if(e.defaultPrevented)return;
      if(pointers.size>=2 && origin?.type==='dual'){
        const mid=midpoint();
-       const zoom=clamp(origin.zoom*distance()/origin.distance,minZoom,zoomLimit());
+       // Slightly more responsive pinch in deep-inspection mode; V13 remains unchanged.
+       const ratio=Math.max(.02,distance()/origin.distance);
+       const zoom=clamp(origin.zoom*Math.pow(ratio,deepZoom()?1.28:1),minZoom,zoomLimit());
        // The camera target pans in the view plane, while zoom stays anchored
        // to the user's pinch centroid rather than jumping to canvas center.
        const bound=canvas.getBoundingClientRect();
@@ -139,7 +145,8 @@
    function wheel(e){
      if(!Number.isFinite(e.deltaY)||!e.deltaY)return;
      beginMove();e.preventDefault();
-     const before=state.zoom,after=clamp(before*(e.deltaY<0?1.09:.91),minZoom,zoomLimit());
+     const step=deepZoom()?1.18:1.09;
+     const before=state.zoom,after=clamp(before*(e.deltaY<0?step:1/step),minZoom,zoomLimit());
      if(after===before)return;
      const bound=canvas.getBoundingClientRect();
      const units=Math.min(bound.width/3.25,bound.height/Math.max(.2,state.frameSpan));

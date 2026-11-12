@@ -482,18 +482,22 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-explore')));
   const c=state.data.camera;
   const extra=window.BodyExtendedRegions.config[region];
+  const studioKnee=region==='knee'&&window.innerWidth<=850&&$('atlas-app').dataset.connectiveStudio==='true';
   const home={yaw:shortestYaw(c.yaw,extra?extra.yaw:region==='hip'?Math.PI+.28:region==='shoulder'?.48:.47),pitch:-.11,
-   zoom:extra?extra.zoom:region==='hip'?1.05:region==='shoulder'?1.00:1.10,
-   frameSpan:extra?extra.span:region==='hip'?3.4:region==='shoulder'?3.15:3.2,target:centerPoint(region)};
+   zoom:studioKnee?1.7:extra?extra.zoom:region==='hip'?1.05:region==='shoulder'?1.00:1.10,
+   frameSpan:studioKnee?2.55:extra?extra.span:region==='hip'?3.4:region==='shoulder'?3.15:3.2,
+   target:studioKnee?(model.getStructureBounds('knee','patella')?.center||centerPoint(region)):centerPoint(region)};
   const id=++token;
   travel(home,reduce()?0:480,()=>{},()=>{if(id===token)render();});
  }
  function recenter(){
   if(!region||state.data.view!=='detail')return false;
   const c=state.data.camera,extra=window.BodyExtendedRegions.config[region];
+  const studioKnee=region==='knee'&&window.innerWidth<=850&&$('atlas-app').dataset.connectiveStudio==='true';
   const target={yaw:shortestYaw(c.yaw,extra?extra.yaw:region==='hip'?Math.PI+.28:region==='shoulder'?.48:.47),
-   pitch:-.11,zoom:extra?extra.zoom:region==='hip'?1.05:region==='shoulder'?1:1.1,
-   frameSpan:extra?extra.span:region==='hip'?3.4:region==='shoulder'?3.15:3.2,target:centerPoint(region)};
+   pitch:-.11,zoom:studioKnee?1.7:extra?extra.zoom:region==='hip'?1.05:region==='shoulder'?1:1.1,
+   frameSpan:studioKnee?2.55:extra?extra.span:region==='hip'?3.4:region==='shoulder'?3.15:3.2,
+   target:studioKnee?(model.getStructureBounds('knee','patella')?.center||centerPoint(region)):centerPoint(region)};
   travel(target,reduce()?0:300,()=>{},()=>render());
   return true;
  }

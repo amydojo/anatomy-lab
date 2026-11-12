@@ -589,7 +589,9 @@ function recenter(){
 }
 function setup(){
  const canvas=$('atlas-canvas');
- window.BodySpatialCore.attachOrbit(canvas,{state:state.data.camera,render,pick:pickAt,getBounds:()=>model.getViewBounds(U.getRegion()||state.data.region),maxZoom:4,onInteract:()=>U.interrupt(),onDoubleTap:recenter});
+ window.BodySpatialCore.attachOrbit(canvas,{state:state.data.camera,render,pick:pickAt,getBounds:()=>model.getViewBounds(U.getRegion()||state.data.region),maxZoom:4,
+  deepZoomEnabled:()=>$('atlas-app').dataset.connectiveStudio==='true'&&U.getRegion()==='knee'&&state.data.view==='detail',deepMaxZoom:14,
+  onInteract:()=>U.interrupt(),onDoubleTap:recenter});
  window.addEventListener('resize',resize,{passive:true});
  if(typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe($('atlas-stage'));
  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(motionFrame);motionFrame=0;clearTimeout(frameTimeout);}else render();});
@@ -779,10 +781,13 @@ function connectiveFocus(id){
  const canvas=$('atlas-canvas'),w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);
  // WebGL scales to min(width/3.25,height/frameSpan) * zoom. On phones the WIDTH usually wins,
  // so reducing frameSpan alone does not zoom in (the previous hard-coded 1.1 could even zoom OUT).
- // Frame the chosen surface at about 22% of the shorter stage dimension, bounded by the orbit's 4x limit.
+ // 'Dive in' on V14 frames the structure at roughly half the usable view, while pinch can
+ // continue to 14x. V13/legacy selection keeps its conservative former camera behavior.
+ const deep=$('atlas-app').dataset.connectiveStudio==='true'&&U.getRegion()==='knee';
  const pixelsPerZoom=Math.max(1,Math.min(w/3.25,h/frameSpan));
- const targetDiameter=Math.min(w,h)*.22;
- const zoom=Math.min(4,Math.max(1.6,targetDiameter/(2*Math.max(.08,bounds.radius)*pixelsPerZoom)));
+ const targetDiameter=Math.min(w,h)*(deep?.55:.22);
+ const fitted=targetDiameter/(2*Math.max(.08,bounds.radius)*pixelsPerZoom);
+ const zoom=deep?Math.min(14,Math.max(c.zoom,2.5,Math.min(12,fitted))):Math.min(4,Math.max(1.6,fitted));
  animateCamera({...c,target:bounds.center,frameSpan,zoom},reduce()?0:360);
  return true;
 }

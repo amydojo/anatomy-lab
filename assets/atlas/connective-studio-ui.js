@@ -103,6 +103,8 @@ const studio=domain.create({provider});
   atlas.connectiveFilter?.(null,null,false);
   atlas.connectiveEnable?.(false);
   atlas.setFrameOwner?.(null);atlas.setMobileFrame?.(false);
+  // Deep V14 magnification must not strand the conservative V13 camera after exit.
+  if(atlas.getState().camera.zoom>2.1)atlas.recenter?.();
   atlas.setInspectorFrame?.(false,true);
   $('connective-left').hidden=true;$('connective-right').hidden=true;
   $('connective-guides').hidden=true;$('connective-mobile-nav').hidden=true;$('connective-peek').hidden=true;
@@ -164,7 +166,7 @@ const studio=domain.create({provider});
  '<div class="connective-status" role="status">'+esc(status)+'</div><p class="cs-evidence-note">'+esc(evidenceStatus)+'</p><p class="cs-evidence-note" data-geometry-proof="unverified">'+esc(geometryDisclosure)+'</p>'+comparison+
  '<section class="cs-inspector-primary"><h3>PRIMARY FUNCTION</h3><p>'+esc(rec?.primaryFunction||item.significance||'Scientific record unavailable.')+'</p>'+
  '<h3>RELEVANT MOVEMENTS</h3><p>'+esc(rec?.movements?.join(' · ')||'Not documented.')+'</p></section>'+
- '<div class="cs-inspector-actions"><button type="button" data-cs-action="focus" '+(!item.selectable?'disabled':'')+'>Focus</button>'+
+ '<div class="cs-inspector-actions"><button type="button" data-cs-action="focus" '+(!item.selectable?'disabled':'')+'>Dive in</button>'+
  '<button type="button" data-cs-action="isolate" '+(!item.selectable?'disabled':'')+'>Isolate</button>'+
  (compareReady?'<button type="button" data-cs-action="compare">Compare ACL / PCL</button>':'')+
  '<button type="button" data-cs-action="context">Context</button></div><button type="button" class="cs-ghost" data-cs-action="ghost" aria-pressed="'+s.ghost+'">Surrounding anatomy '+(s.ghost?'ghosted':'hidden')+'</button>'+
@@ -231,8 +233,8 @@ const studio=domain.create({provider});
   locationLabel.textContent=(regionNames[s.region]||s.region).toUpperCase()+' / CONNECTIVE';
   peek.hidden=!mobileScreen;
   if(mobileScreen&&mobileSheet==='peek'){
-   peek.innerHTML='<div class="cs-peek-copy"><span class="cs-overline">'+esc(regionNames[s.region])+(chosen?' / SELECTED':' / EXPLORE')+'</span><strong>'+esc(chosen?.name||'Explore the anatomy')+'</strong><span class="cs-peek-note">'+(chosen?(chosen.geometryStatus==='illustrative'?'Illustrative 3D · educational':'Reference information only'):'Tap a structure, or browse the list')+'</span></div>'+
-    (chosen?.selectable?'<button type="button" data-cs-action="focus" aria-label="Focus selected anatomy">Focus</button>':'')+
+   peek.innerHTML='<div class="cs-peek-copy"><span class="cs-overline">'+esc(regionNames[s.region])+(chosen?' / SELECTED':' / EXPLORE')+'</span><strong>'+esc(chosen?.name||'Explore the anatomy')+'</strong><span class="cs-peek-note">'+(chosen?(chosen.geometryStatus==='illustrative'?'Illustrative 3D · educational':'Reference information only'):'Pinch to zoom deep · Drag to rotate')+'</span></div>'+
+    (chosen?.selectable?'<button type="button" data-cs-action="focus" aria-label="Dive closer to selected anatomy">Dive in</button>':'')+
     '<button type="button" class="cs-peek-primary" data-cs-action="'+(chosen?'peek-details':'peek-browse')+'">'+(chosen?'Details':'Browse')+'</button>';
   }
   if(mobileScreen&&mobileSheet!=='peek')peek.innerHTML='';
