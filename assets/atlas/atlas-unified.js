@@ -344,9 +344,14 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
    setStatus(direct?'TRAVELING DIRECTLY BETWEEN REGIONS':'TRAVELING IN ONE ANATOMICAL SCENE');
    const c=state.data.camera;
    const extra=window.BodyExtendedRegions.config[name];
+   // In Connective Studio on a phone, open on the knee JOINT instead of presenting the entire leg
+   // in a narrow anatomical silhouette. Read the source patella centre; keep a conservative fallback.
+   const jointFirst=name==='knee'&&window.innerWidth<=850&&$('atlas-app').dataset.connectiveStudio==='true';
+   const patella=jointFirst?model.getStructureBounds('knee','patella'):null;
    const to={yaw:shortestYaw(c.yaw,extra?extra.yaw:name==='hip'?Math.PI+.28:name==='shoulder'?.48:.47),
-     pitch:-.11,zoom:extra?extra.zoom:name==='hip'?1.05:name==='shoulder'?1.00:1.10,
-     frameSpan:extra?extra.span:name==='hip'?3.4:name==='shoulder'?3.15:3.2,target:centerPoint(name)};
+     pitch:-.11,zoom:jointFirst?1.7:extra?extra.zoom:name==='hip'?1.05:name==='shoulder'?1.00:1.10,
+     frameSpan:jointFirst?2.55:extra?extra.span:name==='hip'?3.4:name==='shoulder'?3.15:3.2,
+     target:patella?.center||centerPoint(name)};
    travel(to,reduce()?0:(direct?620:900),v=>{reveal=direct?v:clamp((v-.35)/.65,0,1);},()=>{
     if(id!==token)return;
     state.enter();state.data.frameReady=true;reveal=1;transitionFrom=null;
