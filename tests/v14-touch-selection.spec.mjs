@@ -7,7 +7,7 @@ import {test,expect} from '@playwright/test';
 const MOBILE=[[390,844],[375,667],[320,568],[844,390],[667,375]];
 const DESKTOP=[[1440,900]];
 const KNEE=['anterior-cruciate-ligament','posterior-cruciate-ligament','medial-collateral-ligament','lateral-collateral-ligament','medial-meniscus','lateral-meniscus','patellar-ligament','quadriceps-tendon'];
-const CHROME='.topbar,#connective-guides,#connective-mobile-nav,#connective-left,#connective-right,.stage-meta';
+const CHROME='.topbar,#connective-guides,#connective-mobile-nav,#connective-left,#connective-right,#connective-peek,.stage-meta';
 // contact 2 = what WebKit reports for every touch (Chromium 1-2); the survey must plan with the value the real tap carries.
 const TOUCH={pointerType:'touch',contact:2};
 const frames=page=>page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(r,120)))));
@@ -17,7 +17,7 @@ async function enter(page,w,h){
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.setViewportSize({width:w,height:h});
  await page.goto('/atlas/?studio=connective',{waitUntil:'domcontentloaded'});
- await expect(page.locator('#connective-left')).toBeVisible();
+ if(w<=850)await expect(page.locator('#connective-peek')).toBeVisible();else await expect(page.locator('#connective-left')).toBeVisible();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState()?.renderer?.connectiveMeshes)).toBe(8);
  await frames(page);await frames(page);
  return errors;
