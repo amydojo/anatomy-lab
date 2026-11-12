@@ -3,15 +3,18 @@ async function enter(page){
  const errors=[];page.on('pageerror',err=>errors.push(err.message));
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.goto('/atlas/?studio=connective');
- await expect(page.locator('#connective-left')).toBeVisible();
+ if(page.viewportSize().width<=850)await expect(page.locator('#connective-peek')).toBeVisible();else await expect(page.locator('#connective-left')).toBeVisible();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_INTELLIGENCE__?.()?.getStructuresByRegion('knee').length)).toBe(8);
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.connectiveMeshes)).toBe(8);
  return errors;
 }
+async function explore(page){if(page.viewportSize().width<=850&&await page.locator('#connective-left').isHidden())await page.locator('#connective-mobile-nav [data-cs-panel="structures"]').click();}
+async function details(page){if(page.viewportSize().width<=850&&await page.locator('#connective-right').isHidden())await page.locator('#connective-mobile-nav [data-cs-panel="inspector"]').click();}
+async function exitStudio(page){if(page.viewportSize().width<=850)await page.locator('#connective-mobile-nav [data-cs-action="close"]').click();else await page.locator('#connective-entry').click();}
 test('V14: all eight real illustrative knee meshes and source-backed inspector',async({page})=>{
- const errors=await enter(page);
- await expect(page.locator('[data-cs-select]')).toHaveCount(8);
- await page.locator('[data-cs-select="anterior-cruciate-ligament"]').click();
+ const errors=await enter(page);await explore(page);
+ await expect(page.locator('#connective-left [data-cs-select]')).toHaveCount(8);
+ await page.locator('[data-cs-select="anterior-cruciate-ligament"]').click();await details(page);
  await expect(page.locator('#connective-right')).toContainText('Anterior cruciate ligament');
  await expect(page.locator('#connective-right')).toContainText('ILLUSTRATIVE');
  await expect(page.locator('[data-cs-action="focus"]')).toBeEnabled();
@@ -28,7 +31,7 @@ test('V14: all eight real illustrative knee meshes and source-backed inspector',
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().comparison.length)).toBe(2);
  // The mobile inspector intentionally hides the structure explorer. Use the
  // visible related-structure control instead of targeting a hidden desktop list.
- await page.locator('#connective-right [data-cs-select="posterior-cruciate-ligament"]').click();
+ await page.locator('#connective-right [data-cs-select="posterior-cruciate-ligament"]').click();await details(page);
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().selectedId)).toBe('posterior-cruciate-ligament');
  await expect(page.locator('#connective-right header h2')).toHaveText('Posterior cruciate ligament');
  await expect(page.locator('#connective-right')).toContainText('Primarily restrains posterior translation');
@@ -39,25 +42,26 @@ test('V14: all eight real illustrative knee meshes and source-backed inspector',
    await expect(page.locator('#connective-right')).toBeHidden();
    await page.locator('#connective-left [data-cs-select="anterior-cruciate-ligament"]').click();
    await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().selectedId)).toBe('anterior-cruciate-ligament');
-   await expect(page.locator('#connective-right')).toBeVisible();
+   await expect(page.locator('#connective-peek')).toBeVisible();await expect(page.locator('#connective-right')).toBeHidden();
  }
  expect(errors).toEqual([]);
 });
 test('V14: independent filters, guided evidence and reset',async({page})=>{
- const errors=await enter(page);
+ const errors=await enter(page);await explore(page);
+ if(page.viewportSize().width<=850)await page.locator('.cs-advanced summary').click();
  await page.locator('[data-cs-tissue="ligaments"]').click();
  await expect(page.locator('[data-cs-tissue="ligaments"]')).toHaveAttribute('aria-pressed','false');
  await expect(page.locator('[data-cs-tissue="fibrocartilage"]')).toHaveAttribute('aria-pressed','true');
  await page.locator('#connective-search').fill('meniscus');
  await expect(page.locator('[data-cs-select]')).toHaveCount(2);
  await page.locator('[data-cs-guide="stability"]').click();
- await expect(page.locator('#connective-guides')).toContainText('cruciate');
+ await expect(page.locator(page.viewportSize().width<=850?'.cs-mobile-guides':'#connective-guides')).toContainText('cruciate');
  await page.locator('[data-cs-action="isolate-guide"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().comparison.length)).toBe(4);
  await page.locator('[data-cs-guide="movement"]').click();
- await expect(page.locator('#connective-guides')).toContainText('quadriceps');
+ await expect(page.locator(page.viewportSize().width<=850?'.cs-mobile-guides':'#connective-guides')).toContainText('quadriceps');
  await page.locator('[data-cs-guide="load-distribution"]').click();
- await expect(page.locator('#connective-guides')).toContainText('menisci');
+ await expect(page.locator(page.viewportSize().width<=850?'.cs-mobile-guides':'#connective-guides')).toContainText('menisci');
  await page.locator(page.viewportSize().width>850?'#connective-left [data-cs-action="reset"]':'#connective-mobile-nav [data-cs-action="reset"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().guideId)).toBe(null);
  expect(errors).toEqual([]);
@@ -65,9 +69,10 @@ test('V14: independent filters, guided evidence and reset',async({page})=>{
 test('V14: mobile inspector, gestures and actual canvas',async({page},info)=>{
  await page.setViewportSize({width:390,height:844});
  const errors=await enter(page);
- await expect(page.locator('#connective-mobile-nav')).toBeVisible();
+ await expect(page.locator('#connective-mobile-nav')).toBeVisible();await explore(page);
  await page.locator('[data-cs-select="medial-meniscus"]').click();
- await expect(page.locator('#connective-right')).toBeVisible();
+ await expect(page.locator('#connective-peek')).toBeVisible();await expect(page.locator('#connective-right')).toBeHidden();
+ await details(page);await expect(page.locator('#connective-right')).toBeVisible();
  await expect(page.locator('#connective-left')).toBeHidden();
  const dims=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,viewport:innerWidth,dock:document.querySelector('.connective-mobile-nav button').getBoundingClientRect().height,canvases:document.querySelectorAll('#atlas-canvas').length}));
  expect(dims.scroll).toBeLessThanOrEqual(dims.viewport+2);
@@ -99,18 +104,18 @@ test('V14 hardening: mobile model viewport remains uncovered and focus preserves
  await page.setViewportSize({width:390,height:844});
  const errors=await enter(page);
  const stage=await page.locator('#atlas-stage').boundingBox();
- const sheet=await page.locator('#connective-left').boundingBox();
+ const sheet=await page.locator('#connective-peek').boundingBox();
  expect(stage).toBeTruthy();expect(sheet).toBeTruthy();
  expect(stage.y+stage.height).toBeLessThanOrEqual(sheet.y+2);
  expect(stage.height).toBeGreaterThan(230);
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.connectiveEnabled)).toBe(true);
  await page.screenshot({path:'artifacts/v14-hardening-unobstructed-'+info.project.name+'.png',fullPage:true});
- await page.locator('#connective-left [data-cs-select="anterior-cruciate-ligament"]').click();
+ await explore(page);await page.locator('#connective-left [data-cs-select="anterior-cruciate-ligament"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.connectiveEnabled)).toBe(true);
- await page.locator('#connective-right [data-cs-action="focus"]').click();
+ await details(page);await page.locator('#connective-right [data-cs-action="focus"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.connectiveEnabled)).toBe(true);
  await page.screenshot({path:'artifacts/v14-hardening-focused-'+info.project.name+'.png',fullPage:true});
- await page.locator('#connective-entry').click();
+ await exitStudio(page);
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.connectiveEnabled)).toBe(false);
  await page.locator('#connective-entry').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.connectiveEnabled)).toBe(true);
