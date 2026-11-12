@@ -82,19 +82,127 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   patella:['Right patella','Kneecap located anterior to the distal femur. Its tracking here is an approximation.']
  };
  function clearSelection(){
-  selected=null;$('structure-chip').hidden=true;$('structure-details').hidden=true;
+  hideTouchUI();selected=null;$('structure-chip').hidden=true;$('structure-details').hidden=true;
  }
- function pickAt(x,y){
+ function pickAt(x,y,opts){
   if(state.data.view!=='detail'||!region||returning)return null;
+  hideTouchUI();
   const hit=model.hitTest(state.data.camera,region,state.data.layer,motion,x,y,secondary);
+  // Exact-triangle selection is always first. Mouse and pen never get tolerance.
+  if(hit)return applySelection(hit);
+  const plan=opts&&opts.pointerType==='touch'?touchPlan(x,y,opts):null;
+  if(plan&&plan.kind==='select'){
+   const target=model.getStructure(region,plan.id);
+   if(target){const id=applySelection(target);showSnap(plan,x,y);return id;}
+  }
+  if(plan&&plan.kind==='choose'){showChooser(plan.options,x,y);return null;}
   // A miss must not redraw the full WebGL scene unless it clears an existing
   // highlight. Repeated empty taps (including mobile hit probing) otherwise
   // force synchronous GPU work and can stall the inspector interaction.
-  if(!hit){
-   if(selected){clearSelection();render();}
-   return null;
+  if(selected){clearSelection();render();}
+  return null;
+ }
+ // Touch tolerance decision for a point that missed every triangle. Read-only: no selection, render, URL or camera effects.
+ function touchPlan(x,y,opts){
+  const TP=window.BodyTouchPick;if(!TP)return null;
+  const R=TP.radiusFor(opts);if(!R)return {kind:'none',radius:0,reason:'no-tolerance',candidates:[]};
+  const candidates=model.touchCandidates(state.data.camera,region,state.data.layer,motion,x,y,secondary,R)||[];
+  return {...TP.decide(candidates,R),radius:R,candidates};
+ }
+ // Read-only diagnostics: every pickable structure within `radius` CSS px (use a large radius for footprints).
+ function touchCandidatesAt(x,y,radius){
+  if(state.data.view!=='detail'||!region||returning)return null;
+  return model.touchCandidates(state.data.camera,region,state.data.layer,motion,x,y,secondary,radius);
+ }
+ function touchPlanAt(x,y,opts){
+  if(state.data.view!=='detail'||!region||returning)return null;
+  const hit=model.hitTest(state.data.camera,region,state.data.layer,motion,x,y,secondary);
+  if(hit)return {kind:'exact',id:hit.id,radius:0,candidates:[]};
+  return touchPlan(x,y,opts);
+ }
+ // ---- compact touch UI: snap ring, "Not it?" correction, nearby-structures chooser -------------------------------
+ let touchEl=null,ringEl=null,touchTimer=0,ringTimer=0;
+ function displayName(c){
+  return window.BodyConnectiveMode?.info(c.id)?.name||INFORMATION[c.id]?.[0]||c.name||c.id.split('-').map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');
+ }
+ function ensureTouchUI(){
+  if(touchEl)return;
+  const stage=$('atlas-stage');
+  touchEl=document.createElement('div');touchEl.id='touch-pick';touchEl.className='touch-pick';touchEl.hidden=true;
+  touchEl.setAttribute('role','group');
+  ringEl=document.createElement('div');ringEl.id='touch-ring';ringEl.className='touch-ring';ringEl.hidden=true;ringEl.setAttribute('aria-hidden','true');
+  stage.append(ringEl,touchEl);
+  // A canvas tap can synthesize a click on a newly appearing chooser without a pointerdown on that chooser.
+  // Arm only genuine interactions that BEGIN on it; do not block a fast second tap with a 350ms timer.
+  touchEl.addEventListener('pointerdown',()=>{touchEl._pointerArmed=true;},true);
+  touchEl.addEventListener('touchstart',()=>{touchEl._pointerArmed=true;},{capture:true,passive:true});
+  touchEl.addEventListener('click',e=>{
+   if(!touchEl._pointerArmed&&e.detail!==0)return; // detail=0 allows keyboard and assistive activation
+   touchEl._pointerArmed=false;
+   const other=e.target.closest('[data-touch-other]');
+   if(other){const list=touchEl._options||[];showChooser(list,touchEl._x,touchEl._y);return;}
+   const b=e.target.closest('button[data-touch-id]');if(!b)return;
+   selectById(b.dataset.touchId);hideTouchUI();
+  });
+  // Capture phase and first: Escape closes the nearest overlay (this chooser) before Studio's own Escape handler runs.
+  window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!touchEl.hidden){hideTouchUI();e.stopImmediatePropagation();e.preventDefault();}},true);
+ }
+ function hideTouchUI(){
+  clearTimeout(touchTimer);clearTimeout(ringTimer);
+  if(touchEl){touchEl.hidden=true;touchEl._pointerArmed=false;}
+  if(ringEl)ringEl.hidden=true;
+ }
+ function place(el,x,y){
+  const canvas=$('atlas-canvas'),stage=$('atlas-stage'),cr=canvas.getBoundingClientRect(),sr=stage.getBoundingClientRect();
+  const ox=cr.left-sr.left,oy=cr.top-sr.top,px=ox+x,py=oy+y,m=8,f=30;       // f = half-size of the area the finger covers
+  el.style.left='0px';el.style.top='0px';
+  const w=el.offsetWidth,h=el.offsetHeight;
+  const minX=ox+m,maxX=ox+cr.width-w-m,minY=oy+m,maxY=oy+cr.height-h-m;
+  const clampX=v=>Math.max(minX,Math.min(maxX<minX?minX:maxX,v)),clampY=v=>Math.max(minY,Math.min(maxY<minY?minY:maxY,v));
+  // Prefer above the finger (the hand does not hide it), then below, then beside. Never on top of the touch point if any side fits.
+  const spots=[[clampX(px-w/2),py-h-f+8],[clampX(px-w/2),py+f],[px+f,clampY(py-h/2)],[px-f-w,clampY(py-h/2)]];
+  const fits=([l,t])=>l>=minX-.5&&l<=maxX+.5&&t>=minY-.5&&t<=maxY+.5;
+  const pick=spots.find(fits)||[clampX(px-w/2),clampY(py-h-f+8)];
+  el.style.left=pick[0]+'px';el.style.top=pick[1]+'px';
+ }
+ function showRing(at){
+  ensureTouchUI();
+  const canvas=$('atlas-canvas'),stage=$('atlas-stage'),cr=canvas.getBoundingClientRect(),sr=stage.getBoundingClientRect();
+  ringEl.style.left=(cr.left-sr.left+at.x)+'px';ringEl.style.top=(cr.top-sr.top+at.y)+'px';
+  ringEl.hidden=false;ringEl.classList.remove('go');void ringEl.offsetWidth;ringEl.classList.add('go');
+  clearTimeout(ringTimer);ringTimer=setTimeout(()=>{ringEl.hidden=true;},reduce()?900:700);
+ }
+ function showSnap(plan,x,y){
+  ensureTouchUI();
+  showRing(plan.candidate.nearest||{x,y});
+  if(!plan.alternatives.length){touchEl.hidden=true;return;}
+  touchEl._options=[plan.candidate,...plan.alternatives];touchEl._x=x;touchEl._y=y;
+  touchEl.className='touch-pick confirm';
+  touchEl._pointerArmed=false;touchEl.style.maxHeight='';
+  touchEl.setAttribute('aria-label','Nearby structure correction');
+  touchEl.innerHTML='';
+  const label=document.createElement('span');label.textContent=displayName(plan.candidate);
+  const btn=document.createElement('button');btn.type='button';btn.dataset.touchOther='1';btn.textContent='Not it?';
+  btn.setAttribute('aria-label','Choose a different nearby structure');
+  touchEl.append(label,btn);touchEl.hidden=false;place(touchEl,x,y);
+  clearTimeout(touchTimer);touchTimer=setTimeout(()=>{touchEl.hidden=true;},4200);
+ }
+ function showChooser(options,x,y){
+  ensureTouchUI();
+  clearTimeout(touchTimer);
+  touchEl._options=options;touchEl._x=x;touchEl._y=y;
+  touchEl.className='touch-pick choose';touchEl.innerHTML='';touchEl._pointerArmed=false;
+  touchEl.setAttribute('aria-label','Nearby structures. Choose one.');
+  for(const c of options){
+   const b=document.createElement('button');b.type='button';b.dataset.touchId=c.id;b.textContent=displayName(c);
+   touchEl.append(b);
   }
-  return applySelection(hit);
+  touchEl.hidden=false;ringEl.hidden=true;
+  // Keep EVERY plausible option and full-size finger targets. Scroll inside the stage instead of silently dropping choices.
+  const avail=Math.max(44,$('atlas-canvas').getBoundingClientRect().height-16);
+  touchEl.style.maxHeight=avail+'px';
+  touchEl.classList.toggle('dense',touchEl.scrollHeight>avail);
+  place(touchEl,x,y);
  }
  // Read-only raycast: the id pickAt WOULD select, with no selection, render, URL or camera side effects.
  // Lets tests and diagnostics locate real tap targets without mutating application state.
@@ -152,6 +260,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   clearSelection();render();
  }
  function interrupt(){
+  hideTouchUI();
   if(!isActive())return;
   cancelAnimationFrame(animation);animation=0;
   if(returning){
@@ -235,9 +344,14 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
    setStatus(direct?'TRAVELING DIRECTLY BETWEEN REGIONS':'TRAVELING IN ONE ANATOMICAL SCENE');
    const c=state.data.camera;
    const extra=window.BodyExtendedRegions.config[name];
+   // In Connective Studio on a phone, open on the knee JOINT instead of presenting the entire leg
+   // in a narrow anatomical silhouette. Read the source patella centre; keep a conservative fallback.
+   const jointFirst=name==='knee'&&window.innerWidth<=850&&$('atlas-app').dataset.connectiveStudio==='true';
+   const patella=jointFirst?model.getStructureBounds('knee','patella'):null;
    const to={yaw:shortestYaw(c.yaw,extra?extra.yaw:name==='hip'?Math.PI+.28:name==='shoulder'?.48:.47),
-     pitch:-.11,zoom:extra?extra.zoom:name==='hip'?1.05:name==='shoulder'?1.00:1.10,
-     frameSpan:extra?extra.span:name==='hip'?3.4:name==='shoulder'?3.15:3.2,target:centerPoint(name)};
+     pitch:-.11,zoom:jointFirst?1.7:extra?extra.zoom:name==='hip'?1.05:name==='shoulder'?1.00:1.10,
+     frameSpan:jointFirst?2.55:extra?extra.span:name==='hip'?3.4:name==='shoulder'?3.15:3.2,
+     target:patella?.center||centerPoint(name)};
    travel(to,reduce()?0:(direct?620:900),v=>{reveal=direct?v:clamp((v-.35)/.65,0,1);},()=>{
     if(id!==token)return;
     state.enter();state.data.frameReady=true;reveal=1;transitionFrom=null;
@@ -368,23 +482,27 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
   document.querySelectorAll('.seg-control button').forEach(b=>b.setAttribute('aria-pressed',String(b.id==='mode-explore')));
   const c=state.data.camera;
   const extra=window.BodyExtendedRegions.config[region];
+  const studioKnee=region==='knee'&&window.innerWidth<=850&&$('atlas-app').dataset.connectiveStudio==='true';
   const home={yaw:shortestYaw(c.yaw,extra?extra.yaw:region==='hip'?Math.PI+.28:region==='shoulder'?.48:.47),pitch:-.11,
-   zoom:extra?extra.zoom:region==='hip'?1.05:region==='shoulder'?1.00:1.10,
-   frameSpan:extra?extra.span:region==='hip'?3.4:region==='shoulder'?3.15:3.2,target:centerPoint(region)};
+   zoom:studioKnee?1.7:extra?extra.zoom:region==='hip'?1.05:region==='shoulder'?1.00:1.10,
+   frameSpan:studioKnee?2.55:extra?extra.span:region==='hip'?3.4:region==='shoulder'?3.15:3.2,
+   target:studioKnee?(model.getStructureBounds('knee','patella')?.center||centerPoint(region)):centerPoint(region)};
   const id=++token;
   travel(home,reduce()?0:480,()=>{},()=>{if(id===token)render();});
  }
  function recenter(){
   if(!region||state.data.view!=='detail')return false;
   const c=state.data.camera,extra=window.BodyExtendedRegions.config[region];
+  const studioKnee=region==='knee'&&window.innerWidth<=850&&$('atlas-app').dataset.connectiveStudio==='true';
   const target={yaw:shortestYaw(c.yaw,extra?extra.yaw:region==='hip'?Math.PI+.28:region==='shoulder'?.48:.47),
-   pitch:-.11,zoom:extra?extra.zoom:region==='hip'?1.05:region==='shoulder'?1:1.1,
-   frameSpan:extra?extra.span:region==='hip'?3.4:region==='shoulder'?3.15:3.2,target:centerPoint(region)};
+   pitch:-.11,zoom:studioKnee?1.7:extra?extra.zoom:region==='hip'?1.05:region==='shoulder'?1:1.1,
+   frameSpan:studioKnee?2.55:extra?extra.span:region==='hip'?3.4:region==='shoulder'?3.15:3.2,
+   target:studioKnee?(model.getStructureBounds('knee','patella')?.center||centerPoint(region)):centerPoint(region)};
   travel(target,reduce()?0:300,()=>{},()=>render());
   return true;
  }
  return Object.freeze({choose,back,travelKnee,isActive,getRegion,getReveal,getMotion,getSecondaryMotion,getSelected,getTransitionFrom,
-  snapshot,depthChange,setMode,reset,recenter,neutral,setMotion,setSecondaryMotion,pickAt,hitTestAt,selectById,clearSelection,showSelected,nextRegion,interrupt});
+  snapshot,depthChange,setMode,reset,recenter,neutral,setMotion,setSecondaryMotion,pickAt,hitTestAt,touchPlanAt,touchCandidatesAt,selectById,clearSelection,showSelected,nextRegion,interrupt});
 }
 window.BodyAtlasUnified=Object.freeze({create});
 })();

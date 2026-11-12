@@ -9,14 +9,14 @@ import {test,expect} from '@playwright/test';
 const MOBILE=[[390,844],[375,667],[320,568],[844,390],[667,375]];
 const DESKTOP=[[1440,900]];
 const KNEE=['anterior-cruciate-ligament','posterior-cruciate-ligament','medial-collateral-ligament','lateral-collateral-ligament','medial-meniscus','lateral-meniscus','patellar-ligament','quadriceps-tendon'];
-const CHROME='.topbar,#connective-guides,#connective-mobile-nav,#connective-left,#connective-right,.stage-meta';
+const CHROME='.topbar,#connective-guides,#connective-mobile-nav,#connective-left,#connective-right,#connective-peek,.stage-meta';
 const frames=page=>page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(r,120)))));
 async function enter(page,w,h){
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.setViewportSize({width:w,height:h});
  await page.goto('/atlas/?studio=connective',{waitUntil:'domcontentloaded'});
- await expect(page.locator('#connective-left')).toBeVisible();
+ if(w<=850)await expect(page.locator('#connective-peek')).toBeVisible();else await expect(page.locator('#connective-left')).toBeVisible();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState()?.renderer?.connectiveMeshes)).toBe(8);
  await frames(page);await frames(page);
  return errors;
@@ -66,7 +66,7 @@ for(const [w,h] of [...MOBILE,...DESKTOP]){
   const area=L.stage.w*L.stage.h;
   expect(area/(L.vw*L.vh),'usable model area share of viewport').toBeGreaterThan(mobileLayout?.22:.3);
   if(mobileLayout){
-   const sheet=L.controls['#connective-left']||L.controls['#connective-right'];
+   const sheet=L.controls['#connective-peek']||L.controls['#connective-left']||L.controls['#connective-right'];
    expect(sheet,'a structure/inspector sheet is visible').toBeTruthy();
    const landscape=sheet.h>L.vh*.6;
    // No dead band between stage and sheet: the contract has a single source of truth.
@@ -163,7 +163,7 @@ test('Studio owns mobile camera framing while open and releases it on exit',asyn
  await page.evaluate(()=>window.__BODY_ATLAS__.setMobileFrame(true));
  await frames(page);
  expect(await anchor()).toBeCloseTo(.5,2);
- await page.locator('#connective-entry').click();
+ await page.locator('#connective-mobile-nav [data-cs-action="close"]').click();
  await expect(page.locator('#atlas-app')).toHaveAttribute('data-connective-studio','false');
  await page.evaluate(()=>window.__BODY_ATLAS__.setMobileFrame(true));
  expect(await anchor()).toBeCloseTo(.39,2);
@@ -174,15 +174,16 @@ test('legacy connective controller is coherent after Studio exit and reentry',as
  const errors=await enter(page,390,844);
  const legacy=()=>page.evaluate(()=>({pressed:document.getElementById('connective-toggle')?.getAttribute('aria-pressed'),
   panelHidden:document.getElementById('connective-workbench')?.hidden,enabled:window.__BODY_ATLAS__.getState().renderer.connectiveEnabled}));
- await page.locator('#connective-entry').click();                       // exit Studio
+ await page.locator('#connective-mobile-nav [data-cs-action="close"]').click();   // exit Studio
  await expect(page.locator('#atlas-app')).toHaveAttribute('data-connective-studio','false');
  await page.locator('#connective-toggle').click();                      // activate legacy workbench
  await expect.poll(async()=>(await legacy()).enabled).toBe(true);
  await page.locator('#connective-entry').click();                       // re-enter Studio with legacy active
- await expect(page.locator('#connective-left')).toBeVisible();
+ await expect(page.locator('#connective-peek')).toBeVisible();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.connectiveEnabled)).toBe(true);
+ await page.locator('#connective-mobile-nav [data-cs-panel="structures"]').click();
  await page.locator('#connective-left [data-cs-select="anterior-cruciate-ligament"]').click();
- await page.locator('#connective-entry').click();                       // exit again
+ await page.locator('#connective-mobile-nav [data-cs-action="close"]').click();                       // exit again
  await expect(page.locator('#atlas-app')).toHaveAttribute('data-connective-studio','false');
  const after=await legacy();
  expect(after.enabled,'renderer state matches legacy UI').toBe(after.pressed==='true');

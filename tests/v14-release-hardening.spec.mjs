@@ -9,7 +9,7 @@ async function enter(page){
  const errors=[];
  page.on('pageerror',error=>errors.push(error.message));
  await page.goto('/atlas/?studio=connective',{waitUntil:'domcontentloaded'});
- await expect(page.locator('#connective-left')).toBeVisible();
+ if(page.viewportSize().width<=850)await expect(page.locator('#connective-peek')).toBeVisible();else await expect(page.locator('#connective-left')).toBeVisible();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState()?.renderer?.connectiveMeshes)).toBe(8);
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_INTELLIGENCE__?.()?.getStructuresByRegion('knee')?.length)).toBe(8);
  return errors;
@@ -21,16 +21,19 @@ for(const width of [320,375,390,430]){
   const errors=await enter(page);
   const layout=await page.evaluate(()=>{
    const rect=selector=>{const r=document.querySelector(selector)?.getBoundingClientRect();return r?{x:r.x,y:r.y,width:r.width,height:r.height,bottom:r.bottom}:null};
-   return {documentWidth:document.documentElement.scrollWidth,innerWidth,stage:rect('#atlas-stage'),sheet:rect('#connective-left'),dock:rect('#connective-mobile-nav')};
+   return {documentWidth:document.documentElement.scrollWidth,innerWidth,stage:rect('#atlas-stage'),sheet:rect('#connective-peek'),dock:rect('#connective-mobile-nav')};
   });
   expect(layout.documentWidth).toBeLessThanOrEqual(width+2);
   expect(layout.stage.height).toBeGreaterThan(230);
   expect(layout.stage.bottom).toBeLessThanOrEqual(layout.sheet.y+2);
   expect(layout.dock.bottom).toBeLessThanOrEqual(846);
   await page.screenshot({path:'artifacts/v14-hardening-'+width+'-camera.png',fullPage:true});
+  await page.locator('#connective-mobile-nav [data-cs-panel="structures"]').click();
   for(const id of knee){
    await page.locator('#connective-left [data-cs-select="'+id+'"]').click();
    await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().selectedId)).toBe(id);
+   await expect(page.locator('#connective-peek')).toBeVisible();
+   await page.locator('#connective-mobile-nav [data-cs-panel="inspector"]').click();
    await expect(page.locator('#connective-right')).toBeVisible();
    await expect(page.locator('#connective-right .connective-status')).toContainText('ILLUSTRATIVE');
    await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.connectiveEnabled)).toBe(true);
@@ -44,8 +47,14 @@ test('V14 hardening: focus, isolate, ghost, compare, hide/show, reset and V13 ex
  test.skip(info.project.name!=='chromium-mobile','Covered on mobile Chromium; normal V13 regression covers desktop');
  await page.setViewportSize({width:390,height:844});
  const errors=await enter(page);
+ await page.locator('#connective-mobile-nav [data-cs-panel="structures"]').click();
+ const initialZoom=await page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.zoom);
  await page.locator('#connective-left [data-cs-select="anterior-cruciate-ligament"]').click();
+ await page.locator('#connective-mobile-nav [data-cs-panel="inspector"]').click();
+ // Selection preserves the camera; magnification requires an explicit Focus.
+ expect(await page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.zoom)).toBeCloseTo(initialZoom,3);
  await page.locator('#connective-right [data-cs-action="focus"]').click();
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.zoom)).toBeGreaterThan(initialZoom*1.3);
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.connectiveEnabled)).toBe(true);
  await page.locator('#connective-right [data-cs-action="isolate"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().mode)).toBe('isolate');
@@ -54,6 +63,7 @@ test('V14 hardening: focus, isolate, ghost, compare, hide/show, reset and V13 ex
  await page.locator('#connective-right [data-cs-action="compare"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().comparison.length)).toBe(2);
  await page.locator('#connective-mobile-nav [data-cs-panel="structures"]').click();
+ await page.locator('.cs-advanced summary').click();
  await page.locator('#connective-left [data-cs-tissue="ligaments"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().visibility.ligaments)).toBe(false);
  await page.locator('#connective-left [data-cs-tissue="ligaments"]').click();
@@ -61,12 +71,12 @@ test('V14 hardening: focus, isolate, ghost, compare, hide/show, reset and V13 ex
  await page.locator('#connective-mobile-nav [data-cs-action="reset"]').click();
  const state=await page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot());
  expect(state.selectedId).toBe(null);expect(state.mode).toBe('all');expect(state.ghost).toBe(true);expect(state.comparison).toEqual([]);
- await page.locator('#connective-entry').click();
+ await page.locator('#connective-mobile-nav [data-cs-action="close"]').click();
  await expect(page.locator('#connective-left')).toBeHidden();
  await expect(page.locator('#atlas-app')).toHaveAttribute('data-connective-studio','false');
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.connectiveEnabled)).toBe(false);
  await page.locator('#connective-entry').click();
- await expect(page.locator('#connective-left')).toBeVisible();
+ await expect(page.locator('#connective-peek')).toBeVisible();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.connectiveEnabled)).toBe(true);
  expect(errors).toEqual([]);
 });
