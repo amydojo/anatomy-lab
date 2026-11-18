@@ -163,7 +163,7 @@ const studio=domain.create({provider});
    s.comparison.map(id=>{const r=intelligence?.getAdapter(id)?.record;
     return '<article><strong>'+esc(r?.name||id)+'</strong><p>'+esc(r?.primaryFunction||'Scientific description unavailable.')+'</p></article>';
    }).join('')+'</section>':'';
- return '<header><span class="cs-overline">03 / ANATOMICAL INSPECTOR</span><h2>'+esc(item.name)+'</h2><p class="cs-subtitle">'+esc(typeNames[item.tissueType])+' / '+esc(regionNames[item.region])+'</p></header>'+
+ return '<header class="cs-inspector-swipe-handle"><span class="cs-overline">03 / ANATOMICAL INSPECTOR</span><h2>'+esc(item.name)+'</h2><p class="cs-subtitle">'+esc(typeNames[item.tissueType])+' / '+esc(regionNames[item.region])+'</p></header>'+
  '<div class="connective-status" role="status">'+esc(status)+'</div><p class="cs-evidence-note">'+esc(evidenceStatus)+'</p><p class="cs-evidence-note" data-geometry-proof="unverified">'+esc(geometryDisclosure)+'</p>'+comparison+
  '<section class="cs-inspector-primary"><h3>PRIMARY FUNCTION</h3><p>'+esc(rec?.primaryFunction||item.significance||'Scientific record unavailable.')+'</p>'+
  '<h3>RELEVANT MOVEMENTS</h3><p>'+esc(rec?.movements?.join(' · ')||'Not documented.')+'</p></section>'+
@@ -293,7 +293,7 @@ const studio=domain.create({provider});
  let sheetGesture=null;
  workspace.addEventListener('touchstart',e=>{
   if(!opened||!isMobileLayout()||e.touches.length!==1||e.target.closest('button,input,textarea,select,a,summary'))return;
-  const origin=e.target.closest('#connective-peek,.cs-mobile-sheet-heading');
+  const origin=e.target.closest('#connective-peek,.cs-mobile-sheet-heading,.cs-inspector-swipe-handle');
   if(!origin)return;
   const t=e.touches[0];sheetGesture={x:t.clientX,y:t.clientY,peek:origin.id==='connective-peek'};
  },{passive:true});
