@@ -56,10 +56,13 @@ test('V14 hardening: focus, isolate, ghost, compare, hide/show, reset and V13 ex
  await page.locator('#connective-right [data-cs-action="focus"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.zoom)).toBeGreaterThan(initialZoom*1.3);
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.connectiveEnabled)).toBe(true);
+ await page.locator('#connective-mobile-nav [data-cs-panel="inspector"]').click();
  await page.locator('#connective-right [data-cs-action="isolate"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().mode)).toBe('isolate');
+ await page.locator('#connective-mobile-nav [data-cs-panel="inspector"]').click();
  await page.locator('#connective-right [data-cs-action="ghost"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().ghost)).toBe(false);
+ await page.locator('#connective-mobile-nav [data-cs-panel="inspector"]').click();
  await page.locator('#connective-right [data-cs-action="compare"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().comparison.length)).toBe(2);
  await page.locator('#connective-mobile-nav [data-cs-panel="structures"]').click();
