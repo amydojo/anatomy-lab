@@ -2,8 +2,10 @@ import {test,expect} from '@playwright/test';
 test('Operator C: ACL evidence reports source blocker, hashes and measured error as unavailable',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('/atlas/?studio=connective');
+ if(page.viewportSize().width<=850)await page.locator('#connective-mobile-nav [data-cs-panel="structures"]').click();
  await expect(page.locator('[data-cs-select="anterior-cruciate-ligament"]')).toBeVisible({timeout:30000});
  await page.locator('[data-cs-select="anterior-cruciate-ligament"]').click();
+ if(page.viewportSize().width<=850)await page.locator('#connective-mobile-nav [data-cs-panel="inspector"]').click();
  await expect(page.locator('#connective-right [data-geometry-proof="unverified"]')).toContainText('NOT ACQUIRED',{timeout:15000});
  await expect(page.locator('#connective-right')).toContainText('ILLUSTRATIVE');
  await page.locator('#connective-right [data-cs-action="details"]').click();

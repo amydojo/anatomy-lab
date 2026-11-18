@@ -148,8 +148,8 @@ function drawPins(){
 }
 // Tapping the actual source-backed skeleton should work like tapping a hotspot,
  // without claiming we have reconstructed unlabeled or missing anatomy.
-function pickAt(x,y){
- if(U.isActive()&&state.data.view==='detail')return U.pickAt(x,y);
+function pickAt(x,y,opts){
+ if(U.isActive()&&state.data.view==='detail')return U.pickAt(x,y,opts);
  if(state.data.view!=='overview'||!source||model.getStatus()!=='ready')return null;
  const canvas=$('atlas-canvas'),w=canvas.clientWidth,h=canvas.clientHeight;
  if(!w||!h)return null;
@@ -589,7 +589,9 @@ function recenter(){
 }
 function setup(){
  const canvas=$('atlas-canvas');
- window.BodySpatialCore.attachOrbit(canvas,{state:state.data.camera,render,pick:pickAt,getBounds:()=>model.getViewBounds(U.getRegion()||state.data.region),maxZoom:4,onInteract:()=>U.interrupt(),onDoubleTap:recenter});
+ window.BodySpatialCore.attachOrbit(canvas,{state:state.data.camera,render,pick:pickAt,getBounds:()=>model.getViewBounds(U.getRegion()||state.data.region),maxZoom:4,
+  deepZoomEnabled:()=>$('atlas-app').dataset.connectiveStudio==='true'&&U.getRegion()==='knee'&&state.data.view==='detail',deepMaxZoom:14,
+  onInteract:()=>U.interrupt(),onDoubleTap:recenter});
  window.addEventListener('resize',resize,{passive:true});
  if(typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe($('atlas-stage'));
  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(motionFrame);motionFrame=0;clearTimeout(frameTimeout);}else render();});
@@ -775,7 +777,18 @@ function connectiveFocus(id){
  const bounds=model.getStructureBounds(U.getRegion(),id);
  if(!bounds||!U.selectById(id))return false;
  const c=state.data.camera;
- animateCamera({...c,target:bounds.center,frameSpan:Math.max(.35,Math.min(3.2,bounds.radius*3.8)),zoom:1.1},reduce()?0:360);
+ const frameSpan=Math.max(.35,Math.min(3.2,bounds.radius*3.8));
+ const canvas=$('atlas-canvas'),w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);
+ // WebGL scales to min(width/3.25,height/frameSpan) * zoom. On phones the WIDTH usually wins,
+ // so reducing frameSpan alone does not zoom in (the previous hard-coded 1.1 could even zoom OUT).
+ // 'Dive in' on V14 frames the structure at roughly half the usable view, while pinch can
+ // continue to 14x. V13/legacy selection keeps its conservative former camera behavior.
+ const deep=$('atlas-app').dataset.connectiveStudio==='true'&&U.getRegion()==='knee';
+ const pixelsPerZoom=Math.max(1,Math.min(w/3.25,h/frameSpan));
+ const targetDiameter=Math.min(w,h)*(deep?.55:.22);
+ const fitted=targetDiameter/(2*Math.max(.08,bounds.radius)*pixelsPerZoom);
+ const zoom=deep?Math.min(14,Math.max(c.zoom,2.5,Math.min(12,fitted))):Math.min(4,Math.max(1.6,fitted));
+ animateCamera({...c,target:bounds.center,frameSpan,zoom},reduce()?0:360);
  return true;
 }
 function connectiveOrientation(yaw,pitch){
@@ -786,6 +799,6 @@ function connectiveOrientation(yaw,pitch){
 }
 const U=window.BodyAtlasUnified.create({state,model,loader,render,updateURL,resize,setExpanded,reduce,centerPoint,shortestYaw,enableControls,NOTE,LABEL,navigate:region=>choose(region)});
 window.BodyConnectiveMode?.mount({model,render,U});
-window.__BODY_ATLAS__={hitTestAt:(x,y)=>U.isActive()&&state.data.view==='detail'?U.hitTestAt(x,y):null,getState:()=>({...state.snapshot(),renderer:model.stats(),unified:U.snapshot(),assetsLoaded:loaded,overviewLoaded,expansionLoaded,facialLoaded,osteologyLoaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,recenter,focusOsteology,clearOsteologyFocus,setInspectorFrame,setMobileFrame,setFrameOwner,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode,connectiveFilter,connectiveEnable,connectiveFocus,connectiveOrientation,connectiveSelect:id=>U.selectById(id),connectiveClear:()=>{U.clearSelection();render();},connectiveStructure:(region,id)=>model.getStructure(region,id),connectiveReset:()=>{model.setConnectiveFilter(null,null,false);U.reset();}};
+window.__BODY_ATLAS__={touchCandidatesAt:(x,y,r)=>U.isActive()&&state.data.view==='detail'?U.touchCandidatesAt(x,y,r):null,touchPlanAt:(x,y,o)=>U.isActive()&&state.data.view==='detail'?U.touchPlanAt(x,y,o):null,hitTestAt:(x,y)=>U.isActive()&&state.data.view==='detail'?U.hitTestAt(x,y):null,getState:()=>({...state.snapshot(),renderer:model.stats(),unified:U.snapshot(),assetsLoaded:loaded,overviewLoaded,expansionLoaded,facialLoaded,osteologyLoaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,recenter,focusOsteology,clearOsteologyFocus,setInspectorFrame,setMobileFrame,setFrameOwner,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode,connectiveFilter,connectiveEnable,connectiveFocus,connectiveOrientation,connectiveSelect:id=>U.selectById(id),connectiveClear:()=>{U.clearSelection();render();},connectiveStructure:(region,id)=>model.getStructure(region,id),connectiveReset:()=>{model.setConnectiveFilter(null,null,false);U.reset();}};
 setup();
 })();
