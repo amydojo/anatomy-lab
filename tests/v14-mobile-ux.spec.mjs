@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 // Real mobile-flow acceptance (emulated mobile WebKit + Chromium; physical iPhone remains a separate gate).
-for(const [width,height] of [[390,844],[320,568],[844,390]]){
+for(const [width,height] of [[390,844],[320,568],[844,390],[874,402],[932,430]]){
  test('V14 anatomy-first flow '+width+'x'+height,async({page},info)=>{
   test.skip(info.project.name==='desktop-chromium','Mobile-only layout');
   test.setTimeout(180000);
@@ -49,6 +49,34 @@ for(const [width,height] of [[390,844],[320,568],[844,390]]){
   });
   expect(hierarchy.primary).toBeLessThan(hierarchy.status);
   await page.screenshot({path:'artifacts/v14-ux-'+width+'x'+height+'-'+info.project.name+'-details.png'});
+  // A visualization command must give the pixels back to the specimen, not leave
+  // the inspector swallowing one-third of the phone display.
+  await page.locator('#connective-right [data-cs-action="focus"]').click();
+  await expect(app).toHaveAttribute('data-connective-sheet','peek');
+  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().camera.zoom)).toBeGreaterThanOrEqual(2.5);
+  await page.locator('#connective-peek [data-cs-action="peek-details"]').click();
+  await page.locator('#connective-right [data-cs-action="isolate"]').click();
+  await expect(app).toHaveAttribute('data-connective-sheet','peek');
+  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().mode)).toBe('isolate');
+  // Native-sheet gesture direction, separate from native scroll on the structure list.
+  await page.evaluate(()=>{
+   const el=document.querySelector('#connective-peek .cs-peek-copy');
+   const finger=y=>({clientX:175,clientY:y});
+   for(const [kind,y] of [['touchstart',280],['touchend',200]]){
+    const e=new Event(kind,{bubbles:true});Object.defineProperty(e,kind==='touchstart'?'touches':'changedTouches',{value:[finger(y)]});el.dispatchEvent(e);
+   }
+  });
+  await expect(app).toHaveAttribute('data-connective-sheet','open');
+  await expect(page.locator('#connective-right')).toBeVisible();
+  await page.evaluate(()=>{
+   const el=document.querySelector('#connective-right .cs-mobile-sheet-heading');
+   const finger=y=>({clientX:175,clientY:y});
+   for(const [kind,y] of [['touchstart',100],['touchend',170]]){
+    const e=new Event(kind,{bubbles:true});Object.defineProperty(e,kind==='touchstart'?'touches':'changedTouches',{value:[finger(y)]});el.dispatchEvent(e);
+   }
+  });
+  await expect(app).toHaveAttribute('data-connective-sheet','peek');
+  await page.locator('#connective-peek [data-cs-action="peek-details"]').click();
   await page.locator('#connective-mobile-nav [data-cs-panel="inspector"]').click();
   await expect(app).toHaveAttribute('data-connective-sheet','peek');
   const restored=await stage.boundingBox();
