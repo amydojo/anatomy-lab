@@ -6,8 +6,9 @@ import {test,expect} from '@playwright/test';
  * every layer hidden, captured with the control chrome made invisible (layout unchanged). The footprint is
  * then compared with the real rectangles of every control. Interaction uses real taps, never force.
  * Synthetic/emulated viewports only: this is NOT real-device (iPhone Safari) validation. */
-const MOBILE=[[390,844],[375,667],[320,568],[844,390],[667,375]];
+const MOBILE=[[390,844],[375,667],[320,568],[844,390],[667,375],[874,402],[932,430]];
 const DESKTOP=[[1440,900]];
+const isPhone=(w,h)=>w<=850||(w<=980&&h<=520&&w>h);
 const KNEE=['anterior-cruciate-ligament','posterior-cruciate-ligament','medial-collateral-ligament','lateral-collateral-ligament','medial-meniscus','lateral-meniscus','patellar-ligament','quadriceps-tendon'];
 const CHROME='.topbar,#connective-guides,#connective-mobile-nav,#connective-left,#connective-right,#connective-peek,.stage-meta';
 const frames=page=>page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(r,120)))));
@@ -16,7 +17,7 @@ async function enter(page,w,h){
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.setViewportSize({width:w,height:h});
  await page.goto('/atlas/?studio=connective',{waitUntil:'domcontentloaded'});
- if(w<=850)await expect(page.locator('#connective-peek')).toBeVisible();else await expect(page.locator('#connective-left')).toBeVisible();
+ if(isPhone(w,h))await expect(page.locator('#connective-peek')).toBeVisible();else await expect(page.locator('#connective-left')).toBeVisible();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState()?.renderer?.connectiveMeshes)).toBe(8);
  await frames(page);await frames(page);
  return errors;
@@ -57,7 +58,7 @@ for(const [w,h] of [...MOBILE,...DESKTOP]){
   test.skip(!projectViewports(info).some(v=>v[0]===w&&v[1]===h),'viewport belongs to another project');
   const errors=await enter(page,w,h);
   const L=await rects(page);
-  const mobileLayout=w<=850;
+  const mobileLayout=isPhone(w,h);
   for(const [name,c] of Object.entries(L.controls)){
    if(name==='.topbar'||!mobileLayout&&name!=='.topbar')continue;
    expect(overlap(L.stage,c),name+' covers '+Math.round(overlap(L.stage,c))+'px² of the model stage').toBeLessThan(4);
@@ -88,7 +89,7 @@ for(const [w,h] of [...MOBILE,...DESKTOP]){
   // Desktop keeps the pre-existing floating perspective strip over the top of the stage (documented
   // limitation, not changed by this repair); on mobile every control must be clear of the anatomy.
   for(const [name,c] of Object.entries(L.controls))
-   if(w<=850||name!=='#connective-guides')expect(overlap(f,c),'anatomy footprint hidden under '+name).toBe(0);
+   if(isPhone(w,h)||name!=='#connective-guides')expect(overlap(f,c),'anatomy footprint hidden under '+name).toBe(0);
   const cy=(f.y+f.b)/2,sy=L.stage.y+L.stage.h/2;
   expect(Math.abs(cy-sy),'anatomy is centred in the usable stage').toBeLessThan(L.stage.h*.3);
   expect(errors).toEqual([]);
