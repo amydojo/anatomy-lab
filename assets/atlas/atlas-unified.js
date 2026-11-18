@@ -346,7 +346,7 @@ function create({state,model,loader,render,updateURL,resize,setExpanded,reduce,c
    const extra=window.BodyExtendedRegions.config[name];
    // In Connective Studio on a phone, open on the knee JOINT instead of presenting the entire leg
    // in a narrow anatomical silhouette. Read the source patella centre; keep a conservative fallback.
-   const jointFirst=name==='knee'&&window.innerWidth<=850&&$('atlas-app').dataset.connectiveStudio==='true';
+   const jointFirst=name==='knee'&&window.matchMedia('(max-width:850px), (max-width:980px) and (max-height:520px) and (orientation:landscape)').matches&&$('atlas-app').dataset.connectiveStudio==='true';
    const patella=jointFirst?model.getStructureBounds('knee','patella'):null;
    const to={yaw:shortestYaw(c.yaw,extra?extra.yaw:name==='hip'?Math.PI+.28:name==='shoulder'?.48:.47),
      pitch:-.11,zoom:jointFirst?1.7:extra?extra.zoom:name==='hip'?1.05:name==='shoulder'?1.00:1.10,
