@@ -69,7 +69,7 @@ for(const [width,height] of [[390,844],[320,568],[844,390],[874,402],[932,430]])
   await expect(app).toHaveAttribute('data-connective-sheet','open');
   await expect(page.locator('#connective-right')).toBeVisible();
   await page.evaluate(()=>{
-   const el=document.querySelector('#connective-right .cs-mobile-sheet-heading');
+   const el=document.querySelector('#connective-right .cs-inspector-swipe-handle');
    const finger=y=>({clientX:175,clientY:y});
    for(const [kind,y] of [['touchstart',100],['touchend',170]]){
     const e=new Event(kind,{bubbles:true});Object.defineProperty(e,kind==='touchstart'?'touches':'changedTouches',{value:[finger(y)]});el.dispatchEvent(e);
