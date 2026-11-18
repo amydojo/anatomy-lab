@@ -23,14 +23,18 @@ test('V14: all eight real illustrative knee meshes and source-backed inspector',
  await expect(page.locator('#connective-right')).toContainText('EVIDENCE SOURCES');
  await expect(page.locator('#connective-right')).toContainText('NOT VERIFIED');
  await page.locator('[data-cs-action="isolate"]').click();
+ await details(page); // Isolate returns to the anatomy-first viewport on phones.
  await page.locator('[data-cs-action="ghost"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().ghost)).toBe(false);
+ await details(page);
  await page.locator('[data-cs-action="ghost"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().isolateId)).toBe('anterior-cruciate-ligament');
+ await details(page);
  await page.locator('[data-cs-action="compare"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().comparison.length)).toBe(2);
  // The mobile inspector intentionally hides the structure explorer. Use the
  // visible related-structure control instead of targeting a hidden desktop list.
+ await details(page);
  await page.locator('#connective-right [data-cs-select="posterior-cruciate-ligament"]').click();await details(page);
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().selectedId)).toBe('posterior-cruciate-ligament');
  await expect(page.locator('#connective-right header h2')).toHaveText('Posterior cruciate ligament');
@@ -58,6 +62,8 @@ test('V14: independent filters, guided evidence and reset',async({page})=>{
  await expect(page.locator(page.viewportSize().width<=850?'.cs-mobile-guides':'#connective-guides')).toContainText('cruciate');
  await page.locator('[data-cs-action="isolate-guide"]').click();
  await expect.poll(()=>page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().comparison.length)).toBe(4);
+ await explore(page);
+ if(page.viewportSize().width<=850&&!(await page.locator('.cs-advanced').evaluate(e=>e.open)))await page.locator('.cs-advanced summary').click();
  await page.locator('[data-cs-guide="movement"]').click();
  await expect(page.locator(page.viewportSize().width<=850?'.cs-mobile-guides':'#connective-guides')).toContainText('quadriceps');
  await page.locator('[data-cs-guide="load-distribution"]').click();
