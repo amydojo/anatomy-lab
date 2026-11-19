@@ -67,6 +67,7 @@ function render(){
  model.render(state.data.camera,U.getRegion()||state.data.region,state.data.evidenceMode,state.data.layer,U.getReveal(),U.getMotion(),U.getSelected(),U.getSecondaryMotion(),U.getTransitionFrom(),state.data.mode==='trace'&&!window.BodyExtendedRegions?.has(U.getRegion()||state.data.region));
  window.BodyShoulderDebug?.draw(state.data.camera,
   state.data.view==='detail'&&U.getRegion()==='shoulder'?model.shoulderDiagnostics(U.getMotion()):null);
+ if(studioCameraActive())window.__BODY_V14_ORIENTATION_UPDATE__?.(state.data.camera);
  if(state.data.view==='overview'&&!U.isActive())drawPins();
 }
 function fallback(reason){
@@ -174,13 +175,26 @@ function buildPins(){
   b.addEventListener('click',()=>choose(region));$('hotspots').appendChild(b);pins.push(b);
  }drawPins();
 }
+function studioCameraActive(){
+ return $('atlas-app').dataset.connectiveStudio==='true'&&U.getRegion()==='knee'&&state.data.view==='detail';
+}
+function cameraScale(frameSpan){
+ const rect=$('atlas-canvas').getBoundingClientRect();
+ return Math.max(.001,Math.min(Math.max(1,rect.width)/3.25,Math.max(1,rect.height)/Math.max(.2,frameSpan)));
+}
 function animateCamera(destination,ms=530,done){
  cancelAnimationFrame(motionFrame);motionFrame=0;
  const cam=state.data.camera;const from={yaw:cam.yaw,pitch:cam.pitch,zoom:cam.zoom,frameSpan:cam.frameSpan,target:{...cam.target}};
  if(reduce()||ms===0){Object.assign(cam,destination);render();done?.();return;}
+ const continuous=studioCameraActive(),startScale=cameraScale(from.frameSpan)*from.zoom,
+  endScale=cameraScale(destination.frameSpan)*destination.zoom;
  const start=performance.now(),tick=t=>{
   const u=Math.min(1,(t-start)/ms),e=u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2;
-  for(const key of ['yaw','pitch','zoom','frameSpan'])cam[key]=from[key]+(destination[key]-from[key])*e;
+  for(const key of ['yaw','pitch','frameSpan'])cam[key]=from[key]+(destination[key]-from[key])*e;
+  cam.zoom=continuous?Math.exp(Math.log(startScale)+(Math.log(endScale)-Math.log(startScale))*e)/cameraScale(cam.frameSpan):from.zoom+(destination.zoom-from.zoom)*e;
+  if(continuous)for(const key of ['anchorX','anchorY'])if(Number.isFinite(destination[key]))
+   cam[key]=(Number.isFinite(from[key])?from[key]:.5)+
+      (destination[key]-(Number.isFinite(from[key])?from[key]:.5))*e;
   cam.target={x:from.target.x+(destination.target.x-from.target.x)*e,
    y:from.target.y+(destination.target.y-from.target.y)*e,z:from.target.z+(destination.target.z-from.target.z)*e};
   render();if(u<1&&!document.hidden)motionFrame=requestAnimationFrame(tick);else{motionFrame=0;done?.();}
@@ -529,6 +543,7 @@ function reset(){
  if(state.data.view==='detail'){getFrameApi()?.reset?.();$('layer-slider').value=0;state.setDepth(0);$('layer-output').textContent='Surface';return;}
  animateCamera({yaw:-.2,pitch:-.07,zoom:1.03,frameSpan:10.8,target:{x:0,y:-.12,z:0}},reduce()?0:320);
 }
+let studioNavigation=null;
 let studioFramingFrame=0;
 function setInspectorFrame(visible,instant=false){
  const camera=state.data.camera;
@@ -591,7 +606,12 @@ function setup(){
  const canvas=$('atlas-canvas');
  window.BodySpatialCore.attachOrbit(canvas,{state:state.data.camera,render,pick:pickAt,getBounds:()=>model.getViewBounds(U.getRegion()||state.data.region),maxZoom:4,
   deepZoomEnabled:()=>$('atlas-app').dataset.connectiveStudio==='true'&&U.getRegion()==='knee'&&state.data.view==='detail',deepMaxZoom:14,
-  onInteract:()=>U.interrupt(),onDoubleTap:recenter});
+  onInteract:()=>{
+   if(studioCameraActive()){cancelAnimationFrame(motionFrame);motionFrame=0;studioNavigation?.begin();}
+   U.interrupt();
+  },
+  onGestureEnd:()=>{if(studioCameraActive()){studioNavigation?.end();window.dispatchEvent(new Event('body:camera-transaction'));}},
+  onDoubleTap:recenter});
  window.addEventListener('resize',resize,{passive:true});
  if(typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe($('atlas-stage'));
  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(motionFrame);motionFrame=0;clearTimeout(frameTimeout);}else render();});
@@ -771,11 +791,11 @@ function connectiveEnable(enabled=true){
  render();return true;
 }
 // V14: minimal public renderer seam for standalone connective components.
-function connectiveFilter(filter,ids,ghost){model.setConnectiveFilter(filter,ids,ghost);render();return true;}
+function connectiveFilter(filter,ids,ghost,landmarks){model.setConnectiveFilter(filter,ids,ghost,landmarks);render();return true;}
 function connectiveFocus(id){
  if(state.data.view!=='detail'||!U.getRegion())return false;
  const bounds=model.getStructureBounds(U.getRegion(),id);
- if(!bounds||!U.selectById(id))return false;
+ if(!bounds||(U.getSelected()!==id&&!U.selectById(id)))return false;
  const c=state.data.camera;
  const frameSpan=Math.max(.35,Math.min(3.2,bounds.radius*3.8));
  const canvas=$('atlas-canvas'),w=Math.max(1,canvas.clientWidth),h=Math.max(1,canvas.clientHeight);
@@ -797,8 +817,46 @@ function connectiveOrientation(yaw,pitch){
  animateCamera({...c,yaw:shortestYaw(c.yaw,Number(yaw)||0),pitch:Math.max(-1.3,Math.min(1.3,Number(pitch)||0))},reduce()?0:340);
  return true;
 }
+function connectiveNavAction(action,id){
+ if(!studioCameraActive()||!studioNavigation)return false;
+ if(action==='back')return studioNavigation.back();
+ const c=state.data.camera;
+ const ref=model.getStructureBounds('knee','patella');
+ const base=ref?.center||centerPoint('knee');
+ const onPhone=window.matchMedia('(max-width:850px), (max-width:980px) and (max-height:520px) and (orientation:landscape)').matches;
+ const home={...c,yaw:shortestYaw(c.yaw,.47),pitch:-.11,
+  zoom:onPhone?1.7:1.1,frameSpan:onPhone?2.55:3.2,target:{...base},anchorX:.5,anchorY:.5};
+ if(action==='fit')return studioNavigation.move(home);
+ const bounds=id?model.getStructureBounds('knee',id):null;
+ if(!bounds)return false;
+ if(action==='locate'){
+  const target={x:base.x*.65+bounds.center.x*.35,y:base.y*.65+bounds.center.y*.35,z:base.z*.65+bounds.center.z*.35};
+  return studioNavigation.move({...home,target,zoom:onPhone?1.85:1.4});
+ }
+ if(action==='dive'){
+  const frameSpan=Math.max(.35,Math.min(3.2,bounds.radius*3.8));
+  const rect=$('atlas-canvas').getBoundingClientRect();
+  const pixelsPerZoom=cameraScale(frameSpan);
+  const fitted=Math.min(rect.width,rect.height)*.52/(2*Math.max(.08,bounds.radius)*pixelsPerZoom);
+  const zoom=Math.min(14,Math.max(2.5,Math.min(12,fitted)));
+  return studioNavigation.move({...c,target:{...bounds.center},frameSpan,zoom,anchorX:.5,anchorY:.5});
+ }
+ return false;
+}
+function connectiveNavState(id){
+ const c=studioNavigation?.state();
+ const bounds=id?model.getStructureBounds('knee',id):null;
+ const knee=model.getViewBounds('knee');
+ return {...(c||{canBack:false,depth:0,camera:{...state.data.camera}}),selectedBounds:bounds,
+  jointBounds:knee,projectionScale:cameraScale(state.data.camera.frameSpan)*state.data.camera.zoom};
+}
 const U=window.BodyAtlasUnified.create({state,model,loader,render,updateURL,resize,setExpanded,reduce,centerPoint,shortestYaw,enableControls,NOTE,LABEL,navigate:region=>choose(region)});
+studioNavigation=window.BodyV14SpatialNavigation.create({
+ capture:()=>state.data.camera,
+ apply:destination=>{U.interrupt();cancelAnimationFrame(motionFrame);motionFrame=0;animateCamera(destination,reduce()?0:330);}
+});
+window.addEventListener('body:connective-studio-open',()=>studioNavigation.clear());
 window.BodyConnectiveMode?.mount({model,render,U});
-window.__BODY_ATLAS__={touchCandidatesAt:(x,y,r)=>U.isActive()&&state.data.view==='detail'?U.touchCandidatesAt(x,y,r):null,touchPlanAt:(x,y,o)=>U.isActive()&&state.data.view==='detail'?U.touchPlanAt(x,y,o):null,hitTestAt:(x,y)=>U.isActive()&&state.data.view==='detail'?U.hitTestAt(x,y):null,getState:()=>({...state.snapshot(),renderer:model.stats(),unified:U.snapshot(),assetsLoaded:loaded,overviewLoaded,expansionLoaded,facialLoaded,osteologyLoaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,recenter,focusOsteology,clearOsteologyFocus,setInspectorFrame,setMobileFrame,setFrameOwner,toKnee,seam,showEvidence,closeEvidence,setEvidence,setMode,connectiveFilter,connectiveEnable,connectiveFocus,connectiveOrientation,connectiveSelect:id=>U.selectById(id),connectiveClear:()=>{U.clearSelection();render();},connectiveStructure:(region,id)=>model.getStructure(region,id),connectiveReset:()=>{model.setConnectiveFilter(null,null,false);U.reset();}};
+window.__BODY_ATLAS__={touchCandidatesAt:(x,y,r)=>U.isActive()&&state.data.view==='detail'?U.touchCandidatesAt(x,y,r):null,touchPlanAt:(x,y,o)=>U.isActive()&&state.data.view==='detail'?U.touchPlanAt(x,y,o):null,hitTestAt:(x,y)=>U.isActive()&&state.data.view==='detail'?U.hitTestAt(x,y):null,getState:()=>({...state.snapshot(),renderer:model.stats(),unified:U.snapshot(),assetsLoaded:loaded,overviewLoaded,expansionLoaded,facialLoaded,osteologyLoaded,journey:pendingEntry?{region:pendingEntry.region,ready:pendingEntry.ready,traveled:pendingEntry.traveled}:null,pins:pins.length,viewport:{width:$('atlas-canvas').clientWidth,height:$('atlas-canvas').clientHeight}}),choose,pickAt,enter,body,recenter,focusOsteology,clearOsteologyFocus,setInspectorFrame,setMobileFrame,setFrameOwner,toKnee,seam,connectiveNavAction,connectiveNavState,showEvidence,closeEvidence,setEvidence,setMode,connectiveFilter,connectiveEnable,connectiveFocus,connectiveOrientation,connectiveSelect:id=>U.selectById(id),connectiveClear:()=>{U.clearSelection();render();},connectiveStructure:(region,id)=>model.getStructure(region,id),connectiveReset:()=>{model.setConnectiveFilter(null,null,false);U.reset();}};
 setup();
 })();

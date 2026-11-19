@@ -26,9 +26,9 @@
    return {x:camera.width*(Number.isFinite(camera.anchorX)?camera.anchorX:.50)+x*scale*perspective,
      y:camera.height*(Number.isFinite(camera.anchorY)?camera.anchorY:.50)-(y2-.04)*scale*perspective,z:z2,world:view};
  }
- function attachOrbit(canvas,{state,render,pick,onInteract=()=>{},onDoubleTap=()=>{},getBounds=()=>null,minZoom=.7,maxZoom=2.5,deepZoomEnabled=()=>false,deepMaxZoom=14}){
+ function attachOrbit(canvas,{state,render,pick,onInteract=()=>{},onGestureEnd=()=>{},onDoubleTap=()=>{},getBounds=()=>null,minZoom=.7,maxZoom=2.5,deepZoomEnabled=()=>false,deepMaxZoom=14}){
    const pointers=new Map();
-   let origin=null,travel=false,scheduled=0,lastTap=null,gestureStarted=false;
+   let origin=null,travel=false,scheduled=0,lastTap=null,gestureStarted=false,wheelIdle=0;
    // Region extents are source-derived. Never let focal-point zoom/pan escape
    // the inspected specimen or push the synthetic perspective through the mesh.
    const bounds=()=>{try{return getBounds();}catch{return null;}};
@@ -79,7 +79,8 @@
        const mid=midpoint();
        // Slightly more responsive pinch in deep-inspection mode; V13 remains unchanged.
        const ratio=Math.max(.02,distance()/origin.distance);
-       const zoom=clamp(origin.zoom*Math.pow(ratio,deepZoom()?1.28:1),minZoom,zoomLimit());
+       const exponent=deepZoom()?1.10+.18/(1+Math.max(0,origin.zoom-2)*.25):1;
+       const zoom=clamp(origin.zoom*Math.pow(ratio,exponent),minZoom,zoomLimit());
        // The camera target pans in the view plane, while zoom stays anchored
        // to the user's pinch centroid rather than jumping to canvas center.
        const bound=canvas.getBoundingClientRect();
@@ -137,10 +138,10 @@
        const v=coords()[0];
        origin={type:'orbit',x:v.x,y:v.y,yaw:state.yaw,pitch:state.pitch};
        travel=true;gestureStarted=true;
-     }else if(!pointers.size){origin=null;gestureStarted=false;travel=false;}
+     }else if(!pointers.size){if(gestureStarted)onGestureEnd();origin=null;gestureStarted=false;travel=false;}
    }
    function cancel(e){
-     pointers.delete(e.pointerId);origin=null;travel=false;gestureStarted=false;
+     pointers.delete(e.pointerId);if(gestureStarted)onGestureEnd();origin=null;travel=false;gestureStarted=false;
    }
    function wheel(e){
      if(!Number.isFinite(e.deltaY)||!e.deltaY)return;
@@ -158,6 +159,7 @@
      const right=[cy,0,sy],up=[sy*sp,cp,-cy*sp];
      for(let i=0;i<3;i++)state.target[['x','y','z'][i]]+=right[i]*x*difference-up[i]*y*difference;
      constrainTarget();state.zoom=after;
+     clearTimeout(wheelIdle);wheelIdle=setTimeout(()=>{if(!pointers.size&&gestureStarted){onGestureEnd();gestureStarted=false;}},190);
      schedule();
    }
    canvas.addEventListener('pointerdown',start);
@@ -166,7 +168,7 @@
    canvas.addEventListener('pointercancel',cancel);
    canvas.addEventListener('wheel',wheel,{passive:false});
    return ()=>{
-     cancelAnimationFrame(scheduled);
+     cancelAnimationFrame(scheduled);if(wheelIdle)clearTimeout(wheelIdle);
      canvas.removeEventListener('pointerdown',start);
      canvas.removeEventListener('pointermove',move);
      canvas.removeEventListener('pointerup',up);
