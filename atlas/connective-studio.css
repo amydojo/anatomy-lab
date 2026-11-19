@@ -298,3 +298,6 @@
  .connective-spatial-hud .cs-overview-locator{width:24px;height:32px;position:relative;flex:none;border:1px solid #a58c7c;border-radius:45% 45% 38% 38%;opacity:.85}
  .connective-spatial-hud .cs-overview-locator i{width:5px;height:5px;position:absolute;background:#f3bf96;transform:translate(-50%,-50%);border-radius:50%;box-shadow:0 0 0 2px #25201c}
 }
+
+/* V14.2: prevent browser scroll anchoring from moving updated inspector content. */
+.app[data-connective-studio=true] #connective-right{overflow-anchor:none}

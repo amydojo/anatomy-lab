@@ -65,3 +65,27 @@ test('V14.2 Locate, Dive, Back and Fit are camera-only',async({page},info)=>{
  await page.locator('#connective-spatial-hud [data-cs-action=fit-joint]').click();
  expect(await page.evaluate(()=>window.__BODY_CONNECTIVE_STUDIO__.snapshot().selectedId)).toBe('medial-meniscus');
 });
+
+test('V14.2 inspector preserves same-structure scroll but resets for a new selection',async({page},info)=>{
+ test.skip(info.project.name==='desktop-chromium','Mobile inspector behavior');
+ await page.setViewportSize({width:390,height:844});await page.emulateMedia({reducedMotion:'reduce'});
+ await page.goto('/atlas/?studio=connective');
+ await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__?.getState()?.renderer?.connectiveMeshes)).toBe(8);
+ await page.locator('#connective-mobile-nav [data-cs-panel=structures]').click();
+ await page.locator('#connective-left [data-cs-select="medial-meniscus"]').click();
+ await page.locator('#connective-peek [data-cs-action=peek-details]').click();
+ const result=await page.evaluate(()=>{
+  const inspector=document.querySelector('#connective-right'),studio=window.__BODY_CONNECTIVE_STUDIO__;
+  const maximum=inspector.scrollHeight-inspector.clientHeight;
+  inspector.scrollTop=Math.min(120,maximum);
+  const before=inspector.scrollTop;
+  studio.setGhost(false);
+  const same=inspector.scrollTop;
+  studio.selectStructure('lateral-meniscus');
+  return {before,same,after:inspector.scrollTop,selection:studio.snapshot().selectedId};
+ });
+ expect(result.before).toBeGreaterThan(20);
+ expect(result.same).toBeCloseTo(result.before,1);
+ expect(result.after).toBe(0);
+ expect(result.selection).toBe('lateral-meniscus');
+});
