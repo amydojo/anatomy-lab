@@ -46,12 +46,15 @@ test('V14.2 Locate, Dive, Back and Fit are camera-only',async({page},info)=>{
  await page.locator('#connective-peek [data-cs-action=focus]').click();
  const dive=await page.evaluate(sample);
  expect(dive.projectionScale).toBeGreaterThan(locate.projectionScale);
+ await expect(page.locator('#connective-spatial-hud .cs-orbit-angle')).toContainText('DETAIL');
+ await expect(page.locator('#connective-spatial-hud .cs-orbit-angle')).toContainText('× FIT');
  await page.locator('#connective-spatial-hud [data-cs-action=back-view]').click();
  const previous=await page.evaluate(sample);
  expect(previous.camera).toEqual(locate.camera);
  await page.locator('#connective-spatial-hud [data-cs-action=fit-joint]').click();
  const fit=await page.evaluate(sample);
  expect(fit.camera.zoom).toBeGreaterThan(1);
+ await expect(page.locator('#connective-spatial-hud .cs-orbit-angle')).toContainText('JOINT');
  expect(fit.selected).toBe(selected.selected);
  await page.locator('#connective-peek [data-cs-action=peek-details]').click();
  await page.locator('#connective-right [data-cs-action=isolate]').click();

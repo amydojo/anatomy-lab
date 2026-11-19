@@ -141,7 +141,15 @@ const studio=domain.create({provider});
   const yaw=((camera.yaw*180/Math.PI)%360+360)%360;
   const arrow=hud.querySelector('.cs-orbit-arrow'),label=hud.querySelector('.cs-orbit-angle');
   if(arrow)arrow.style.transform='rotate('+yaw.toFixed(1)+'deg)';
-  if(label)label.textContent='ORBIT '+Math.round(yaw)+'°';
+  if(label){
+   // Display magnification relative to the deterministic Fit Joint camera,
+   // not an anatomical measurement or a fictitious microscope power.
+   const w=Math.max(1,Number(camera.width)||1),h=Math.max(1,Number(camera.height)||1);
+   const current=Math.min(w/3.25,h/Math.max(.2,camera.frameSpan))*camera.zoom;
+   const fitted=Math.min(w/3.25,h/2.55)*1.7;
+   const ratio=current/Math.max(.001,fitted);
+   label.textContent=(ratio>1.45?'DETAIL':'JOINT')+' · '+ratio.toFixed(1)+'× FIT · '+Math.round(yaw)+'°';
+  }
  }
  window.__BODY_V14_ORIENTATION_UPDATE__=updateOrientation;
  window.addEventListener('body:camera-transaction',()=>{
