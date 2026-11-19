@@ -78,7 +78,7 @@
  * Stage, sheet, dock and guides are anchored to the workspace edges with them, so there is no
  * height arithmetic to drift out of sync. Safe areas are part of the dock/side values. */
 .app[data-connective-studio=true]{--cs-guides-h:0px;--cs-dock-h:0px;--cs-sheet-h:0px;--cs-sheet-w:0px}
-@media(max-width:850px){
+@media (max-width:850px), (max-width:980px) and (max-height:520px) and (orientation:landscape){
  .app[data-connective-studio=true]{
   --cs-guides-h:52px;
   --cs-dock-h:calc(65px + env(safe-area-inset-bottom,0px)); /* 8+48+8 padding/button + 1px border */
@@ -87,7 +87,7 @@
 }
 /* Perspective lesson: guides band on desktop, structure sheet on mobile. */
 .cs-guide-lesson{display:none}
-@media(max-width:850px){
+@media (max-width:850px), (max-width:980px) and (max-height:520px) and (orientation:landscape){
  .cs-guide-lesson{display:block;margin-top:14px;padding:10px 12px;background:#251c16;border:1px solid #6a5140;border-radius:8px}
  .cs-guide-lesson p{margin:0 0 8px;font-size:12px;line-height:1.45;color:#f1e2d5}
  .cs-guide-lesson .cs-isolate-perspective{display:block;width:100%;min-height:44px}
@@ -95,7 +95,7 @@
 @media(max-width:850px) and (max-height:700px) and (orientation:portrait){
  .app[data-connective-studio=true]{--cs-sheet-h:min(36dvh,380px)}
 }
-@media(max-width:850px){
+@media (max-width:850px), (max-width:980px) and (max-height:520px) and (orientation:landscape){
  .app[data-connective-studio=true] .topbar{height:58px;flex-basis:58px;padding-left:13px;padding-right:13px}
  .connective-entry{font-size:11px;min-height:42px;padding:8px 11px}
  .app[data-connective-studio=true] .workspace{display:block;position:relative;overflow:hidden}
@@ -136,8 +136,9 @@
 
 .app[data-connective-studio=true] #connective-toggle,
 .app[data-connective-studio=true] #connective-workbench{display:none!important}
-@media(max-width:850px){
- .app[data-connective-studio=true] #atlas-stage{touch-action:none}
+@media (max-width:850px), (max-width:980px) and (max-height:520px) and (orientation:landscape){
+ .app[data-connective-studio=true] #atlas-stage{touch-action:pan-y}
+.app[data-connective-studio=true] #atlas-canvas{touch-action:none}
 }
 @media(prefers-reduced-motion:reduce){
  .app[data-connective-studio=true] *{scroll-behavior:auto!important;transition-duration:.01ms!important}
@@ -157,7 +158,7 @@
 .cs-view-actions button{min-height:44px;background:#31231c;border:1px solid #654d3d;border-radius:6px;padding:8px 10px;font-size:11px;flex:1;color:#e6c7ae}
 
 /* Short landscape phones: the sheet moves beside the model instead of covering it. */
-@media(max-width:850px) and (orientation:landscape) and (max-height:520px){
+@media (max-width:980px) and (orientation:landscape) and (max-height:520px){
  .app[data-connective-studio=true]{
   --cs-sheet-h:0px;
   --cs-sheet-w:calc(min(46%,380px) + env(safe-area-inset-right,0px));
@@ -168,3 +169,135 @@
  .app[data-connective-studio=true] .connective-inspector{top:0;left:auto;right:0;bottom:var(--cs-dock-h);width:var(--cs-sheet-w);height:auto;
   border-radius:15px 0 0 0;border-left:1px solid #6a5140;border-bottom:0;padding-right:calc(17px + env(safe-area-inset-right,0px))}
 }
+
+/* V14 mobile UX: large model + stable peek; Explorer/Details only expand on request. */
+#connective-peek[hidden]{display:none!important}
+.connective-peek,.cs-mobile-location{display:none}
+@media (max-width:850px), (max-width:980px) and (max-height:520px) and (orientation:landscape){
+ .app[data-connective-studio=true]{--cs-guides-h:0px;--cs-sheet-h:86px}
+ .app[data-connective-studio=true][data-connective-sheet=open]{--cs-sheet-h:min(34dvh,290px)}
+ .app[data-connective-studio=true] .topbar{height:51px;flex-basis:51px}
+ .app[data-connective-studio=true] #connective-entry{display:none!important}
+ .app[data-connective-studio=true] .cs-mobile-location{display:block;margin-left:auto;font-size:10px;letter-spacing:.13em;font-weight:700;color:#d5b39c;white-space:nowrap}
+ .app[data-connective-studio=true] .connective-guides{display:none!important}
+ .app[data-connective-studio=true] #atlas-stage{inset:0 0 calc(var(--cs-sheet-h) + var(--cs-dock-h)) 0}
+ .app[data-connective-sheet=peek] .connective-explorer,
+ .app[data-connective-sheet=peek] .connective-inspector{display:none!important}
+ .app[data-connective-sheet=open] .connective-peek{display:none!important}
+ .app[data-connective-studio=true] .connective-peek{
+   display:flex;align-items:center;gap:8px;position:absolute;z-index:13;left:0;right:0;bottom:var(--cs-dock-h);
+   height:var(--cs-sheet-h);min-width:0;padding:9px 12px 11px 15px;border-top:1px solid #665042;
+   background:#201914;box-shadow:0 -8px 25px #100a0888;color:#f0dfd3
+ }
+ .cs-peek-copy{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+ .cs-peek-copy .cs-overline{font-size:9px;letter-spacing:.12em}
+ .cs-peek-copy strong{display:block;font:400 19px/1.2 Georgia,serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .cs-peek-note{font-size:10px;color:#b9a99b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .connective-peek button{flex:0 0 auto;min-height:44px;min-width:54px;border-radius:8px;border:1px solid #876851;color:#e8cfbb;background:#32251e;font-size:11px;font-weight:650;padding:8px}
+ .connective-peek .cs-peek-primary{background:#d6a786;border-color:#e7bd9f;color:#21140e}
+ .cs-mobile-sheet-heading{display:flex;align-items:start;justify-content:space-between;gap:12px}
+ .cs-mobile-sheet-heading h2{font:400 24px/1.1 Georgia,serif;letter-spacing:-.025em;margin:5px 0 10px}
+ .cs-sheet-done{border:1px solid #6c5345;background:#30231d;color:#ebceba;border-radius:7px;min-height:44px;padding:7px 13px;white-space:nowrap}
+ .app[data-connective-studio=true] .connective-explorer,
+ .app[data-connective-studio=true] .connective-inspector{padding:13px 15px 16px;overscroll-behavior:contain}
+ .app[data-connective-studio=true] #connective-search{font-size:16px;min-height:46px;margin:2px 0 10px}
+ .app[data-connective-studio=true] .connective-group h3{margin:6px 0;font-size:9px}
+ .app[data-connective-studio=true] .connective-group button{min-height:48px;padding:9px 7px}
+ .app[data-connective-studio=true] .connective-item-state{font-size:9px;letter-spacing:.035em;margin-top:2px}
+ .app[data-connective-studio=true] .connective-list{gap:5px}
+ .cs-advanced{border-top:1px solid #4c3a2d;margin-top:14px;padding-top:4px}
+ .cs-advanced summary{cursor:pointer;min-height:44px;padding:13px 4px;color:#d6b395;font-size:11px;font-weight:650}
+ .cs-advanced .cs-tissue-section{margin-top:8px;padding-top:13px}
+ .cs-mobile-guides{margin:17px 0;padding:15px 0;border-top:1px solid #554237}
+ .cs-mobile-guides .cs-guide-buttons{display:flex}
+ .cs-mobile-guides .cs-guide-buttons button{white-space:normal;font-size:10px;min-height:44px;padding:7px 4px}
+ .cs-mobile-guides>p{font-size:12px;line-height:1.5;color:#c9b6a6}
+ .cs-other-regions{margin-top:15px}
+ .app[data-connective-studio=true] .connective-inspector header h2{font-size:26px;margin:5px 0 3px}
+ .app[data-connective-studio=true] .connective-inspector .cs-subtitle{margin-bottom:7px}
+ .app[data-connective-studio=true] .cs-inspector-primary{padding-top:0}
+ .app[data-connective-studio=true] .cs-inspector-primary h3{margin:8px 0 4px}
+ .app[data-connective-studio=true] .cs-inspector-primary p{font-size:13px;line-height:1.48}
+ .app[data-connective-studio=true] .cs-inspector-actions{padding:10px 0 12px;gap:6px}
+ .app[data-connective-studio=true] .cs-inspector-actions button{padding:8px 9px;min-height:44px}
+ .app[data-connective-studio=true] .connective-status{font-size:10px;padding:8px 0}
+ .app[data-connective-studio=true] .connective-mobile-nav button:disabled{opacity:.45}
+}
+@media (max-width:980px) and (orientation:landscape) and (max-height:520px){
+ .app[data-connective-studio=true]{--cs-sheet-h:62px;--cs-sheet-w:0px}
+ .app[data-connective-studio=true][data-connective-sheet=open]{--cs-sheet-h:0px;--cs-sheet-w:calc(min(46%,380px) + env(safe-area-inset-right,0px))}
+ .app[data-connective-studio=true] #atlas-stage{inset:0 var(--cs-sheet-w) calc(var(--cs-sheet-h) + var(--cs-dock-h)) 0}
+ .app[data-connective-studio=true] .connective-peek{height:var(--cs-sheet-h);padding-top:5px;padding-bottom:5px}
+ .app[data-connective-studio=true] .cs-peek-copy strong{font-size:16px}
+}
+
+/* iPhone portrait + wide landscape: keep all controls clear of the Dynamic Island/notch,
+ * allow native momentum inside sheets, and preserve a one-thumb viewport. */
+@media (max-width:850px), (max-width:980px) and (max-height:520px) and (orientation:landscape){
+ .app[data-connective-studio=true] .topbar{
+  height:calc(51px + env(safe-area-inset-top,0px));
+  flex-basis:calc(51px + env(safe-area-inset-top,0px));
+  padding-top:env(safe-area-inset-top,0px);
+  padding-left:calc(13px + env(safe-area-inset-left,0px));
+  padding-right:calc(13px + env(safe-area-inset-right,0px));
+ }
+ .app[data-connective-studio=true] .connective-mobile-nav{
+  padding-left:calc(10px + env(safe-area-inset-left,0px));
+  padding-right:calc(10px + env(safe-area-inset-right,0px));
+ }
+ .app[data-connective-studio=true] .connective-peek{
+  padding-left:calc(15px + env(safe-area-inset-left,0px));
+  padding-right:calc(12px + env(safe-area-inset-right,0px));
+ }
+ .app[data-connective-studio=true] .connective-explorer,
+ .app[data-connective-studio=true] .connective-inspector{-webkit-overflow-scrolling:touch}
+}
+
+/* Quiet drag affordance: peek swipes up; expanded sheet header swipes down.
+ * Keep it visual only so taps, list scrolling and screen readers remain unchanged. */
+@media (max-width:850px), (max-width:980px) and (max-height:520px) and (orientation:landscape){
+ .app[data-connective-studio=true] .connective-peek::before,
+ .app[data-connective-studio=true] .cs-mobile-sheet-heading::before,
+ .app[data-connective-studio=true] .cs-inspector-swipe-handle::before{
+  content:'';position:absolute;left:calc(50% - 18px);top:4px;
+  width:36px;height:3px;border-radius:999px;background:#8e7462;pointer-events:none;
+ }
+ .app[data-connective-studio=true] .cs-mobile-sheet-heading,
+ .app[data-connective-studio=true] .cs-inspector-swipe-handle{position:relative;padding-top:9px}
+}
+
+/* V14.2: stable WebGL projection during overlays. Sheets never resize the stage. */
+@media (max-width:850px), (max-width:980px) and (max-height:520px) and (orientation:landscape){
+ .app[data-connective-studio=true] #atlas-stage{
+  inset:0 0 calc(86px + var(--cs-dock-h)) 0!important;
+ }
+ .app[data-connective-studio=true] .connective-spatial-hud{
+  position:absolute;top:39px;left:10px;z-index:11;pointer-events:auto;
+  display:flex;align-items:center;gap:6px;max-width:calc(100% - 20px);
+  padding:5px 6px 5px 10px;border-radius:10px;background:#1c1714d9;
+  border:1px solid #745a46a6;color:#e8d7c9;backdrop-filter:blur(12px);
+ }
+ .connective-spatial-hud .cs-orientation-copy{display:grid;gap:2px;min-width:0}
+ .connective-spatial-hud .cs-orientation-copy strong{font:600 10px/1.2 system-ui,sans-serif;white-space:nowrap;max-width:118px;overflow:hidden;text-overflow:ellipsis}
+ .connective-spatial-hud .cs-orientation-copy small{font-size:9px;color:#b7a397;white-space:nowrap}
+ .connective-spatial-hud button{min-height:36px;min-width:37px;padding:6px 8px;border:1px solid #755b49;border-radius:7px;color:#f3e4d7;background:#352820;font-size:10px}
+ .connective-spatial-hud button:disabled{opacity:.42}
+ .connective-spatial-hud .cs-orbit-arrow{display:inline-block;font-size:15px;color:#dcae8b}
+ .connective-peek .cs-peek-note{max-width:100%;font-size:10px}
+}
+@media (max-width:980px) and (max-height:520px) and (orientation:landscape){
+ .app[data-connective-studio=true] #atlas-stage{inset:0 0 calc(62px + var(--cs-dock-h)) 0!important}
+ .app[data-connective-studio=true] .connective-spatial-hud{top:4px;left:calc(8px + env(safe-area-inset-left,0px))}
+}
+@media (min-width:981px), (min-width:851px) and (min-height:521px){
+ .connective-spatial-hud{display:none}
+}
+
+@media (max-width:850px), (max-width:980px) and (max-height:520px) and (orientation:landscape){
+ .connective-spatial-hud[hidden]{display:none!important}
+ .connective-spatial-hud .cs-overview-locator{width:24px;height:32px;position:relative;flex:none;border:1px solid #a58c7c;border-radius:45% 45% 38% 38%;opacity:.85}
+ .connective-spatial-hud .cs-overview-locator i{width:5px;height:5px;position:absolute;background:#f3bf96;transform:translate(-50%,-50%);border-radius:50%;box-shadow:0 0 0 2px #25201c}
+}
+
+/* V14.2: prevent browser scroll anchoring from moving updated inspector content. */
+.app[data-connective-studio=true] #connective-right{overflow-anchor:none}

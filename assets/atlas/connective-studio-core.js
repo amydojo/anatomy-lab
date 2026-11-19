@@ -68,9 +68,10 @@ const clone=x=>JSON.parse(JSON.stringify(x));
    provider?.setTissueVisibility?.(type,!!visible);emit();return true;}
   function setQuery(value){query=String(value||'').slice(0,150);emit();}
   function filtered(){const q=query.toLocaleLowerCase().trim();return all().filter(x=>x.region===region&&(!q||[x.name,x.tissueType,x.location,x.id].join(' ').toLocaleLowerCase().includes(q)));}
-  function selectStructure(id){const item=get(id);if(!item||item.region!==region)return false;
+  function selectStructure(id,options){const item=get(id);if(!item||item.region!==region)return false;
    selectedId=id;
-   if(item.selectable)provider?.selectStructure?.(id);
+   // A pick already performed by the canvas must not be selected/rendered a second time.
+   if(item.selectable&&options?.syncRenderer!==false)provider?.selectStructure?.(id);
    emit();return item;}
   function focusStructure(id){const item=get(id);if(!item||!item.selectable)return false;
    return !!provider?.focusStructure?.(id);

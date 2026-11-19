@@ -7,6 +7,7 @@
  if(!atlas||!domain||!app)return;
  const $=id=>document.getElementById(id);
  const esc=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const isMobileLayout=()=>window.matchMedia('(max-width:850px), (max-width:980px) and (max-height:520px) and (orientation:landscape)').matches;
  const typeNames={bones:'Bones',muscles:'Muscles',ligaments:'Ligaments',tendons:'Tendons',fibrocartilage:'Fibrocartilage'};
  const regionNames={knee:'Knee',shoulder:'Shoulder',hip:'Hip',ankle:'Ankle',wrist:'Wrist',spine:'Spine'};
  let intelligence=null,knowledgeError='Loading anatomical references…';
@@ -20,7 +21,7 @@
    geometryEvidence=data;render();
   }).catch(err=>{geometryEvidenceError='Provenance unavailable: '+err.message+'; NOT VERIFIED';render();});
  }
- let opened=false,mobilePanel='structures',expanded=false,previousFocus=null,statusMessage='',isChangingRegion=false,regionTicket=0;
+ let opened=false,mobilePanel='structures',mobileSheet='peek',expanded=false,previousFocus=null,statusMessage='',isChangingRegion=false,regionTicket=0;
  const renderProvider=()=>window.BodyConnectiveGeometryProvider||null;
  function knowledgeRows(){
  if(!intelligence)return window.BodyConnectiveMode?.records?.().map(r=>{
@@ -63,7 +64,13 @@ const studio=domain.create({provider});
   const ids=s.mode==='isolate'&&s.isolateId?[s.isolateId]:s.mode==='compare'?s.comparison:[];
   // The baseline renderer can filter existing meshes, not fabricate missing ones.
   if(s.region==='knee')atlas.connectiveEnable?.(true);
-  atlas.connectiveFilter?.(s.visibility,ids,s.ghost&&(s.mode==='isolate'||s.mode==='compare'));
+  const related=s.records.find(r=>r.id===s.isolateId)?.relationships||[];
+  // Only existing mesh IDs are used. Scientific status is unchanged.
+  const landmarks=s.mode==='isolate'?[...new Set([...related,...(
+   s.isolateId==='patellar-ligament'?['patella','tibia']:
+   s.isolateId==='quadriceps-tendon'?['patella','femur']:
+   ['femur','tibia'])])]:[];
+  atlas.connectiveFilter?.(s.visibility,ids,s.ghost&&(s.mode==='isolate'||s.mode==='compare'),landmarks);
  }
  // Avoid entering a detail scene before the base atlas source has initialized.
  function chooseWhenReady(id){
@@ -77,7 +84,7 @@ const studio=domain.create({provider});
  }
  function regionNav(id){
   if(!studio.setRegion(id))return;
-  expanded=false;statusMessage='';
+  expanded=false;statusMessage='';mobileSheet='peek';
   if(id==='spine'){statusMessage='Spine connective mesh integration pending. Thorax is shown as regional context.';chooseWhenReady('thorax');}
   else chooseWhenReady(id);
   isChangingRegion=true;
@@ -89,7 +96,7 @@ const studio=domain.create({provider});
   app.dataset.connectiveStudio='true';
   $('connective-entry').setAttribute('aria-pressed','true');
   $('connective-entry').textContent='← Return to atlas';
-  mobilePanel='structures';studio.setRegion('knee');
+  mobilePanel='structures';mobileSheet='peek';studio.setRegion('knee');
   atlas.setFrameOwner?.('studio');atlas.setMobileFrame?.(false,'studio');
   window.dispatchEvent(new CustomEvent('body:connective-studio-open'));
   chooseWhenReady('knee');
@@ -103,9 +110,11 @@ const studio=domain.create({provider});
   atlas.connectiveFilter?.(null,null,false);
   atlas.connectiveEnable?.(false);
   atlas.setFrameOwner?.(null);atlas.setMobileFrame?.(false);
+  // Deep V14 magnification must not strand the conservative V13 camera after exit.
+  if(atlas.getState().camera.zoom>2.1)atlas.recenter?.();
   atlas.setInspectorFrame?.(false,true);
   $('connective-left').hidden=true;$('connective-right').hidden=true;
-  $('connective-guides').hidden=true;$('connective-mobile-nav').hidden=true;
+  $('connective-guides').hidden=true;$('connective-mobile-nav').hidden=true;$('connective-peek').hidden=true;
   window.dispatchEvent(new CustomEvent('body:connective-studio-closed'));
   if(previousFocus&&previousFocus.isConnected&&previousFocus!==$('connective-entry'))previousFocus.focus();
  }
@@ -124,6 +133,50 @@ const studio=domain.create({provider});
  workspace.append(guides); // sibling of the stage so a mobile band can sit outside the model rectangle
  const mobile=document.createElement('nav');mobile.id='connective-mobile-nav';mobile.className='connective-mobile-nav';mobile.hidden=true;
  mobile.setAttribute('aria-label','Connective Studio tools');workspace.append(mobile);
+ const peek=document.createElement('div');peek.id='connective-peek';peek.className='connective-peek';peek.hidden=true;peek.setAttribute('role','group');peek.setAttribute('aria-label','Current anatomy selection');workspace.append(peek);
+ const hud=document.createElement('nav');hud.id='connective-spatial-hud';hud.className='connective-spatial-hud';
+ hud.hidden=true;hud.setAttribute('aria-label','Spatial orientation and camera navigation');workspace.append(hud);
+ function updateOrientation(camera){
+  if(!opened||!camera)return;
+  const yaw=((camera.yaw*180/Math.PI)%360+360)%360;
+  const arrow=hud.querySelector('.cs-orbit-arrow'),label=hud.querySelector('.cs-orbit-angle');
+  if(arrow)arrow.style.transform='rotate('+yaw.toFixed(1)+'deg)';
+  if(label){
+   // Display magnification relative to the deterministic Fit Joint camera,
+   // not an anatomical measurement or a fictitious microscope power.
+   const w=Math.max(1,Number(camera.width)||1),h=Math.max(1,Number(camera.height)||1);
+   const current=Math.min(w/3.25,h/Math.max(.2,camera.frameSpan))*camera.zoom;
+   const fitted=Math.min(w/3.25,h/2.55)*1.7;
+   const ratio=current/Math.max(.001,fitted);
+   label.textContent=(ratio>1.45?'DETAIL':'JOINT')+' · '+ratio.toFixed(1)+'× FIT · '+Math.round(yaw)+'°';
+  }
+ }
+ window.__BODY_V14_ORIENTATION_UPDATE__=updateOrientation;
+ window.addEventListener('body:camera-transaction',()=>{
+  if(!opened)return;
+  const back=hud.querySelector('[data-cs-action="back-view"]');
+  if(back)back.disabled=!atlas.connectiveNavState?.().canBack;
+ });
+ function renderHud(s,chosen){
+  hud.hidden=!isMobileLayout()||s.region!=='knee';
+  if(hud.hidden){hud.innerHTML='';return;}
+  const nav=atlas.connectiveNavState?.(s.selectedId),camera=nav?.camera;
+  const detail=camera&&(camera.zoom>2.7||camera.frameSpan<1.75);
+  const joint=nav?.jointBounds,at=nav?.selectedBounds;
+  let marker='';
+  if(joint&&at&&joint.max[0]>joint.min[0]&&joint.max[1]>joint.min[1]){
+   const x=Math.max(5,Math.min(95,100*(at.center.x-joint.min[0])/(joint.max[0]-joint.min[0])));
+   const y=Math.max(5,Math.min(95,100*(1-(at.center.y-joint.min[1])/(joint.max[1]-joint.min[1]))));
+   marker='<span class="cs-overview-locator" aria-label="Approximate position in illustrative joint mesh"><i style="left:'+x.toFixed(1)+'%;top:'+y.toFixed(1)+'%"></i></span>';
+  }
+  hud.innerHTML='<span class="cs-orbit-arrow" aria-hidden="true">↑</span>'+marker+
+   '<span class="cs-orientation-copy"><strong>'+esc(chosen?.name||'RIGHT KNEE')+'</strong><small class="cs-orbit-angle">'+(detail?'DETAIL · ':'JOINT · ')+'ORBIT</small></span>'+
+   '<button type="button" data-cs-action="back-view" '+(nav?.canBack?'':'disabled')+' aria-label="Back to previous camera view">Back</button>'+
+   '<button type="button" data-cs-action="fit-joint" aria-label="Fit entire knee joint">Fit</button>';
+  updateOrientation(camera);
+ }
+
+ const locationLabel=document.createElement('span');locationLabel.id='cs-mobile-location';locationLabel.className='cs-mobile-location';app.querySelector('.topactions').prepend(locationLabel);
  const types=()=>domain.types.map(t=>'<button type="button" data-cs-tissue="'+t+'" aria-pressed="'+studio.snapshot().visibility[t]+'" class="connective-tissue"><span>'+typeNames[t]+'</span><span aria-hidden="true">'+(studio.snapshot().visibility[t]?'●':'○')+'</span></button>').join('');
  function regionSelector(){
   const s=studio.snapshot();
@@ -158,14 +211,14 @@ const studio=domain.create({provider});
    s.comparison.map(id=>{const r=intelligence?.getAdapter(id)?.record;
     return '<article><strong>'+esc(r?.name||id)+'</strong><p>'+esc(r?.primaryFunction||'Scientific description unavailable.')+'</p></article>';
    }).join('')+'</section>':'';
- return '<header><span class="cs-overline">03 / ANATOMICAL INSPECTOR</span><h2>'+esc(item.name)+'</h2><p class="cs-subtitle">'+esc(typeNames[item.tissueType])+' / '+esc(regionNames[item.region])+'</p></header>'+
+ return '<header class="cs-inspector-swipe-handle"><span class="cs-overline">03 / ANATOMICAL INSPECTOR</span><h2>'+esc(item.name)+'</h2><p class="cs-subtitle">'+esc(typeNames[item.tissueType])+' / '+esc(regionNames[item.region])+'</p></header>'+
  '<div class="connective-status" role="status">'+esc(status)+'</div><p class="cs-evidence-note">'+esc(evidenceStatus)+'</p><p class="cs-evidence-note" data-geometry-proof="unverified">'+esc(geometryDisclosure)+'</p>'+comparison+
  '<section class="cs-inspector-primary"><h3>PRIMARY FUNCTION</h3><p>'+esc(rec?.primaryFunction||item.significance||'Scientific record unavailable.')+'</p>'+
  '<h3>RELEVANT MOVEMENTS</h3><p>'+esc(rec?.movements?.join(' · ')||'Not documented.')+'</p></section>'+
- '<div class="cs-inspector-actions"><button type="button" data-cs-action="focus" '+(!item.selectable?'disabled':'')+'>Focus</button>'+
+ '<div class="cs-inspector-actions"><button type="button" data-cs-action="locate" '+(!item.selectable?'disabled':'')+'>Locate</button><button type="button" data-cs-action="focus" '+(!item.selectable?'disabled':'')+'>Dive in</button>'+
  '<button type="button" data-cs-action="isolate" '+(!item.selectable?'disabled':'')+'>Isolate</button>'+
  (compareReady?'<button type="button" data-cs-action="compare">Compare ACL / PCL</button>':'')+
- '<button type="button" data-cs-action="context">Context</button></div><button type="button" class="cs-ghost" data-cs-action="ghost" aria-pressed="'+s.ghost+'">Surrounding anatomy '+(s.ghost?'ghosted':'hidden')+'</button>'+
+ '<button type="button" data-cs-action="context">Context</button></div><button type="button" class="cs-ghost" data-cs-action="ghost" aria-pressed="'+s.ghost+'">'+(s.ghost?'Hide context':'Show context')+'</button>'+
  '<button type="button" class="cs-disclosure" data-cs-action="details" aria-expanded="'+expanded+'">'+(expanded?'Hide scientific details −':'Attachments, relationships & evidence +')+'</button>'+
  (expanded?'<section class="cs-inspector-depth"><h3>ATTACHMENTS</h3><p>'+esc(rec?[rec.attachments?.proximal,rec.attachments?.distal,rec.attachments?.notes].filter(Boolean).join(' → '):'Knowledge unavailable')+'</p>'+
  '<h3>RELATED BONES</h3><p>'+esc(rec?.relatedBones?.join(', ')||'Not documented')+'</p>'+
@@ -188,58 +241,99 @@ const studio=domain.create({provider});
  }
  function renderGuides(){
   const s=studio.snapshot();
-  guides.hidden=!opened||s.region!=='knee';
-  guides.innerHTML='<span class="cs-overline">KNEE / THREE PERSPECTIVES</span><div class="cs-guide-buttons">'+domain.guides.map(g=>'<button type="button" data-cs-guide="'+g.id+'" aria-pressed="'+(s.guideId===g.id)+'">'+esc(g.title)+'</button>').join('')+'</div>'+guideLesson(s,window.innerWidth>850);
+  const showDesktopGuides=opened&&s.region==='knee'&&!isMobileLayout();
+  guides.hidden=!showDesktopGuides;
+  if(!showDesktopGuides){guides.innerHTML='';return;}
+  guides.innerHTML='<span class="cs-overline">KNEE / THREE PERSPECTIVES</span><div class="cs-guide-buttons">'+domain.guides.map(g=>'<button type="button" data-cs-guide="'+g.id+'" aria-pressed="'+(s.guideId===g.id)+'">'+esc(g.title)+'</button>').join('')+'</div>'+guideLesson(s,!isMobileLayout());
  }
  function render(){
   if(!opened)return;
   const search=document.getElementById('connective-search');
+  const priorAdvanced=left.querySelector('.cs-advanced')?.open;
+  const priorLeftScroll=left.scrollTop,priorRightScroll=right.scrollTop;
+  const formerSelection=right.dataset.structureId||'',formerRegion=right.dataset.region||'';
   const restoreSearch=search&&document.activeElement===search;
   const caret=restoreSearch?search.selectionStart:null;
   const s=studio.snapshot();
   left.hidden=false;right.hidden=false;mobile.hidden=false;
-  left.innerHTML='<header class="cs-panel-header"><span class="cs-overline">BODY / LIVE · V14</span><h2>Connective Studio</h2><p>Explore what holds the body together.</p></header>'+
-   regionSelector()+(window.innerWidth<=850&&s.guideId&&s.region==='knee'?'<section class="cs-guide-lesson" aria-label="Selected perspective">'+guideLesson(s)+'</section>':'')+
-   '<section class="cs-tissue-section"><div class="cs-section-title">01 / VISIBLE TISSUES</div><div class="connective-tissue-grid" role="group" aria-label="Independently toggle visible tissues">'+types()+'</div><button type="button" class="cs-all-btn" data-cs-action="all-tissues">All tissues visible</button><div class="cs-view-actions"><button type="button" data-cs-action="all">Show all</button>'+(window.innerWidth>850?'<button type="button" data-cs-action="reset">Reset view</button>':'')+'</div></section>'+
+  const mobileScreen=isMobileLayout();
+  app.dataset.connectiveSheet=mobileScreen?mobileSheet:'open';
+  const desktopExplorer='<header class="cs-panel-header"><span class="cs-overline">BODY / LIVE · V14</span><h2>Connective Studio</h2><p>Explore what holds the body together.</p></header>'+
+   regionSelector()+'<section class="cs-tissue-section"><div class="cs-section-title">01 / VISIBLE TISSUES</div><div class="connective-tissue-grid" role="group" aria-label="Independently toggle visible tissues">'+types()+'</div><button type="button" class="cs-all-btn" data-cs-action="all-tissues">All tissues visible</button><div class="cs-view-actions"><button type="button" data-cs-action="all">Show all</button><button type="button" data-cs-action="reset">Reset view</button></div></section>'+
    '<section class="cs-structure-section"><div class="cs-section-title">02 / STRUCTURE EXPLORER</div><label for="connective-search" class="cs-visually-hidden">Search structures</label><input id="connective-search" type="search" placeholder="Find a structure…" value="'+esc(s.query)+'" autocomplete="off"/>'+groupList()+'</section>'+
    '<footer class="cs-panel-footer">Structure information does not imply an available or anatomically verified mesh.</footer>';
+  const mobileGuideContent=s.region==='knee'?'<section class="cs-mobile-guides"><span class="cs-overline">EXPLORE BY FUNCTION</span><div class="cs-guide-buttons">'+domain.guides.map(g=>'<button type="button" data-cs-guide="'+g.id+'" aria-pressed="'+(s.guideId===g.id)+'">'+esc(g.title)+'</button>').join('')+'</div>'+guideLesson(s)+'</section>':'';
+  const phoneExplorer='<header class="cs-mobile-sheet-heading"><div><span class="cs-overline">'+esc(regionNames[s.region])+' / EXPLORE</span><h2>Find a structure</h2></div><button type="button" class="cs-sheet-done" data-cs-action="collapse">Done ↓</button></header>'+
+    '<label for="connective-search" class="cs-visually-hidden">Search structures</label><input id="connective-search" type="search" placeholder="Search the anatomy…" value="'+esc(s.query)+'" autocomplete="off"/>'+groupList()+
+    '<details class="cs-advanced"><summary>Layers, perspectives & other regions</summary><section class="cs-tissue-section"><div class="cs-section-title">VISIBLE TISSUES</div><div class="connective-tissue-grid" role="group" aria-label="Independently toggle visible tissues">'+types()+'</div><button type="button" class="cs-all-btn" data-cs-action="all-tissues">All tissues visible</button><div class="cs-view-actions"><button type="button" data-cs-action="all">Show all</button></div></section>'+
+    mobileGuideContent+'<section class="cs-other-regions">'+regionSelector()+'<p class="cs-muted">Other regions are reference-only until their connective meshes are available.</p></section></details>'+
+    '<footer class="cs-panel-footer">Knee connective surfaces are illustrative, not clinically verified.</footer>';
+  left.innerHTML=mobileScreen?phoneExplorer:desktopExplorer;
+  if(priorAdvanced&&mobileScreen&&left.querySelector('.cs-advanced'))left.querySelector('.cs-advanced').open=true;
   right.innerHTML=inspector();
+  left.scrollTop=priorLeftScroll;
+  right.scrollTop=formerSelection===(s.selectedId||'')&&formerRegion===s.region?priorRightScroll:0;
+  right.dataset.structureId=s.selectedId||'';right.dataset.region=s.region;
+  if(mobileScreen){const primary=right.querySelector('.cs-inspector-primary'),actions=right.querySelector('.cs-inspector-actions'),status=right.querySelector('.connective-status');if(primary&&actions&&status)status.before(primary,actions);}
   if(restoreSearch){
     const next=document.getElementById('connective-search');
     next?.focus({preventScroll:true});
     if(caret!=null)next?.setSelectionRange(Math.min(caret,next.value.length),Math.min(caret,next.value.length));
   }
   renderGuides();
-  mobile.innerHTML='<button type="button" data-cs-panel="structures" aria-pressed="'+(mobilePanel==='structures')+'">Structures</button><button type="button" data-cs-panel="inspector" aria-pressed="'+(mobilePanel==='inspector')+'">Inspect'+(s.selectedId?' · 1':'')+'</button><button type="button" data-cs-action="reset">Reset</button><button type="button" data-cs-action="close">Exit</button>';
+  const chosen=s.selectedId?studio.getStructure(s.selectedId):null;
+  locationLabel.textContent=(regionNames[s.region]||s.region).toUpperCase()+' / CONNECTIVE';
+  peek.hidden=!mobileScreen;
+  renderHud(s,chosen);
+  if(mobileScreen&&mobileSheet==='peek'){
+   const summary=chosen?.scientific?.record?.primaryFunction||chosen?.significance||'';
+   peek.innerHTML='<div class="cs-peek-copy"><span class="cs-overline">'+esc(regionNames[s.region])+(chosen?' / SELECTED':' / EXPLORE')+'</span><strong>'+esc(chosen?.name||'Explore the anatomy')+'</strong><span class="cs-peek-note">'+(chosen?esc(summary.slice(0,115)):'Pinch to zoom · Drag to rotate')+'</span></div>'+
+    (chosen?.selectable?'<button type="button" data-cs-action="locate" aria-label="Locate structure in its joint">Locate</button>':'')+
+    (chosen?.selectable?'<button type="button" data-cs-action="focus" aria-label="Dive closer to selected anatomy">Dive</button>':'')+
+    '<button type="button" class="cs-peek-primary" data-cs-action="'+(chosen?'peek-details':'peek-browse')+'">'+(chosen?'Details':'Browse')+'</button>';
+  }
+  if(mobileScreen&&mobileSheet!=='peek')peek.innerHTML='';
+  mobile.innerHTML='<button type="button" data-cs-panel="structures" aria-pressed="'+(mobileSheet==='open'&&mobilePanel==='structures')+'" aria-expanded="'+(mobileSheet==='open'&&mobilePanel==='structures')+'" aria-controls="connective-left">Explore</button><button type="button" data-cs-panel="inspector" aria-pressed="'+(mobileSheet==='open'&&mobilePanel==='inspector')+'" aria-expanded="'+(mobileSheet==='open'&&mobilePanel==='inspector')+'" aria-controls="connective-right" '+(s.selectedId?'':'disabled')+'>Details</button><button type="button" data-cs-action="reset">Reset</button><button type="button" data-cs-action="close">Exit</button>';
   app.dataset.connectivePanel=mobilePanel;
   const hasGeometry=s.records.some(r=>r.region===s.region&&r.selectable);
   const status=!intelligence?knowledgeError:(hasGeometry?'Connective geometry shown for education; geometry verification pending':'No registered connective geometry in this region');
   const stage=$('scene-status');
   if(stage)stage.textContent=statusMessage||status.toUpperCase();
-  if(window.innerWidth>850)atlas.setInspectorFrame?.(false,true);
+  if(!isMobileLayout())atlas.setInspectorFrame?.(false,true);
  }
  function select(id){
+  const onPhone=isMobileLayout();
+  if(onPhone)mobileSheet='peek'; // settle the sheet BEFORE the selection subscription renders
   const record=studio.selectStructure(id);if(!record)return;
-  expanded=false;mobilePanel='inspector';
-  if(record.selectable)studio.focusStructure(id);
+  expanded=false;
+  if(!onPhone)mobilePanel='inspector'; // Selection does not move the camera.
   render();
  }
+ // Immersive commands take you back to the body, not into a shrinking sheet.
+ // Collapse BEFORE calculating camera framing so Dive in uses the actual visible canvas size.
+ function revealModel(){if(isMobileLayout()&&mobileSheet!=='peek'){mobileSheet='peek';render();}}
  function perform(action){
   const s=studio.snapshot();
   if(action==='close'){closeStudio();return;}
+  if(action==='collapse'){mobileSheet='peek';render();return;}
+  if(action==='peek-browse'){mobilePanel='structures';mobileSheet='open';render();return;}
+  if(action==='peek-details'){mobilePanel='inspector';mobileSheet='open';render();return;}
   if(action==='details'){expanded=!expanded;render();return;}
-  if(action==='reset'){studio.resetView();atlas.recenter?.();render();return;}
-  if(action==='focus'){if(s.selectedId)studio.focusStructure(s.selectedId);return;}
-  if(action==='isolate'){if(s.selectedId)studio.isolateStructure(s.selectedId);return;}
-  if(action==='compare'){studio.compareStructures(['anterior-cruciate-ligament','posterior-cruciate-ligament']);return;}
-  if(action==='ghost'){studio.setGhost(!s.ghost);return;}
-  if(action==='all'){studio.showAll();return;}
+  if(action==='reset'){mobileSheet='peek';mobilePanel='structures';studio.resetView();render();return;}
+  if(action==='back-view'){atlas.connectiveNavAction?.('back');render();return;}
+  if(action==='fit-joint'){atlas.connectiveNavAction?.('fit');render();return;}
+  if(action==='locate'){if(s.selectedId){revealModel();atlas.connectiveNavAction?.('locate',s.selectedId);render();}return;}
+  if(action==='focus'){if(s.selectedId){revealModel();atlas.connectiveNavAction?.('dive',s.selectedId);render();}return;}
+  if(action==='isolate'){if(s.selectedId){revealModel();studio.isolateStructure(s.selectedId);}return;}
+  if(action==='compare'){revealModel();studio.compareStructures(['anterior-cruciate-ligament','posterior-cruciate-ligament']);return;}
+  if(action==='ghost'){revealModel();studio.setGhost(!s.ghost);return;}
+  if(action==='all'){revealModel();studio.showAll();return;}
   if(action==='isolate-guide'){
    const ids=(intelligence?.getExploration(s.guideId)?.structureIds||[]).filter(id=>studio.getStructure(id)?.selectable);
-   if(ids.length>=2)studio.compareStructures(ids);else if(ids.length===1)studio.isolateStructure(ids[0]);
+   if(ids.length){revealModel();if(ids.length>=2)studio.compareStructures(ids);else studio.isolateStructure(ids[0]);}
    return;
   }
-  if(action==='context'){studio.revealContext();return;}
+  if(action==='context'){revealModel();studio.revealContext();return;}
   if(action==='all-tissues'){for(const t of domain.types)studio.setTissueVisibility(t,true);return;}
  }
  workspace.addEventListener('click',e=>{
@@ -248,22 +342,37 @@ const studio=domain.create({provider});
   if(btn.dataset.csSelect){select(btn.dataset.csSelect);return;}
   if(btn.dataset.csTissue){const s=studio.snapshot();studio.setTissueVisibility(btn.dataset.csTissue,!s.visibility[btn.dataset.csTissue]);return;}
   if(btn.dataset.csGuide){studio.chooseGuide(btn.dataset.csGuide);return;}
-  if(btn.dataset.csPanel){mobilePanel=btn.dataset.csPanel;render();return;}
+  if(btn.dataset.csPanel){if(isMobileLayout())mobileSheet=mobileSheet==='open'&&mobilePanel===btn.dataset.csPanel?'peek':'open';mobilePanel=btn.dataset.csPanel;render();return;}
   if(btn.dataset.csAction)perform(btn.dataset.csAction);
  });
+ // Safari-native sheet gestures: swipe up on the peek to browse/details, swipe down
+ // on a sheet HEADER to return to the specimen. Never steal scrolling or button touches.
+ let sheetGesture=null;
+ workspace.addEventListener('touchstart',e=>{
+  if(!opened||!isMobileLayout()||e.touches.length!==1||e.target.closest('button,input,textarea,select,a,summary'))return;
+  const origin=e.target.closest('#connective-peek,.cs-mobile-sheet-heading,.cs-inspector-swipe-handle');
+  if(!origin)return;
+  const t=e.touches[0];sheetGesture={x:t.clientX,y:t.clientY,peek:origin.id==='connective-peek'};
+ },{passive:true});
+ workspace.addEventListener('touchend',e=>{
+  const g=sheetGesture;sheetGesture=null;
+  if(!g||!opened||!isMobileLayout()||e.changedTouches.length!==1)return;
+  const t=e.changedTouches[0],dx=t.clientX-g.x,dy=t.clientY-g.y;
+  if(Math.abs(dy)<52||Math.abs(dy)<Math.abs(dx)*1.3)return;
+  if(g.peek&&dy<0){mobilePanel=studio.snapshot().selectedId?'inspector':'structures';mobileSheet='open';render();}
+  else if(!g.peek&&dy>0){mobileSheet='peek';render();}
+ },{passive:true});
+ workspace.addEventListener('touchcancel',()=>{sheetGesture=null;},{passive:true});
  workspace.addEventListener('change',e=>{if(opened&&e.target.id==='connective-region')regionNav(e.target.value);});
  workspace.addEventListener('input',e=>{
   if(!opened||e.target.id!=='connective-search')return;
   studio.setQuery(e.target.value);
-  const list=$('connective-structure-list'),replacement=document.createElement('div');
-  replacement.innerHTML=groupList();
-  if(list)list.replaceWith(replacement.firstChild);
  });
  topButton.addEventListener('click',()=>opened?closeStudio():openStudio());
  document.addEventListener('keydown',e=>{
   if(!opened||e.altKey||e.ctrlKey||e.metaKey)return;
   const target=e.target;
-  if(e.key==='Escape'){if(mobilePanel==='inspector'){mobilePanel='structures';render();}else closeStudio();e.stopImmediatePropagation();e.preventDefault();return;}
+  if(e.key==='Escape'){if(isMobileLayout()&&mobileSheet==='open'){mobileSheet='peek';render();}else if(mobilePanel==='inspector'&&!isMobileLayout()){mobilePanel='structures';render();}else closeStudio();e.stopImmediatePropagation();e.preventDefault();return;}
   if(target?.matches?.('input,textarea,select,[contenteditable]'))return;
   if(e.key==='/'&&!e.shiftKey){e.preventDefault();$('connective-search')?.focus();}
  },true);
@@ -271,13 +380,28 @@ const studio=domain.create({provider});
   if(!opened)return;
   const id=event.detail?.id;
   if(id&&studio.snapshot().selectedId!==id&&studio.getStructure(id)){
-   studio.selectStructure(id);expanded=false;mobilePanel='inspector';render();
+   if(isMobileLayout())mobileSheet='peek';else mobilePanel='inspector';
+   studio.selectStructure(id,{syncRenderer:false});expanded=false;render();
   }
  });
  window.addEventListener('body:region-ready',()=>{if(opened){isChangingRegion=false;statusMessage='';refreshRenderer();render();}});
  window.addEventListener('body:connective-geometry-ready',()=>{if(opened){refreshRenderer();render();}});
  window.addEventListener('resize',()=>{if(opened){atlas.setMobileFrame?.(false,'studio');render();}},{passive:true});
- studio.subscribe(()=>{if(opened){refreshRenderer();render();}});
+ // Avoid WebGL redraws and replacing the search field on every keystroke.
+ let lastGeometryKey=null,lastQuery=null;
+ studio.subscribe(s=>{
+  if(!opened)return;
+  const geometryKey=JSON.stringify([s.region,s.mode,s.isolateId,s.comparison,s.ghost,s.visibility]);
+  const changedGeometry=geometryKey!==lastGeometryKey,queryOnly=!changedGeometry&&s.query!==lastQuery;
+  lastGeometryKey=geometryKey;lastQuery=s.query;
+  if(queryOnly&&document.activeElement?.id==='connective-search'){
+   const list=$('connective-structure-list'),temp=document.createElement('div');temp.innerHTML=groupList();
+   if(list)list.replaceWith(temp.firstChild);
+   return;
+  }
+  if(changedGeometry)refreshRenderer();
+  render();
+ });
 if(window.BodyConnectiveIntelligence){
  window.BodyConnectiveIntelligence.load({knowledgeUrl:'/atlas/assets/v14-connective-knowledge.json',coverageUrl:'/atlas/assets/connective-coverage.json'})
  .then(engine=>{intelligence=engine;knowledgeError='';studio.setProvider(provider);if(opened){refreshRenderer();render();}})
@@ -285,6 +409,6 @@ if(window.BodyConnectiveIntelligence){
 }else knowledgeError='Anatomical intelligence module missing.';
 window.__BODY_CONNECTIVE_INTELLIGENCE__=()=>intelligence;
  // Public entrypoint for integrations and automated tests; no action is taken on import.
- window.BodyConnectiveUI=Object.freeze({open:openStudio,close:closeStudio,isOpen:()=>opened,select,region:regionNav,panel:()=>mobilePanel,refresh:render});
+ window.BodyConnectiveUI=Object.freeze({open:openStudio,close:closeStudio,isOpen:()=>opened,select,region:regionNav,panel:()=>mobilePanel,sheet:()=>mobileSheet,refresh:render});
  if(new URLSearchParams(location.search).get('studio')==='connective')openStudio();
 })();

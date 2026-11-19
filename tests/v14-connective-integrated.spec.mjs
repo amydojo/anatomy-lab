@@ -6,7 +6,10 @@ for(const width of [320,375,390,430]){
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.goto('/atlas/?studio=connective');
   await expect.poll(()=>page.evaluate(()=>window.__BODY_ATLAS__.getState().renderer.connectiveMeshes)).toBe(8);
+  await page.locator('#connective-mobile-nav [data-cs-panel="structures"]').click();
   await page.locator('[data-cs-select="anterior-cruciate-ligament"]').click();
+  await expect(page.locator('#connective-peek')).toBeVisible();
+  await page.locator('#connective-mobile-nav [data-cs-panel="inspector"]').click();
   await expect(page.locator('#connective-right')).toContainText('ILLUSTRATIVE');
   const data=await page.evaluate(()=>{
     const canvas=document.querySelector('#atlas-canvas').getBoundingClientRect(),
