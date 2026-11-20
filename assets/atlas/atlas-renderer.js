@@ -50,7 +50,10 @@ function create(canvas,onContextLost=()=>{}){
   if(!p?.verts?.length)return null;
   const lo=[Infinity,Infinity,Infinity],hi=[-Infinity,-Infinity,-Infinity];
   for(const v of p.verts)for(let k=0;k<3;k++){lo[k]=Math.min(lo[k],v[k]);hi[k]=Math.max(hi[k],v[k]);}
-  return {center:{x:(lo[0]+hi[0])/2,y:(lo[1]+hi[1])/2,z:(lo[2]+hi[2])/2},radius:Math.max(.08,Math.hypot(hi[0]-lo[0],hi[1]-lo[1],hi[2]-lo[2])/2)};
+  return {center:{x:(lo[0]+hi[0])/2,y:(lo[1]+hi[1])/2,z:(lo[2]+hi[2])/2},radius:Math.max(.08,Math.hypot(hi[0]-lo[0],hi[1]-lo[1],hi[2]-lo[2])/2),
+   // Source-derived world-coordinate AABB for conservative screen-space framing.
+   // Existing radius/center consumers retain their exact semantics.
+   min:[...lo],max:[...hi]};
  }
  let registry=window.BodyAtlasRegistry.create();
  const detail=new Map(),detailData=new Map();let shoulderPivot=[-1.1,1.9,0],shoulderGraph=null;let destroyed=false,rebuilding=false,recoveryScheduled=false;let uniformCache=new Map();const boundsCache=new Map();

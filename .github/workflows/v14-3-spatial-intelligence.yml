@@ -1,0 +1,51 @@
+name: V14.3 spatial intelligence isolated gate
+on:
+  push:
+    branches: ['feat/v14-3-spatial-intelligence']
+  pull_request:
+    branches: ['fix/v14-2-spatial-navigation-repair']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: v14-3-spatial-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  science-and-unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: node scripts/audit_v14_connective_sources.cjs
+      - run: node scripts/validate_connective_coverage.cjs
+      - run: node scripts/validate_v14_connective.mjs
+      - run: npm test
+  focused-browser:
+    needs: science-and-unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [desktop-chromium, chromium-mobile, webkit-mobile]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: npm run test:e2e -- --project=${{ matrix.browser }} tests/v14-spatial-intelligence.spec.mjs tests/v14-spatial-repair.spec.mjs tests/v14-mobile-ux.spec.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v14-3-spatial-${{ matrix.browser }}
+          path: |
+            artifacts/
+            test-results/
+          if-no-files-found: ignore
