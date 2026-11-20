@@ -136,19 +136,39 @@ const studio=domain.create({provider});
  const peek=document.createElement('div');peek.id='connective-peek';peek.className='connective-peek';peek.hidden=true;peek.setAttribute('role','group');peek.setAttribute('aria-label','Current anatomy selection');workspace.append(peek);
  const hud=document.createElement('nav');hud.id='connective-spatial-hud';hud.className='connective-spatial-hud';
  hud.hidden=true;hud.setAttribute('aria-label','Spatial orientation and camera navigation');workspace.append(hud);
+ // Cached source-derived geometry avoids rebuilding the HUD on camera frames.
+ let selectionBounds=null,jointOverviewBounds=null,activeHudId='',recoveryShown=false;
  function updateOrientation(camera){
-  if(!opened||!camera)return;
+  if(!opened||!camera||!isMobileLayout())return;
   const yaw=((camera.yaw*180/Math.PI)%360+360)%360;
   const arrow=hud.querySelector('.cs-orbit-arrow'),label=hud.querySelector('.cs-orbit-angle');
   if(arrow)arrow.style.transform='rotate('+yaw.toFixed(1)+'deg)';
-  if(label){
-   // Display magnification relative to the deterministic Fit Joint camera,
-   // not an anatomical measurement or a fictitious microscope power.
-   const w=Math.max(1,Number(camera.width)||1),h=Math.max(1,Number(camera.height)||1);
+  const w=Math.max(1,Number(camera.width)||1),h=Math.max(1,Number(camera.height)||1);
+  if(label&&w>1&&h>1){
+   // Relative to the Fit Joint camera; not medical magnification.
    const current=Math.min(w/3.25,h/Math.max(.2,camera.frameSpan))*camera.zoom;
    const fitted=Math.min(w/3.25,h/2.55)*1.7;
    const ratio=current/Math.max(.001,fitted);
-   label.textContent=(ratio>1.45?'DETAIL':'JOINT')+' · '+ratio.toFixed(1)+'× FIT · '+Math.round(yaw)+'°';
+   label.textContent=(ratio>1.45?'CLOSE VIEW':'JOINT VIEW')+' · '+ratio.toFixed(1)+'×';
+  }
+  const nav=window.BodyV14SpatialNavigation,project=window.BodySpatialCore?.project;
+  if(!project||!nav)return;
+  if(selectionBounds&&jointOverviewBounds){
+   const frame=nav.projectedBounds(jointOverviewBounds,camera,project);
+   const point=project(selectionBounds.center,camera);
+   const marker=hud.querySelector('.cs-overview-locator i');
+   if(marker&&frame&&frame.width>1&&frame.height>1){
+    const x=Math.max(5,Math.min(95,100*(point.x-frame.minX)/frame.width));
+    const y=Math.max(5,Math.min(95,100*(point.y-frame.minY)/frame.height));
+    marker.style.left=x.toFixed(1)+'%';marker.style.top=y.toFixed(1)+'%';
+   }
+  }
+  const recover=hud.querySelector('[data-cs-action="recenter-selection"]');
+  if(recover){
+   const footprint=nav.projectedBounds(selectionBounds,camera,project);
+   // Hysteresis limits flicker as the selected mesh crosses the viewport edge.
+   recoveryShown=nav.needsRecovery(footprint,w,h,recoveryShown);
+   recover.hidden=!recoveryShown;
   }
  }
  window.__BODY_V14_ORIENTATION_UPDATE__=updateOrientation;
@@ -159,18 +179,15 @@ const studio=domain.create({provider});
  });
  function renderHud(s,chosen){
   hud.hidden=!isMobileLayout()||s.region!=='knee';
-  if(hud.hidden){hud.innerHTML='';return;}
-  const nav=atlas.connectiveNavState?.(s.selectedId),camera=nav?.camera;
-  const detail=camera&&(camera.zoom>2.7||camera.frameSpan<1.75);
-  const joint=nav?.jointBounds,at=nav?.selectedBounds;
-  let marker='';
-  if(joint&&at&&joint.max[0]>joint.min[0]&&joint.max[1]>joint.min[1]){
-   const x=Math.max(5,Math.min(95,100*(at.center.x-joint.min[0])/(joint.max[0]-joint.min[0])));
-   const y=Math.max(5,Math.min(95,100*(1-(at.center.y-joint.min[1])/(joint.max[1]-joint.min[1]))));
-   marker='<span class="cs-overview-locator" aria-label="Approximate position in illustrative joint mesh"><i style="left:'+x.toFixed(1)+'%;top:'+y.toFixed(1)+'%"></i></span>';
-  }
-  hud.innerHTML='<span class="cs-orbit-arrow" aria-hidden="true">↑</span>'+marker+
-   '<span class="cs-orientation-copy"><strong>'+esc(chosen?.name||'RIGHT KNEE')+'</strong><small class="cs-orbit-angle">'+(detail?'DETAIL · ':'JOINT · ')+'ORBIT</small></span>'+
+  if(hud.hidden){hud.innerHTML='';selectionBounds=null;jointOverviewBounds=null;return;}
+  const nav=atlas.connectiveNavState?.(s.selectedId),camera=atlas.getState()?.camera;
+  if(activeHudId!==(s.selectedId||'')){recoveryShown=false;activeHudId=s.selectedId||'';}
+  selectionBounds=nav?.selectedBounds||null;
+  jointOverviewBounds=nav?.jointBounds||null;
+  hud.innerHTML='<span class="cs-orbit-arrow" aria-label="Camera orbit direction">↑</span>'+
+   (selectionBounds&&jointOverviewBounds?'<span class="cs-overview-locator" aria-label="Selected location in camera-relative joint overview"><i></i></span>':'')+
+   '<span class="cs-orientation-copy"><strong>'+esc(chosen?.name||'RIGHT KNEE')+'</strong><small class="cs-orbit-angle">JOINT VIEW</small></span>'+
+   (selectionBounds?'<button type="button" data-cs-action="recenter-selection" aria-label="Recenter selected structure at the current zoom" hidden>Find</button>':'')+
    '<button type="button" data-cs-action="back-view" '+(nav?.canBack?'':'disabled')+' aria-label="Back to previous camera view">Back</button>'+
    '<button type="button" data-cs-action="fit-joint" aria-label="Fit entire knee joint">Fit</button>';
   updateOrientation(camera);
@@ -321,6 +338,7 @@ const studio=domain.create({provider});
   if(action==='details'){expanded=!expanded;render();return;}
   if(action==='reset'){mobileSheet='peek';mobilePanel='structures';studio.resetView();render();return;}
   if(action==='back-view'){atlas.connectiveNavAction?.('back');render();return;}
+  if(action==='recenter-selection'){if(s.selectedId){atlas.connectiveNavAction?.('recenter',s.selectedId);render();}return;}
   if(action==='fit-joint'){atlas.connectiveNavAction?.('fit');render();return;}
   if(action==='locate'){if(s.selectedId){revealModel();atlas.connectiveNavAction?.('locate',s.selectedId);render();}return;}
   if(action==='focus'){if(s.selectedId){revealModel();atlas.connectiveNavAction?.('dive',s.selectedId);render();}return;}
