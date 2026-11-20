@@ -8,7 +8,7 @@ const sandbox={window:{}};
 runInNewContext(source,sandbox);
 const nav=sandbox.window.BodyV14SpatialNavigation;
 const bounds={center:{x:1,y:2,z:0},radius:.25,min:[.75,1.9,-.1],max:[1.25,2.1,.1]};
-const camera={yaw:0,pitch:0,zoom:1.4,frameSpan:2.55,width:390,height:844,anchorX:.5,anchorY:.5,target:{x:0,y:0,z:0}};
+const camera={yaw:0,pitch:0,zoom:1.3,frameSpan:2.55,width:390,height:844,anchorX:.5,anchorY:.5,target:{x:0,y:0,z:0}};
 const project=(p,c)=>({x:c.width/2+(p.x-c.target.x)*50*c.zoom,y:c.height/2-(p.y-c.target.y)*50*c.zoom});
 test('V14.3 projects the sourced 3D bounds rather than only using radius',()=>{
  const rect=nav.projectedBounds(bounds,camera,project);
