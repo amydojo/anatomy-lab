@@ -149,7 +149,7 @@ const studio=domain.create({provider});
    const current=Math.min(w/3.25,h/Math.max(.2,camera.frameSpan))*camera.zoom;
    const fitted=Math.min(w/3.25,h/2.55)*1.7;
    const ratio=current/Math.max(.001,fitted);
-   label.textContent=(ratio>1.45?'CLOSE VIEW':'JOINT VIEW')+' · '+ratio.toFixed(1)+'×';
+   label.textContent=(ratio>1.45?'DETAIL VIEW':'JOINT VIEW')+' · '+ratio.toFixed(1)+'× FIT';
   }
   const nav=window.BodyV14SpatialNavigation,project=window.BodySpatialCore?.project;
   if(!project||!nav)return;
