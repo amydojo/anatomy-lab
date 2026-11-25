@@ -1,0 +1,39 @@
+name: ASCENSION publish verified artifact
+on:
+  push:
+    branches: ['feat/v15-expedition-gamepad']
+    paths: ['.github/workflows/v15-ascension-publish.yml']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: ascension-publication
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/feat/v15-expedition-gamepad'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/v15-expedition-gamepad
+      - uses: actions/download-artifact@v4
+        with:
+          name: axis-pinned-source-qualified
+          run-id: 45552154605
+          github-token: ${{ github.token }}
+          path: assets/atlas/vhf/axis/v1
+      - run: python3 scripts/verify_ascension.py
+      - name: Publish only verified runtime assets to draft branch
+        run: |
+          test "$(git branch --show-current)" = feat/v15-expedition-gamepad
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- assets/atlas/vhf/axis/v1
+          git diff --cached --quiet && exit 0
+          git commit -m "assets(v15.8.1): publish verified BoneHub axial source"
+          git push origin HEAD:refs/heads/feat/v15-expedition-gamepad

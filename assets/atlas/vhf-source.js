@@ -6,9 +6,9 @@ globalThis.BodyVHF=(function sourceModule(){
  const colors={Bone:[.85,.78,.66],Cartilage:[.57,.68,.68],Ligament:[.82,.75,.60],Muscle:[.70,.35,.32]};
  const transform=p=>[p[0]*.005,(p[2]+10)*.005,-p[1]*.005];
  const nextFrame=()=>new Promise(resolve=>requestAnimationFrame(resolve));
- function compact(pos,idx){
+ function compact(pos,idx,axis=false){
  const positions=new Float32Array(pos.length),indices=pos.length/3<=65536?new Uint16Array(idx.length):new Uint32Array(idx.length),min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
- for(let i=0;i<pos.length;i+=3){positions[i]=pos[i]*.005;positions[i+1]=(pos[i+2]+10)*.005;positions[i+2]=-pos[i+1]*.005;for(let k=0;k<3;k++){const v=positions[i+k];if(!Number.isFinite(v))throw Error('Invalid source coordinate');min[k]=Math.min(min[k],v);max[k]=Math.max(max[k],v);}}
+ for(let i=0;i<pos.length;i+=3){positions[i]=axis?(240-pos[i])*.005:pos[i]*.005;positions[i+1]=axis?(pos[i+2]-1000)*.005:(pos[i+2]+10)*.005;positions[i+2]=axis?(pos[i+1]-235)*.005:-pos[i+1]*.005;for(let k=0;k<3;k++){const v=positions[i+k];if(!Number.isFinite(v))throw Error('Invalid source coordinate');min[k]=Math.min(min[k],v);max[k]=Math.max(max[k],v);}}
  for(let i=0;i<idx.length;i++){const v=idx[i];if(!Number.isInteger(v)||v<0||v>=pos.length/3)throw Error('Source index out of bounds');indices[i]=v;}
  return {positions,indices,min,max};
 }
@@ -59,7 +59,7 @@ globalThis.BodyVHF=(function sourceModule(){
  }
  return id?{id,point:{x:o[0]+d[0]*best,y:o[1]+d[1]*best,z:o[2]+d[2]*best}}:null;
 }
- function parse(buffer,manifest,world=false){
+ function parse(buffer,manifest,world=false,axis=false){
   const dv=new DataView(buffer);
   if(dv.getUint32(0,true)!==0x46546c67||dv.getUint32(4,true)!==2||dv.getUint32(8,true)!==buffer.byteLength)throw Error('Invalid GLB header');
   const n=dv.getUint32(12,true),offset=20+n;
@@ -76,8 +76,8 @@ globalThis.BodyVHF=(function sourceModule(){
    if(m.name!==s.id||m.primitives.length!==1||p.mode!==4||!colors[s.tissue])throw Error('Source identity mismatch');
    const pos=accessor(p.attributes.POSITION,'VEC3',5126,3),idx=accessor(p.indices,'SCALAR',5125,1);
    if(pos.length!==s.vertices*3||idx.length!==s.triangles*3)throw Error('Source count mismatch');
-   const geometry=compact(pos,idx);
-   return {id:s.id,name:world?`${s.source_name} · ${/^(Sacrum|Coccyx)$/i.test(s.source_name)?'Central':s.side}`:names[j],category:s.tissue,color:colors[s.tissue],...geometry};
+   const geometry=compact(pos,idx,axis);
+   return {id:s.id,name:axis?s.source_name.replace(/VERTEBRA_/,'').replaceAll('_',' '):world?`${s.source_name} · ${/^(Sacrum|Coccyx)$/i.test(s.source_name)?'Central':s.side}`:names[j],category:s.tissue,color:colors[s.tissue],...geometry};
   });
  }
  async function load(){
@@ -92,6 +92,9 @@ globalThis.BodyVHF=(function sourceModule(){
  async function loadWorld(){
   const root=base+'world/', response=await fetch(root+'lower-body-manifest.json');if(!response.ok)throw Error('World manifest unavailable');const bytes=await response.arrayBuffer();const digest=async b=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',b)),v=>v.toString(16).padStart(2,'0')).join('');if(await digest(bytes)!==worldHash)throw Error('World manifest hash mismatch');const m=JSON.parse(new TextDecoder().decode(bytes));if(m.schema!=='body-live-vhf-lower-body-1'||m.bundles.length!==8||m.structures.length!==128)throw Error('World inventory mismatch');const parts=[],timings=[];for(const b of m.bundles){const started=performance.now(),response=await fetch(root+b.file);if(!response.ok)throw Error('World bundle unavailable: '+b.file);const data=await response.arrayBuffer(),fetched=performance.now();if(data.byteLength!==b.bytes||await digest(data)!==b.sha256)throw Error('World bundle integrity: '+b.file);const structures=m.structures.filter(s=>s.side===b.side&&s.tissue===b.tissue);await nextFrame();const decoding=performance.now();parts.push(...parse(data,{structures},true));timings.push({file:b.file,fetchMs:fetched-started,decodeMs:performance.now()-decoding});}parts.sourceInfo={specimen:'VHF lower body · Denver',manifestHash:worldHash,bundles:m.bundles.map(b=>({file:b.file,sha256:b.sha256,bytes:b.bytes})),coverage:'lower body',timings};return parts;
  }
+ const axisManifestHash='2fdd5646e81e66ab16458091fdc9d8a45ffbbc1465f5f2bb0056f07cedc953d7',axisRegions=['PELVIS / LUMBAR SPINE','THORACIC CAGE','CERVICAL SPINE','CRANIUM'];
+ function axisIncludes(s,region){const n=s.source_name;if(region===0)return n==='SACRUM'||n.startsWith('HIP_')||/^VERTEBRA_L[1-6]$/.test(n)||n==='VERTEBRA_T12';if(region===1)return /^VERTEBRA_T\d+$/.test(n)||n==='VERTEBRA_L1'||n==='VERTEBRA_C7'||s.region==='THORAX'||n.startsWith('CLAVICLE_')||n.startsWith('SCAPULA_');if(region===2)return /^VERTEBRA_C[1-7]$/.test(n)||n==='VERTEBRA_T1';return s.region==='SKULL'||n==='VERTEBRA_C1'||n==='VERTEBRA_C2';}
+ async function loadAxis(region,previous=[],signal){const root=base+'axis/v1/',digest=async b=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',b)),v=>v.toString(16).padStart(2,'0')).join('');const response=await fetch(root+'manifest.json',{signal});if(!response.ok)throw Error('AXIS manifest unavailable');const bytes=await response.arrayBuffer();if(await digest(bytes)!==axisManifestHash)throw Error('AXIS manifest mismatch');const m=JSON.parse(new TextDecoder().decode(bytes));if(m.schema!=='body-live-axis-source-1'||m.structures.length!==61)throw Error('AXIS inventory mismatch');const selected=m.structures.filter(s=>axisIncludes(s,region)),parts=[],timings=[];for(const s of selected){const cached=previous.find(p=>p.id===s.id);if(cached){parts.push(cached);continue;}const start=performance.now(),res=await fetch(root+s.file,{signal});if(!res.ok)throw Error('AXIS geometry unavailable: '+s.file);const data=await res.arrayBuffer(),fetched=performance.now();if(data.byteLength!==s.bytes||await digest(data)!==s.sha256)throw Error('AXIS asset integrity: '+s.file);await nextFrame();if(signal?.aborted)throw Error('AXIS request canceled');const decode=performance.now();parts.push(...parse(data,{structures:[{...s,tissue:'Bone'}]},true,true));timings.push({file:s.file,fetchMs:fetched-start,decodeMs:performance.now()-decode});}parts.sourceInfo={specimen:'BoneHub VHF · separate CT reconstruction',registrationStatus:'unregistered to Denver',manifestHash:axisManifestHash,geometryRevision:m.revision,coverage:axisRegions[region],availableStructures:59,availableTriangles:m.structures.filter(s=>!s.source_name.startsWith('FEMUR_')).reduce((n,s)=>n+s.triangles,0),bundles:selected.map(s=>({file:s.file,sha256:s.sha256,bytes:s.bytes})),timings};return parts;}
  function landmarks(parts){const points=[];const center=p=>p.min.map((v,k)=>(v+p.max[k])/2);for(const side of ['left','right']){const get=n=>parts.find(p=>p.id==='vhf-'+side+'-bone-'+n);const femur=get('femur'),tibia=get('tibia'),patella=get('patella'),talus=get('talus'),foot=get('calcaneous'),pelvis=get('pelvis');const add=(label,p)=>{if(p)points.push({label:side.toUpperCase()+' '+label,point:center(p)});};add('HIP',pelvis);add('THIGH',femur);add('KNEE',patella);add('LOWER LEG',tibia);add('ANKLE',talus);add('FOOT',foot);}const sacrum=parts.find(p=>p.id==='vhf-left-bone-sacrum');if(sacrum)points.push({label:'PELVIS',point:center(sacrum)});return points;}
  function neighborhood(points,c,previous){if(c.zoom<3||!points.length)return 'LOWER BODY';const distances=points.map(p=>({label:p.label,d:Math.hypot(p.point[0]-c.target.x,p.point[1]-c.target.y,p.point[2]-c.target.z)})).sort((a,b)=>a.d-b.d);const best=distances[0],old=distances.find(x=>x.label===previous);if(best.d>.65)return 'LOWER BODY';return old&&old.d<=best.d+.10?old.label:best.label;}
  function evictionPlan(entries,protectedIds,now,budget,dwell=5000){let bytes=entries.reduce((n,e)=>n+e.bytes,0);const evict=[];for(const e of entries.filter(e=>!protectedIds.has(e.id)&&now-e.lastUse>=dwell).sort((a,b)=>a.lastUse-b.lastUse)){if(bytes<=budget)break;evict.push(e.id);bytes-=e.bytes;}return {evict,bytes,overBudget:bytes>budget};}
@@ -107,5 +110,5 @@ globalThis.BodyVHF=(function sourceModule(){
  function boxHit(o,d,min,max){let lo=0,hi=Infinity;for(let k=0;k<3;k++){if(Math.abs(d[k])<1e-12){if(o[k]<min[k]||o[k]>max[k])return false;continue;}let a=(min[k]-o[k])/d[k],b=(max[k]-o[k])/d[k];if(a>b)[a,b]=[b,a];lo=Math.max(lo,a);hi=Math.min(hi,b);if(hi<lo)return false;}return true;}
  function pickHit(parts,view,c,x,y){return intersect(parts,view,c,x,y,ray,boxHit,visible);}
  function pick(parts,view,c,x,y){return pickHit(parts,view,c,x,y)?.id||null;}
- return Object.freeze({load,loadWorld,parse,transform,bounds,visible,pick,pickHit,inView,compact,packVertices,hash,worldHash,landmarks,neighborhood,evictionPlan});
+ return Object.freeze({load,loadWorld,loadAxis,axisRegions,axisIncludes,parse,transform,bounds,visible,pick,pickHit,inView,compact,packVertices,hash,worldHash,landmarks,neighborhood,evictionPlan});
 })();
