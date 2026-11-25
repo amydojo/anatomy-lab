@@ -1,0 +1,8 @@
+/* Expedition is opt-in; the existing atlas layout is unchanged. */
+#expedition-control{position:absolute;z-index:9;right:12px;top:12px;display:flex;flex-direction:column;align-items:flex-end;gap:6px;max-width:min(320px,80%);pointer-events:none}
+#expedition-control button{pointer-events:auto;color:#eee6dd;background:#181512;border:1px solid #817366;border-radius:5px;padding:8px 12px;font:inherit;font-size:12px;cursor:pointer}
+#expedition-control button[aria-pressed="true"]{border-color:#d6a47f}
+#expedition-hud{color:#eee6dd;background:#181512e8;border:1px solid #817366;padding:8px 10px;font:11px/1.5 system-ui,sans-serif;text-align:right}
+#expedition-hud[hidden],#expedition-reticle[hidden]{display:none}
+#expedition-reticle{position:absolute;z-index:8;left:50%;top:50%;width:18px;height:18px;border:1px solid #e9c6a5;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;box-shadow:0 0 4px #000}
+@media(max-width:980px){#expedition-control{top:auto;bottom:64px;right:8px}}

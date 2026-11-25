@@ -604,6 +604,42 @@ function recenter(){
  animateCamera({yaw:-.2,pitch:-.07,zoom:1.03,frameSpan:10.8,target:{x:0,y:-.12,z:0}},reduce()?0:280);
  return true;
 }
+function setupExpedition(){
+ const button=$('expedition-toggle'),hud=$('expedition-hud'),reticle=$('expedition-reticle'),status=$('expedition-status');
+ if(!button||!window.BodyExpedition)return;
+ let enabled=false;const pointers=new Set();
+ const setStatus=message=>{if(status.textContent!==message)status.textContent=message;};
+ const finish=()=>{if(studioCameraActive()){studioNavigation?.end();window.dispatchEvent(new Event('body:camera-transaction'));}};
+ const command=index=>{
+  const selected=U.getSelected(),studio=studioCameraActive();
+  if(index===0){const c=$('atlas-canvas');pickAt(c.clientWidth/2,c.clientHeight/2,{pointerType:'mouse'});}
+  if(index===1){if(studio&&connectiveNavAction('back'))return;if(selected){U.clearSelection();render();}else if(state.data.view==='detail')body();}
+  if(index===2&&studio&&selected){const el=document.querySelector('[data-cs-action="isolate"]:not([disabled])');el?.click();}
+  if(index===3&&studio&&selected){const el=document.querySelector('[data-cs-action="focus"]:not([disabled])');el?.click();}
+  if(index===11){if(studio){if(selected)connectiveNavAction('recenter',selected);else connectiveNavAction('fit');}else recenter();}
+  if(index===12||index===13){if(U.isActive()&&state.data.view==='detail'&&!studio){depthChange(Math.max(0,Math.min(4,state.data.layer+(index===13?1:-1))));}}
+  if((index===14||index===15)&&state.data.view==='overview'){
+   const regions=window.BodyAtlasState.regions.filter(r=>r!=='nerve');const n=regions.indexOf(state.data.region);
+   choose(regions[(n+(index===15?1:-1)+regions.length)%regions.length]);
+  }
+ };
+ const controls=window.BodyExpedition.mount({
+  camera:()=>state.data.camera,
+  bounds:()=>model.getViewBounds(U.getRegion()||state.data.region),
+  maxZoom:()=>{const radius=model.getViewBounds(U.getRegion()||state.data.region)?.radius;
+   return studioCameraActive()?14:Math.min(4,!Number.isFinite(radius)?2.1:radius<.55?3.3:radius<1.1?2.35:1.95);},
+  canMove:()=>enabled&&loaded&&model.getStatus()==='ready'&&!pendingEntry&&state.data.view!=='focused'&&!document.hidden&&document.hasFocus()&&!pointers.size&&$('evidence-sheet').hidden&&$('seam').hidden&&!activeFrameRoute,
+  begin:()=>{cancelAnimationFrame(motionFrame);motionFrame=0;U.interrupt();if(studioCameraActive())studioNavigation?.begin();},
+  end:finish,render,command,status:setStatus
+ });
+ function toggle(next){enabled=next;button.setAttribute('aria-pressed',String(next));hud.hidden=reticle.hidden=!next;controls.setEnabled(next);if(next)setStatus('Press any controller button to connect');}
+ button.addEventListener('click',()=>toggle(!enabled));
+ window.addEventListener('pointerdown',e=>{pointers.add(e.pointerId);controls.interrupt();},true);
+ const release=e=>pointers.delete(e.pointerId);window.addEventListener('pointerup',release,true);window.addEventListener('pointercancel',release,true);
+ window.addEventListener('blur',()=>pointers.clear());window.addEventListener('pagehide',()=>toggle(false));
+ if(new URLSearchParams(location.search).get('expedition')==='1')toggle(true);
+}
+
 function setup(){
  const canvas=$('atlas-canvas');
  window.BodySpatialCore.attachOrbit(canvas,{state:state.data.camera,render,pick:pickAt,getBounds:()=>model.getViewBounds(U.getRegion()||state.data.region),maxZoom:4,
@@ -700,7 +736,7 @@ function setup(){
  $('joint-rest').onclick=()=>U.neutral();
  $('structure-chip-more').onclick=()=>U.showSelected();
  $('structure-chip-close').onclick=()=>{U.clearSelection();updateURL({replace:true});render();};
- buildPins();resize();
+ buildPins();resize();setupExpedition();
  Promise.all([loader.load('atlas'),loader.load('provenance')]).then(([asset,provenance])=>{
   loader.verifyAtlas(asset,provenance);
   source=asset;proof=provenance;loaded=true;
