@@ -1,6 +1,6 @@
 /* V15.3 optical density policy; callback cadence is not GPU or display FPS. */
 globalThis.BodyOptical=(function opticalPolicy(){
- const profiles=Object.freeze({fixed:[2,2,2],performance:[1.5,1.5,1.5],balanced:[2,1.5,2.5],precision:[2,1.5,3]});
+ const profiles=Object.freeze({fixed:[2,2,2],tv:[1,1,1],performance:[1.5,1.5,1.5],balanced:[2,1.5,2.5],precision:[2,1.5,3]});
  const valid=name=>Object.hasOwn(profiles,name)?name:'fixed';
  function dimensions(w,h,native,requested,maxW=4096,maxH=4096,budget=4000000){
   w=Math.max(1,w);h=Math.max(1,h);

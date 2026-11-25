@@ -105,6 +105,8 @@ function create(canvas,onContextLost=()=>{}){
  }catch(e){status='fallback';onContextLost(e.message);}});
  try{setup();}catch(e){status='fallback';onContextLost(e.message);}
  function makeBuffer(part,id,group,color,tissue=false){
+  if(part.positions&&part.indices){const flat=window.BodyVHF.packVertices(part.positions,part.indices),indices=part.indices,buffer=gl.createBuffer(),indexBuffer=gl.createBuffer();if(!buffer||!indexBuffer){if(buffer)gl.deleteBuffer(buffer);if(indexBuffer)gl.deleteBuffer(indexBuffer);throw Error('Source allocation failed: '+id);}gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,flat,gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,indexBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,indices,gl.STATIC_DRAW);return {id,name:part.name,group,color,tissue,buffer,indexBuffer,indexType:indices.BYTES_PER_ELEMENT===2?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,bufferBytes:flat.byteLength+indices.byteLength,count:indices.length,min:part.min,max:part.max};}
+
   if(!Array.isArray(part.vertices)||!Array.isArray(part.faces)||part.vertices.length<50||part.faces.length<50)throw Error('Incomplete sourced mesh: '+id);
   const vs=part.vertices,normal=new Float32Array(vs.length*3);
   for(const tri of part.faces){
@@ -450,7 +452,7 @@ function create(canvas,onContextLost=()=>{}){
    gl.enableVertexAttribArray(locW);gl.vertexAttribPointer(locW,1,gl.FLOAT,false,28,24);
    if(item.indexBuffer){gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,item.indexBuffer);gl.drawElements(gl.TRIANGLES,item.count,item.indexType,0);}else gl.drawArrays(gl.TRIANGLES,0,item.count);drawCalls++;submittedTriangles+=item.count/3;
   };
-  if(sourceView){gl.depthMask(true);for(const m of vhfMeshes)if(window.BodyVHF.visible(m,sourceView))draw(m,1,1,true);frameStats={drawCalls,submittedTriangles};return size;}
+  if(sourceView){gl.depthMask(true);let eligibleStructures=0,culledStructures=0,culledTriangles=0,eligibleTriangles=0;for(const m of vhfMeshes){if(!window.BodyVHF.visible(m,sourceView))continue;eligibleStructures++;eligibleTriangles+=m.count/3;if(!window.BodyVHF.inView(m,{...camera,width:size.width,height:size.height})){culledStructures++;culledTriangles+=m.count/3;continue;}draw(m,1,1,true);}frameStats={drawCalls,submittedTriangles,eligibleStructures,eligibleTriangles,culledStructures,culledTriangles,residentStructures:vhfMeshes.length,estimatedSourceGpuBufferBytes:vhfMeshes.reduce((n,m)=>n+m.bufferBytes,0)};return size;}
   const region=detail.has(selected)?selected:null;
   const from=transitionFrom&&transitionFrom!==region&&detail.has(transitionFrom)?transitionFrom:null;
   const r=clamp(Number(reveal)||0,0,1);
