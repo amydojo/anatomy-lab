@@ -18,3 +18,5 @@ test('expedition clean view fills the browser viewport and restores atlas chrome
  await expect(app).toHaveAttribute('data-expedition-clean','false');
  await expect(page.locator('#expedition-reticle')).toBeHidden();
 });
+
+test('diagnostics are opt-in and expose a bounded local report',async({page})=>{await page.goto('/atlas/');await expect(page.locator('#expedition-diagnostics-export')).toHaveCount(0);await page.goto('/atlas/?expedition=1&expeditionDiagnostics=1');await expect(page.locator('#expedition-diagnostics-export')).toBeVisible();const report=await page.evaluate(()=>window.__BODY_EXPEDITION_DIAGNOSTICS__.report());expect(report.schema).toBe('body-live-expedition-diagnostics-1');expect(report.canvas.devicePixelRatio).toBeGreaterThan(0);expect(report.unsupported.gpuFrameTimeMs).toBe('unavailable');expect(report.metrics.activeFrameIntervalMs.samples).toBe(0);});

@@ -33,28 +33,51 @@
   }
   return old.some((v,i)=>v!==[c.yaw,c.pitch,c.zoom,c.target.x,c.target.y,c.target.z][i]);
  }
- function mount({camera,bounds,maxZoom,canMove,begin,end,render,command,status,getPads=()=>navigator.getGamepads?.()||[]}){
+ // Opt-in local measurements; bounded rolling samples.
+ function series(capacity=1800){
+  const values=new Float64Array(capacity);let count=0,next=0,total=0;
+  return {push(value){if(!Number.isFinite(value)||value<0)return;values[next]=value;next=(next+1)%capacity;count=Math.min(count+1,capacity);total++;},
+   summary(){const sorted=Array.from(values.subarray(0,count)).sort((a,b)=>a-b);
+    const q=p=>count?sorted[Math.max(0,Math.ceil(p*count)-1)]:null;
+    return {samples:count,totalSamples:total,median:q(.5),p95:q(.95),p99:q(.99),max:q(1),estimatedMissed60HzSlots:sorted.reduce((n,v)=>n+Math.max(0,Math.round(v/(1000/60))-1),0)};}};
+ }
+ function diagnostics(clock=()=>performance.now()){
+  const start=clock(),samples={activeFrameIntervalMs:series(),pollIntervalMs:series(),pollCpuMs:series(),renderCpuMs:series(),inputToRenderSubmissionMs:series(),selectionCpuMs:series(),longTaskMs:series()};
+  const events=[];let activeAt=null,pollAt=null,longTasksSupported=false;
+  const event=(type,detail)=>{events.push({elapsedMs:clock()-start,type,detail});if(events.length>120)events.shift();};
+  return {sample:(key,v)=>samples[key]?.push(v),event,
+   poll(now){if(pollAt!==null)samples.pollIntervalMs.push(now-pollAt);pollAt=now;},
+   active(now){if(activeAt!==null)samples.activeFrameIntervalMs.push(now-activeAt);activeAt=now;},
+   idle(){activeAt=null;},suspend(){activeAt=pollAt=null;},
+   setLongTasksSupported(v){longTasksSupported=!!v;},
+   report(){const metrics=Object.fromEntries(Object.entries(samples).map(([k,v])=>{const s=v.summary();if(!k.endsWith('IntervalMs'))delete s.estimatedMissed60HzSlots;return [k,s];}));
+    if(!longTasksSupported)metrics.longTaskMs=null;
+    return {schema:'body-live-expedition-diagnostics-1',elapsedMs:clock()-start,rollingCapacity:1800,metrics,events:events.slice(),unsupported:{gpuFrameTimeMs:'unavailable',airplayEncoding:'unavailable',physicalInputLatencyMs:'unavailable'},notes:['Frame intervals measure successive active controller callbacks, not display presentation. Missed slots assume nominal 60 Hz, not measured dropped frames. CPU render duration measures submission, not GPU completion.']};}};
+ }
+ function mount({camera,bounds,maxZoom,canMove,begin,end,render,command,status,diagnostic=null,getPads=()=>navigator.getGamepads?.()||[]}){
   let enabled=false,frame=0,last=0,active=false,padIndex=null,armed=false,prior=[];
   const finish=()=>{if(active){active=false;end();}};
-  const reset=()=>{finish();padIndex=null;armed=false;prior=[];last=0;};
+  const reset=()=>{diagnostic?.suspend();finish();padIndex=null;armed=false;prior=[];last=0;};
   function tick(now){
    if(!enabled)return;frame=requestAnimationFrame(tick);
    if(document.hidden||!canMove()){reset();return;}
+   const pollStart=diagnostic?performance.now():0;diagnostic?.poll(now);
    let pads;try{pads=Array.from(getPads()).filter(p=>p?.connected&&p.mapping==='standard');}catch{status('Controller access unavailable');reset();return;}
+   if(diagnostic)diagnostic.sample('pollCpuMs',performance.now()-pollStart);
    const pad=pads.find(p=>p.index===padIndex)||pads[0];
    if(!pad){reset();status('Press any controller button to connect');return;}
-   if(padIndex!==pad.index){reset();padIndex=pad.index;}
+   if(padIndex!==pad.index){reset();padIndex=pad.index;diagnostic?.event('controller-connected',{index:pad.index,mapping:pad.mapping});}
    const input=read(pad),dt=last?(now-last)/1000:0;last=now;
    if(!armed){if(!moving(input)&&!input.buttons.some(Boolean))armed=true;status(armed?'Controller ready':'Release controls to begin');return;}
    status('Controller ready');
    const edges=input.buttons.map((b,i)=>b&&!prior[i]);prior=input.buttons;
    // Discrete actions take priority over continuous navigation in the same frame.
    const action=[9,0,1,2,3,11,12,13,14,15].find(i=>edges[i]);
-   if(action!==undefined){finish();command(action);return;}
+   if(action!==undefined){diagnostic?.idle();finish();const start=diagnostic?performance.now():0;command(action);if(diagnostic&&action===0)diagnostic.sample('selectionCpuMs',performance.now()-start);return;}
    if(moving(input)){
     if(!active){active=true;begin();}
-    if(advance(camera(),input,dt,bounds(),maxZoom()))render();
-   }else finish();
+    if(advance(camera(),input,dt,bounds(),maxZoom())){diagnostic?.active(now);render();if(diagnostic)diagnostic.sample('inputToRenderSubmissionMs',performance.now()-pollStart);}else diagnostic?.idle();
+   }else{diagnostic?.idle();finish();}
   }
   function setEnabled(next){enabled=!!next;cancelAnimationFrame(frame);frame=0;reset();if(enabled)frame=requestAnimationFrame(tick);}
   window.addEventListener('blur',reset);
@@ -62,5 +85,5 @@
   window.addEventListener('pagehide',()=>setEnabled(false));
   return Object.freeze({setEnabled,interrupt:reset});
  }
- root.BodyExpedition=Object.freeze({stick,read,moving,advance,mount});
+ root.BodyExpedition=Object.freeze({stick,read,moving,advance,mount,series,diagnostics});
 })(globalThis);

@@ -2,6 +2,7 @@
 (function(){'use strict';
 const $=id=>document.getElementById(id);
 const state=window.BodyAtlasState.create();
+const expeditionDiagnostic=new URLSearchParams(location.search).get('expeditionDiagnostics')==='1'?window.BodyExpedition.diagnostics():null;
 const loader=window.BodyAtlasLoader,model=window.BodyAtlasRenderer.create($('atlas-canvas'),reason=>fallback(reason));
 const E=window.BodyAtlasEvidence;let source=null,proof=null,hipProof=null,nerveProof=null,shoulderProof=null,kneeMuscleProof=null,extendedProof=null,overviewProof=null;
 let osteologyAsset=null;let lastFocus=null,activeFrameRoute=null,motionFrame=0,travelMixFrame=0,frameTimeout=0,entryTimer=0,exitTimer=0,seq=0,previousFocus=null,pins=[],loaded=false,overviewLoaded=false,expansionLoaded=false,facialLoaded=false,osteologyLoaded=false,pendingEntry=null,sourceSeamPending=false;
@@ -71,13 +72,16 @@ function render(){
   const el=$('expedition-location');if(el&&el.textContent!==label)el.textContent=label;
  }
  if(document.hidden||(state.data.view==='detail'&&!U.isActive()))return;
+ const renderStart=expeditionDiagnostic?performance.now():0;
  model.render(state.data.camera,U.getRegion()||state.data.region,state.data.evidenceMode,state.data.layer,U.getReveal(),U.getMotion(),U.getSelected(),U.getSecondaryMotion(),U.getTransitionFrom(),state.data.mode==='trace'&&!window.BodyExtendedRegions?.has(U.getRegion()||state.data.region));
  window.BodyShoulderDebug?.draw(state.data.camera,
   state.data.view==='detail'&&U.getRegion()==='shoulder'?model.shoulderDiagnostics(U.getMotion()):null);
  if(studioCameraActive())window.__BODY_V14_ORIENTATION_UPDATE__?.(state.data.camera);
  if(state.data.view==='overview'&&!U.isActive())drawPins();
+ if(expeditionDiagnostic)expeditionDiagnostic.sample('renderCpuMs',performance.now()-renderStart);
 }
 function fallback(reason){
+ expeditionDiagnostic?.event('fallback',{reason:String(reason||'unavailable')});
  $('canvas-fallback').hidden=false;$('scene-status').textContent='SEMANTIC FALLBACK';
  $('canvas-fallback').querySelector('p').textContent=(reason||'3D unavailable')+'. Choose a region using the accessible list.';
  if(window.innerWidth<=850)setExpanded(true);
@@ -641,9 +645,24 @@ function setupExpedition(){
    return studioCameraActive()?14:Math.min(4,!Number.isFinite(radius)?2.1:radius<.55?3.3:radius<1.1?2.35:1.95);},
   canMove:()=>enabled&&loaded&&model.getStatus()==='ready'&&!pendingEntry&&state.data.view!=='focused'&&!document.hidden&&document.hasFocus()&&!pointers.size&&$('evidence-sheet').hidden&&$('seam').hidden&&!activeFrameRoute,
   begin:()=>{cancelAnimationFrame(motionFrame);motionFrame=0;U.interrupt();if(studioCameraActive())studioNavigation?.begin();},
-  end:finish,render,command,status:setStatus
+  end:finish,render,command,status:setStatus,diagnostic:expeditionDiagnostic
  });
  function toggle(next){enabled=next;button.setAttribute('aria-pressed',String(next));button.textContent=next?'Exit controller':'Controller mode';hud.hidden=reticle.hidden=viewButton.hidden=!next;controls.setEnabled(next);setClean(next);if(next)setStatus('Press any controller button to connect');}
+ if(expeditionDiagnostic){
+  const canvas=$('atlas-canvas');
+  const report=()=>({...expeditionDiagnostic.report(),canvas:{backingWidth:canvas.width,backingHeight:canvas.height,cssWidth:canvas.clientWidth,cssHeight:canvas.clientHeight,devicePixelRatio:window.devicePixelRatio,effectiveScale:canvas.clientWidth?canvas.width/canvas.clientWidth:null},renderer:model.frameStats(),controller:{enabled,status:status.textContent},camera:JSON.parse(JSON.stringify(state.data.camera)),contextStatus:model.getStatus(),region:U.getRegion()||state.data.region,selectedStructure:U.getSelected(),visibilityLayer:state.data.layer,qualityMode:'V15.1 fixed cap',assetReadiness:{loaded,overviewLoaded,expansionLoaded,facialLoaded,osteologyLoaded}});
+  window.__BODY_EXPEDITION_DIAGNOSTICS__=Object.freeze({report});
+  const exportButton=document.createElement('button');exportButton.type='button';exportButton.id='expedition-diagnostics-export';exportButton.textContent='Export diagnostics';
+  exportButton.onclick=()=>{const blob=new Blob([JSON.stringify(report(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='body-live-expedition-diagnostics.json';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);};
+  button.parentElement.append(exportButton);
+  if(window.PerformanceObserver?.supportedEntryTypes?.includes('longtask')){
+   try{const observer=new PerformanceObserver(list=>{for(const entry of list.getEntries())expeditionDiagnostic.sample('longTaskMs',entry.duration);});observer.observe({type:'longtask',buffered:false});expeditionDiagnostic.setLongTasksSupported(true);}catch{}
+  }
+  canvas.addEventListener('webglcontextlost',()=>expeditionDiagnostic.event('webgl-context-lost'));
+  canvas.addEventListener('webglcontextrestored',()=>expeditionDiagnostic.event('webgl-context-restored',{status:model.getStatus()}));
+  document.addEventListener('visibilitychange',()=>expeditionDiagnostic.event('visibility',{hidden:document.hidden}));
+  window.addEventListener('gamepaddisconnected',event=>expeditionDiagnostic.event('controller-disconnected',{index:event.gamepad.index}));
+ }
  viewButton.addEventListener('click',()=>setClean(!clean));
  button.addEventListener('click',()=>toggle(!enabled));
  window.addEventListener('pointerdown',e=>{pointers.add(e.pointerId);controls.interrupt();},true);
