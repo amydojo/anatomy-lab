@@ -42,3 +42,10 @@
 
 /* In cramped normal layout keep the return-to-clean button within the stage. */
 @media(max-height:520px){#atlas-app:not([data-expedition-clean=true]) #expedition-control{top:4px;bottom:auto;right:calc(5px + env(safe-area-inset-right,0px))}#atlas-app:not([data-expedition-clean=true]) #expedition-hud{display:none}#atlas-app:not([data-expedition-clean=true]) #expedition-control button{font-size:10px;padding:4px 7px}}
+
+/* V15.7.2: neutral, uniform compositor background. No raster gradient or texture.
+   Keep this independent of WebGL density and scope to clean Expedition only. */
+#atlas-app[data-expedition-clean=true],
+#atlas-app[data-expedition-clean=true] #workspace,
+#atlas-app[data-expedition-clean=true] #atlas-stage{background:#16181b!important}
+#atlas-app[data-expedition-clean=true] #atlas-canvas{background:transparent!important}
