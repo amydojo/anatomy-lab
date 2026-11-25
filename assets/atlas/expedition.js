@@ -72,7 +72,7 @@
    status('Controller ready');
    const edges=input.buttons.map((b,i)=>b&&!prior[i]);prior=input.buttons;
    // Discrete actions take priority over continuous navigation in the same frame.
-   const action=[9,0,1,2,3,11,12,13,14,15].find(i=>edges[i]);
+   const action=[9,0,1,2,3,11,12,13,14,15,4,5].find(i=>edges[i]);
    if(action!==undefined){onOpticalSuspend();diagnostic?.idle();finish();const start=diagnostic?performance.now():0;command(action);if(diagnostic&&action===0)diagnostic.sample('selectionCpuMs',performance.now()-start);return;}
    const isMoving=moving(input);const qualityChanged=onOpticalTick(now,isMoving);
    if(isMoving){

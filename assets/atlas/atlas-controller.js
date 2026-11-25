@@ -3,6 +3,7 @@
 const $=id=>document.getElementById(id);
 const state=window.BodyAtlasState.create();
 const expeditionDiagnostic=new URLSearchParams(location.search).get('expeditionDiagnostics')==='1'?window.BodyExpedition.diagnostics():null;
+let vhfView=null;const vhfRequested=new URLSearchParams(location.search).get('source')==='vhf';
 const loader=window.BodyAtlasLoader,model=window.BodyAtlasRenderer.create($('atlas-canvas'),reason=>fallback(reason));
 const E=window.BodyAtlasEvidence;let source=null,proof=null,hipProof=null,nerveProof=null,shoulderProof=null,kneeMuscleProof=null,extendedProof=null,overviewProof=null;
 let osteologyAsset=null;let lastFocus=null,activeFrameRoute=null,motionFrame=0,travelMixFrame=0,frameTimeout=0,entryTimer=0,exitTimer=0,seq=0,previousFocus=null,pins=[],loaded=false,overviewLoaded=false,expansionLoaded=false,facialLoaded=false,osteologyLoaded=false,pendingEntry=null,sourceSeamPending=false;
@@ -66,6 +67,7 @@ function refreshOsteologyCoverage(){
   ' conventional bones · BP3D 4.0 CC BY 4.0 · BP3D 3.0 facial CC BY-SA 2.1 Japan · Z-Anatomy CC BY-SA 4.0 · expert review pending';
 }
 function render(){
+ if(vhfView?.active){if(document.hidden)return;const canvas=$('atlas-canvas'),c=vhfView.camera;c.width=canvas.clientWidth;c.height=canvas.clientHeight;const start=performance.now();model.render(c,'vhf','clean',0,1,0,vhfView.selected,0,null,false,vhfView);const p=vhfView.parts.find(p=>p.id===vhfView.selected);$('expedition-location').textContent=(p?p.name:'VISIBLE HUMAN · RIGHT KNEE')+' · '+vhfView.category;$('expedition-evidence').textContent='VHF · CC BY 4.0 · research geometry · review pending';expeditionDiagnostic?.sample('renderCpuMs',performance.now()-start);return;}
  if($('atlas-app').dataset.expeditionClean==='true'){
   const id=U.getSelected(),region=U.getRegion()||state.data.region;
   const label=id?(model.getStructure(region,id)?.name||$('structure-chip-name').textContent||id):(LABEL[region]||'FULL BODY');
@@ -617,6 +619,7 @@ function setupExpedition(){
  const button=$('expedition-toggle'),hud=$('expedition-hud'),reticle=$('expedition-reticle'),status=$('expedition-status');
  if(!button||!window.BodyExpedition)return;
  let enabled=false,clean=false;const pointers=new Set();const app=$('atlas-app'),viewButton=$('expedition-view');
+ const evidence=hud.querySelector('.expedition-evidence');evidence.id='expedition-evidence';
  const optical=window.BodyOptical.create(new URLSearchParams(location.search).get('optical')||'fixed');
  const visual=document.createElement('select');visual.id='expedition-visual';visual.setAttribute('aria-label','Specimen appearance');for(const name of ['atlas','specimen','cinema','legacy']){const option=document.createElement('option');option.value=name;option.textContent=name==='legacy'?'Original':name.toUpperCase();visual.append(option);}visual.value=['atlas','specimen','cinema','legacy'].includes(new URLSearchParams(location.search).get('visual'))?new URLSearchParams(location.search).get('visual'):'specimen';visual.hidden=true;viewButton.after(visual);visual.addEventListener('change',()=>{model.setVisualMode(enabled?visual.value:'legacy');expeditionDiagnostic?.event('visual-mode',{mode:visual.value});render();});
  const quality=$('expedition-quality');quality.value=optical.state().profile;
@@ -628,8 +631,11 @@ function setupExpedition(){
   resize();
  }
  const setStatus=message=>{if(status.textContent!==message)status.textContent=message;};
- const finish=()=>{if(studioCameraActive()){studioNavigation?.end();window.dispatchEvent(new Event('body:camera-transaction'));}};
+ const finish=()=>{if(vhfView?.active)return;if(studioCameraActive()){studioNavigation?.end();window.dispatchEvent(new Event('body:camera-transaction'));}};
+ const categories=['All','Bone','Cartilage','Ligament','Muscle'];
+ const fitSource=()=>{Object.assign(vhfView.camera,{yaw:0,pitch:0,zoom:2.4,target:{x:0,y:0,z:0},anchorX:.5,anchorY:.5});};
  const command=index=>{
+  if(vhfView?.active){const v=vhfView,c=v.camera;if(index===9){setClean(!clean);return;}if(index===0){v.selected=window.BodyVHF.pick(v.parts,v,c,c.width/2,c.height/2);}if(index===1){v.isolated=null;v.selected=null;v.category='All';}if(index===2&&v.selected){v.isolated=v.isolated?null:v.selected;}if(index===3&&v.selected){const p=v.parts.find(p=>p.id===v.selected);c.target={x:(p.min[0]+p.max[0])/2,y:(p.min[1]+p.max[1])/2,z:(p.min[2]+p.max[2])/2};c.zoom=Math.min(14,c.zoom*1.5);}if(index===4||index===5){v.isolated=null;v.selected=null;v.category=categories[(categories.indexOf(v.category)+(index===5?1:4))%5];}if(index===11)fitSource();render();return;}
   const selected=U.getSelected(),studio=studioCameraActive();
   if(index===9){setClean(!clean);return;}
   if(index===0){const c=$('atlas-canvas');pickAt(c.clientWidth/2,c.clientHeight/2,{pointerType:'mouse'});}
@@ -644,20 +650,20 @@ function setupExpedition(){
   }
  };
  const controls=window.BodyExpedition.mount({
-  camera:()=>state.data.camera,
-  bounds:()=>model.getViewBounds(U.getRegion()||state.data.region),
-  maxZoom:()=>{const radius=model.getViewBounds(U.getRegion()||state.data.region)?.radius;
+  camera:()=>vhfView?.active?vhfView.camera:state.data.camera,
+  bounds:()=>vhfView?.active?vhfView.bounds:model.getViewBounds(U.getRegion()||state.data.region),
+  maxZoom:()=>{if(vhfView?.active)return 14;const radius=model.getViewBounds(U.getRegion()||state.data.region)?.radius;
    return studioCameraActive()?14:Math.min(4,!Number.isFinite(radius)?2.1:radius<.55?3.3:radius<1.1?2.35:1.95);},
-  canMove:()=>enabled&&loaded&&model.getStatus()==='ready'&&!pendingEntry&&state.data.view!=='focused'&&!document.hidden&&document.hasFocus()&&!pointers.size&&$('evidence-sheet').hidden&&$('seam').hidden&&!activeFrameRoute,
-  begin:()=>{cancelAnimationFrame(motionFrame);motionFrame=0;U.interrupt();if(studioCameraActive())studioNavigation?.begin();},
+  canMove:()=>enabled&&loaded&&model.getStatus()==='ready'&&(vhfView?.active||!pendingEntry)&&state.data.view!=='focused'&&!document.hidden&&document.hasFocus()&&!pointers.size&&$('evidence-sheet').hidden&&$('seam').hidden&&!activeFrameRoute,
+  begin:()=>{if(vhfView?.active)return;cancelAnimationFrame(motionFrame);motionFrame=0;U.interrupt();if(studioCameraActive())studioNavigation?.begin();},
   end:finish,render,command,status:setStatus,diagnostic:expeditionDiagnostic,
   onOpticalTick:(now,moving)=>{const change=optical.tick(now,moving||!!motionFrame||!!travelMixFrame);return change?applyQuality(change):false;},
   onOpticalSuspend:()=>optical.reset(performance.now())
  });
- function toggle(next){enabled=next;visual.hidden=!next;model.setVisualMode(next?visual.value:'legacy');expeditionDiagnostic?.event('visual-mode',{mode:next?visual.value:'legacy'});quality.hidden=!next;applyQuality({...optical.set(quality.value,performance.now()),reason:'controller-toggle'});button.setAttribute('aria-pressed',String(next));button.textContent=next?'Exit controller':'Controller mode';hud.hidden=reticle.hidden=viewButton.hidden=!next;controls.setEnabled(next);setClean(next);if(next)setStatus('Press any controller button to connect');}
+ function toggle(next){enabled=next;if(vhfView)vhfView.active=next&&vhfView.ready;if(!next)evidence.textContent='Reference anatomy · not clinically validated';visual.hidden=!next;model.setVisualMode(next?visual.value:'legacy');expeditionDiagnostic?.event('visual-mode',{mode:next?visual.value:'legacy'});quality.hidden=!next;applyQuality({...optical.set(quality.value,performance.now()),reason:'controller-toggle'});button.setAttribute('aria-pressed',String(next));button.textContent=next?'Exit controller':'Controller mode';hud.hidden=reticle.hidden=viewButton.hidden=!next;controls.setEnabled(next);setClean(next);if(next)setStatus('Press any controller button to connect');}
  if(expeditionDiagnostic){
   const canvas=$('atlas-canvas');
-  const report=()=>({...expeditionDiagnostic.report(),canvas:{backingWidth:canvas.width,backingHeight:canvas.height,cssWidth:canvas.clientWidth,cssHeight:canvas.clientHeight,devicePixelRatio:window.devicePixelRatio,effectiveScale:canvas.clientWidth?canvas.width/canvas.clientWidth:null},renderer:model.frameStats(),controller:{enabled,status:status.textContent},camera:JSON.parse(JSON.stringify(state.data.camera)),contextStatus:model.getStatus(),region:U.getRegion()||state.data.region,selectedStructure:U.getSelected(),visibilityLayer:state.data.layer,visualMode:enabled?visual.value:'legacy',qualityMode:optical.state().profile,optical:optical.state(),assetReadiness:{loaded,overviewLoaded,expansionLoaded,facialLoaded,osteologyLoaded}});
+  const report=()=>({...expeditionDiagnostic.report(),canvas:{backingWidth:canvas.width,backingHeight:canvas.height,cssWidth:canvas.clientWidth,cssHeight:canvas.clientHeight,devicePixelRatio:window.devicePixelRatio,effectiveScale:canvas.clientWidth?canvas.width/canvas.clientWidth:null},renderer:model.frameStats(),controller:{enabled,status:status.textContent},source:vhfView?{active:vhfView.active,ready:vhfView.ready,hash:window.BodyVHF.hash,category:vhfView.category,selected:vhfView.selected,triangles:345788}:null,camera:JSON.parse(JSON.stringify(vhfView?.active?vhfView.camera:state.data.camera)),contextStatus:model.getStatus(),region:U.getRegion()||state.data.region,selectedStructure:vhfView?.active?vhfView.selected:U.getSelected(),visibilityLayer:state.data.layer,visualMode:enabled?visual.value:'legacy',qualityMode:optical.state().profile,optical:optical.state(),assetReadiness:{loaded,overviewLoaded,expansionLoaded,facialLoaded,osteologyLoaded}});
   window.__BODY_EXPEDITION_DIAGNOSTICS__=Object.freeze({report});
   const exportButton=document.createElement('button');exportButton.type='button';exportButton.id='expedition-diagnostics-export';exportButton.textContent='Export diagnostics';
   exportButton.onclick=()=>{const blob=new Blob([JSON.stringify(report(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='body-live-expedition-diagnostics.json';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);};
@@ -670,6 +676,8 @@ function setupExpedition(){
   document.addEventListener('visibilitychange',()=>expeditionDiagnostic.event('visibility',{hidden:document.hidden}));
   window.addEventListener('gamepaddisconnected',event=>expeditionDiagnostic.event('controller-disconnected',{index:event.gamepad.index}));
  }
+ async function activateSource(){if(!vhfRequested||!loaded||!enabled||model.getStatus()!=='ready')return;try{evidence.textContent='Loading verified VHF specimen…';const parts=vhfView?.parts||await window.BodyVHF.load();await model.loadVHF(parts);const existing=vhfView;vhfView=existing||{parts,bounds:window.BodyVHF.bounds(parts),camera:{width:1,height:1,frameSpan:2.55},category:'All',selected:null,isolated:null};vhfView.ready=true;vhfView.active=enabled;if(!existing)fitSource();expeditionDiagnostic?.event('vhf-ready',{triangles:345788,structures:17});render();}catch(e){if(vhfView){vhfView.active=false;vhfView.ready=false;}evidence.textContent='VHF unavailable · original retained: '+e.message;expeditionDiagnostic?.event('vhf-fallback',{reason:e.message});render();}}
+ if(vhfRequested){window.addEventListener('body:vhf-base-ready',activateSource);window.addEventListener('body:webgl-restored',()=>{if(vhfView)vhfView.active=false;activateSource();});}
  viewButton.addEventListener('click',()=>setClean(!clean));
  button.addEventListener('click',()=>toggle(!enabled));
  window.addEventListener('pointerdown',e=>{pointers.add(e.pointerId);controls.interrupt();},true);
@@ -781,7 +789,7 @@ function setup(){
   source=asset;proof=provenance;loaded=true;
   model.load(asset);$('scene-status').textContent=model.getStatus()==='ready'?'SOURCED SKELETON · 78 STRUCTURES':'2D FALLBACK';
   if(model.getStatus()!=='ready')fallback('WebGL2 unavailable');
-  resize();
+  resize();window.dispatchEvent(new Event('body:vhf-base-ready'));
   // V8 overview is a separate hashed, mobile LOD. Detailed labs still load only
   // when entered, avoiding 10MB+ of source meshes on initial mobile view.
   Promise.all([loader.load('overviewV8'),loader.load('overviewV8Proof')])
