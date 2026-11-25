@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 test('ASCENSION loads actual pinned geometry and travels on controller',async({page},info)=>{
  test.setTimeout(180000);
  await page.addInitScript(()=>{window.__axisPadButtons=Array(17).fill(false);Object.defineProperty(navigator,'getGamepads',{configurable:true,value:()=>[{connected:true,mapping:'standard',index:0,axes:[0,0,0,0],buttons:window.__axisPadButtons.map(pressed=>({pressed,value:pressed?1:0}))}]});});
- await page.goto('/atlas/?source=axis&expedition=1&visual=cinema&optical=tv&expeditionDiagnostics=1');
+ await page.goto('/atlas/?source=axis&axisMode=regional&expedition=1&visual=cinema&optical=tv&expeditionDiagnostics=1');
  const report=()=>page.evaluate(()=>window.__BODY_EXPEDITION_DIAGNOSTICS__?.report());
  await expect.poll(async()=>{const r=await report();return r?.source?.active&&r.renderer?.drawCalls>0?r.source.coverage:null;},{timeout:90000}).toBe('PELVIS / LUMBAR SPINE');
  const baseline=await report();expect(baseline.source.registrationStatus).toBe('unregistered to Denver');expect(baseline.renderer.residentStructures).toBe(10);
@@ -20,4 +20,27 @@ test('ASCENSION loads actual pinned geometry and travels on controller',async({p
  await expect.poll(async()=> (await report())?.source?.coverage,{timeout:90000}).toBe('CRANIUM');
  expect((await report()).renderer.residentStructures).toBe(4);
  await page.screenshot({path:info.outputPath('ascension-cranium.png')});
+});
+
+test('CONTINUUM renders the complete inventory and moves without resetting camera',async({page},info)=>{
+ test.setTimeout(240000);
+ await page.addInitScript(()=>{window.__axisPadButtons=Array(17).fill(false);window.__axisPadAxes=[0,0,0,0];Object.defineProperty(navigator,'getGamepads',{configurable:true,value:()=>[{connected:true,mapping:'standard',index:0,axes:window.__axisPadAxes,buttons:window.__axisPadButtons.map(pressed=>({pressed,value:pressed?1:0}))}]});});
+ await page.goto('/atlas/?source=axis&expedition=1&visual=cinema&optical=tv&expeditionDiagnostics=1');
+ const report=()=>page.evaluate(()=>window.__BODY_EXPEDITION_DIAGNOSTICS__?.report());
+ await expect.poll(async()=>{const r=await report();return r?.source?.active&&r.source.streaming?.loaded===59&&!r.source.streaming.running?r.source.coverage:null;},{timeout:150000}).toBe('AXIAL WORLD');
+ await expect.poll(async()=> (await report())?.renderer?.residentStructures,{timeout:30000}).toBe(59);
+ const start=await report();expect(start.source.registrationStatus).toBe('unregistered to Denver');expect(start.source.streaming.failed).toEqual([]);expect(start.renderer.drawCalls).toBe(59);
+ await page.screenshot({path:info.outputPath('continuum-overview.png')});
+ await page.bringToFront();await expect.poll(async()=> (await report())?.controller?.status,{timeout:15000}).toBe('Controller ready');
+ const press=async i=>{await page.evaluate(i=>window.__axisPadButtons[i]=true,i);await page.waitForTimeout(180);await page.evaluate(i=>window.__axisPadButtons[i]=false,i);await page.waitForTimeout(800);};
+ const move=async axes=>{await page.evaluate(a=>window.__axisPadAxes=a,axes);await page.waitForTimeout(650);await page.evaluate(()=>window.__axisPadAxes=[0,0,0,0]);};
+ await move([0,0,.5,0]);const rotated=await report();expect(rotated.camera.yaw).not.toBe(start.camera.yaw);
+ await press(13);const down=await report();expect(down.camera.yaw).toBeCloseTo(rotated.camera.yaw,6);expect(down.camera.zoom).toBe(rotated.camera.zoom);expect(down.camera.frameSpan).toBe(rotated.camera.frameSpan);expect(down.camera.target.y).toBeLessThan(rotated.camera.target.y);expect(down.source.streaming.loaded).toBe(59);
+ await page.screenshot({path:info.outputPath('continuum-pelvis.png')});
+ await press(12);const up=await report();expect(up.camera.target.y).toBeGreaterThan(down.camera.target.y);expect(up.camera.yaw).toBeCloseTo(rotated.camera.yaw,6);expect(up.source.coverage).toBe('AXIAL WORLD');
+ await page.screenshot({path:info.outputPath('continuum-thorax.png')});
+ await press(12);await press(12);const skull=await report();expect(skull.camera.target.y).toBeGreaterThan(up.camera.target.y);expect(skull.source.streaming.loaded).toBe(59);
+ await page.screenshot({path:info.outputPath('continuum-cranium.png')});
+ await press(11);const recovered=await report();expect(recovered.camera.target).toEqual(start.camera.target);expect(recovered.camera.zoom).toBe(start.camera.zoom);expect(recovered.camera.frameSpan).toBe(start.camera.frameSpan);
+ await page.screenshot({path:info.outputPath('continuum-recovered.png')});
 });
