@@ -29,7 +29,7 @@ test('CONTINUUM renders the complete inventory and moves without resetting camer
  const report=()=>page.evaluate(()=>window.__BODY_EXPEDITION_DIAGNOSTICS__?.report());
  await expect.poll(async()=>{const r=await report();return r?.source?.active&&r.source.streaming?.loaded===59&&!r.source.streaming.running?r.source.coverage:null;},{timeout:150000}).toBe('AXIAL WORLD');
  await expect.poll(async()=> (await report())?.renderer?.residentStructures,{timeout:30000}).toBe(59);
- const start=await report();expect(start.source.registrationStatus).toBe('unregistered to Denver');expect(start.source.streaming.failed).toEqual([]);expect(start.renderer.drawCalls).toBe(59);
+ const start=await report();expect(start.source.registrationStatus).toBe('unregistered to Denver');expect(start.source.streaming.failed).toEqual([]);expect(start.renderer.drawCalls).toBe(59);expect(start.renderer.drawnSourceIds).toHaveLength(59);expect(start.renderer.drawnSourceIds.filter(id=>id.startsWith('bonehub-vhf-rib_'))).toHaveLength(24);for(const id of ['bonehub-vhf-skull_cranial_maxilla','bonehub-vhf-skull_mandible','bonehub-vhf-sternum','bonehub-vhf-vertebra_t6'])expect(start.renderer.drawnSourceIds).toContain(id);
  await page.screenshot({path:info.outputPath('continuum-overview.png')});
  await page.bringToFront();await expect.poll(async()=> (await report())?.controller?.status,{timeout:15000}).toBe('Controller ready');
  const press=async i=>{await page.evaluate(i=>window.__axisPadButtons[i]=true,i);await page.waitForTimeout(180);await page.evaluate(i=>window.__axisPadButtons[i]=false,i);await page.waitForTimeout(800);};
@@ -43,4 +43,18 @@ test('CONTINUUM renders the complete inventory and moves without resetting camer
  await page.screenshot({path:info.outputPath('continuum-cranium.png')});
  await press(11);const recovered=await report();expect(recovered.camera.target).toEqual(start.camera.target);expect(recovered.camera.zoom).toBe(start.camera.zoom);expect(recovered.camera.frameSpan).toBe(start.camera.frameSpan);
  await page.screenshot({path:info.outputPath('continuum-recovered.png')});
+});
+
+test('CONTINUUM retains loaded anatomy when one source asset fails and recovers on explicit retry',async({page})=>{
+ test.setTimeout(240000);
+ await page.addInitScript(()=>{window.__axisPadButtons=Array(17).fill(false);Object.defineProperty(navigator,'getGamepads',{configurable:true,value:()=>[{connected:true,mapping:'standard',index:0,axes:[0,0,0,0],buttons:window.__axisPadButtons.map(pressed=>({pressed,value:pressed?1:0}))}]});});
+ const blocked='**/bonehub-vhf-rib_12_left.glb';await page.route(blocked,r=>r.abort());
+ await page.goto('/atlas/?source=axis&expedition=1&expeditionDiagnostics=1');
+ const report=()=>page.evaluate(()=>window.__BODY_EXPEDITION_DIAGNOSTICS__?.report());
+ await expect.poll(async()=>{const r=await report();return r?.source?.active&&!r.source.streaming?.running?r.source.streaming?.loaded:null;},{timeout:150000}).toBe(58);
+ const partial=await report();expect(partial.source.streaming.failed.map(x=>x[0])).toEqual(['bonehub-vhf-rib_12_left']);expect(partial.renderer.drawnSourceIds).toContain('bonehub-vhf-skull_cranial_maxilla');
+ await page.unroute(blocked);await page.bringToFront();await expect.poll(async()=> (await report())?.controller?.status,{timeout:15000}).toBe('Controller ready');
+ await page.evaluate(()=>window.__axisPadButtons[11]=true);await page.waitForTimeout(220);await page.evaluate(()=>window.__axisPadButtons[11]=false);
+ await expect.poll(async()=> (await report())?.renderer?.drawnSourceIds?.length,{timeout:30000}).toBe(59);
+ expect((await report()).source.streaming.failed).toEqual([]);
 });
