@@ -114,17 +114,61 @@ globalThis.BodyVHF=(function sourceModule(){
   const key=(a,b)=>Math.min(a,b)*n+Math.max(a,b);
   for(let i=0;i<indices.length;i+=3){const a=indices[i],b=indices[i+1],c=indices[i+2];use(a);use(b);use(c);join(a,b);join(b,c);for(const [u,v] of [[a,b],[b,c],[c,a]]){const k=key(u,v);edges.set(k,(edges.get(k)||0)+1);}}
   const components=new Set();let vertices=0;for(let i=0;i<n;i++)if(used[i]){vertices++;components.add(root(i));}
-  const degree=new Uint32Array(n),boundaryParent=new Int32Array(n);boundaryParent.fill(-1);let nonmanifold=0;
+  const degree=new Uint32Array(n),badVertex=new Uint8Array(n),boundaryParent=new Int32Array(n);boundaryParent.fill(-1);let nonmanifold=0;
   const br=a=>{while(boundaryParent[a]!==a){boundaryParent[a]=boundaryParent[boundaryParent[a]];a=boundaryParent[a];}return a;};
-  for(const [k,count] of edges){if(count>2)nonmanifold++;if(count!==1)continue;const a=Math.floor(k/n),b=k%n;for(const v of [a,b]){degree[v]++;if(boundaryParent[v]<0)boundaryParent[v]=v;}const x=br(a),y=br(b);if(x!==y)boundaryParent[y]=x;}
+  for(const [k,count] of edges){const a=Math.floor(k/n),b=k%n;if(count>2){nonmanifold++;badVertex[a]=badVertex[b]=1;}if(count!==1)continue;for(const v of [a,b]){degree[v]++;if(boundaryParent[v]<0)boundaryParent[v]=v;}const x=br(a),y=br(b);if(x!==y)boundaryParent[y]=x;}
   const boundaries=new Set();let irregularBoundary=0;for(let i=0;i<n;i++)if(degree[i]){boundaries.add(br(i));if(degree[i]!==2)irregularBoundary++;}
-  return {used,edges,key,signature:{components:components.size,euler:vertices-edges.size+indices.length/3,boundaries:boundaries.size,irregularBoundary,nonmanifold}};
+  return {used,edges,key,degree,badVertex,signature:{components:components.size,euler:vertices-edges.size+indices.length/3,boundaries:boundaries.size,irregularBoundary,nonmanifold}};
  }
- function deriveLod(part,fraction,level,sourceTopology){
+
+ // Independent manifold edge collapses with a one-ring exclusion per pass.
+ // The exact source coordinates of surviving vertices are retained.
+ function collapseRound(pos,idx,radii,limit,top){
+  const n=pos.length/3,counts=new Uint32Array(n),offsets=new Uint32Array(n+1);
+  for(const v of idx)counts[v]++;for(let i=0;i<n;i++)offsets[i+1]=offsets[i]+counts[i];
+  const cursor=offsets.slice(),incident=new Uint32Array(idx.length);
+  for(let i=0;i<idx.length;i++)incident[cursor[idx[i]]++]=Math.floor(i/3)*3;
+  const neighbors=v=>{const set=new Set();for(let k=offsets[v];k<offsets[v+1];k++){const f=incident[k];for(let j=0;j<3;j++)if(idx[f+j]!==v)set.add(idx[f+j]);}return set;};
+  const normal=(a,b,c)=>{a*=3;b*=3;c*=3;const x=pos[b]-pos[a],y=pos[b+1]-pos[a+1],z=pos[b+2]-pos[a+2],u=pos[c]-pos[a],v=pos[c+1]-pos[a+1],w=pos[c+2]-pos[a+2];return [y*w-z*v,z*u-x*w,x*v-y*u];};
+  const safe=(from,to,dist)=>{if(radii[from]+dist>limit)return false;const faceKeys=new Set();
+   for(const v of [from,to])for(let k=offsets[v];k<offsets[v+1];k++){const f=incident[k],old=[idx[f],idx[f+1],idx[f+2]];if(old.includes(from)&&old.includes(to))continue;const next=old.map(x=>x===from?to:x);const key=[...next].sort((a,b)=>a-b).join(',');if(faceKeys.has(key))return false;faceKeys.add(key);if(v===from){const a=normal(...old),b=normal(...next),dot=a[0]*b[0]+a[1]*b[1]+a[2]*b[2],len=Math.hypot(...a)*Math.hypot(...b);if(!len||dot<len*.5)return false;}}
+   return true;};
+  const blocked=new Uint8Array(n),representative=Uint32Array.from({length:n},(_,i)=>i);let removed=0;
+  for(const [k,edgeFaces] of top.edges){if(edgeFaces>2)continue;let a=Math.floor(k/n),b=k%n;if(blocked[a]||blocked[b]||top.badVertex[a]||top.badVertex[b])continue;
+   const ba=top.degree[a],bb=top.degree[b];if((ba||bb)&&(edgeFaces!==1||ba!==2||bb!==2))continue;
+   const dist=Math.hypot(pos[a*3]-pos[b*3],pos[a*3+1]-pos[b*3+1],pos[a*3+2]-pos[b*3+2]);if(!dist||Math.min(radii[a],radii[b])+dist>limit)continue;
+   const na=neighbors(a),nb=neighbors(b);let common=0;for(const x of na)if(nb.has(x))common++;if(common!==edgeFaces)continue;
+   // A surviving link must contain exactly the edge's opposite vertices.
+   const opposite=new Set();for(let j=offsets[a];j<offsets[a+1];j++){const f=incident[j],tri=[idx[f],idx[f+1],idx[f+2]];if(tri.includes(b))for(const x of tri)if(x!==a&&x!==b)opposite.add(x);}
+   if(opposite.size!==edgeFaces||[...opposite].some(x=>!na.has(x)||!nb.has(x)))continue;
+   if(!safe(b,a,dist)){if(!safe(a,b,dist))continue;[a,b]=[b,a];}
+   representative[b]=a;radii[a]=Math.max(radii[a],radii[b]+dist);blocked[a]=blocked[b]=1;for(const x of na)blocked[x]=1;for(const x of nb)blocked[x]=1;removed++;
+  }
+  if(!removed)return null;
+  const remap=new Uint32Array(n),index=new Int32Array(n);index.fill(-1);const coords=[],outRadii=[];
+  for(let i=0;i<n;i++){const j=representative[i];if(index[j]<0){index[j]=coords.length/3;coords.push(pos[j*3],pos[j*3+1],pos[j*3+2]);outRadii.push(radii[j]);}remap[i]=index[j];}
+  const faces=[];for(let i=0;i<idx.length;i+=3){const a=remap[idx[i]],b=remap[idx[i+1]],c=remap[idx[i+2]];if(a!==b&&b!==c&&a!==c)faces.push(a,b,c);}
+  return {positions:new Float32Array(coords),indices:new Uint32Array(faces),radii:new Float64Array(outRadii),remap,removed};
+ }
+ function edgeCorrespondence(part,limit,sourceTopology,maxRounds=4){
+  const source=part.positions,n=source.length/3;
+  let pos=source,idx=part.indices,radii=new Float64Array(n),mapped=Uint32Array.from({length:n},(_,i)=>i),top=sourceTopology;
+  for(let pass=0;pass<maxRounds;pass++){
+   const round=collapseRound(pos,idx,radii,limit,top);if(!round)break;
+   const next=lodTopology(round.indices,round.positions.length/3);
+   if(JSON.stringify(next.signature)!==JSON.stringify(sourceTopology.signature))break;
+   for(let i=0;i<n;i++)mapped[i]=round.remap[mapped[i]];
+   pos=round.positions;idx=round.indices;radii=round.radii;top=next;
+   if(idx.length<part.indices.length*.45)break;
+  }
+  let error=0;for(let i=0;i<n;i++){const j=mapped[i];error=Math.max(error,Math.hypot(source[i*3]-pos[j*3],source[i*3+1]-pos[j*3+1],source[i*3+2]-pos[j*3+2]));}
+  return {mapped,coords:pos,error};
+ }
+
+ function deriveLod(part,fraction,level,sourceTopology,maxRounds=4){
   const pos=part.positions,idx=part.indices,n=pos.length/3,diagonal=Math.hypot(...part.max.map((v,k)=>v-part.min[k]));
   if(!Number.isFinite(diagonal)||diagonal<=0||idx.length<300)return null;
-  const limit=diagonal*fraction,cell=limit/Math.sqrt(3),map=new Map(),mapped=new Uint32Array(n),coords=[];let error=0;
-  for(let i=0;i<n;i++){const x=pos[i*3],y=pos[i*3+1],z=pos[i*3+2],key=[x,y,z].map((v,k)=>Math.floor((v-part.min[k])/cell)).join(',');let j=map.get(key);if(j===undefined){j=coords.length/3;map.set(key,j);coords.push(x,y,z);}mapped[i]=j;error=Math.max(error,Math.hypot(x-coords[j*3],y-coords[j*3+1],z-coords[j*3+2]));}
+  const limit=diagonal*fraction,{mapped,coords,error}=edgeCorrespondence(part,limit,sourceTopology,maxRounds);
   if(error>limit||coords.length>=pos.length*.95)return null;
   const faces=[],unique=new Map(),collapsed=[];
   const normal=(p,a,b,c)=>{a*=3;b*=3;c*=3;const x=p[b]-p[a],y=p[b+1]-p[a+1],z=p[b+2]-p[a+2],u=p[c]-p[a],v=p[c+1]-p[a+1],w=p[c+2]-p[a+2];return [y*w-z*v,z*u-x*w,x*v-y*u];};
@@ -137,11 +181,11 @@ globalThis.BodyVHF=(function sourceModule(){
   const positions=new Float32Array(coords),indices=count<=65536?new Uint16Array(faces):new Uint32Array(faces);
   return {id:part.id,name:part.name,category:part.category,color:part.color,min:part.min,max:part.max,positions,indices,lodLevel:level,certificate:{method:'face-correspondence-bound-v1',maxSurfaceDistanceUpperBound:error,limit,relativeBound:error/diagonal,sourceTriangles:idx.length/3,triangles:indices.length/3,topologyInvariants:top.signature,units:'display units; physical mm unconfirmed'}};
  }
- function buildLods(part){
+ function buildLods(part,maxRounds=4){
   const topology=lodTopology(part.indices,part.positions.length/3),levels=[];
   for(const [fraction,level] of [[.012,'overview'],[.004,'regional']]){
    // Conservative rejection is expected for thin, unusual or non-manifold geometry.
-   const candidate=deriveLod(part,fraction,level,topology);if(candidate)levels.push(candidate);
+   const candidate=deriveLod(part,fraction,level,topology,maxRounds);if(candidate)levels.push(candidate);
   }
   return levels;
  }
