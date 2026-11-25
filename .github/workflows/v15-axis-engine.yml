@@ -1,0 +1,16 @@
+name: AXIS engine unit gate
+on:
+  push:
+    branches: ['feat/v15-expedition-gamepad']
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/v15-axis.test.mjs tests/v15-world-engine.test.mjs tests/v15-vhf.test.mjs tests/v15-expedition.test.mjs tests/v15-optical.test.mjs
