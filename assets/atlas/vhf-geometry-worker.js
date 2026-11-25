@@ -7,7 +7,7 @@ self.onmessage=event=>{
   const part=self.BodyVHF.parse(buffer,{structures:[{...structure,tissue:'Bone'}]},true,true)[0];
   const decoded=performance.now();
   const transfers=[part.positions.buffer,part.indices.buffer];
-  if(lod){part.lods=self.BodyVHF.buildLods(part);for(const p of part.lods)transfers.push(p.positions.buffer,p.indices.buffer);}
+  if(lod&&part.indices.length/3<=250000){part.lods=self.BodyVHF.buildLods(part);for(const p of part.lods)transfers.push(p.positions.buffer,p.indices.buffer);}
   const initial=part.lods?.find(p=>p.lodLevel==='overview')||part.lods?.find(p=>p.lodLevel==='regional')||part;
   initial.packed=self.BodyVHF.packVertices(initial.positions,initial.indices);transfers.push(initial.packed.buffer);
   const packed=performance.now();

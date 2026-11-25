@@ -25,3 +25,11 @@ test('RESIDENCY LOD candidates preserve source identity and use bounded correspo
  assert.equal(V.chooseLod(part,{zoom:8},null),part);assert.equal(V.chooseLod(part,{zoom:1},part.id),part);
  const chosen=V.chooseLod(part,{zoom:1},null);assert.ok(chosen===part||part.lods.includes(chosen));
 });
+
+test('RESIDENCY demonstrates non-vacuous reduction on pinned C1 and rib geometry',()=>{
+ for(const [name,level] of [['VERTEBRA_C1','overview'],['RIB_12_LEFT','regional']]){
+  const e=manifest.structures.find(s=>s.source_name===name),b=readFileSync(new URL('../assets/atlas/vhf/axis/v1/'+e.file,import.meta.url));
+  const p=V.parse(b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength),{structures:[{...e,tissue:'Bone'}]},true,true)[0],lod=V.buildLods(p).find(x=>x.lodLevel===level);
+  assert.ok(lod,`${name}: no useful ${level} LOD`);assert.ok(lod.indices.length<p.indices.length*.95);assert.ok(lod.certificate.relativeBound<=(level==='overview'?.012:.004));
+ }
+});
