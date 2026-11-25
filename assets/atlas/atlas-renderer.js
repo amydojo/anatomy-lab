@@ -58,7 +58,8 @@ function create(canvas,onContextLost=()=>{}){
  let registry=window.BodyAtlasRegistry.create();
  let frameStats={drawCalls:0,submittedTriangles:0};
  const detail=new Map(),detailData=new Map();let shoulderPivot=[-1.1,1.9,0],shoulderGraph=null;let destroyed=false,rebuilding=false,recoveryScheduled=false;let uniformCache=new Map();const boundsCache=new Map();
- function cleanup(){if(gl){for(const item of [...buffers,...overviewBones,...overviewMuscles,...expansionBones,...expansionMuscles,...expansionConnective,...[...connectiveDetail.values()].flat(),...(facialOverview?[facialOverview]:[]),...facialDetail,...osteologyOverview,...[...expansionDetail.values()].flat(),...[...osteologyDetail.values()].flat(),...[...detail.values()].flat()])gl.deleteBuffer(item.buffer);if(program)gl.deleteProgram(program);}buffers=[];overviewBones=[];overviewMuscles=[];expansionBones=[];expansionMuscles=[];expansionConnective=[];connectiveDetail.clear();facialOverview=null;facialDetail=[];osteologyOverview=[];osteologyDetail.clear();expansionDetail.clear();detail.clear();program=null;uniformCache.clear();boundsCache.clear();}
+ function disposeMesh(item){gl.deleteBuffer(item.buffer);if(item.indexBuffer)gl.deleteBuffer(item.indexBuffer);}
+ function cleanup(){if(gl){for(const item of [...buffers,...overviewBones,...overviewMuscles,...expansionBones,...expansionMuscles,...expansionConnective,...[...connectiveDetail.values()].flat(),...(facialOverview?[facialOverview]:[]),...facialDetail,...osteologyOverview,...[...expansionDetail.values()].flat(),...[...osteologyDetail.values()].flat(),...[...detail.values()].flat()])disposeMesh(item);if(program)gl.deleteProgram(program);}buffers=[];overviewBones=[];overviewMuscles=[];expansionBones=[];expansionMuscles=[];expansionConnective=[];connectiveDetail.clear();facialOverview=null;facialDetail=[];osteologyOverview=[];osteologyDetail.clear();expansionDetail.clear();detail.clear();program=null;uniformCache.clear();boundsCache.clear();}
  function compile(type,source){const sh=gl.createShader(type);gl.shaderSource(sh,source);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(sh));return sh;}
  function setup(){
   gl=canvas.getContext('webgl2',{alpha:true,antialias:true,depth:true,premultipliedAlpha:false,powerPreference:'low-power'});
@@ -120,18 +121,17 @@ function create(canvas,onContextLost=()=>{}){
   }
   const weights=part.skinWeights||null;
   if(weights&&(weights.length!==vs.length||weights.some(w=>!Number.isFinite(w)||w<0||w>1)))throw Error('Invalid anatomical skin weights: '+id);
-  const flat=new Float32Array(part.faces.length*21);let cursor=0;
-  for(const tri of part.faces){
-   for(const i of tri){
-    flat.set(vs[i],cursor);
-    flat.set(normal.subarray(i*3,i*3+3),cursor+3);
-    flat[cursor+6]=weights?weights[i]:0;
-    cursor+=7;
-   }
+  const flat=new Float32Array(vs.length*7);
+  for(let i=0;i<vs.length;i++){
+   flat.set(vs[i],i*7);flat.set(normal.subarray(i*3,i*3+3),i*7+3);flat[i*7+6]=weights?weights[i]:0;
   }
-  const buffer=gl.createBuffer();
+  const indices=vs.length<=65536?new Uint16Array(part.faces.length*3):new Uint32Array(part.faces.length*3);
+  for(let i=0;i<part.faces.length;i++)indices.set(part.faces[i],i*3);
+  const buffer=gl.createBuffer(),indexBuffer=gl.createBuffer();
+  if(!buffer||!indexBuffer){if(buffer)gl.deleteBuffer(buffer);if(indexBuffer)gl.deleteBuffer(indexBuffer);throw Error('Geometry allocation failed: '+id);}
   gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,flat,gl.STATIC_DRAW);
-  return {id,name:part.name||id,fma:part.fma||null,group,color,tissue,buffer,verts:part.vertices,faces:part.faces,skinWeights:weights,rig:part.rig||null,count:part.faces.length*3};
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,indexBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,indices,gl.STATIC_DRAW);
+  return {id,name:part.name||id,fma:part.fma||null,group,color,tissue,buffer,indexBuffer,indexType:indices.BYTES_PER_ELEMENT===2?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,bufferBytes:flat.byteLength+indices.byteLength,verts:part.vertices,faces:part.faces,skinWeights:weights,rig:part.rig||null,count:indices.length};
  }
  function load(asset){
   if(asset.schema!=='body-live/atlas-skeleton-v1')throw Error('Unexpected skeleton schema');
@@ -162,8 +162,8 @@ function create(canvas,onContextLost=()=>{}){
     const mesh=makeBuffer(part,id,part.group,EXTENDED_MUSCLE_COLORS[part.region]||[.8,.49,.4],true);
     muscles.push(mesh);newlyAdded.push(mesh);
    }
-  }catch(err){for(const mesh of newlyAdded)gl.deleteBuffer(mesh.buffer);throw err;}
-  for(const old of [...overviewBones,...overviewMuscles])gl.deleteBuffer(old.buffer);
+  }catch(err){for(const mesh of newlyAdded)disposeMesh(mesh);throw err;}
+  for(const old of [...overviewBones,...overviewMuscles])disposeMesh(old);
   overviewBones=bones;overviewMuscles=muscles;overviewData=asset;
   registry.overview(asset);boundsCache.delete('__body__');
   return true;
@@ -196,8 +196,8 @@ function create(canvas,onContextLost=()=>{}){
      parts[kind].push(gpu);created.push(gpu);
     }
    }
-  }catch(e){for(const p of created)gl.deleteBuffer(p.buffer);throw e;}
-  for(const old of [...expansionBones,...expansionMuscles,...expansionConnective])gl.deleteBuffer(old.buffer);
+  }catch(e){for(const p of created)disposeMesh(p);throw e;}
+  for(const old of [...expansionBones,...expansionMuscles,...expansionConnective])disposeMesh(old);
   expansionBones=parts.bones;expansionMuscles=parts.muscles;expansionConnective=parts.connective;
   const additions=new Map();
   for(const region of ['skull','wrist','ankle']){
@@ -212,7 +212,7 @@ function create(canvas,onContextLost=()=>{}){
     return mesh;
    }));
   }
-  for(const m of expansionDetail.values())for(const p of m)gl.deleteBuffer(p.buffer);
+  for(const m of expansionDetail.values())for(const p of m)disposeMesh(p);
   expansionDetail=additions;
   expansionData=asset;registry.expansion(asset);
   return true;
@@ -234,8 +234,8 @@ function create(canvas,onContextLost=()=>{}){
     mesh.license='CC BY-SA 2.1 Japan';
     details.push(mesh);
    }
-  }catch(e){for(const x of [...(overview?[overview]:[]),...details])gl.deleteBuffer(x.buffer);throw e;}
-  for(const old of [...(facialOverview?[facialOverview]:[]),...facialDetail])gl.deleteBuffer(old.buffer);
+  }catch(e){for(const x of [...(overview?[overview]:[]),...details])disposeMesh(x);throw e;}
+  for(const old of [...(facialOverview?[facialOverview]:[]),...facialDetail])disposeMesh(old);
   facialData=asset;facialOverview=overview;facialDetail=details;
   registry.facial(asset);
   return true;
@@ -254,8 +254,8 @@ function create(canvas,onContextLost=()=>{}){
     built.push(mesh);
    }
    if(built.length!==7)throw Error('Missing the seven source bone references');
-  }catch(err){for(const m of built)gl.deleteBuffer(m.buffer);throw err;}
-  for(const m of osteologyOverview)gl.deleteBuffer(m.buffer);
+  }catch(err){for(const m of built)disposeMesh(m);throw err;}
+  for(const m of osteologyOverview)disposeMesh(m);
   osteologyOverview=built;
   osteologyDetail=new Map([
     ['skull',built.filter(m=>m.id!=='z-v11-coccyx')],
@@ -320,8 +320,8 @@ function create(canvas,onContextLost=()=>{}){
     next.push(makeBuffer(converted,id,tissue?'tissue':extended?window.BodyExtendedRegions.config[region].group:'lower',color,tissue));
    }
    if(next.filter(p=>!p.tissue).length!==(extended?Object.keys(asset.parts).length:hip||shoulder?3:4))throw Error('Incomplete detailed bone registration');
-  }catch(error){for(const p of next)gl.deleteBuffer(p.buffer);throw error;}
-  for(const old of detail.get(region)||[])gl.deleteBuffer(old.buffer);
+  }catch(error){for(const p of next)disposeMesh(p);throw error;}
+  for(const old of detail.get(region)||[])disposeMesh(old);
   if(shoulder){
     if(!window.BodyShoulderKinematics)throw Error('Shoulder kinematic graph missing');
     shoulderGraph=window.BodyShoulderKinematics.create(asset.parts);
@@ -338,7 +338,7 @@ function create(canvas,onContextLost=()=>{}){
   while(detail.size>3){
    const expired=detail.keys().next().value;
    const meshes=detail.get(expired)||[];
-   for(const part of meshes)gl.deleteBuffer(part.buffer);
+   for(const part of meshes)disposeMesh(part);
    detail.delete(expired);detailData.delete(expired);
   }
   if(extended)registry.detail(region,asset);
@@ -356,7 +356,7 @@ function create(canvas,onContextLost=()=>{}){
     const mesh=makeBuffer(part,id,'connective',palette[part.system],true);
     mesh.connective=true;mesh.connectiveKind=part.system;mesh.illustrative=true;
     result.push(mesh);
-  }}catch(e){for(const m of result)gl.deleteBuffer(m.buffer);throw e;}
+  }}catch(e){for(const m of result)disposeMesh(m);throw e;}
   connectiveDetail.set(region,result);return true;
  }
  function setConnectiveState(next){
@@ -446,7 +446,7 @@ function create(canvas,onContextLost=()=>{}){
    gl.enableVertexAttribArray(locP);gl.vertexAttribPointer(locP,3,gl.FLOAT,false,28,0);
    gl.enableVertexAttribArray(locN);gl.vertexAttribPointer(locN,3,gl.FLOAT,false,28,12);
    gl.enableVertexAttribArray(locW);gl.vertexAttribPointer(locW,1,gl.FLOAT,false,28,24);
-   gl.drawArrays(gl.TRIANGLES,0,item.count);drawCalls++;submittedTriangles+=item.count/3;
+   if(item.indexBuffer){gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,item.indexBuffer);gl.drawElements(gl.TRIANGLES,item.count,item.indexType,0);}else gl.drawArrays(gl.TRIANGLES,0,item.count);drawCalls++;submittedTriangles+=item.count/3;
   };
   const region=detail.has(selected)?selected:null;
   const from=transitionFrom&&transitionFrom!==region&&detail.has(transitionFrom)?transitionFrom:null;
