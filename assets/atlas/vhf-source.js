@@ -1,7 +1,7 @@
 /* Exact pinned VHF source; display transform provisional, no atlas registration. */
 globalThis.BodyVHF=(function sourceModule(){
  const base='/assets/atlas/vhf/';
- const hash='2aac40404f4aee5867d0f4feb13cf6aab5db2bc2360f0585356738113c35fb7c';
+ const hash='2aac40404f4aee5867d0f4feb13cf6aab5db2bc2360f0585356738113c35fb7c',worldHash='b4403e606faac7fca9525692f51a4d83db8d6a44622ab78a3b2bd07bf3e545c0';
  const names=['Femur','Tibia','Fibula','Patella','Distal femoral cartilage','Patellar cartilage','Lateral tibial cartilage','Medial tibial cartilage','Anterior cruciate ligament','Posterior cruciate ligament','Medial collateral ligament','Lateral collateral ligament','Vastus lateralis','Vastus medialis','Vastus intermedius','Biceps femoris short head','Popliteus'];
  const colors={Bone:[.85,.78,.66],Cartilage:[.57,.68,.68],Ligament:[.82,.75,.60],Muscle:[.70,.35,.32]};
  const transform=p=>[p[0]*.005,(p[2]+10)*.005,-p[1]*.005];
@@ -43,7 +43,7 @@ globalThis.BodyVHF=(function sourceModule(){
  function intersect(parts,view,c,x,y,ray,boxHit,visible){
  const {o,d}=ray(c,x,y);let best=Infinity,id=null;
  for(const p of parts){
-  if(!visible(p,view)||!boxHit(o,d,p.min,p.max))continue;
+  if((view.renderedIds&&!view.renderedIds.has(p.id))||!visible(p,view)||!boxHit(o,d,p.min,p.max))continue;
   const positions=p.positions,indices=p.indices,len=indices?indices.length/3:p.faces.length;
   for(let i=0;i<len;i++){
    const ia=indices?indices[i*3]:p.faces[i][0],ib=indices?indices[i*3+1]:p.faces[i][1],ic=indices?indices[i*3+2]:p.faces[i][2];
@@ -87,11 +87,14 @@ globalThis.BodyVHF=(function sourceModule(){
   if(buffer.byteLength!==6929868||manifest.glb.sha256!==hash)throw Error('Source asset size or manifest mismatch');
   const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',buffer)),v=>v.toString(16).padStart(2,'0')).join('');
   if(digest!==hash)throw Error('Source SHA-256 mismatch');
-  await nextFrame();return parse(buffer,manifest);
+  await nextFrame();const parts=parse(buffer,manifest);parts.sourceInfo={specimen:'VHF right knee · Denver',geometryHash:hash,manifestHash:'ed46e43fca5e8f3ecc4176be1b4fc2229d039dabd63880f070e7a9650f7060f8',bundles:[{file:'vhf-right-knee-source.glb',sha256:hash}],coverage:'right knee'};return parts;
  }
  async function loadWorld(){
-  const root=base+'world/', response=await fetch(root+'lower-body-manifest.json');if(!response.ok)throw Error('World manifest unavailable');const bytes=await response.arrayBuffer();const digest=async b=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',b)),v=>v.toString(16).padStart(2,'0')).join('');if(await digest(bytes)!=='b4403e606faac7fca9525692f51a4d83db8d6a44622ab78a3b2bd07bf3e545c0')throw Error('World manifest hash mismatch');const m=JSON.parse(new TextDecoder().decode(bytes));if(m.schema!=='body-live-vhf-lower-body-1'||m.bundles.length!==8||m.structures.length!==128)throw Error('World inventory mismatch');const parts=[];for(const b of m.bundles){const response=await fetch(root+b.file);if(!response.ok)throw Error('World bundle unavailable: '+b.file);const data=await response.arrayBuffer();if(data.byteLength!==b.bytes||await digest(data)!==b.sha256)throw Error('World bundle integrity: '+b.file);const structures=m.structures.filter(s=>s.side===b.side&&s.tissue===b.tissue);await nextFrame();parts.push(...parse(data,{structures},true));}return parts;
+  const root=base+'world/', response=await fetch(root+'lower-body-manifest.json');if(!response.ok)throw Error('World manifest unavailable');const bytes=await response.arrayBuffer();const digest=async b=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',b)),v=>v.toString(16).padStart(2,'0')).join('');if(await digest(bytes)!==worldHash)throw Error('World manifest hash mismatch');const m=JSON.parse(new TextDecoder().decode(bytes));if(m.schema!=='body-live-vhf-lower-body-1'||m.bundles.length!==8||m.structures.length!==128)throw Error('World inventory mismatch');const parts=[],timings=[];for(const b of m.bundles){const started=performance.now(),response=await fetch(root+b.file);if(!response.ok)throw Error('World bundle unavailable: '+b.file);const data=await response.arrayBuffer(),fetched=performance.now();if(data.byteLength!==b.bytes||await digest(data)!==b.sha256)throw Error('World bundle integrity: '+b.file);const structures=m.structures.filter(s=>s.side===b.side&&s.tissue===b.tissue);await nextFrame();const decoding=performance.now();parts.push(...parse(data,{structures},true));timings.push({file:b.file,fetchMs:fetched-started,decodeMs:performance.now()-decoding});}parts.sourceInfo={specimen:'VHF lower body · Denver',manifestHash:worldHash,bundles:m.bundles.map(b=>({file:b.file,sha256:b.sha256,bytes:b.bytes})),coverage:'lower body',timings};return parts;
  }
+ function landmarks(parts){const points=[];const center=p=>p.min.map((v,k)=>(v+p.max[k])/2);for(const side of ['left','right']){const get=n=>parts.find(p=>p.id==='vhf-'+side+'-bone-'+n);const femur=get('femur'),tibia=get('tibia'),patella=get('patella'),talus=get('talus'),foot=get('calcaneous'),pelvis=get('pelvis');const add=(label,p)=>{if(p)points.push({label:side.toUpperCase()+' '+label,point:center(p)});};add('HIP',pelvis);add('THIGH',femur);add('KNEE',patella);add('LOWER LEG',tibia);add('ANKLE',talus);add('FOOT',foot);}const sacrum=parts.find(p=>p.id==='vhf-left-bone-sacrum');if(sacrum)points.push({label:'PELVIS',point:center(sacrum)});return points;}
+ function neighborhood(points,c,previous){if(c.zoom<3||!points.length)return 'LOWER BODY';const distances=points.map(p=>({label:p.label,d:Math.hypot(p.point[0]-c.target.x,p.point[1]-c.target.y,p.point[2]-c.target.z)})).sort((a,b)=>a.d-b.d);const best=distances[0],old=distances.find(x=>x.label===previous);if(best.d>.65)return 'LOWER BODY';return old&&old.d<=best.d+.10?old.label:best.label;}
+ function evictionPlan(entries,protectedIds,now,budget,dwell=5000){let bytes=entries.reduce((n,e)=>n+e.bytes,0);const evict=[];for(const e of entries.filter(e=>!protectedIds.has(e.id)&&now-e.lastUse>=dwell).sort((a,b)=>a.lastUse-b.lastUse)){if(bytes<=budget)break;evict.push(e.id);bytes-=e.bytes;}return {evict,bytes,overBudget:bytes>budget};}
  function bounds(parts){const min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];for(const p of parts)for(let k=0;k<3;k++){min[k]=Math.min(min[k],p.min[k]);max[k]=Math.max(max[k],p.max[k]);}return {min,max,radius:Math.hypot(...max.map((x,i)=>x-min[i]))/2,center:{x:0,y:0,z:0}};}
  function visible(part,view){return (!view.isolated||part.id===view.isolated)&&(view.category==='All'||view.category===part.category);}
  function ray(c,x,y){
@@ -104,5 +107,5 @@ globalThis.BodyVHF=(function sourceModule(){
  function boxHit(o,d,min,max){let lo=0,hi=Infinity;for(let k=0;k<3;k++){if(Math.abs(d[k])<1e-12){if(o[k]<min[k]||o[k]>max[k])return false;continue;}let a=(min[k]-o[k])/d[k],b=(max[k]-o[k])/d[k];if(a>b)[a,b]=[b,a];lo=Math.max(lo,a);hi=Math.min(hi,b);if(hi<lo)return false;}return true;}
  function pickHit(parts,view,c,x,y){return intersect(parts,view,c,x,y,ray,boxHit,visible);}
  function pick(parts,view,c,x,y){return pickHit(parts,view,c,x,y)?.id||null;}
- return Object.freeze({load,loadWorld,parse,transform,bounds,visible,pick,pickHit,inView,compact,packVertices,hash});
+ return Object.freeze({load,loadWorld,parse,transform,bounds,visible,pick,pickHit,inView,compact,packVertices,hash,worldHash,landmarks,neighborhood,evictionPlan});
 })();
