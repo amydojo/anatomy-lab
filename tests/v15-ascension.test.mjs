@@ -9,3 +9,19 @@ test('CONTINUUM location depends on camera target, not ownership or loading',()=
 
 import vm from 'node:vm';
 test('VELOCITY worker transfers exact positions, topology and packed normals',()=>{const entry=manifest.structures.find(s=>s.source_name==='VERTEBRA_C1');const bytes=readFileSync(new URL('../assets/atlas/vhf/axis/v1/'+entry.file,import.meta.url));const raw=bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength);const direct=V.parse(raw,{structures:[{...entry,tissue:'Bone'}]},true,true)[0];let message,transfers;const worker={BodyVHF:V,postMessage:(data,list)=>{message=data;transfers=list;}};vm.runInNewContext(readFileSync(new URL('../assets/atlas/vhf-geometry-worker.js',import.meta.url),'utf8'),{self:worker,importScripts:()=>{},performance});worker.onmessage({data:{id:1,buffer:raw,structure:entry}});assert.equal(message.id,1);assert.equal(message.part.id,direct.id);assert.deepEqual(message.part.positions,direct.positions);assert.deepEqual(message.part.indices,direct.indices);assert.deepEqual(message.part.packed,V.packVertices(direct.positions,direct.indices));assert.equal(transfers.length,3);});
+
+test('RESIDENCY conservative overview framing contains every source AABB in initial portrait and landscape view',()=>{
+ const world=V.axisWorldLayout(manifest),b=world.bounds,target={x:(b.min[0]+b.max[0])/2,y:(b.min[1]+b.max[1])/2,z:(b.min[2]+b.max[2])/2};
+ for(const [width,height] of [[390,844],[1280,720],[844,390]]){
+  const c={width,height,target,yaw:0,pitch:0,zoom:1,anchorX:.5,anchorY:.5,frameSpan:V.overviewFrameSpan(b)};
+  assert.ok(world.boxes.every(p=>V.inView(p,c)),`Initial overview clipped in ${width}x${height}`);
+ }
+});
+test('RESIDENCY LOD candidates preserve source identity and use bounded correspondence; exact is retained on rejection',()=>{
+ const entry=manifest.structures.find(s=>s.source_name==='VERTEBRA_C1'),bytes=readFileSync(new URL('../assets/atlas/vhf/axis/v1/'+entry.file,import.meta.url));
+ const part=V.parse(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),{structures:[{...entry,tissue:'Bone'}]},true,true)[0];
+ part.lods=V.buildLods(part);
+ for(const p of part.lods){assert.equal(p.id,part.id);assert.ok(p.indices.length<part.indices.length);assert.ok(p.certificate.maxSurfaceDistanceUpperBound<=p.certificate.limit);assert.ok(p.certificate.relativeBound<=(p.lodLevel==='overview'?.012:.004));assert.ok(p.indices.every(i=>i<p.positions.length/3));}
+ assert.equal(V.chooseLod(part,{zoom:8},null),part);assert.equal(V.chooseLod(part,{zoom:1},part.id),part);
+ const chosen=V.chooseLod(part,{zoom:1},null);assert.ok(chosen===part||part.lods.includes(chosen));
+});

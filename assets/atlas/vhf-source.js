@@ -100,21 +100,84 @@ globalThis.BodyVHF=(function sourceModule(){
  function axisBox(s){return {id:s.id,min:[(240-s.max[0])*.005,(s.min[2]-1000)*.005,(s.min[1]-235)*.005],max:[(240-s.min[0])*.005,(s.max[2]-1000)*.005,(s.max[1]-235)*.005]};}
  function axisWorldLayout(m){const entries=axisInventory(m);if(entries.length!==59)throw Error('Unexpected axial world inventory');const boxes=entries.map(axisBox);const landmarks=axisRegions.map((label,i)=>{const b=bounds(entries.filter(s=>axisIncludes(s,i)).map(axisBox));return {label,point:b.min.map((v,k)=>(v+b.max[k])/2)};});return {entries,boxes,bounds:bounds(boxes),landmarks};}
  function axisLocation(points,c,previous){if(c.zoom<1.5)return 'AXIAL WORLD';const distances=points.map((p,i)=>({i,d:Math.abs(p.point[1]-c.target.y)})).sort((a,b)=>a.d-b.d);const old=distances.find(x=>x.i===previous);return old&&old.d<=distances[0].d+.12?old.i:distances[0].i;}
+
+ // RESIDENCY: geometric correspondence certificate for display-only LOD.
+ // Every source face maps to a retained triangle, edge or vertex; every retained
+ // triangle has a source preimage. The maximum vertex displacement consequently
+ // bounds both directed surface distances by barycentric interpolation.
+ function lodTopology(indices,n){
+  const parent=new Int32Array(n),used=new Uint8Array(n),edges=new Map();
+  parent.fill(-1);
+  const root=(a)=>{while(parent[a]!==a){parent[a]=parent[parent[a]];a=parent[a];}return a;};
+  const use=a=>{if(!used[a]){used[a]=1;parent[a]=a;}};
+  const join=(a,b)=>{a=root(a);b=root(b);if(a!==b)parent[b]=a;};
+  const key=(a,b)=>Math.min(a,b)*n+Math.max(a,b);
+  for(let i=0;i<indices.length;i+=3){const a=indices[i],b=indices[i+1],c=indices[i+2];use(a);use(b);use(c);join(a,b);join(b,c);for(const [u,v] of [[a,b],[b,c],[c,a]]){const k=key(u,v);edges.set(k,(edges.get(k)||0)+1);}}
+  const components=new Set();let vertices=0;for(let i=0;i<n;i++)if(used[i]){vertices++;components.add(root(i));}
+  const degree=new Uint32Array(n),boundaryParent=new Int32Array(n);boundaryParent.fill(-1);let nonmanifold=0;
+  const br=a=>{while(boundaryParent[a]!==a){boundaryParent[a]=boundaryParent[boundaryParent[a]];a=boundaryParent[a];}return a;};
+  for(const [k,count] of edges){if(count>2)nonmanifold++;if(count!==1)continue;const a=Math.floor(k/n),b=k%n;for(const v of [a,b]){degree[v]++;if(boundaryParent[v]<0)boundaryParent[v]=v;}const x=br(a),y=br(b);if(x!==y)boundaryParent[y]=x;}
+  const boundaries=new Set();let irregularBoundary=0;for(let i=0;i<n;i++)if(degree[i]){boundaries.add(br(i));if(degree[i]!==2)irregularBoundary++;}
+  return {used,edges,key,signature:{components:components.size,euler:vertices-edges.size+indices.length/3,boundaries:boundaries.size,irregularBoundary,nonmanifold}};
+ }
+ function deriveLod(part,fraction,level,sourceTopology){
+  const pos=part.positions,idx=part.indices,n=pos.length/3,diagonal=Math.hypot(...part.max.map((v,k)=>v-part.min[k]));
+  if(!Number.isFinite(diagonal)||diagonal<=0||idx.length<300)return null;
+  const limit=diagonal*fraction,cell=limit/Math.sqrt(3),map=new Map(),mapped=new Uint32Array(n),coords=[];let error=0;
+  for(let i=0;i<n;i++){const x=pos[i*3],y=pos[i*3+1],z=pos[i*3+2],key=[x,y,z].map((v,k)=>Math.floor((v-part.min[k])/cell)).join(',');let j=map.get(key);if(j===undefined){j=coords.length/3;map.set(key,j);coords.push(x,y,z);}mapped[i]=j;error=Math.max(error,Math.hypot(x-coords[j*3],y-coords[j*3+1],z-coords[j*3+2]));}
+  if(error>limit||coords.length>=pos.length*.95)return null;
+  const faces=[],unique=new Map(),collapsed=[];
+  const normal=(p,a,b,c)=>{a*=3;b*=3;c*=3;const x=p[b]-p[a],y=p[b+1]-p[a+1],z=p[b+2]-p[a+2],u=p[c]-p[a],v=p[c+1]-p[a+1],w=p[c+2]-p[a+2];return [y*w-z*v,z*u-x*w,x*v-y*u];};
+  for(let i=0;i<idx.length;i+=3){const a=mapped[idx[i]],b=mapped[idx[i+1]],c=mapped[idx[i+2]];if(a===b||b===c||c===a){collapsed.push(a,b,c);continue;}const old=normal(pos,idx[i],idx[i+1],idx[i+2]),next=normal(coords,a,b,c);if(old[0]*next[0]+old[1]*next[1]+old[2]*next[2]<=0)return null;const sorted=[a,b,c].sort((x,y)=>x-y),key=sorted.join(','),orientation=(a===sorted[0]&&b===sorted[1])||(b===sorted[0]&&c===sorted[1])||(c===sorted[0]&&a===sorted[1]);if(unique.has(key)){if(unique.get(key)!==orientation)return null;continue;}unique.set(key,orientation);faces.push(a,b,c);}
+  if(faces.length<3||faces.length>=idx.length*.95)return null;
+  const count=coords.length/3,top=lodTopology(faces,count);
+  for(let i=0;i<collapsed.length;i+=3){const distinct=[...new Set(collapsed.slice(i,i+3))];if(distinct.some(v=>!top.used[v])||(distinct.length===2&&!top.edges.has(top.key(...distinct))))return null;}
+  if(JSON.stringify(top.signature)!==JSON.stringify(sourceTopology.signature))return null;
+  // Use the source AABB conservatively for visibility; actual vertices never leave it.
+  const positions=new Float32Array(coords),indices=count<=65536?new Uint16Array(faces):new Uint32Array(faces);
+  return {id:part.id,name:part.name,category:part.category,color:part.color,min:part.min,max:part.max,positions,indices,lodLevel:level,certificate:{method:'face-correspondence-bound-v1',maxSurfaceDistanceUpperBound:error,limit,relativeBound:error/diagonal,sourceTriangles:idx.length/3,triangles:indices.length/3,topologyInvariants:top.signature,units:'display units; physical mm unconfirmed'}};
+ }
+ function buildLods(part){
+  const topology=lodTopology(part.indices,part.positions.length/3),levels=[];
+  for(const [fraction,level] of [[.012,'overview'],[.004,'regional']]){
+   // Conservative rejection is expected for thin, unusual or non-manifold geometry.
+   const candidate=deriveLod(part,fraction,level,topology);if(candidate)levels.push(candidate);
+  }
+  return levels;
+ }
+ function chooseLod(part,c,selected,current){
+  const levels=part.lods||[],find=level=>levels.find(p=>p.lodLevel===level);
+  if(selected===part.id||c.zoom>=4.5||(current==='exact'&&c.zoom>3.8))return part;
+  if(c.zoom>=1.7||(current==='regional'&&c.zoom>1.4))return find('regional')||part;
+  return find('overview')||find('regional')||part;
+ }
+ function overviewFrameSpan(b){return Math.max(3.25,2*(b.radius+.04)/Math.max(.1,1-b.radius/7.4)*1.12);}
+ // Bounded network operations, including reading the response body. Unlike RAF,
+ // a timeout-backed task yield does not depend on animation frame delivery.
+ async function axisFetch(url,signal,timeout=20000){
+  const ac=new AbortController(),abort=()=>ac.abort(signal?.reason);
+  if(signal?.aborted)abort();else signal?.addEventListener('abort',abort,{once:true});
+  const timer=setTimeout(()=>ac.abort(Error('AXIS fetch deadline exceeded')),timeout);
+  try{const response=await fetch(url,{signal:ac.signal});if(!response.ok)throw Error('HTTP '+response.status);return await response.arrayBuffer();}
+  finally{clearTimeout(timer);signal?.removeEventListener('abort',abort);}
+ }
+ const yieldTask=()=>new Promise(resolve=>setTimeout(resolve,0));
+
  // Worker ownership is scoped to each streaming pass. Transfer buffers rather than clone.
- function axisDecoder(enabled=true){
+ function axisDecoder(enabled=true,lod=true){
   let worker=null,serial=0,disabled=!enabled;const jobs=new Map();
   function close(reason='decoder closed'){disabled=true;if(worker){worker.terminate();worker=null;}for(const j of jobs.values()){clearTimeout(j.timer);j.reject(Error(reason));}jobs.clear();}
   function ensure(){if(disabled)return false;if(worker)return true;try{worker=new Worker('/assets/atlas/vhf-geometry-worker.js');worker.onmessage=event=>{const {id,part,error,decodeMs,packMs}=event.data,j=jobs.get(id);if(!j)return;jobs.delete(id);clearTimeout(j.timer);if(error)j.reject(Error(error));else j.resolve({part,decodeMs,packMs,execution:'worker'});};worker.onerror=()=>close('geometry worker unavailable');worker.onmessageerror=()=>close('geometry worker message unavailable');return true;}catch{close('geometry worker unavailable');return false;}}
-  async function decode(buffer,structure){if(!ensure()){await nextFrame();const start=performance.now(),part=parse(buffer,{structures:[{...structure,tissue:'Bone'}]},true,true)[0],decoded=performance.now();await nextFrame();part.packed=packVertices(part.positions,part.indices);return {part,decodeMs:decoded-start,packMs:performance.now()-decoded,execution:'main-fallback'};}
-   const id=++serial;return new Promise((resolve,reject)=>{const timer=setTimeout(()=>close('geometry worker timed out'),30000);jobs.set(id,{resolve,reject,timer});try{worker.postMessage({id,buffer,structure},[buffer]);}catch(e){close(e.message);}});}
+  async function decode(buffer,structure){if(!ensure()){await yieldTask();const start=performance.now(),part=parse(buffer,{structures:[{...structure,tissue:'Bone'}]},true,true)[0],decoded=performance.now();await yieldTask();part.packed=packVertices(part.positions,part.indices);return {part,decodeMs:decoded-start,packMs:performance.now()-decoded,execution:'main-fallback'};}
+   const id=++serial;return new Promise((resolve,reject)=>{const timer=setTimeout(()=>close('geometry worker timed out'),30000);jobs.set(id,{resolve,reject,timer});try{worker.postMessage({id,buffer,structure,lod},[buffer]);}catch(e){close(e.message);}});}
   return {decode,close};
  }
- async function openAxisWorld(signal){const root=base+'axis/v1/',digest=async b=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',b)),v=>v.toString(16).padStart(2,'0')).join('');const response=await fetch(root+'manifest.json',{signal});if(!response.ok)throw Error('AXIS manifest unavailable');const bytes=await response.arrayBuffer();if(await digest(bytes)!==axisManifestHash)throw Error('AXIS manifest mismatch');const m=JSON.parse(new TextDecoder().decode(bytes));if(m.schema!=='body-live-axis-source-1'||m.structures.length!==61)throw Error('AXIS inventory mismatch');const layout=axisWorldLayout(m),parts=[],timings=[],failures=new Map();parts.sourceInfo={specimen:'BoneHub VHF · separate CT reconstruction',registrationStatus:'unregistered to Denver',manifestHash:axisManifestHash,geometryRevision:m.revision,coverage:'AXIAL WORLD',availableStructures:layout.entries.length,availableTriangles:layout.entries.reduce((n,s)=>n+s.triangles,0),bundles:layout.entries.map(s=>({file:s.file,sha256:s.sha256,bytes:s.bytes})),timings};let running=false;
- async function stream(onChange,signal,priority=()=>null){if(running)return;running=true;const queued=layout.entries.filter(s=>!parts.some(p=>p.id===s.id)),legacy=new URLSearchParams(globalThis.location?.search||'').get('velocity')==='legacy',decoder=axisDecoder(!legacy);const started=performance.now();let first=true;parts.sourceInfo.processing=legacy?'legacy':'worker-preferred';parts.sourceInfo.streamStartedAt=started;
+ async function openAxisWorld(signal){const root=base+'axis/v1/',digest=async b=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',b)),v=>v.toString(16).padStart(2,'0')).join('');const bytes=await axisFetch(root+'manifest.json',signal);if(await digest(bytes)!==axisManifestHash)throw Error('AXIS manifest mismatch');const m=JSON.parse(new TextDecoder().decode(bytes));if(m.schema!=='body-live-axis-source-1'||m.structures.length!==61)throw Error('AXIS inventory mismatch');const layout=axisWorldLayout(m),parts=[],timings=[],failures=new Map();parts.sourceInfo={specimen:'BoneHub VHF · separate CT reconstruction',registrationStatus:'unregistered to Denver',manifestHash:axisManifestHash,geometryRevision:m.revision,coverage:'AXIAL WORLD',availableStructures:layout.entries.length,availableTriangles:layout.entries.reduce((n,s)=>n+s.triangles,0),bundles:layout.entries.map(s=>({file:s.file,sha256:s.sha256,bytes:s.bytes})),timings};let running=false;
+ async function stream(onChange,signal,priority=()=>null){if(running)return;running=true;const queued=layout.entries.filter(s=>!parts.some(p=>p.id===s.id)),legacy=new URLSearchParams(globalThis.location?.search||'').get('velocity')==='legacy',lodEnabled=new URLSearchParams(globalThis.location?.search||'').get('lod')!=='off',decoders=[axisDecoder(!legacy,lodEnabled),axisDecoder(!legacy,lodEnabled)];const started=performance.now();let first=true;parts.sourceInfo.processing=legacy?'legacy':'worker-preferred';parts.sourceInfo.streamStartedAt=started;
  const rank=s=>s.source_name==='SKULL_CRANIAL_MAXILLA'||s.source_name==='SACRUM'||s.source_name==='STERNUM'||s.source_name==='VERTEBRA_C1'||s.source_name==='HIP_LEFT'||s.source_name==='HIP_RIGHT'||/^RIB_[12]_/.test(s.source_name)?0:1;
  const take=()=>{const c=priority();queued.sort((a,b)=>{if(parts.length<8)return rank(a)-rank(b)||a.bytes-b.bytes;if(!c)return 0;const distance=s=>{const q=axisBox(s);return Math.hypot(...q.min.map((v,k)=>(v+q.max[k])/2-c.target[['x','y','z'][k]]));};return distance(a)-distance(b);});return queued.shift();};
- async function lane(){while(queued.length&&!signal?.aborted){const s=take();if(!s)return;for(let attempt=0;attempt<2&&!signal?.aborted;attempt++){try{const start=performance.now(),res=await fetch(root+s.file,{signal});if(!res.ok)throw Error('HTTP '+res.status);const data=await res.arrayBuffer(),fetched=performance.now();if(data.byteLength!==s.bytes||await digest(data)!==s.sha256)throw Error('asset integrity');if(signal?.aborted)return;let result;if(legacy){await nextFrame();const t=performance.now();result={part:parse(data,{structures:[{...s,tissue:'Bone'}]},true,true)[0],decodeMs:performance.now()-t,packMs:null,execution:'legacy'};}else result=await decoder.decode(data,s);if(signal?.aborted)return;parts.push(result.part);failures.delete(s.id);timings.push({file:s.file,fetchMs:fetched-start,decodeMs:result.decodeMs,packMs:result.packMs,execution:result.execution});if(first){first=false;parts.sourceInfo.firstGeometryMs=performance.now()-started;}onChange();break;}catch(e){if(signal?.aborted)return;failures.set(s.id,e.message);if(attempt===1)onChange();}}}}
- const abort=()=>decoder.close('stream aborted');signal?.addEventListener('abort',abort,{once:true});try{await Promise.all([lane(),lane()]);}finally{signal?.removeEventListener('abort',abort);decoder.close();running=false;parts.sourceInfo.lastStreamDurationMs=performance.now()-started;onChange();}}
+ async function lane(decoder){while(queued.length&&!signal?.aborted){const s=take();if(!s)return;for(let attempt=0;attempt<2&&!signal?.aborted;attempt++){try{const start=performance.now(),data=await axisFetch(root+s.file,signal),fetched=performance.now();if(data.byteLength!==s.bytes||await digest(data)!==s.sha256)throw Error('asset integrity');if(signal?.aborted)return;let result;if(legacy){await yieldTask();const t=performance.now();result={part:parse(data,{structures:[{...s,tissue:'Bone'}]},true,true)[0],decodeMs:performance.now()-t,packMs:null,execution:'legacy'};}else result=await decoder.decode(data,s);if(signal?.aborted)return;parts.push(result.part);failures.delete(s.id);timings.push({file:s.file,fetchMs:fetched-start,decodeMs:result.decodeMs,packMs:result.packMs,execution:result.execution,lod:(result.part.lods||[]).map(p=>({level:p.lodLevel,...p.certificate}))});if(first){first=false;parts.sourceInfo.firstGeometryMs=performance.now()-started;}onChange();break;}catch(e){if(signal?.aborted)return;failures.set(s.id,e.message);if(attempt===1)onChange();}}}}
+ const abort=()=>decoders.forEach(d=>d.close('stream aborted'));signal?.addEventListener('abort',abort,{once:true});try{await Promise.all(decoders.map(lane));}finally{signal?.removeEventListener('abort',abort);decoders.forEach(d=>d.close());running=false;parts.sourceInfo.lastStreamDurationMs=performance.now()-started;onChange();}}
 
  return {...layout,parts,failures,stream,get running(){return running;}};
  }
@@ -133,5 +196,5 @@ globalThis.BodyVHF=(function sourceModule(){
  function boxHit(o,d,min,max){let lo=0,hi=Infinity;for(let k=0;k<3;k++){if(Math.abs(d[k])<1e-12){if(o[k]<min[k]||o[k]>max[k])return false;continue;}let a=(min[k]-o[k])/d[k],b=(max[k]-o[k])/d[k];if(a>b)[a,b]=[b,a];lo=Math.max(lo,a);hi=Math.min(hi,b);if(hi<lo)return false;}return true;}
  function pickHit(parts,view,c,x,y){return intersect(parts,view,c,x,y,ray,boxHit,visible);}
  function pick(parts,view,c,x,y){return pickHit(parts,view,c,x,y)?.id||null;}
- return Object.freeze({load,loadWorld,loadAxis,openAxisWorld,axisWorldLayout,axisLocation,axisRegions,axisIncludes,parse,transform,bounds,visible,pick,pickHit,inView,compact,packVertices,hash,worldHash,landmarks,neighborhood,evictionPlan});
+ return Object.freeze({load,loadWorld,loadAxis,openAxisWorld,axisWorldLayout,axisLocation,axisRegions,axisIncludes,buildLods,chooseLod,overviewFrameSpan,parse,transform,bounds,visible,pick,pickHit,inView,compact,packVertices,hash,worldHash,landmarks,neighborhood,evictionPlan});
 })();
