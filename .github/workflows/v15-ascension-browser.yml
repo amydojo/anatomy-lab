@@ -1,0 +1,31 @@
+name: ASCENSION browser verification
+on:
+  push:
+    branches: ['feat/v15-expedition-gamepad']
+    paths: ['tests/v15-ascension*','.github/workflows/v15-ascension-browser.yml']
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop-chromium, webkit-mobile]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: node --test tests/v15-ascension.test.mjs tests/v15-axis.test.mjs tests/v15-world-engine.test.mjs
+      - run: npm run test:e2e -- --project=${{ matrix.project }} tests/v15-ascension.spec.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ascension-browser-${{ matrix.project }}
+          path: test-results/
+          if-no-files-found: warn

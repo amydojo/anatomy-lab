@@ -1,0 +1,23 @@
+import {test,expect} from '@playwright/test';
+test('ASCENSION loads actual pinned geometry and travels on controller',async({page},info)=>{
+ test.setTimeout(180000);
+ await page.addInitScript(()=>{window.__axisPadButtons=Array(17).fill(false);Object.defineProperty(navigator,'getGamepads',{configurable:true,value:()=>[{connected:true,mapping:'standard',index:0,axes:[0,0,0,0],buttons:window.__axisPadButtons.map(pressed=>({pressed,value:pressed?1:0}))}]});});
+ await page.goto('/atlas/?source=axis&expedition=1&visual=cinema&optical=tv&expeditionDiagnostics=1');
+ const report=()=>page.evaluate(()=>window.__BODY_EXPEDITION_DIAGNOSTICS__?.report());
+ await expect.poll(async()=>{const r=await report();return r?.source?.active&&r.renderer?.drawCalls>0?r.source.coverage:null;},{timeout:90000}).toBe('PELVIS / LUMBAR SPINE');
+ const baseline=await report();expect(baseline.source.registrationStatus).toBe('unregistered to Denver');expect(baseline.renderer.residentStructures).toBe(10);
+ await page.screenshot({path:info.outputPath('ascension-lumbar.png')});
+ await page.bringToFront();
+ const press=async()=>{await page.evaluate(()=>window.__axisPadButtons[12]=true);await page.waitForTimeout(350);await page.evaluate(()=>window.__axisPadButtons[12]=false);};
+ await expect.poll(async()=> (await report())?.controller?.status,{timeout:15000}).toBe('Controller ready');
+ await press();
+ await expect.poll(async()=> (await report())?.source?.coverage,{timeout:90000}).toBe('THORACIC CAGE');
+ const thorax=await report();expect(thorax.renderer.residentStructures).toBe(43);expect(thorax.renderer.drawCalls).toBeGreaterThan(0);
+ await page.screenshot({path:info.outputPath('ascension-thorax.png')});
+ await press();
+ await expect.poll(async()=> (await report())?.source?.coverage,{timeout:60000}).toBe('CERVICAL SPINE');
+ await press();
+ await expect.poll(async()=> (await report())?.source?.coverage,{timeout:90000}).toBe('CRANIUM');
+ expect((await report()).renderer.residentStructures).toBe(4);
+ await page.screenshot({path:info.outputPath('ascension-cranium.png')});
+});
