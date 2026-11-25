@@ -2,12 +2,12 @@ name: ASCENSION browser verification
 on:
   push:
     branches: ['feat/v15-expedition-gamepad']
-    paths: ['tests/v15-ascension*','.github/workflows/v15-ascension-browser.yml','assets/atlas/vhf-source.js','assets/atlas/atlas-controller.js','assets/atlas/atlas-renderer.js']
+    paths: ['tests/v15-ascension*','.github/workflows/v15-ascension-browser.yml','assets/atlas/vhf-source.js','assets/atlas/vhf-geometry-worker.js','assets/atlas/atlas-controller.js','assets/atlas/atlas-renderer.js']
   pull_request:
     branches: ['feat/v14-3-spatial-intelligence']
-    paths: ['tests/v15-ascension*','.github/workflows/v15-ascension-browser.yml','assets/atlas/vhf-source.js','assets/atlas/atlas-controller.js','assets/atlas/atlas-renderer.js']
+    paths: ['tests/v15-ascension*','.github/workflows/v15-ascension-browser.yml','assets/atlas/vhf-source.js','assets/atlas/vhf-geometry-worker.js','assets/atlas/atlas-controller.js','assets/atlas/atlas-renderer.js']
 concurrency:
-  group: ascension-browser-${{ github.head_ref || github.ref }}
+  group: ascension-browser-${{ github.event_name }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 permissions:
   contents: read
