@@ -49,7 +49,7 @@
    status('Controller ready');
    const edges=input.buttons.map((b,i)=>b&&!prior[i]);prior=input.buttons;
    // Discrete actions take priority over continuous navigation in the same frame.
-   const action=[0,1,2,3,11,12,13,14,15].find(i=>edges[i]);
+   const action=[9,0,1,2,3,11,12,13,14,15].find(i=>edges[i]);
    if(action!==undefined){finish();command(action);return;}
    if(moving(input)){
     if(!active){active=true;begin();}

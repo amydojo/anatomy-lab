@@ -65,6 +65,11 @@ function refreshOsteologyCoverage(){
   ' conventional bones · BP3D 4.0 CC BY 4.0 · BP3D 3.0 facial CC BY-SA 2.1 Japan · Z-Anatomy CC BY-SA 4.0 · expert review pending';
 }
 function render(){
+ if($('atlas-app').dataset.expeditionClean==='true'){
+  const id=U.getSelected(),region=U.getRegion()||state.data.region;
+  const label=id?(model.getStructure(region,id)?.name||$('structure-chip-name').textContent||id):(LABEL[region]||'FULL BODY');
+  const el=$('expedition-location');if(el&&el.textContent!==label)el.textContent=label;
+ }
  if(document.hidden||(state.data.view==='detail'&&!U.isActive()))return;
  model.render(state.data.camera,U.getRegion()||state.data.region,state.data.evidenceMode,state.data.layer,U.getReveal(),U.getMotion(),U.getSelected(),U.getSecondaryMotion(),U.getTransitionFrom(),state.data.mode==='trace'&&!window.BodyExtendedRegions?.has(U.getRegion()||state.data.region));
  window.BodyShoulderDebug?.draw(state.data.camera,
@@ -551,7 +556,7 @@ function setInspectorFrame(visible,instant=false){
  const camera=state.data.camera;
  const width=Math.max(1,$('atlas-canvas').clientWidth);
  // A 355px inspector + 90px tool rail must not hide the specimen.
- const target=(visible&&window.innerWidth>850)?Math.max(.30,.5-Math.min(152,Math.max(99,width*.101))/width):.5;
+ const target=(visible&&$('atlas-app').dataset.expeditionClean!=='true'&&window.innerWidth>850)?Math.max(.30,.5-Math.min(152,Math.max(99,width*.101))/width):.5;
  const start=Number.isFinite(camera.anchorX)?camera.anchorX:.5;
  cancelAnimationFrame(studioFramingFrame);studioFramingFrame=0;
  if(Math.abs(target-start)<.0002)return target;
@@ -595,7 +600,7 @@ let frameOwner=null;
 function setFrameOwner(owner){frameOwner=owner||null;}
 function setMobileFrame(visible,owner){
  if(frameOwner&&owner!==frameOwner)return;
- const c=state.data.camera,target=visible?.39:.5;
+ const c=state.data.camera,target=visible&&$('atlas-app').dataset.expeditionClean!=='true'?.39:.5;
  if(Math.abs((c.anchorY??.5)-target)<.001)return;
  c.anchorY=target;render();
 }
@@ -607,11 +612,17 @@ function recenter(){
 function setupExpedition(){
  const button=$('expedition-toggle'),hud=$('expedition-hud'),reticle=$('expedition-reticle'),status=$('expedition-status');
  if(!button||!window.BodyExpedition)return;
- let enabled=false;const pointers=new Set();
+ let enabled=false,clean=false;const pointers=new Set();const app=$('atlas-app'),viewButton=$('expedition-view');
+ function setClean(next){
+  clean=!!next&&enabled;app.dataset.expeditionClean=String(clean);viewButton.setAttribute('aria-pressed',String(clean));viewButton.textContent=clean?'Show UI':'Hide UI';
+  if(clean){cancelAnimationFrame(studioFramingFrame);studioFramingFrame=0;state.data.camera.anchorX=.5;state.data.camera.anchorY=.5;}
+  resize();
+ }
  const setStatus=message=>{if(status.textContent!==message)status.textContent=message;};
  const finish=()=>{if(studioCameraActive()){studioNavigation?.end();window.dispatchEvent(new Event('body:camera-transaction'));}};
  const command=index=>{
   const selected=U.getSelected(),studio=studioCameraActive();
+  if(index===9){setClean(!clean);return;}
   if(index===0){const c=$('atlas-canvas');pickAt(c.clientWidth/2,c.clientHeight/2,{pointerType:'mouse'});}
   if(index===1){if(studio&&connectiveNavAction('back'))return;if(selected){U.clearSelection();render();}else if(state.data.view==='detail')body();}
   if(index===2&&studio&&selected){const el=document.querySelector('[data-cs-action="isolate"]:not([disabled])');el?.click();}
@@ -632,12 +643,14 @@ function setupExpedition(){
   begin:()=>{cancelAnimationFrame(motionFrame);motionFrame=0;U.interrupt();if(studioCameraActive())studioNavigation?.begin();},
   end:finish,render,command,status:setStatus
  });
- function toggle(next){enabled=next;button.setAttribute('aria-pressed',String(next));hud.hidden=reticle.hidden=!next;controls.setEnabled(next);if(next)setStatus('Press any controller button to connect');}
+ function toggle(next){enabled=next;button.setAttribute('aria-pressed',String(next));button.textContent=next?'Exit controller':'Controller mode';hud.hidden=reticle.hidden=viewButton.hidden=!next;controls.setEnabled(next);setClean(next);if(next)setStatus('Press any controller button to connect');}
+ viewButton.addEventListener('click',()=>setClean(!clean));
  button.addEventListener('click',()=>toggle(!enabled));
  window.addEventListener('pointerdown',e=>{pointers.add(e.pointerId);controls.interrupt();},true);
  const release=e=>pointers.delete(e.pointerId);window.addEventListener('pointerup',release,true);window.addEventListener('pointercancel',release,true);
  window.addEventListener('blur',()=>pointers.clear());window.addEventListener('pagehide',()=>toggle(false));
  if(new URLSearchParams(location.search).get('expedition')==='1')toggle(true);
+ window.addEventListener('pageshow',event=>{if(event.persisted&&new URLSearchParams(location.search).get('expedition')==='1')toggle(true);});
 }
 
 function setup(){

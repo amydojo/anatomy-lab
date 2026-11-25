@@ -6,3 +6,36 @@
 #expedition-hud[hidden],#expedition-reticle[hidden]{display:none}
 #expedition-reticle{position:absolute;z-index:8;left:50%;top:50%;width:18px;height:18px;border:1px solid #e9c6a5;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;box-shadow:0 0 4px #000}
 @media(max-width:980px){#expedition-control{top:auto;bottom:64px;right:8px}}
+
+/* V15.1: specimen-first presentation. Only active during controller clean view. */
+.expedition-actions{display:flex;gap:5px;align-items:center}
+#expedition-view[hidden]{display:none!important}
+#expedition-location{font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.expedition-help,.expedition-menu-hint,.expedition-evidence{display:block}
+.expedition-menu-hint,.expedition-evidence{color:#c4ad9c;font-size:10px}
+#atlas-app[data-expedition-clean=true]{height:100dvh!important;min-height:0!important;position:relative;overflow:hidden}
+#atlas-app[data-expedition-clean=true]>.topbar,
+#atlas-app[data-expedition-clean=true]>.region-dock,
+#atlas-app[data-expedition-clean=true]>#overview-system-switch,
+#atlas-app[data-expedition-clean=true]>#controlbar,
+#atlas-app[data-expedition-clean=true] #workspace>:not(#atlas-stage),
+#atlas-app[data-expedition-clean=true] #atlas-stage>.stage-meta,
+#atlas-app[data-expedition-clean=true] #atlas-stage>.stage-bottom,
+#atlas-app[data-expedition-clean=true] #atlas-stage>.stage-wash,
+#atlas-app[data-expedition-clean=true] #atlas-stage>#mobile-workbench,
+#atlas-app[data-expedition-clean=true] #atlas-stage>#desktop-studio,
+#atlas-app[data-expedition-clean=true] #atlas-stage>#joint-motion,
+#atlas-app[data-expedition-clean=true] #atlas-stage>#structure-chip,
+#atlas-app[data-expedition-clean=true] #atlas-stage>#hotspots,
+#atlas-app[data-expedition-clean=true] #atlas-stage>#osteology-micro-controls,
+#atlas-app[data-expedition-clean=true] #atlas-stage>#shoulder-rig-tools,
+#atlas-app[data-expedition-clean=true] #atlas-stage>#connective-spatial-hud{display:none!important}
+#atlas-app[data-expedition-clean=true] #workspace{display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:0!important;padding:0!important}
+#atlas-app[data-expedition-clean=true] #atlas-stage{display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:0!important;max-height:none!important}
+#atlas-app[data-expedition-clean=true] #atlas-canvas{position:absolute!important;inset:0!important;width:100%!important;height:100%!important}
+#atlas-app[data-expedition-clean=true] #expedition-control{z-index:12;top:calc(6px + env(safe-area-inset-top,0px));bottom:auto;left:calc(8px + env(safe-area-inset-left,0px));right:calc(8px + env(safe-area-inset-right,0px));max-width:none;flex-direction:row-reverse;align-items:flex-start;justify-content:space-between;gap:8px}
+#atlas-app[data-expedition-clean=true] #expedition-hud{background:none;border:0;padding:2px 0;text-align:left;max-width:56%;text-shadow:0 1px 4px #000,0 0 6px #000;font-size:10px;line-height:1.4}
+#atlas-app[data-expedition-clean=true] #expedition-location{font-size:12px}
+#atlas-app[data-expedition-clean=true] .expedition-help{display:none}
+#atlas-app[data-expedition-clean=true] #expedition-control button{background:#181512a6;border-color:#81736688;padding:4px 7px;font-size:10px;min-height:30px}
+#atlas-app[data-expedition-clean=true] #expedition-reticle{width:12px;height:12px;opacity:.75}
