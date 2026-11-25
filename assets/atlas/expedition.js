@@ -54,10 +54,10 @@
     if(!longTasksSupported)metrics.longTaskMs=null;
     return {schema:'body-live-expedition-diagnostics-1',elapsedMs:clock()-start,rollingCapacity:1800,metrics,events:events.slice(),unsupported:{gpuFrameTimeMs:'unavailable',airplayEncoding:'unavailable',physicalInputLatencyMs:'unavailable'},notes:['Frame intervals measure successive active controller callbacks, not display presentation. Missed slots assume nominal 60 Hz, not measured dropped frames. CPU render duration measures submission, not GPU completion.']};}};
  }
- function mount({camera,bounds,maxZoom,canMove,begin,end,render,command,status,diagnostic=null,getPads=()=>navigator.getGamepads?.()||[]}){
+ function mount({camera,bounds,maxZoom,canMove,begin,end,render,command,status,diagnostic=null,onOpticalTick=()=>{},onOpticalSuspend=()=>{},getPads=()=>navigator.getGamepads?.()||[]}){
   let enabled=false,frame=0,last=0,active=false,padIndex=null,armed=false,prior=[];
   const finish=()=>{if(active){active=false;end();}};
-  const reset=()=>{diagnostic?.suspend();finish();padIndex=null;armed=false;prior=[];last=0;};
+  const reset=()=>{diagnostic?.suspend();onOpticalSuspend();finish();padIndex=null;armed=false;prior=[];last=0;};
   function tick(now){
    if(!enabled)return;frame=requestAnimationFrame(tick);
    if(document.hidden||!canMove()){reset();return;}
@@ -73,11 +73,12 @@
    const edges=input.buttons.map((b,i)=>b&&!prior[i]);prior=input.buttons;
    // Discrete actions take priority over continuous navigation in the same frame.
    const action=[9,0,1,2,3,11,12,13,14,15].find(i=>edges[i]);
-   if(action!==undefined){diagnostic?.idle();finish();const start=diagnostic?performance.now():0;command(action);if(diagnostic&&action===0)diagnostic.sample('selectionCpuMs',performance.now()-start);return;}
-   if(moving(input)){
+   if(action!==undefined){onOpticalSuspend();diagnostic?.idle();finish();const start=diagnostic?performance.now():0;command(action);if(diagnostic&&action===0)diagnostic.sample('selectionCpuMs',performance.now()-start);return;}
+   const isMoving=moving(input);const qualityChanged=onOpticalTick(now,isMoving);
+   if(isMoving){
     if(!active){active=true;begin();}
-    if(advance(camera(),input,dt,bounds(),maxZoom())){diagnostic?.active(now);render();if(diagnostic)diagnostic.sample('inputToRenderSubmissionMs',performance.now()-pollStart);}else diagnostic?.idle();
-   }else{diagnostic?.idle();finish();}
+    if(advance(camera(),input,dt,bounds(),maxZoom())){diagnostic?.active(now);render();if(diagnostic)diagnostic.sample('inputToRenderSubmissionMs',performance.now()-pollStart);}else{diagnostic?.idle();if(qualityChanged)render();}
+   }else{diagnostic?.idle();finish();if(qualityChanged)render();}
   }
   function setEnabled(next){enabled=!!next;cancelAnimationFrame(frame);frame=0;reset();if(enabled)frame=requestAnimationFrame(tick);}
   window.addEventListener('blur',reset);
