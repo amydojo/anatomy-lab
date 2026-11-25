@@ -39,3 +39,6 @@
 #atlas-app[data-expedition-clean=true] .expedition-help{display:none}
 #atlas-app[data-expedition-clean=true] #expedition-control button{background:#181512a6;border-color:#81736688;padding:4px 7px;font-size:10px;min-height:30px}
 #atlas-app[data-expedition-clean=true] #expedition-reticle{width:12px;height:12px;opacity:.75}
+
+/* In cramped normal layout keep the return-to-clean button within the stage. */
+@media(max-height:520px){#atlas-app:not([data-expedition-clean=true]) #expedition-control{top:4px;bottom:auto;right:calc(5px + env(safe-area-inset-right,0px))}#atlas-app:not([data-expedition-clean=true]) #expedition-hud{display:none}#atlas-app:not([data-expedition-clean=true]) #expedition-control button{font-size:10px;padding:4px 7px}}
