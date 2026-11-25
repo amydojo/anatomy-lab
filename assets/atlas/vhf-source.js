@@ -6,27 +6,27 @@ globalThis.BodyVHF=(function sourceModule(){
  const colors={Bone:[.85,.78,.66],Cartilage:[.57,.68,.68],Ligament:[.82,.75,.60],Muscle:[.70,.35,.32]};
  const transform=p=>[p[0]*.005,(p[2]+10)*.005,-p[1]*.005];
  const nextFrame=()=>new Promise(resolve=>requestAnimationFrame(resolve));
- function parse(buffer,manifest){
+ function parse(buffer,manifest,world=false){
   const dv=new DataView(buffer);
   if(dv.getUint32(0,true)!==0x46546c67||dv.getUint32(4,true)!==2||dv.getUint32(8,true)!==buffer.byteLength)throw Error('Invalid GLB header');
   const n=dv.getUint32(12,true),offset=20+n;
   if(offset+8>buffer.byteLength||dv.getUint32(16,true)!==0x4e4f534a||dv.getUint32(offset+4,true)!==0x004e4942||offset+8+dv.getUint32(offset,true)!==buffer.byteLength)throw Error('Invalid GLB chunks');
   const doc=JSON.parse(new TextDecoder().decode(new Uint8Array(buffer,20,n))),start=offset+8;
-  if(doc.meshes.length!==17||manifest.structures.length!==17)throw Error('Unexpected source inventory');
+  if(doc.meshes.length!==manifest.structures.length||(!world&&doc.meshes.length!==17))throw Error('Unexpected source inventory');
   function accessor(index,type,component,lanes){
    const ac=doc.accessors[index],bv=doc.bufferViews[ac.bufferView],bytes=4,begin=start+(bv.byteOffset||0)+(ac.byteOffset||0),len=ac.count*lanes;
    if(ac.type!==type||ac.componentType!==component||ac.sparse||bv.buffer!==0||bv.byteStride||begin<start||begin+len*bytes>start+(bv.byteOffset||0)+bv.byteLength||begin+len*bytes>buffer.byteLength||begin%4)throw Error('Unsupported GLB accessor');
    return component===5126?new Float32Array(buffer,begin,len):new Uint32Array(buffer,begin,len);
   }
   return doc.meshes.map((m,j)=>{
-   const s=manifest.structures[j],p=m.primitives[0];
+   const s=world?manifest.structures.find(s=>s.id===m.name):manifest.structures[j],p=m.primitives[0];
    if(m.name!==s.id||m.primitives.length!==1||p.mode!==4||!colors[s.tissue])throw Error('Source identity mismatch');
    const pos=accessor(p.attributes.POSITION,'VEC3',5126,3),idx=accessor(p.indices,'SCALAR',5125,1);
    if(pos.length!==s.vertices*3||idx.length!==s.triangles*3)throw Error('Source count mismatch');
    const vertices=[],faces=[],min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
    for(let i=0;i<pos.length;i+=3){const v=transform(pos.subarray(i,i+3));if(v.some(x=>!Number.isFinite(x)))throw Error('Invalid source coordinate');vertices.push(v);for(let k=0;k<3;k++){min[k]=Math.min(min[k],v[k]);max[k]=Math.max(max[k],v[k]);}}
    for(let i=0;i<idx.length;i+=3){const f=[idx[i],idx[i+1],idx[i+2]];if(f.some(x=>x>=vertices.length))throw Error('Source index out of bounds');faces.push(f);}
-   return {id:s.id,name:names[j],category:s.tissue,color:colors[s.tissue],vertices,faces,min,max};
+   return {id:s.id,name:world?`${s.source_name} · ${/^(Sacrum|Coccyx)$/i.test(s.source_name)?'Central':s.side}`:names[j],category:s.tissue,color:colors[s.tissue],vertices,faces,min,max};
   });
  }
  async function load(){
@@ -37,6 +37,9 @@ globalThis.BodyVHF=(function sourceModule(){
   const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',buffer)),v=>v.toString(16).padStart(2,'0')).join('');
   if(digest!==hash)throw Error('Source SHA-256 mismatch');
   await nextFrame();return parse(buffer,manifest);
+ }
+ async function loadWorld(){
+  const root=base+'world/', response=await fetch(root+'lower-body-manifest.json');if(!response.ok)throw Error('World manifest unavailable');const bytes=await response.arrayBuffer();const digest=async b=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',b)),v=>v.toString(16).padStart(2,'0')).join('');if(await digest(bytes)!=='b4403e606faac7fca9525692f51a4d83db8d6a44622ab78a3b2bd07bf3e545c0')throw Error('World manifest hash mismatch');const m=JSON.parse(new TextDecoder().decode(bytes));if(m.schema!=='body-live-vhf-lower-body-1'||m.bundles.length!==8||m.structures.length!==128)throw Error('World inventory mismatch');const parts=[];for(const b of m.bundles){const response=await fetch(root+b.file);if(!response.ok)throw Error('World bundle unavailable: '+b.file);const data=await response.arrayBuffer();if(data.byteLength!==b.bytes||await digest(data)!==b.sha256)throw Error('World bundle integrity: '+b.file);const structures=m.structures.filter(s=>s.side===b.side&&s.tissue===b.tissue);await nextFrame();parts.push(...parse(data,{structures},true));}return parts;
  }
  function bounds(parts){const min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];for(const p of parts)for(let k=0;k<3;k++){min[k]=Math.min(min[k],p.min[k]);max[k]=Math.max(max[k],p.max[k]);}return {min,max,radius:Math.hypot(...max.map((x,i)=>x-min[i]))/2,center:{x:0,y:0,z:0}};}
  function visible(part,view){return (!view.isolated||part.id===view.isolated)&&(view.category==='All'||view.category===part.category);}
@@ -64,5 +67,5 @@ globalThis.BodyVHF=(function sourceModule(){
   }
   return hit;
  }
- return Object.freeze({load,parse,transform,bounds,visible,pick,hash});
+ return Object.freeze({load,loadWorld,parse,transform,bounds,visible,pick,hash});
 })();
