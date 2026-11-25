@@ -15,6 +15,8 @@ const sub=(a,b)=>a.map((x,k)=>x-b[k]),add=(a,b)=>a.map((x,k)=>x+b[k]),mul=(a,s)=
 // Independent exact point-to-triangle closest point (Voronoi-region tests).
 function distance2(p,a,b,c){
  const ab=sub(b,a),ac=sub(c,a),ap=sub(p,a),d1=dot(ab,ap),d2a=dot(ac,ap);
+ const cross=[ab[1]*ac[2]-ab[2]*ac[1],ab[2]*ac[0]-ab[0]*ac[2],ab[0]*ac[1]-ab[1]*ac[0]];
+ if(dot(cross,cross)<1e-28){const segment=(x,y)=>{const v=sub(y,x),n=dot(v,v),t=n?Math.max(0,Math.min(1,dot(sub(p,x),v)/n)):0;return d2(p,add(x,mul(v,t)));};return Math.min(segment(a,b),segment(b,c),segment(c,a));}
  if(d1<=0&&d2a<=0)return d2(p,a);
  const bp=sub(p,b),d3=dot(ab,bp),d4=dot(ac,bp);if(d3>=0&&d4<=d3)return d2(p,b);
  const vc=d1*d4-d3*d2a;if(vc<=0&&d1>=0&&d3<=0)return d2(p,add(a,mul(ab,d1/(d1-d3))));
@@ -49,7 +51,7 @@ function samples(mesh,count=256){
  for(let k=0;k<3;k++)for(const sign of [-1,1]){let best=0;for(let v=1;v<p.length/3;v++)if(sign*p[v*3+k]>sign*p[best*3+k])best=v;points.push(p3(p,best));}
  return points;
 }
-const summarize=a=>{a.sort((x,y)=>x-y);return {samples:a.length,median:a[Math.floor(a.length*.5)],p95:a[Math.min(a.length-1,Math.floor(a.length*.95))],maximum:a[a.length-1]};};
+const summarize=a=>{if(!a.length||a.some(x=>!Number.isFinite(x)||x<0))throw Error('Invalid independent distance measurement');a.sort((x,y)=>x-y);return {samples:a.length,median:a[Math.floor(a.length*.5)],p95:a[Math.min(a.length-1,Math.floor(a.length*.95))],maximum:a[a.length-1]};};
 const estimatedGpu=p=>p.positions.length/3*28+p.indices.byteLength;
 const rows=[],derived=[];let fullTriangles=0,overviewTriangles=0,fullGpu=0,overviewGpu=0;
 for(const e of entries){
