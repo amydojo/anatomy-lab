@@ -25,8 +25,9 @@ function create(world,hit,opts={}){const home={...hit,point:hit.point.slice(),no
   if(s.ground){
    const speed=len(v),goal=mul(desired,wantedSpeed);v=mix(plane(v,n),goal,damp(brake?18:throttle?9:5,STEP));const d=len(v)*STEP;
    if(d>1e-7){let h=null;const dir=unit(v),pred=add(p,mul(dir,d));h=contact(world,pred,n,dir,s.id,{old:p,dir,length:d});
-    if(!h){for(const a of [.35,-.35,.7,-.7,1.05,-1.05]){const alt=rotate(dir,n,a),q=add(p,mul(alt,d));const c=contact(world,q,n,alt,s.id,{old:p,dir:alt,length:d});if(c&&dot(alt,desired)>.1){h=c;break;}}}
-    if(h){const displacement=sub(h.q,p);if(len(displacement)<=Math.max(d*4,.008)){setContact(h);v=mul(tangent(n,transport(dir,up,n)),speed>0?len(v):wantedSpeed);s.edgeBlocked=false;blocked=false;}else h=null;}
+    const qualifies=h=>h&&len(sub(h.q,p))<=Math.max(d*2.7,.0018)&&dot(sub(h.q,p),desired)>d*.12;if(!qualifies(h))h=null;
+    if(!h){for(const a of [.35,-.35,.7,-.7,1.05,-1.05]){const alt=rotate(dir,n,a),q=add(p,mul(alt,d));const c=contact(world,q,n,alt,s.id,{old:p,dir:alt,length:d});if(qualifies(c)&&dot(alt,desired)>.1){h=c;break;}}}
+    if(h){const displacement=sub(h.q,p);setContact(h);v=mul(tangent(n,displacement),Math.min(len(v),len(displacement)/STEP));s.edgeBlocked=false;blocked=false;}
     if(!h){v=mul(v,Math.exp(-STEP*28));if(!blocked){s.edgeSaves++;s.contactLosses++;}blocked=true;s.edgeBlocked=true;}
    }else{s.edgeBlocked=false;blocked=false;}
    s.f=tangent(n,mix(s.f,tangent(n,desired),damp(13,STEP)));s.groundSteps++;s.flightState='ride';s.capture=0;const wasGrinding=s.grind;s.grind=false;s.grindSource=null;
