@@ -23,6 +23,7 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npx playwright test tests/nexus-paired.spec.mjs --project=desktop-chromium
       - run: npx playwright test tests/nexus-essence-creative.spec.mjs
+      - run: npx playwright test tests/nexus-presence-paired.spec.mjs --project=desktop-chromium
       - if: always()
         uses: actions/upload-artifact@v4
         with:
