@@ -13,7 +13,8 @@ test('projection accounts for viewport and depth, not zoom alone',()=>{
 test('screen error hysteresis and explicit exact selection',()=>{
  const e={...bounds,exact:{file:'exact.glb'},levels:[{level:'overview',gpuBytes:80,error:.01},{level:'regional',gpuBytes:100,error:.004},{level:'exact-display',gpuBytes:120,error:0}]};
  assert.equal(chooseLevel(e,camera,null).level,'overview');
- assert.equal(chooseLevel(e,{...camera,zoom:5},'overview').level,'regional');
+ assert.equal(chooseLevel(e,{...camera,zoom:2.5},'overview').level,'regional');
+ assert.equal(chooseLevel(e,{...camera,zoom:5},'overview').level,'exact-display');
  assert.equal(chooseLevel(e,camera,null,true).level,'exact');
 });
 test('compact GPU representation preserves float32 positions and uses 16-byte stride',()=>{
