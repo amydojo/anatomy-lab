@@ -1,0 +1,56 @@
+name: NANITE-C constrained research
+on:
+  pull_request:
+    branches: ['feat/v15-expedition-gamepad']
+    paths: ['scripts/nanite_c*.mjs','scripts/vendor/meshoptimizer-0.22/**','.github/workflows/v15-nanite-c.yml','assets/atlas/unity-nmo-codec.mjs','assets/atlas/unity-nmq-research-worker.mjs']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  fixtures:
+    if: github.head_ref == 'feat/unity-nanite' || github.ref == 'refs/heads/feat/unity-nanite'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm test
+      - run: node --test scripts/nanite_c_surface.test.mjs scripts/nanite_c_codec.test.mjs
+      - run: node --check scripts/nanite_c_matrix.mjs && node --check assets/atlas/unity-nmq-research-worker.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nanite-c-research-code
+          path: |
+            scripts/nanite_c*.mjs
+            scripts/vendor/meshoptimizer-0.22/
+            assets/atlas/vhf-source.js
+            assets/atlas/unity-nmo-codec.mjs
+            assets/atlas/unity-nmq-research-worker.mjs
+            assets/atlas/vendor/meshopt_decoder.js
+          retention-days: 7
+  matrix:
+    if: github.head_ref == 'feat/unity-nanite' || github.ref == 'refs/heads/feat/unity-nanite'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: unity-pinned-whole-skeleton
+          run-id: 45734848736
+          github-token: ${{ github.token }}
+          path: unity-qualified
+      - run: node --max-old-space-size=6144 scripts/nanite_c_matrix.mjs unity-qualified nanite-c-cohort cohort
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nanite-c-cohort
+          path: nanite-c-cohort/
+          retention-days: 7
+          if-no-files-found: warn

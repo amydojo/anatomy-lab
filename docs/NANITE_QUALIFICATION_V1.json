@@ -1,0 +1,41 @@
+{
+  "schema": "body-live-nanite-qualification-evidence-1",
+  "compiledCommit": "d0bfebda2888db48e02de42e9350bdf761cd9d50",
+  "sourceRun": 45734848736,
+  "sourceArtifact": 15078885236,
+  "sourceArchiveSha256": "1d7f8d54a5c683ac6f675a2495cb32585dc1d097058fd0f683418db6808ea58e",
+  "sourceManifestSha256": "e8c22674b3f29c3db3671632cb4ba0ccfcf7168a319dc9f77fb3c3773f09273f",
+  "derivativeRun": 45735968113,
+  "derivativeArtifact": 15078158735,
+  "derivativeArchiveSha256": "973bcef203901b7e4891158ad787617379f5a79ba8e133acda58a2d8319b6ddb",
+  "derivativeManifestSha256": "a13a90aabd010a5bb1ac76357573441fc60133e62405ad96d079451a02166543",
+  "independentReadOnlyAudit": {
+    "exactGLBsVerified": 143,
+    "exactDisplayArraysBitwiseVerified": 143,
+    "derivativePayloadsVerified": 263,
+    "sourceTriangles": 6070400,
+    "overviewTriangles": 4491656,
+    "sourceGLBBytes": 109371976,
+    "overviewTransferBytes": 42686367,
+    "sourceManifestBytes": 133650,
+    "derivativeManifestBytes": 396409,
+    "overviewGpuBytes": 77390560,
+    "exactCompactGpuBytes": 101261440,
+    "tiers": {"overview":82,"regional":28,"exact-display":33},
+    "exactFallbackGpuBytes": 55530000,
+    "exactFallbackTransferBytes": 27345415,
+    "recordedSurfaceSamplesChecked": 124320,
+    "maxRecordedFractionOfCertifiedBound": 0.36282861770047387,
+    "surfaceDistancesRecomputed": false,
+    "atomicUpgradesPossibleAtFullOverview": 0,
+    "gates": {"coverage":true,"payload":false,"gpu":false,"steadyWithHeadroom":false}
+  },
+  "exactClusterExperiment": {
+    "scope": "eight large exact-display fallback labels",
+    "sourceFacesAndSeamCoordinatesVerified": true,
+    "hypotheticalWholeOverviewGpuBytes": 63657792,
+    "mixedResolutionValidated": false,
+    "cranium": {"clusters":64,"triangles":829568,"seamEdges":18999,"lockedSourceVertices":18831,"lockedVertexInstances":37968,"clusterVertexInstances":433877,"monolithicGpuBytes":16590656,"clusterGpuBytes":11919440}
+  },
+  "releaseStatus": "BLOCKED; no production or full-world activation"
+}
