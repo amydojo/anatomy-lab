@@ -49,3 +49,7 @@
 #atlas-app[data-expedition-clean=true] #workspace,
 #atlas-app[data-expedition-clean=true] #atlas-stage{background:#16181b!important}
 #atlas-app[data-expedition-clean=true] #atlas-canvas{background:transparent!important}
+
+/* GRAVITY II configuration is accessible in normal UI, not cinematic clean mode. */
+#gravity-profile{pointer-events:auto;color:#eee6dd;background:#181512;border:1px solid #817366;border-radius:5px;font:inherit;font-size:11px;padding:4px;max-width:128px}
+#gravity-profile[hidden],#atlas-app[data-expedition-clean=true] #gravity-profile{display:none!important}
