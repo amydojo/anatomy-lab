@@ -1,5 +1,5 @@
 // NANITE WebGL adapter. Host owns camera, shader, context recovery and draw loop.
-import {Residency,packCompact,chooseLevel,loadDisplay,verifiedBytes,validateManifest} from './unity-geometry.mjs';
+import {Residency,packCompact,chooseLevel,loadDisplay,verifiedBytes,validateManifest,openVerifiedManifests} from './unity-geometry.mjs';
 function require(x,m){if(!x)throw Error(m);}
 const frame=()=>new Promise(resolve=>requestAnimationFrame(resolve));
 export function disposeGeometry(gl,h){if(!h)return;gl.deleteBuffer(h.vertex);gl.deleteBuffer(h.index);}
@@ -24,6 +24,7 @@ export function bindGeometry(gl,h,{position,normal,weight}){
 }
 // One upload at a time. No exact-source request is required to obtain display LOD.
 // Host supplies a worker-backed prepare() to keep CPU processing off input thread.
+export const PROVIDER_VERSION='1.1.0';
 export class UnityGeometrySession{
  constructor({gl,manifest,source,sourceHash,root,exactRoot,prepare,budget=32*1024*1024,headroom=Math.floor(budget/8)}){
   this.gl=gl;this.manifest=validateManifest(manifest,source,sourceHash);this.source=source;this.root=root;this.exactRoot=exactRoot;this.prepare=prepare;this.ledger=new Residency(budget,headroom);this.active=null;this.closed=false;this.failures=new Map();
@@ -81,4 +82,17 @@ export function createGeometryWorker(){
   try{worker.postMessage({id,record,root:new URL(root,location.href).href});}catch(e){finish(id,String(e.message||e));}
  });
  return {prepare,close};
+}
+
+// Factory is the production-facing entry point. Low-level session constructor is
+// retained for deterministic fixtures; never use it with unverified network data.
+export async function openUnityGeometryProvider({gl,sourceUrl,derivativeUrl,sourceHash,derivativeHash,root,exactRoot,budget,headroom,signal}){
+ const pins=await openVerifiedManifests({sourceUrl,derivativeUrl,sourceHash,derivativeHash,signal});
+ if(signal?.aborted)throw Error('provider opening canceled');
+ const worker=createGeometryWorker();
+ let session;
+ try{session=new UnityGeometrySession({gl,...pins,root,exactRoot,budget,headroom,prepare:worker.prepare});}
+ catch(e){worker.close();throw e;}
+ const provider={version:PROVIDER_VERSION,manifest:pins.manifest,source:pins.source,pins:{sourceHash,derivativeHash},step:(...args)=>session.step(...args),exact:(...args)=>session.exact(...args),touch:(...args)=>session.touch(...args),cancel:()=>session.cancel(),retry:()=>session.retry(),diagnostics:()=>session.diagnostics(),getDrawables:()=>[...session.ledger.resident].map(([id,r])=>({id,level:r.level,handle:r.handle,bytes:r.bytes})),dispose:()=>{session.dispose();worker.close();}};
+ return Object.freeze(provider);
 }
