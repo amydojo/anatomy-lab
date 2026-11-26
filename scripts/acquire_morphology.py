@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Acquire exact indexed source derivatives, never resample/reposition individual anatomy."""
-import hashlib,json,struct,math,re,urllib.request,csv
+import hashlib,json,struct,math,re,urllib.request,urllib.error,csv
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 DIR=ROOT/'assets/atlas/morphology/acquired'
@@ -73,14 +73,23 @@ def main():
  for reg in PATTERNS:
   keys=[k for k in packs if k.startswith('bp4-'+reg+'-')]
   if keys:specimens.append({'id':'exact-'+reg,'name':reg.replace('-',' / ').title()+' · BP3D source','region':reg,'space':'bp4-reference','status':'Exact indexed upstream derivative, distinct from VHF','packs':keys})
- f=LOCK['facial'];m=fetch(f['repo'],f['revision'],'public/models/facial/atlas.json',f['manifestGitBlob'],f['manifestSha256']);b=fetch(f['repo'],f['revision'],'public/models/facial/facial.bin',f['binaryGitBlob'],f['binarySha256']);j=json.loads(m)
- if len(j['parts'])!=47 or j['bytes']!=len(b) or j['license']!=f['license']:raise ValueError('facial source mismatch')
- emit('bp3-exact-face',[(p,'muscle') for p in j['parts']],{0:b},f['revision'],f['license'],f['attribution'],'upstream BP4-registered metres; experimental similarity; display=(source-[0,.9,0])*5')
- inputs['facial/atlas.json']=sha(m);inputs['facial/facial.bin']=sha(b)
- specimens.append({'id':'exact-facial','name':'Facial expression · 47 exact source derivatives','region':'Face','space':'bp4-upstream-registered-experimental','status':'Upstream similarity registration, separate from VHF; no independent clinical validation','packs':['bp3-exact-face']})
- catalog={'schema':'body-live-morphology-1','specimens':specimens,'packs':packs,'inputs':inputs,'limits':['Source derivative, not raw segmentation','No independent clinical review or anatomical depth metadata','Region selection conservative name-based subset; full source inventory retained','No cross-source fusion']}
+ failures=[]
+ try:
+  f=LOCK['facial'];m=fetch(f['repo'],f['revision'],'public/models/facial/atlas.json',f['manifestGitBlob'],f['manifestSha256']);b=fetch(f['repo'],f['revision'],'public/models/facial/facial.bin',f['binaryGitBlob'],f['binarySha256']);j=json.loads(m)
+  if len(j['parts'])!=47 or j['bytes']!=len(b) or j['license']!=f['license']:raise ValueError('facial source mismatch')
+  emit('bp3-exact-face',[(p,'muscle') for p in j['parts']],{0:b},f['revision'],f['license'],f['attribution'],'upstream BP4-registered metres; experimental similarity; display=(source-[0,.9,0])*5')
+  inputs['facial/atlas.json']=sha(m);inputs['facial/facial.bin']=sha(b)
+  specimens.append({'id':'exact-facial','name':'Facial expression · 47 exact source derivatives','region':'Face','space':'bp4-upstream-registered-experimental','status':'Upstream similarity registration, separate from VHF; no independent clinical validation','packs':['bp3-exact-face']})
+ except urllib.error.HTTPError as e:
+  if e.code!=404:raise
+  failures.append({'source':'OMFAtlas pinned facial archive','status':'unavailable','httpStatus':404,'url':e.url,'decision':'retain existing hashed reduced facial derivative; no substitution'})
+  print('FACIAL ACQUISITION BLOCKED: '+str(e),flush=True)
+ if failures:
+  head=next((s for s in specimens if s['id']=='exact-head-neck'),None)
+  if head:specimens.append({'id':'exact-head-face-extension','name':'Face / neck · experimental expression overlay','region':'Face / neck','space':'bp4-upstream-registered-experimental','status':'BP4 source + separately licensed reduced BP3 facial extension; upstream similarity only; no VHF fusion','packs':head['packs']+['facial']})
+ catalog={'schema':'body-live-morphology-1','specimens':specimens,'packs':packs,'inputs':inputs,'unavailable':failures,'limits':['Source derivative, not raw segmentation','No independent clinical review or anatomical depth metadata','Region selection conservative name-based subset; full source inventory retained','No cross-source fusion']}
  (DIR/'catalog.json').write_text(json.dumps(catalog,indent=2)+'\n')
  with (DIR/'inventory.csv').open('w',newline='') as f:
   w=csv.DictWriter(f,fieldnames=list(inventory[0]));w.writeheader();w.writerows(inventory)
- print(json.dumps({'upstreamInventory':len(inventory),'acquiredPacks':len(packs),'acquiredStructures':sum(len(p['parts']) for p in packs.values()),'triangles':sum(p['triangles'] for p in packs.values()),'bytes':sum(p['bytes'] for p in packs.values()),'specimens':[{**s,'counts':{t:sum(packs[k]['counts'].get(t,0) for k in s['packs']) for t in sorted({t for k in s['packs'] for t in packs[k]['counts']})}} for s in specimens]},indent=2))
+ print(json.dumps({'unavailable':failures,'upstreamInventory':len(inventory),'acquiredPacks':len(packs),'acquiredStructures':sum(len(p['parts']) for p in packs.values()),'triangles':sum(p['triangles'] for p in packs.values()),'bytes':sum(p['bytes'] for p in packs.values()),'specimens':[{**s,'counts':{t:sum(packs[k]['counts'].get(t,0) for k in s['packs'] if k in packs) for t in sorted({t for k in s['packs'] if k in packs for t in packs[k]['counts']})}} for s in specimens]},indent=2))
 if __name__=='__main__':main()
