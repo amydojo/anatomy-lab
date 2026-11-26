@@ -23,21 +23,21 @@ test('browser RAF with simulated standard pad: precision, response, neutral reco
   const E=BodyExpedition,G=BodyGravity;
   const c={yaw:0,pitch:0,zoom:4,width:800,height:600,frameSpan:3,target:{x:0,y:0,z:0}};
   const bounds={min:[-5,-5,-5],max:[5,5,5]},buttons=Array.from({length:17},()=>({pressed:false,value:0})),axes=[0,0,0,0];
-  let now=0,renderCount=0,firstMotion=null,start=null,prev=null;
+  let now=0,renderCount=0,firstMotion=null,start=null,prev=null,integrated=0;
   const periods=[],costs=[];
   const tick=()=>new Promise(r=>requestAnimationFrame(t=>{now=t;r(t);}));
   const mount=E.mount({camera:()=>c,bounds:()=>bounds,maxZoom:()=>14,canMove:()=>true,begin(){},end(){},
     render(){renderCount++;if(firstMotion===null)firstMotion=performance.now()-start;if(prev!==null)periods.push(performance.now()-prev);prev=performance.now();},
     command(){},status(){},getPads:()=>[{connected:true,index:0,mapping:'standard',buttons,axes}],
-    navigate:(camera,i,dt,b,m)=>{const t=performance.now();const changed=G.advance(E.advance,camera,i,dt,b,m,null);costs.push(performance.now()-t);return changed;}
+    navigate:(camera,i,dt,b,m)=>{const t=performance.now();if(i.orbitX)integrated+=Math.min(.05,dt);const changed=G.advance(E.advance,camera,i,dt,b,m,null);costs.push(performance.now()-t);return changed;}
   });
   const quantile=(xs,p)=>{const a=xs.slice().sort((x,y)=>x-y);return a.length?a[Math.ceil(a.length*p)-1]:null;};
   try{
    mount.setEnabled(true);for(let i=0;i<5;i++)await tick();
-   start=performance.now();axes[2]=.8;let yaw=c.yaw,t=now;for(let i=0;i<24;i++)await tick();
-   const regular=(c.yaw-yaw)/(now-t);axes[2]=0;await tick();await tick();prev=null;
-   buttons[10]={pressed:true,value:1};axes[2]=.8;yaw=c.yaw;t=now;for(let i=0;i<24;i++)await tick();
-   const precision=(c.yaw-yaw)/(now-t);
+   start=performance.now();axes[2]=.8;let yaw=c.yaw,t=integrated;for(let i=0;i<24;i++)await tick();
+   const regular=(c.yaw-yaw)/(integrated-t);axes[2]=0;await tick();await tick();prev=null;
+   buttons[10]={pressed:true,value:1};axes[2]=.8;yaw=c.yaw;t=integrated;for(let i=0;i<24;i++)await tick();
+   const precision=(c.yaw-yaw)/(integrated-t);
    axes[2]=0;buttons[10]={pressed:false,value:0};await tick();await tick();const before=c.yaw,count=renderCount;
    for(let i=0;i<8;i++)await tick();
    return {ratio:precision/regular,regular,firstMotionMs:firstMotion,activeCallbacks:periods.length,p95CallbackIntervalMs:quantile(periods,.95),p95NavigationCpuMs:quantile(costs,.95),renderCount,neutralStable:c.yaw===before&&renderCount===count};
