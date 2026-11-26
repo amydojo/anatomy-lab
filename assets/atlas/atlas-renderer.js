@@ -77,7 +77,7 @@ function create(canvas,onContextLost=()=>{}){
  const detail=new Map(),detailData=new Map();let shoulderPivot=[-1.1,1.9,0],shoulderGraph=null;let destroyed=false,rebuilding=false,recoveryScheduled=false;let uniformCache=new Map();const boundsCache=new Map();
  function disposeMesh(item){gl.deleteBuffer(item.buffer);if(item.indexBuffer)gl.deleteBuffer(item.indexBuffer);}
  let marrowMesh=null;
- function cleanup(){if(marrowMesh&&gl)disposeMesh(marrowMesh);marrowMesh=null;clearVhfStage();vhfGeneration++;if(vhfCacheFrame)cancelAnimationFrame(vhfCacheFrame);vhfCacheFrame=0;if(gl){for(const m of vhfMeshes)disposeMesh(m);}vhfMeshes=[];if(gl){for(const item of [...buffers,...overviewBones,...overviewMuscles,...expansionBones,...expansionMuscles,...expansionConnective,...[...connectiveDetail.values()].flat(),...(facialOverview?[facialOverview]:[]),...facialDetail,...osteologyOverview,...[...expansionDetail.values()].flat(),...[...osteologyDetail.values()].flat(),...[...detail.values()].flat()])disposeMesh(item);if(program)gl.deleteProgram(program);}buffers=[];overviewBones=[];overviewMuscles=[];expansionBones=[];expansionMuscles=[];expansionConnective=[];connectiveDetail.clear();facialOverview=null;facialDetail=[];osteologyOverview=[];osteologyDetail.clear();expansionDetail.clear();detail.clear();program=null;uniformCache.clear();boundsCache.clear();}
+ function cleanup(){if(marrowMesh&&gl)for(const m of marrowMesh)disposeMesh(m);marrowMesh=null;clearVhfStage();vhfGeneration++;if(vhfCacheFrame)cancelAnimationFrame(vhfCacheFrame);vhfCacheFrame=0;if(gl){for(const m of vhfMeshes)disposeMesh(m);}vhfMeshes=[];if(gl){for(const item of [...buffers,...overviewBones,...overviewMuscles,...expansionBones,...expansionMuscles,...expansionConnective,...[...connectiveDetail.values()].flat(),...(facialOverview?[facialOverview]:[]),...facialDetail,...osteologyOverview,...[...expansionDetail.values()].flat(),...[...osteologyDetail.values()].flat(),...[...detail.values()].flat()])disposeMesh(item);if(program)gl.deleteProgram(program);}buffers=[];overviewBones=[];overviewMuscles=[];expansionBones=[];expansionMuscles=[];expansionConnective=[];connectiveDetail.clear();facialOverview=null;facialDetail=[];osteologyOverview=[];osteologyDetail.clear();expansionDetail.clear();detail.clear();program=null;uniformCache.clear();boundsCache.clear();}
  function compile(type,source){const sh=gl.createShader(type);gl.shaderSource(sh,source);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(sh));return sh;}
  function setup(){
   gl=canvas.getContext('webgl2',{alpha:true,antialias:true,depth:true,premultipliedAlpha:false,powerPreference:'low-power'});
@@ -460,7 +460,7 @@ function create(canvas,onContextLost=()=>{}){
    gl.uniform1f(uni('uMotion'),unposed?0:moving?1:0);gl.uniform1f(uni('uSoftSkin'),item.skinWeights?1:0);gl.uniform1f(uni('uMotionAxis'),selected==='shoulder'?1:0);
    gl.uniform1f(uni('uFlex'),(selected==='shoulder'?-1:1)*Number(flex)*Math.PI/180);
    gl.uniform3fv(uni('uPivot'),pivot);
-   const play=item.id==='__marrow_board__'?sourceView?.marrowBoard:sourceView?.playground?.transform(item.id);gl.uniformMatrix3fv(uni('uPlayRotation'),false,play?.r||identityRotation);gl.uniform3fv(uni('uPlayTranslation'),play?.t||identityTranslation);
+   const play=item.id.startsWith('__marrow_')?sourceView?.marrowBoard:sourceView?.playground?.transform(item.id);gl.uniformMatrix3fv(uni('uPlayRotation'),false,play?.r||identityRotation);gl.uniform3fv(uni('uPlayTranslation'),play?.t||identityTranslation);
    const kind=item.connectiveKind;gl.uniform1f(uni('uMaterial'),item.id===highlight?4:kind==='fibrocartilage'||kind==='cartilage'?3:kind==='tendon'||kind==='ligament'?2:item.connective||item.group==='connective'?4:item.tissue?1:0);
    gl.uniform3fv(uni('uColor'),item.id===highlight?[1,.81,.48]:item.color);gl.uniform1f(uni('uDim'),dim);gl.uniform1f(uni('uAlpha'),alpha);
    gl.bindBuffer(gl.ARRAY_BUFFER,item.buffer);
@@ -503,7 +503,18 @@ function create(canvas,onContextLost=()=>{}){
     if((pending||vhfUploadGate)&&!vhfCacheFrame){const generation=vhfGeneration;vhfCacheFrame=requestAnimationFrame(()=>{vhfCacheFrame=0;vhfUploadGate=false;if(generation===vhfGeneration&&!document.hidden)window.dispatchEvent(new Event('body:vhf-residency-frame'));});}
    }
    for(const m of vhfMeshes){if(!wanted.has(m.id)||!V.visible(m,sourceView)||!V.inView(sourceView.playground?.bounds(m)||m,cam))continue;m.lastUse=now;draw(m,1,1,true);drawn.add(m.id);}
-   if(sourceView.marrowBoard){if(!marrowMesh){const positions=[],indices=[];function cube(x,y,z,a,b,c){const n=positions.length/3;for(let j=0;j<8;j++)positions.push(x+(j&1?a:-a),y+(j&2?b:-b),z+(j&4?c:-c));for(const k of [0,2,1,1,2,3,4,5,6,5,7,6,0,1,4,1,5,4,2,6,3,3,6,7,0,4,2,2,4,6,1,3,5,3,7,5])indices.push(n+k);}cube(0,.003,0,.012,.002,.035);for(const x of [-.011,.011])for(const z of [-.022,.022])cube(x,-.004,z,.004,.004,.005);marrowMesh=makeBuffer({positions:new Float32Array(positions),indices:new Uint16Array(indices)},'__marrow_board__','marrow',[.38,.83,.72]);}draw(marrowMesh,1,1,true);}else if(marrowMesh){disposeMesh(marrowMesh);marrowMesh=null;}
+   if(sourceView.marrowBoard){
+    if(!marrowMesh){
+     function geometry(id,color,make){const positions=[],indices=[];function cube(x,y,z,a,b,c){const n=positions.length/3;for(let j=0;j<8;j++)positions.push(x+(j&1?a:-a),y+(j&2?b:-b),z+(j&4?c:-c));for(const k of [0,2,1,1,2,3,4,5,6,5,7,6,0,1,4,1,5,4,2,6,3,3,6,7,0,4,2,2,4,6,1,3,5,3,7,5])indices.push(n+k);}make(cube);return makeBuffer({positions:new Float32Array(positions),indices:new Uint16Array(indices)},'__marrow_'+id,'marrow',color);}
+     const glyph={M:['101','111','111','101','101'],A:['010','101','111','101','101'],P:['110','101','110','100','100'],O:['111','101','101','101','111'],D:['110','101','101','101','110'],F:['111','100','110','100','100'],U:['101','101','101','101','111']};
+     marrowMesh=[
+      geometry('deck',[.055,.025,.09],cube=>{cube(0,.003,0,.012,.002,.030);cube(0,.004,-.032,.010,.003,.004);cube(0,.004,.032,.010,.003,.004);}),
+      geometry('acid',[.80,1,.06],cube=>{for(const x of [-.011,.011])for(const z of [-.022,.022])cube(x,-.004,z,.004,.004,.005);for(const [row,word] of ['MAPO','DOFU'].entries())for(let l=0;l<4;l++)for(let y=0;y<5;y++)for(let x=0;x<3;x++)if(glyph[word[l]][y][x]==='1')cube((l*4+x-7)*.00135,.0054,(row*7+y-5.5)*.0022,.00061,.0003,.00098);}),
+      geometry('violet',[.83,.10,.64],cube=>{for(const z of [-.027,.027]){cube(0,.0055,z,.010,.0005,.0015);cube(0,.0055,z*.76,.008,.0005,.0007);}})
+     ];
+    }
+    for(const m of marrowMesh)draw(m,1,1,true);
+   }else if(marrowMesh){for(const m of marrowMesh)disposeMesh(m);marrowMesh=null;}
    sourceView.renderedIds=bounded||sourceView.playground?drawn:null;
    if(drawn.size&&vhfFirstDrawMs===null)vhfFirstDrawMs=performance.now()-(parts.sourceInfo?.streamStartedAt??now);
    const bytes=vhfMeshes.reduce((n,m)=>n+m.bufferBytes,0);
