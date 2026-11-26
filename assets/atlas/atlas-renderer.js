@@ -390,20 +390,20 @@ function create(canvas,onContextLost=()=>{}){
  function setVisualMode(mode){visualMode=({legacy:0,atlas:1,specimen:2,cinema:3})[mode]??0;}
  let opticalDensity=null,limitContext=null,limits=null;
  function setOpticalDensity(value){opticalDensity=Number.isFinite(value)?value:null;}
- function resize(marrow=false){
+ function resize(marrow=false,inspect=false,sharp=false){
   const rect=canvas.getBoundingClientRect(),w=Math.max(1,rect.width),h=Math.max(1,rect.height),native=window.devicePixelRatio||1;
   let dpr=Math.min(native,2),width=Math.ceil(w*dpr),height=Math.ceil(h*dpr);
   if(opticalDensity!==null&&gl&&status==='ready'&&window.BodyOptical){
    if(limitContext!==gl||!limits){const viewport=gl.getParameter(gl.MAX_VIEWPORT_DIMS),size=gl.getParameter(gl.MAX_RENDERBUFFER_SIZE);limits=[Math.min(viewport[0],size),Math.min(viewport[1],size)];limitContext=gl;}
    const dims=window.BodyOptical.dimensions(w,h,native,opticalDensity,limits[0],limits[1]);({width,height}=dims);dpr=dims.scale;
   }
-  if(marrow){const cap=Math.min(1,Math.sqrt(450000/(w*h)),dpr);width=Math.max(1,Math.ceil(w*cap));height=Math.max(1,Math.ceil(h*cap));dpr=cap;}
+  if(marrow){const cap=Math.min(inspect?Math.min(native,2):sharp?Math.min(native,1.5):1,Math.sqrt((inspect?2800000:sharp?1500000:450000)/(w*h)));width=Math.max(1,Math.ceil(w*cap));height=Math.max(1,Math.ceil(h*cap));dpr=cap;}
   if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
   return {width:w,height:h,dpr};
  }
  function render(camera,selected,mode='clean',layer=0,reveal=0,flex=0,highlight=null,secondary=0,transitionFrom=null,tissueFocus=false,sourceView=null){
   if(destroyed)return {width:canvas.clientWidth,height:canvas.clientHeight,dpr:1};
-  const size=resize(!!sourceView?.marrowBoard);
+  const board=sourceView?.marrowBoard,inspection=board?.inspection;const size=resize(!!board,!!inspection,board?.sharp);if(inspection)camera=window.BodyMarrowBoard.inspectionCamera(board,{...camera,width:size.width,height:size.height},inspection);
   if(!gl||status!=='ready'||gl.isContextLost?.())return size;
   // Resizing can invalidate a GPU context; never query locations from a stale program.
   if(!program||!gl.isProgram(program)){
@@ -470,6 +470,7 @@ function create(canvas,onContextLost=()=>{}){
    gl.enableVertexAttribArray(locW);gl.vertexAttribPointer(locW,1,gl.FLOAT,false,28,24);
    if(item.indexBuffer){gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,item.indexBuffer);if(ranges){for(const q of ranges){gl.drawElements(gl.TRIANGLES,q.count,item.indexType,q.offset);drawCalls++;submittedTriangles+=q.count/3;}return;}gl.drawElements(gl.TRIANGLES,item.count,item.indexType,0);}else gl.drawArrays(gl.TRIANGLES,0,item.count);drawCalls++;submittedTriangles+=item.count/3;
   };
+  if(inspection){if(!marrowMesh)marrowMesh=window.BodyMarrowBoard.geometry(board.vehicle?.skin).map(p=>makeBuffer(p,p.id,'marrow',p.color));gl.depthMask(true);for(const m of marrowMesh)draw(m,window.BodyMarrowBoard.intensity(m.id,board),1,true);frameStats={drawCalls,submittedTriangles,marrowInspection:true,marrowVehicleDrawCalls:marrowMesh.length,marrowVehicleTriangles:submittedTriangles,backingWidth:canvas.width,backingHeight:canvas.height};return size;}
   if(sourceView){
    gl.depthMask(true);
    const V=window.BodyVHF,now=performance.now(),cam={...camera,width:size.width,height:size.height},bounded=!!sourceView.bounded,parts=sourceView.parts,axial=!!sourceView.stream,legacy=parts.sourceInfo?.processing==='legacy';
