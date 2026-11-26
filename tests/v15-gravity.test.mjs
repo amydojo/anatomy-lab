@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import '../assets/atlas/expedition.js';
+import '../assets/atlas/gravity.js';
+const E=globalThis.BodyExpedition,G=globalThis.BodyGravity;
+const cam=()=>({yaw:0,pitch:0,zoom:4,width:800,height:600,frameSpan:3,target:{x:0,y:0,z:0},anchorX:.5,anchorY:.5});
+const b={min:[-5,-5,-5],max:[5,5,5]},p={x:.15,y:.2,z:.35};
+const input=(over={})=>({panX:0,panY:0,orbitX:0,orbitY:0,zoom:0,buttons:[],...over});
+const world={inspectionPoint:()=>p};
+test('missing or failing world preserves original camera response',()=>{for(const w of [null,{inspectionPoint:()=>{throw Error('unavailable');}}]){const a=cam(),c=cam(),i=input({panX:.5,orbitY:.3,zoom:.2});E.advance(a,i,.016,b,14);G.advance(E.advance,c,i,.016,b,14,w);assert.deepEqual(c,a);}});
+test('selected point stays pixel-stable during orbit and zoom at mobile and desktop aspect ratios',()=>{for(const [width,height] of [[390,844],[844,390],[1440,900]]){const c={...cam(),width,height};const before=G.project(c,p);let max=0;for(let j=0;j<60;j++){G.advance(E.advance,c,input({orbitX:.7,orbitY:.2,zoom:.5}),1/60,b,14,world);const q=G.project(c,p);max=Math.max(max,Math.hypot(q.x-before.x,q.y-before.y));}assert.ok(max<1e-8,'projection drift '+max);}});
+test('L3 hold reduces pan displacement to quarter without a new mode',()=>{const a=cam(),c=cam(),buttons=Array(17).fill(false);buttons[10]=true;G.advance(E.advance,a,input({panX:1}),.05,b,14,null);G.advance(E.advance,c,input({panX:1,buttons}),.05,b,14,null);assert.ok(Math.abs(c.target.x/a.target.x-.25)<1e-12);});
+test('proximity heuristic bounded and explicit pan remains user controlled',()=>{const c=cam();c.zoom=14;assert.ok(G.proximity(c,{x:0,y:0,z:0})>=.45-1e-12);assert.ok(G.proximity(c,{x:0,y:0,z:0})<1);G.advance(E.advance,c,input({panX:1}),.05,b,14,{inspectionPoint:()=>({x:0,y:0,z:0})});assert.ok(c.target.x>0);});
+test('neutral input and provider replacement do not move camera',()=>{const c=cam(),a=structuredClone(c);assert.equal(G.advance(E.advance,c,input(),.016,b,14,world),false);assert.equal(G.advance(E.advance,c,input(),.016,b,14,{inspectionPoint:()=>({x:1,y:1,z:1})}),false);assert.deepEqual(c,a);});
+test('out-of-bounds anchor correction is rejected atomically',()=>{const c=cam(),a=structuredClone(c.target);assert.equal(G.anchor(c,{x:100,y:0,z:0},{x:400,y:300,z:0},b),false);assert.deepEqual(c.target,a);});
+test('unsupported and rejected rumble fail gracefully',async()=>{assert.equal(G.pulse({}),false);assert.equal(G.pulse({vibrationActuator:{playEffect(){throw Error('no');}}}),false);let calls=0;assert.equal(G.pulse({vibrationActuator:{playEffect(type,opts){calls++;assert.equal(type,'dual-rumble');assert.equal(opts.duration,35);return Promise.reject(Error('no'));}}}),true);await Promise.resolve();assert.equal(calls,1);});
+test('no anchor or precision changes the established frame-rate independence',()=>{const a=cam(),c=cam(),i=input({orbitX:1,zoom:.5});for(let j=0;j<60;j++)G.advance(E.advance,a,i,1/60,b,14,null);for(let j=0;j<120;j++)G.advance(E.advance,c,i,1/120,b,14,null);assert.ok(Math.abs(a.yaw-c.yaw)<1e-8);assert.ok(Math.abs(a.zoom-c.zoom)<1e-8);});
