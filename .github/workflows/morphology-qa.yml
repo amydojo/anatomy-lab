@@ -1,0 +1,27 @@
+name: MORPHOLOGY browser gate
+on:
+  pull_request:
+    branches: ['feat/v15-expedition-gamepad']
+    paths: ['assets/atlas/morphology/**','atlas/morphology/**','tests/morphology*','.github/workflows/morphology-qa.yml']
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: node --check assets/atlas/morphology/viewer.mjs
+      - run: node --test tests/morphology.test.mjs tests/v16-strata.test.mjs tests/v15-expedition.test.mjs
+      - run: npm run test:e2e -- --project=desktop-chromium tests/morphology.spec.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: morphology-browser
+          path: test-results/
