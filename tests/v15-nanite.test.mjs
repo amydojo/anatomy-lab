@@ -53,3 +53,38 @@ test('decoder rejects corrupt indices and preserves exact float32 data',()=>{
 test('manifest requires full qualified inventory, rejects omissions',()=>{
  assert.throws(()=>validateManifest({schema:'body-live-unity-geometry-1',sourceManifestSha256:'a'.repeat(64),sourceRevision:'p',structures:[]},{schema:'body-live-unity-source-1',revision:'p',structures:[]}));
 });
+
+test('reserved headroom enables atomic upgrade without losing coverage',()=>{
+ const r=new Residency(100,20),gone=[],d=h=>gone.push(h);
+ for(const [id,n] of [['a',10],['b',60]]){const t=r.reserve(id,'overview',n,0);assert.ok(t);r.commit(t,id,n,0,d);}
+ const upgrade=r.reserve('a','detail',20,1,new Set(['a','b']),d);
+ assert.ok(upgrade);assert.equal(r.diagnostics().stagedBytes,20);assert.equal(r.bytes,90);assert.equal(r.resident.get('a').handle,'a');
+ r.commit(upgrade,'detail',20,2,d);assert.equal(r.bytes,80);assert.deepEqual(gone,['a']);assert.equal(r.resident.size,2);
+ assert.equal(r.reserve('c','overview',1,3,new Set(['a','b']),d),null);
+});
+test('impossible upgrade does not evict unrelated meshes; cancellation recovers headroom',()=>{
+ const r=new Residency(100,20),gone=[],d=h=>gone.push(h);
+ for(const [id,n] of [['a',10],['b',30],['c',30]]){const t=r.reserve(id,'overview',n,0);r.commit(t,id,n,0,d);}
+ assert.equal(r.reserve('a','detail',90,6000,new Set(['c']),d),null);assert.deepEqual(gone,[]);assert.equal(r.bytes,70);
+ const t=r.reserve('a','detail',20,6000,new Set(['b','c']),d);assert.ok(t);r.cancel(t);assert.equal(r.bytes,70);
+ assert.throws(()=>r.commit(t,'stale',20,6001,d));assert.equal(r.resident.get('a').handle,'a');
+ const retry=r.reserve('a','detail',20,6001,new Set(['b','c']),d);assert.ok(retry);r.commit(retry,'new',20,6002,d);assert.equal(r.bytes,80);
+});
+test('eviction restores headroom and stale tokens cannot cancel new reservations',()=>{
+ const r=new Residency(100,20),gone=[],d=h=>gone.push(h);
+ for(const [id,n] of [['a',20],['b',50]]){const t=r.reserve(id,'overview',n,0);r.commit(t,id,n,0,d);}
+ const t=r.reserve('a','detail',40,6000,new Set(),d);assert.ok(t);assert.deepEqual(gone,['b']);r.cancel(t);
+ const next=r.reserve('a','detail',40,6001,new Set(),d);assert.ok(next);r.cancel(t);assert.equal(r.diagnostics().pendingCount,1);r.commit(next,'new',40,6002,d);assert.equal(r.bytes,40);
+});
+const hashA='a'.repeat(64),hashB='b'.repeat(64);
+function fixture(){
+ const source={schema:'body-live-unity-source-1',revision:'fixture',structures:Array.from({length:143},(_,i)=>({id:'bonehub-vhf-fixture_'+i,file:'bonehub-vhf-fixture_'+i+'.glb',sha256:hashA,bytes:100,vertices:4,triangles:2}))};
+ const manifest={schema:'body-live-unity-geometry-1',sourceManifestSha256:hashB,sourceRevision:'fixture',structures:source.structures.map(s=>({id:s.id,sourceHash:s.sha256,exact:{...s},min:[0,0,0],max:[1,1,1],overviewLevel:'exact-display',levels:[{level:'exact-display',file:s.id+'.exact-display.bld.gz',sha256:hashA,decodedSha256:hashB,bytes:50,decodedBytes:76,vertices:4,triangles:2,indexWidth:2,gpuBytes:76,error:0,limit:0}]}))};
+ return {source,manifest};
+}
+test('manifest requires external source hash and matches exact file identity',()=>{
+ const {source,manifest}=fixture();assert.equal(validateManifest(manifest,source,hashB),manifest);
+ assert.throws(()=>validateManifest(manifest,source,hashA));assert.throws(()=>validateManifest(manifest,source));
+ manifest.structures[0].exact.sha256=hashB;assert.throws(()=>validateManifest(manifest,source,hashB));
+ manifest.structures[0].exact.sha256=hashA;manifest.structures[0].overviewLevel='overview';assert.throws(()=>validateManifest(manifest,source,hashB));
+});
