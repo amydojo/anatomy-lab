@@ -1,0 +1,77 @@
+name: GROUND TRUTH B image-mesh correspondence
+on:
+  push:
+    branches: ['feat/unity-ground-truth']
+    paths: ['scripts/ground_truth_mesh_mask.py','.github/workflows/v15-ground-truth-mask.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: ground-truth-mask-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  mask:
+    if: github.ref == 'refs/heads/feat/unity-ground-truth'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        region: [FOOT_LEFT, FOOT_RIGHT, HAND_LEFT, HAND_RIGHT, LOWER_EXTREMITY_LEFT, LOWER_EXTREMITY_RIGHT, SKULL, SPINAL_COLUMN, THORAX, UPPER_EXTREMITY_LEFT, UPPER_EXTREMITY_RIGHT]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --only-binary=:all: numpy==2.2.6 scipy==1.15.3 scikit-image==0.25.2 trimesh==4.6.10
+      - run: python scripts/ground_truth_mesh_mask.py --self-test
+      - name: Retrieve exact verified input archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/amydojo/anatomy-lab/actions/artifacts/15078885236/zip > unity.zip
+          gh api repos/amydojo/anatomy-lab/actions/artifacts/15079087018/zip > headers.zip
+      - name: Compare native geometry to full pinned segmentation
+        run: python scripts/ground_truth_mesh_mask.py --archive unity.zip --headers headers.zip --region "${{ matrix.region }}" --output correspondence.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ground-truth-mask-${{ matrix.region }}
+          path: correspondence.json
+          if-no-files-found: warn
+          retention-days: 90
+  consolidate:
+    needs: mask
+    if: always() && github.ref == 'refs/heads/feat/unity-ground-truth'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ground-truth-mask-*
+          path: reports
+      - name: Reconcile exact structure coverage
+        run: |
+          python - <<'PY'
+          import json,pathlib,statistics
+          files=list(pathlib.Path('reports').glob('*/correspondence.json'))
+          data=[json.loads(p.read_text()) for p in files]
+          rows=[s for d in data for s in d['structures']]
+          volumes=[s for d in data for s in d['volumes']]
+          keys={(s['region'],s['name']) for s in rows}
+          ok=len(files)==11 and len(volumes)==11 and len(rows)==len(keys)==143 and all(x['fullyHashVerified'] for x in volumes)
+          m=[s['nativeIdentityLpsHypothesis']['symmetricMedian'] for s in rows]
+          p=[s['nativeIdentityLpsHypothesis']['symmetricP95'] for s in rows]
+          summary={'complete':ok,'volumeCount':len(volumes),'structureCount':len(rows),'uniqueStructureCount':len(keys),'physicalCoordinateApproved':False,'denverFusionAllowed':False}
+          if rows: summary.update(medianOfStructureMedians=statistics.median(m),medianOfStructureP95=statistics.median(p),maxStructureP95=max(p),identityCloserThanRas=sum(s['nativeIdentityLpsHypothesis']['symmetricMedian']<s['rasSignFlipNegativeControl']['symmetricMedian'] for s in rows))
+          pathlib.Path('aggregate.json').write_text(json.dumps({'summary':summary,'volumes':volumes,'structures':rows,'regionalReports':data},indent=2)+'\n')
+          print(json.dumps(summary))
+          if not ok: raise SystemExit('Incomplete correspondence; no coordinate approval')
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ground-truth-mask-aggregate
+          path: aggregate.json
+          if-no-files-found: warn
+          retention-days: 90
