@@ -76,7 +76,7 @@ function create(canvas,onContextLost=()=>{}){
 
  const detail=new Map(),detailData=new Map();let shoulderPivot=[-1.1,1.9,0],shoulderGraph=null;let destroyed=false,rebuilding=false,recoveryScheduled=false;let uniformCache=new Map();const boundsCache=new Map();
  function disposeMesh(item){gl.deleteBuffer(item.buffer);if(item.indexBuffer)gl.deleteBuffer(item.indexBuffer);}
- let marrowMesh=null;const marrowDisplay=new Map();function clearMarrowDisplay(){if(gl)for(const q of marrowDisplay.values())for(const m of q.chunks)gl.deleteBuffer(m.indexBuffer);marrowDisplay.clear();}
+ let marrowMesh=null;const marrowDisplay=new Map();function clearMarrowDisplay(){if(gl)for(const q of marrowDisplay.values())gl.deleteBuffer(q.mesh.indexBuffer);marrowDisplay.clear();}
  function cleanup(){clearMarrowDisplay();if(marrowMesh&&gl)for(const m of marrowMesh)disposeMesh(m);marrowMesh=null;clearVhfStage();vhfGeneration++;if(vhfCacheFrame)cancelAnimationFrame(vhfCacheFrame);vhfCacheFrame=0;if(gl){for(const m of vhfMeshes)disposeMesh(m);}vhfMeshes=[];if(gl){for(const item of [...buffers,...overviewBones,...overviewMuscles,...expansionBones,...expansionMuscles,...expansionConnective,...[...connectiveDetail.values()].flat(),...(facialOverview?[facialOverview]:[]),...facialDetail,...osteologyOverview,...[...expansionDetail.values()].flat(),...[...osteologyDetail.values()].flat(),...[...detail.values()].flat()])disposeMesh(item);if(program)gl.deleteProgram(program);}buffers=[];overviewBones=[];overviewMuscles=[];expansionBones=[];expansionMuscles=[];expansionConnective=[];connectiveDetail.clear();facialOverview=null;facialDetail=[];osteologyOverview=[];osteologyDetail.clear();expansionDetail.clear();detail.clear();program=null;uniformCache.clear();boundsCache.clear();}
  function compile(type,source){const sh=gl.createShader(type);gl.shaderSource(sh,source);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(sh));return sh;}
  function setup(){
@@ -437,7 +437,7 @@ function create(canvas,onContextLost=()=>{}){
   const extendedPose=window.BodyExtendedRegions?.has(selected)&&detailData.has(selected)
    ?M.poseExtended(selected,detailData.get(selected),flex,secondary):null;
   const jointPose=shoulderPose||lowerPose||extendedPose;
-  const draw=(item,dim=1,alpha=1,unposed=false)=>{
+  const draw=(item,dim=1,alpha=1,unposed=false,ranges=null)=>{
   if(!sourceView&&!allowed(item))return;
   if(!sourceView&&connectiveIsolated&&!connectiveIsolated.has(item.id)){
    if(!connectiveGhost)return;
@@ -468,7 +468,7 @@ function create(canvas,onContextLost=()=>{}){
    gl.enableVertexAttribArray(locP);gl.vertexAttribPointer(locP,3,gl.FLOAT,false,28,0);
    gl.enableVertexAttribArray(locN);gl.vertexAttribPointer(locN,3,gl.FLOAT,false,28,12);
    gl.enableVertexAttribArray(locW);gl.vertexAttribPointer(locW,1,gl.FLOAT,false,28,24);
-   if(item.indexBuffer){gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,item.indexBuffer);gl.drawElements(gl.TRIANGLES,item.count,item.indexType,0);}else gl.drawArrays(gl.TRIANGLES,0,item.count);drawCalls++;submittedTriangles+=item.count/3;
+   if(item.indexBuffer){gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,item.indexBuffer);if(ranges){for(const q of ranges){gl.drawElements(gl.TRIANGLES,q.count,item.indexType,q.offset);drawCalls++;submittedTriangles+=q.count/3;}return;}gl.drawElements(gl.TRIANGLES,item.count,item.indexType,0);}else gl.drawArrays(gl.TRIANGLES,0,item.count);drawCalls++;submittedTriangles+=item.count/3;
   };
   if(sourceView){
    gl.depthMask(true);
@@ -507,9 +507,9 @@ function create(canvas,onContextLost=()=>{}){
     // Exact index partitions share the resident original vertex/normal buffer.
     // No simplification, topology change, or source-face deletion.
     for(const p of parts){if(!wanted.has(p.id))continue;const original=resident.get(p.id);if(!original)continue;let q=marrowDisplay.get(p.id);
-     if(q&&q.original!==original){for(const m of q.chunks)gl.deleteBuffer(m.indexBuffer);marrowDisplay.delete(p.id);q=null;}
-     if(!q&&original.lodLevel==='exact'&&original.count===p.indices.length&&p.indices.length/3>18000){const chunks=[];try{for(const c of window.BodyMarrowRide.exactChunks(p,.10)){const indexBuffer=gl.createBuffer();if(!indexBuffer)throw Error('MARROW index allocation');gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,indexBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,c.indices,gl.STATIC_DRAW);chunks.push({...original,indexBuffer,indexType:c.indices.BYTES_PER_ELEMENT===2?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,count:c.indices.length,min:c.min,max:c.max,bufferBytes:c.indices.byteLength});}q={original,chunks};marrowDisplay.set(p.id,q);}catch(e){for(const m of chunks)gl.deleteBuffer(m.indexBuffer);console.warn('MARROW exact partition fallback',e.message);q=null;}}
-     if(q){for(const m of q.chunks)if(V.inView(m,cam))draw(m,1,1,true);}else draw(original,1,1,true);drawn.add(p.id);
+     if(q&&q.original!==original){gl.deleteBuffer(q.mesh.indexBuffer);marrowDisplay.delete(p.id);q=null;}
+     if(!q&&original.lodLevel==='exact'&&original.count===p.indices.length&&p.indices.length/3>18000){let indexBuffer=null;try{const exact=window.BodyMarrowRide.exactChunks(p,.10),packed=new p.indices.constructor(p.indices.length),chunks=[];let start=0;for(const c of exact){packed.set(c.indices,start);chunks.push({count:c.indices.length,offset:start*packed.BYTES_PER_ELEMENT,min:c.min,max:c.max,bufferBytes:c.indices.byteLength});start+=c.indices.length;}if(start!==p.indices.length)throw Error('MARROW exact coverage');indexBuffer=gl.createBuffer();if(!indexBuffer)throw Error('MARROW index allocation');gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,indexBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,packed,gl.STATIC_DRAW);q={original,chunks,mesh:{...original,indexBuffer,indexType:packed.BYTES_PER_ELEMENT===2?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT}};marrowDisplay.set(p.id,q);}catch(e){if(indexBuffer)gl.deleteBuffer(indexBuffer);console.warn('MARROW exact partition fallback',e.message);q=null;}}
+     if(q){const visible=q.chunks.filter(m=>V.inView(m,cam));if(visible.length)draw(q.mesh,1,1,true,visible);}else draw(original,1,1,true);drawn.add(p.id);
     }
    }else{if(marrowDisplay.size)clearMarrowDisplay();for(const m of vhfMeshes){if(!wanted.has(m.id)||!V.visible(m,sourceView)||!V.inView(sourceView.playground?.bounds(m)||m,cam))continue;m.lastUse=now;draw(m,1,1,true);drawn.add(m.id);}}
 
