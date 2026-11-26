@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 jobs:
   somatic:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -15,6 +15,7 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-audit --no-fund
+      - run: node --check somatic/somatic.js
       - run: node --test tests/somatic.test.mjs
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test tests/somatic.spec.mjs --project=desktop-chromium --retries=0
