@@ -167,7 +167,7 @@
     if(desired===0&&Math.abs(v[k])<=.00200000000001)v[k]=0;
    }
    if(c.flight){const wantedGlide=i.glide&&!i.precision&&!selected&&(Math.abs(i.zoom)+Math.abs(i.panX)+Math.abs(i.panY)>0)?1:0;glideBlend=i.precision||selected?0:wantedGlide+(glideBlend-wantedGlide)*Math.exp(-dt/(wantedGlide?.12:.08));if(glideBlend<.002&&!wantedGlide)glideBlend=0;
-   probeAge+=dt;const near=flightClearance(c,world?.flightBoxes?.()||[b]);if(near>.24){surface=null;probeAge=.1;}else if(probeAge>=.09){surface=world?.flightSurface?.(c)||null;probeAge=0;}
+   probeAge+=dt;const near=flightClearance(c,world?.flightBoxes?.()||[b]);if(near>.24){surface=null;probeAge=.1;}else if(probeAge>=.09){try{surface=world?.flightSurface?.(c)||null;}catch(error){surface=null;world?.onFlightSurfaceError?.(error);}probeAge=0;}
    const desiredBoost=i.boost&&!i.precision&&!selected&&(i.zoom>0||Math.abs(i.panX)+Math.abs(i.panY)>0)?1:0;const oldBoost=boostBlend;boostBlend=i.precision||selected?0:desiredBoost+(boostBlend-desiredBoost)*Math.exp(-dt/(desiredBoost?.4:.18));if(!desiredBoost&&boostBlend<.002)boostBlend=0;let changed=false;const boxes=world?.flightBoxes?.(),n=Math.max(1,Math.ceil(dt/.025));for(let j=0;j<n;j++)changed=flightStep(c,motion,dt/n,b,p,boxes,selected,i.precision||selected?0:oldBoost+(boostBlend-oldBoost)*(j+1)/n,surface,glideBlend)||changed;return changed;}
    if(!legacy)return spatialStep(base,c,motion,dt,b,maxZoom,p,world?.orthographic===true,world?.wideMobility===true);
    const pan=Math.abs(motion.panX)+Math.abs(motion.panY)>0,anchorPoint=!pan?(p||(motion.zoom?{...c.target}:null)):null,old=anchorPoint?G.project(c,anchorPoint):null;

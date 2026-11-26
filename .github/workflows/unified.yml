@@ -19,6 +19,33 @@ jobs:
           node-version: '22'
       - run: node --check assets/atlas/atlas-controller.js && node --check somatic/somatic.js
       - run: npm test
+  startup-smoke:
+    if: github.ref == 'refs/heads/feat/body-live-unified' || github.head_ref == 'feat/body-live-unified'
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop-chromium, chromium-mobile, webkit-mobile]
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 12
+    steps:
+      - run: apt-get update && apt-get install -y git-lfs
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright test tests/flight-startup.spec.mjs --project=${{ matrix.project }} --workers=1 --retries=0
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: startup-${{ matrix.project }}
+          path: |
+            test-results/
+            artifacts/
   browser:
     if: github.ref == 'refs/heads/feat/body-live-unified' || github.head_ref == 'feat/body-live-unified'
     strategy:
