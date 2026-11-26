@@ -22,6 +22,7 @@ jobs:
           node-version: '22'
       - run: npm install --no-audit --no-fund
       - run: npx playwright test tests/nexus-paired.spec.mjs --project=desktop-chromium
+      - run: npx playwright test tests/nexus-essence-creative.spec.mjs
       - if: always()
         uses: actions/upload-artifact@v4
         with:
