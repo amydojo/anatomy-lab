@@ -1,0 +1,41 @@
+name: GRAVITY navigation verification
+on:
+  push:
+    branches: ['feat/unity-gravity']
+  pull_request:
+    branches: ['feat/v15-expedition-gamepad']
+    paths: ['assets/atlas/gravity.js','assets/atlas/expedition.js','assets/atlas/atlas-controller.js','atlas/index.html','tests/v15-gravity*','.github/workflows/v15-gravity.yml']
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm test
+  browser:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop-chromium, webkit-mobile]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: npm run test:e2e -- --project=${{ matrix.project }} tests/v15-gravity.spec.mjs tests/v15-expedition-layout.spec.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gravity-${{ matrix.project }}
+          path: |
+            test-results/
+            artifacts/results.json
+          if-no-files-found: warn
