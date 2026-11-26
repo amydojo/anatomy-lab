@@ -52,7 +52,7 @@ Left lacrimal lake,fma59542,sensory,0,126,248,head-neck,,False
 Left nasolacrimal duct,fma59556,sensory,0,217,424,head-neck,,False
 Left lateral rectus,fma49055,muscular,0,407,728,head-neck,muscle,True
 Left lens,fma58243,sensory,0,753,1502,,,False
-Left levator palpebrae superioris,fma49049,muscular,0,639,1096,,muscle,False
+Left levator palpebrae superioris,fma49049,muscular,0,639,1096,head-neck,muscle,True
 Left medial rectus,fma49057,muscular,0,319,566,head-neck,muscle,True
 Left lacrimal sac,fma59546,sensory,0,188,372,head-neck,,False
 Left nasociliary nerve,fma52670,nervous,0,171,236,,nerve,False
@@ -86,7 +86,7 @@ Right ciliary ganglion,fma53549,nervous,0,125,246,,,False
 Right cornea,fma58239,sensory,0,1042,1012,head-neck,organ,True
 Right frontal nerve,fma52639,nervous,0,149,294,,nerve,False
 Right common tendinous ring,fma49072,sensory,0,420,736,,,False
-Tendon of right levator palpebrae superioris,fma54159,connective,0,1173,1674,,tendon,False
+Tendon of right levator palpebrae superioris,fma54159,connective,0,1173,1674,head-neck,tendon,True
 Inferior branch of right oculomotor nerve,fma52576,nervous,0,774,870,,nerve,False
 Right inferior oblique,fma49050,muscular,0,507,922,head-neck,muscle,True
 Right inferior rectus,fma49046,muscular,0,438,778,head-neck,muscle,True
@@ -99,7 +99,7 @@ Right lacrimal lake,fma59541,sensory,0,126,248,head-neck,,False
 Right nasolacrimal duct,fma59555,sensory,0,221,432,head-neck,,False
 Right lateral rectus,fma49054,muscular,0,398,720,head-neck,muscle,True
 Right lens,fma58242,sensory,0,763,1522,,,False
-Right levator palpebrae superioris,fma49048,muscular,0,759,1206,,muscle,False
+Right levator palpebrae superioris,fma49048,muscular,0,759,1206,head-neck,muscle,True
 Right medial rectus,fma49056,muscular,0,335,560,head-neck,muscle,True
 Right lacrimal sac,fma59545,sensory,0,193,382,head-neck,,False
 Right nasociliary nerve,fma52669,nervous,0,189,238,,nerve,False
@@ -168,8 +168,8 @@ Right adductor minimus,fma43886,muscular,1,825,794,,muscle,False
 Left adductor minimus,fma43887,muscular,1,837,798,,muscle,False
 Right calcaneal tendon,fma258847,connective,1,1937,1442,,tendon,False
 Left calcaneal tendon,fma264844,connective,1,1915,1430,,tendon,False
-Right extensor digitorum longus,fma22548,muscular,1,1859,1326,arms-hands,muscle,True
-Left extensor digitorum longus,fma22549,muscular,1,1848,1326,arms-hands,muscle,True
+Right extensor digitorum longus,fma22548,muscular,1,1859,1326,,muscle,False
+Left extensor digitorum longus,fma22549,muscular,1,1848,1326,,muscle,False
 Right extensor hallucis brevis,fma51144,muscular,1,870,662,,muscle,False
 Left extensor hallucis brevis,fma51145,muscular,1,873,664,,muscle,False
 Right extensor hallucis longus,fma22546,muscular,1,618,526,,muscle,False
@@ -182,10 +182,10 @@ Right fibularis tertius,fma22550,skeletal,1,1017,716,,bone,False
 Left fibularis tertius,fma22551,skeletal,1,1004,716,,bone,False
 Right flexor accessorius,fma37465,muscular,1,555,576,,muscle,False
 Left flexor accessorius,fma37466,muscular,1,554,576,,muscle,False
-Right flexor digitorum brevis,fma37461,muscular,1,1662,1254,arms-hands,muscle,True
-Left flexor digitorum brevis,fma37462,muscular,1,1668,1272,arms-hands,muscle,True
-Right flexor digitorum longus,fma65016,muscular,1,1081,1006,arms-hands,muscle,True
-Left flexor digitorum longus,fma65017,muscular,1,1103,1024,arms-hands,muscle,True
+Right flexor digitorum brevis,fma37461,muscular,1,1662,1254,,muscle,False
+Left flexor digitorum brevis,fma37462,muscular,1,1668,1272,,muscle,False
+Right flexor digitorum longus,fma65016,muscular,1,1081,1006,,muscle,False
+Left flexor digitorum longus,fma65017,muscular,1,1103,1024,,muscle,False
 Right flexor hallucis longus,fma65014,muscular,1,605,660,,muscle,False
 Left flexor hallucis longus,fma65015,muscular,1,604,664,,muscle,False
 Right gemellus inferior,fma22336,muscular,1,393,460,,muscle,False
@@ -293,8 +293,8 @@ Left flexor pollicis brevis,fma37389,muscular,3,547,490,arms-hands,muscle,True
 Right flexor pollicis brevis,fma37388,muscular,3,551,492,arms-hands,muscle,True
 Flexor digiti minimi brevis of right hand,fma37398,muscular,3,232,216,arms-hands,muscle,True
 Flexor digiti minimi brevis of left hand,fma37399,muscular,3,233,216,arms-hands,muscle,True
-Flexor retinaculum of right wrist,fma40120,sensory,3,1303,1414,head-neck,connective,True
-Flexor retinaculum of left wrist,fma40121,sensory,3,1299,1412,head-neck,connective,True
+Flexor retinaculum of right wrist,fma40120,sensory,3,1303,1414,arms-hands,connective,True
+Flexor retinaculum of left wrist,fma40121,sensory,3,1299,1412,arms-hands,connective,True
 Right extensor carpi ulnaris,fma38507,muscular,3,2167,1136,arms-hands,muscle,True
 Left extensor carpi ulnaris,fma38508,muscular,3,2185,1152,arms-hands,muscle,True
 Humeral head of right flexor carpi ulnaris,fma38617,muscular,3,694,680,arms-hands,muscle,True
@@ -359,8 +359,8 @@ Right palmaris longus,fma38463,muscular,3,2090,1500,arms-hands,muscle,True
 Left palmaris longus,fma38464,muscular,3,2094,1506,arms-hands,muscle,True
 Right pronator quadratus,fma38454,muscular,3,1724,1284,arms-hands,muscle,True
 Left pronator quadratus,fma38455,muscular,4,1737,1292,arms-hands,muscle,True
-Right subscapularis,fma13414,skeletal,4,2368,1524,thorax-shoulder,bone,True
-Left subscapularis,fma13415,skeletal,4,2342,1512,thorax-shoulder,bone,True
+Right subscapularis,fma13414,skeletal,4,2368,1524,thorax-shoulder,muscle,True
+Left subscapularis,fma13415,skeletal,4,2342,1512,thorax-shoulder,muscle,True
 Right supinator,fma38513,muscular,4,1229,1266,arms-hands,muscle,True
 Left supinator,fma38514,muscular,4,1253,1282,arms-hands,muscle,True
 Right supraspinatus,fma32544,muscular,4,622,564,thorax-shoulder,muscle,True
@@ -405,8 +405,8 @@ Right iliocostalis lumborum,fma22740,muscular,4,3264,3490,,muscle,False
 Left iliocostalis lumborum,fma22741,muscular,4,3278,3490,,muscle,False
 Right iliocostalis thoracis,fma22742,muscular,4,1684,1844,,muscle,False
 Left iliocostalis thoracis,fma22743,muscular,4,1703,1844,,muscle,False
-Right levator scapulae,fma32540,skeletal,4,1262,1314,thorax-shoulder,bone,True
-Left levator scapulae,fma32541,skeletal,4,1285,1316,thorax-shoulder,bone,True
+Right levator scapulae,fma32540,skeletal,4,1262,1314,thorax-shoulder,muscle,True
+Left levator scapulae,fma32541,skeletal,4,1285,1316,thorax-shoulder,muscle,True
 Right longissimus capitis,fma22754,muscular,4,860,780,,muscle,False
 Left longissimus capitis,fma22756,muscular,4,867,792,,muscle,False
 Right longissimus cervicis,fma22757,muscular,4,1065,916,,muscle,False
@@ -656,7 +656,7 @@ Anterior commissure,fma61961,nervous,5,348,652,,,False
 Brachium of left superior colliculus,fma73462,nervous,5,143,280,,,False
 Brachium of right superior colliculus,fma73461,nervous,5,138,266,,,False
 Central canal of spinal cord,fma78497,nervous,5,112,160,,,False
-Cerebral aqueduct,fma78467,nervous,5,222,352,head-neck,organ,True
+Cerebral aqueduct,fma78467,nervous,5,222,352,,organ,False
 Left cingulate gyrus,fma72718,nervous,5,876,1480,,,False
 Right cingulate gyrus,fma72717,nervous,5,904,1538,,,False
 Commissure of fornix of forebrain,fma61970,nervous,5,1208,2338,head-neck,organ,True
@@ -761,7 +761,7 @@ Posterior part of left superior temporal gyrus,fma72805,nervous,6,965,1806,,,Fal
 Posterior part of right superior temporal gyrus,fma72804,nervous,6,1004,1840,,,False
 Left supramarginal gyrus,fma72668,nervous,6,1199,2104,,,False
 Right supramarginal gyrus,fma72667,nervous,7,1251,2090,,,False
-Tentorium cerebelli,fma83966,nervous,7,2889,4822,head-neck,organ,True
+Tentorium cerebelli,fma83966,nervous,7,2889,4822,head-neck,connective,True
 Basilar artery,fma50542,arterial,7,125,238,,artery,False
 Celiac artery,fma50737,arterial,7,133,238,,artery,False
 Hepatic portal vein,fma50735,venous,7,396,788,,vein,False
@@ -778,7 +778,7 @@ Caudate lobe branch of right hepatic artery,fma70447,arterial,7,209,352,,artery,
 Right lobe branch of right hepatic artery,fma71708,arterial,7,454,450,,artery,False
 Superior mesenteric artery,fma14749,arterial,7,352,580,,artery,False
 Descending thoracic aorta,fma87217,arterial,7,300,502,thorax-shoulder,artery,True
-Abdominal aorta,fma3789,arterial,7,286,498,thorax-shoulder,artery,True
+Abdominal aorta,fma3789,arterial,7,286,498,,artery,False
 Bronchial artery,fma68109,arterial,7,459,548,thorax-shoulder,artery,True
 Esophageal artery,fma4149,arterial,7,388,438,,artery,False
 Right superior intercostal artery,fma5042,arterial,7,103,184,thorax-shoulder,artery,True
@@ -922,7 +922,7 @@ Right genicular vein,fma44887,venous,7,311,548,,vein,False
 Left anterior tibial vein,fma44337,venous,7,1409,2814,,vein,False
 Left fibular vein,fma44886,venous,7,196,314,,vein,False
 Set of dorsal digital veins,fma70917,venous,7,748,1100,,,False
-Dorsal metacarpal vein,fma22954,venous,7,485,944,arms-hands,vein,True
+Dorsal metacarpal vein,fma22954,venous,7,485,944,arms-hands,vein,False
 Left fibular vein,fma44886,venous,8,1260,2334,,vein,False
 Left lateral circumflex femoral vein,fma44922,venous,8,420,794,,vein,False
 Left medial circumflex femoral vein,fma44919,venous,8,165,292,,vein,False
@@ -1842,29 +1842,29 @@ Distal phalanx of right thumb,fma24459,skeletal,12,181,228,arms-hands,bone,True
 Ethmoid,fma52740,skeletal,12,5334,8618,head-neck,bone,True
 Frontal bone,fma52734,skeletal,12,3315,5112,head-neck,bone,True
 Hyoid bone,fma52749,skeletal,12,604,1036,head-neck,bone,False
-Intervertebral disk of axis,fma25058,skeletal,12,996,1872,,bone,False
-Intervertebral disk of fourth thoracic vertebra,fma13501,skeletal,12,999,1310,thorax-shoulder,bone,True
-Intervertebral disk of fifth thoracic vertebra,fma13502,skeletal,12,1280,1530,thorax-shoulder,bone,True
-Intervertebral disk of sixth thoracic vertebra,fma13503,skeletal,12,1831,2104,thorax-shoulder,bone,True
-Intervertebral disk of seventh thoracic vertebra,fma13504,skeletal,12,1813,2146,thorax-shoulder,bone,True
-Intervertebral disk of eighth thoracic vertebra,fma13505,skeletal,12,2675,2548,thorax-shoulder,bone,True
-Intervertebral disk of ninth thoracic vertebra,fma13506,skeletal,12,2552,2420,thorax-shoulder,bone,True
-Intervertebral disk of tenth thoracic vertebra,fma13507,skeletal,12,2554,2456,thorax-shoulder,bone,True
-Intervertebral disk of eleventh thoracic vertebra,fma13508,skeletal,12,2892,2648,thorax-shoulder,bone,True
-Intervertebral disk,fma10446,skeletal,12,3614,2852,,bone,False
-Intervertebral disk of first lumbar vertebra,fma16033,skeletal,12,3399,2882,,bone,False
-Intervertebral disk of third cervical vertebra,fma13896,skeletal,12,582,728,head-neck,bone,True
-Intervertebral disk of second lumbar vertebra,fma16034,skeletal,12,2955,2604,,bone,False
-Intervertebral disk of third lumbar vertebra,fma16035,skeletal,12,3750,2922,,bone,False
-Intervertebral disk of fourth lumbar vertebra,fma16036,skeletal,12,3137,2710,,bone,False
-Intervertebral disk of fifth lumbar vertebra,fma16037,skeletal,12,1765,2048,,bone,False
-Intervertebral disk of fourth cervical vertebra,fma13897,skeletal,12,626,840,head-neck,bone,True
-Intervertebral disk of fifth cervical vertebra,fma13898,skeletal,12,629,864,head-neck,bone,True
-Intervertebral disk of sixth cervical vertebra,fma13899,skeletal,12,850,834,head-neck,bone,True
-Intervertebral disk of seventh cervical vertebra,fma13900,skeletal,12,828,956,head-neck,bone,True
-Intervertebral disk of first thoracic vertebra,fma10458,skeletal,12,950,1062,thorax-shoulder,bone,True
-Intervertebral disk of second thoracic vertebra,fma13495,skeletal,12,1128,1230,thorax-shoulder,bone,True
-Intervertebral disk of third thoracic vertebra,fma13500,skeletal,12,1410,1388,thorax-shoulder,bone,True
+Intervertebral disk of axis,fma25058,skeletal,12,996,1872,head-neck,connective,True
+Intervertebral disk of fourth thoracic vertebra,fma13501,skeletal,12,999,1310,thorax-shoulder,connective,True
+Intervertebral disk of fifth thoracic vertebra,fma13502,skeletal,12,1280,1530,thorax-shoulder,connective,True
+Intervertebral disk of sixth thoracic vertebra,fma13503,skeletal,12,1831,2104,thorax-shoulder,connective,True
+Intervertebral disk of seventh thoracic vertebra,fma13504,skeletal,12,1813,2146,thorax-shoulder,connective,True
+Intervertebral disk of eighth thoracic vertebra,fma13505,skeletal,12,2675,2548,thorax-shoulder,connective,True
+Intervertebral disk of ninth thoracic vertebra,fma13506,skeletal,12,2552,2420,thorax-shoulder,connective,True
+Intervertebral disk of tenth thoracic vertebra,fma13507,skeletal,12,2554,2456,thorax-shoulder,connective,True
+Intervertebral disk of eleventh thoracic vertebra,fma13508,skeletal,12,2892,2648,thorax-shoulder,connective,True
+Intervertebral disk,fma10446,skeletal,12,3614,2852,,connective,False
+Intervertebral disk of first lumbar vertebra,fma16033,skeletal,12,3399,2882,,connective,False
+Intervertebral disk of third cervical vertebra,fma13896,skeletal,12,582,728,head-neck,connective,True
+Intervertebral disk of second lumbar vertebra,fma16034,skeletal,12,2955,2604,,connective,False
+Intervertebral disk of third lumbar vertebra,fma16035,skeletal,12,3750,2922,,connective,False
+Intervertebral disk of fourth lumbar vertebra,fma16036,skeletal,12,3137,2710,,connective,False
+Intervertebral disk of fifth lumbar vertebra,fma16037,skeletal,12,1765,2048,,connective,False
+Intervertebral disk of fourth cervical vertebra,fma13897,skeletal,12,626,840,head-neck,connective,True
+Intervertebral disk of fifth cervical vertebra,fma13898,skeletal,12,629,864,head-neck,connective,True
+Intervertebral disk of sixth cervical vertebra,fma13899,skeletal,12,850,834,head-neck,connective,True
+Intervertebral disk of seventh cervical vertebra,fma13900,skeletal,12,828,956,head-neck,connective,True
+Intervertebral disk of first thoracic vertebra,fma10458,skeletal,12,950,1062,thorax-shoulder,connective,True
+Intervertebral disk of second thoracic vertebra,fma13495,skeletal,12,1128,1230,thorax-shoulder,connective,True
+Intervertebral disk of third thoracic vertebra,fma13500,skeletal,12,1410,1388,thorax-shoulder,connective,True
 Left tenth rib,fma8472,skeletal,12,754,1500,thorax-shoulder,bone,True
 Left eleventh rib,fma8532,skeletal,12,537,1070,thorax-shoulder,bone,True
 Left twelfth rib,fma8534,skeletal,12,367,730,thorax-shoulder,bone,True
@@ -2054,7 +2054,7 @@ Caudal pancreatic artery,fma14793,arterial,13,475,418,,artery,False
 Splenic artery,fma14773,arterial,13,590,426,,artery,False
 Celiac trunk,fma14812,arterial,13,133,238,,,False
 Left superficial dorsal vein of penis,fma21386,venous,13,544,1072,,vein,False
-Descending aorta,fma3784,arterial,13,535,1002,thorax-shoulder,artery,True
+Descending aorta,fma3784,arterial,13,535,1002,,artery,False
 Descending branch of left colic artery,fma14829,arterial,13,286,464,,artery,False
 Left colic vein,fma15394,venous,13,298,436,,vein,False
 Dorsal pancreatic artery,fma14787,arterial,13,244,456,,artery,False
