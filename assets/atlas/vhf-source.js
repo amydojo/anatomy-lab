@@ -19,7 +19,7 @@ globalThis.BodyVHF=(function sourceModule(){
  let outside=63;
  for(let i=0;i<8;i++){
   const x0=(i&1?p.max[0]:p.min[0])-c.target.x,y0=(i&2?p.max[1]:p.min[1])-c.target.y,z0=(i&4?p.max[2]:p.min[2])-c.target.z;
-  const x=x0*cy+z0*sy,z=z0*cy-x0*sy,y=y0*cp-z*sp,z2=y0*sp+z*cp,D=c.marrowDistance||7.4,w=(D-z2)/D;
+  let x=x0*cy+z0*sy,z=z0*cy-x0*sy,y=y0*cp-z*sp,z2=y0*sp+z*cp;const B=c.marrowBasis;if(B){x=x0*B[0]+y0*B[1]+z0*B[2];y=x0*B[3]+y0*B[4]+z0*B[5];z2=x0*B[6]+y0*B[7]+z0*B[8];}const D=c.marrowDistance||7.4,w=(D-z2)/D;
   if(!Number.isFinite(w)||(!c.marrowDistance&&w<=.10))return true; // perspective clamp: conservatively retain
   const X=x*scale/(c.width*.5)+(ax-.5)*2*w,Y=(y-(c.marrowDistance?0:.04))*scale/(c.height*.5)-(ay-.5)*2*w,Z=c.marrowDistance?((20.004/19.996)*(D-z2)-.16/19.996)/D:-z2/15;
   const margin=.005*Math.max(1,Math.abs(w));
