@@ -1,0 +1,7 @@
+// NEXUS B companion: local-only navigation and draft guard; no camera engine.
+export function returnURL(raw){try{const u=new URL(raw);return u.protocol==='https:'&&/^anatomy-(?:[a-z0-9]+|lab-git-feat-nexus-experience)-amy-dos-projects\.vercel\.app$/.test(u.hostname)&&u.pathname==='/nexus/'&&!u.username&&!u.password&&!u.port?u.origin+'/nexus/':null;}catch{return null;}}
+export function initialSpecimen(raw){return ['0','1','2','3','knee','world'].includes(raw)?raw:null;}
+export function exitGate(s){if(s.recording||s.replaying||s.videoRecording||s.loading)return 'Stop recording, replay or loading first.';if(s.audioActive)return 'Stop audio first. Local audio files cannot be restored.';if(s.videoPending)return 'Download video and explicitly confirm it is saved first.';if(!s.hasSpecimen)return 'No verified specimen available to save.';return null;}
+export const DRAFT_KEY='somatic-nexus-draft-1';
+export function readDraft(storage){try{const d=JSON.parse(storage.getItem(DRAFT_KEY)||'null');return d?.version===1&&typeof d.sourceKey==='string'&&/^[a-f0-9]{64}$/.test(d.manifestHash)?d:null;}catch{return null;}}
+export function writeDraft(storage,d){try{const raw=JSON.stringify(d);if(raw.length>3500000)return false;storage.setItem(DRAFT_KEY,raw);return true;}catch{return false;}}
