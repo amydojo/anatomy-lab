@@ -1,0 +1,574 @@
+{
+  "state": "source-qualification-only",
+  "labels": 143,
+  "reused": 61,
+  "new": 82,
+  "regionCounts": {
+    "SKULL": 2,
+    "SPINAL_COLUMN": 26,
+    "THORAX": 25,
+    "UPPER_EXTREMITY_LEFT": 5,
+    "LOWER_EXTREMITY_LEFT": 5,
+    "HAND_LEFT": 18,
+    "FOOT_LEFT": 17,
+    "UPPER_EXTREMITY_RIGHT": 5,
+    "LOWER_EXTREMITY_RIGHT": 5,
+    "HAND_RIGHT": 18,
+    "FOOT_RIGHT": 17
+  },
+  "triangles": 6070400,
+  "vertices": 3035302,
+  "glbBytes": 109371976,
+  "manifestSha256": "e8c22674b3f29c3db3671632cb4ba0ccfcf7168a319dc9f77fb3c3773f09273f",
+  "spatial": {
+    "checks": [
+      {
+        "id": "bonehub-vhf-calcaneus_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 33.137868881225586,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-cuboid_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 44.33417320251465,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-intermediate_cuneiform_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 35.929433822631836,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-lateral_cuneiform_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 41.74161338806152,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-medial_cuneiform_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 20.074644088745117,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-metatarsal_1_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 11.916349411010742,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-metatarsal_2_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 29.860151290893555,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-metatarsal_3_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 38.54642295837402,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-metatarsal_4_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 44.71724510192871,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-metatarsal_5_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 54.09369468688965,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-navicular_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 28.922849655151367,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-phalange_foot_1_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 3.2970943450927734,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-phalange_foot_2_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 24.344228744506836,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-phalange_foot_3_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 36.52326011657715,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-phalange_foot_4_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 45.529531478881836,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-phalange_foot_5_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 54.730031967163086,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-talus_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 38.824331283569336,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-calcaneus_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 31.290407180786133,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-cuboid_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 50.37986946105957,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-intermediate_cuneiform_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 46.851335525512695,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-lateral_cuneiform_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 52.326433181762695,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-medial_cuneiform_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 33.50564002990723,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-metatarsal_1_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 27.608163833618164,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-metatarsal_2_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 45.74349403381348,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-metatarsal_3_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 53.824960708618164,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-metatarsal_4_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 56.58526802062988,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-metatarsal_5_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 62.32571601867676,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-navicular_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 37.5176944732666,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-phalange_foot_1_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 30.03093147277832,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-phalange_foot_2_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 50.94960975646973,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-phalange_foot_3_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 62.320077896118164,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-phalange_foot_4_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 66.76742744445801,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-phalange_foot_5_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 70.19585609436035,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-talus_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 40.18466377258301,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-capitate_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 174.51993370056152,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-hamate_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 175.28551292419434,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-lunate_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 178.2264461517334,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-metacarpal_1_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 137.89003562927246,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-metacarpal_2_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 159.4099941253662,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-metacarpal_3_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 167.25205039978027,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-metacarpal_4_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 169.6760768890381,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-metacarpal_5_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 170.2626552581787,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-phalange_hand_1_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 112.8089656829834,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-phalange_hand_2_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 117.27266502380371,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-phalange_hand_3_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 121.67966270446777,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-phalange_hand_4_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 126.68451499938965,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-phalange_hand_5_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 131.72427940368652,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-pisiform_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 173.3528347015381,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-scaphoid_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 169.57468223571777,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-trapezium_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 155.6494655609131,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-trapezoid_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 168.88805198669434,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-triquetrum_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 182.0564785003662,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-capitate_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 182.68666458129883,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-hamate_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 184.80932998657227,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-lunate_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 183.62981605529785,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-metacarpal_1_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 146.58365058898926,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-metacarpal_2_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 170.0896453857422,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-metacarpal_3_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 179.25957489013672,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-metacarpal_4_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 183.313383102417,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-metacarpal_5_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 185.1908950805664,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-phalange_hand_1_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 129.88059425354004,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-phalange_hand_2_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 134.55072593688965,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-phalange_hand_3_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 142.2322177886963,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-phalange_hand_4_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 152.34731674194336,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-phalange_hand_5_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 162.76978492736816,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-pisiform_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 182.80343437194824,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-scaphoid_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 174.64718055725098,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-trapezium_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 162.34188652038574,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-trapezoid_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 176.76662635803223,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-triquetrum_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 189.24208450317383,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-femur_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 96.53108787536621,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-fibula_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 83.16678428649902,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-hip_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 74.15054893493652,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-patella_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 83.19585227966309,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-tibia_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 62.45265007019043,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-femur_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 97.30284690856934,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-fibula_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 80.38620185852051,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-hip_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 74.15054893493652,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-patella_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 91.89078330993652,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-tibia_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 64.80360984802246,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-clavicle_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 78.09733390808105,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-humerus_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 192.3717098236084,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-radius_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 205.93692588806152,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-scapula_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 109.72005271911621,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-ulna_left",
+        "side": "LEFT",
+        "signedMidlineDistanceSourceUnits": 212.04935264587402,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-clavicle_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 73.63754081726074,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-humerus_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 181.8250823020935,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-radius_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 200.98306822776794,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-scapula_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 108.21685600280762,
+        "pass": true
+      },
+      {
+        "id": "bonehub-vhf-ulna_right",
+        "side": "RIGHT",
+        "signedMidlineDistanceSourceUnits": 211.03609013557434,
+        "pass": true
+      }
+    ],
+    "midlineSourceX": 238.64766883850098,
+    "leftSign": 1,
+    "limitations": "AABB centroids and ordering only; not joint-contact, physical-unit, CT-mask or landmark validation."
+  },
+  "rendering": "not integrated",
+  "units": "unconfirmed",
+  "clinicalValidation": "not performed",
+  "denverFusion": false
+}

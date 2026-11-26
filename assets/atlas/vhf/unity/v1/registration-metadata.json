@@ -1,0 +1,156 @@
+{
+  "existingFit": {
+    "matrix_source_to_denver_raw": [
+      [
+        -0.9989941700784746,
+        -0.03886946184456025,
+        -0.02235649984106498,
+        805.1853554910044
+      ],
+      [
+        0.03917307506032958,
+        -0.9991438349272099,
+        -0.013306664392877008,
+        683.6409396801585
+      ],
+      [
+        -0.021820136102852286,
+        -0.014169052998035348,
+        0.99966150250852,
+        6.692825721458576
+      ],
+      [
+        0,
+        0,
+        0,
+        1
+      ]
+    ],
+    "scale": 1,
+    "det": 1,
+    "units": "source units, physical mm unconfirmed",
+    "method": "35k area-weighted samples per reference; two femurs fit by 40 iterations 85% trimmed rigid ICP; symmetric sampled NN distances; hips and sacrum held out",
+    "thresholds": {
+      "median": 3,
+      "p95": 8,
+      "centroidDelta": 5
+    },
+    "metrics": {
+      "femur_left": [
+        1.267987,
+        3.214,
+        1.9194
+      ],
+      "femur_right": [
+        1.373323,
+        3.81764,
+        1.94735
+      ],
+      "hip_left": [
+        1.951302,
+        4.143719,
+        4.653666
+      ],
+      "hip_right": [
+        1.701445,
+        4.063036,
+        4.424021
+      ],
+      "sacrum_coccyx": [
+        3.3399,
+        7.301483,
+        10.563021
+      ]
+    },
+    "metricOrder": [
+      "median",
+      "p95",
+      "centroidDelta"
+    ],
+    "decision": "unregistered separate space; sacral validation fails; no clinical review"
+  },
+  "aabbCenterChecks": [
+    {
+      "source": "bonehub-vhf-hip_left",
+      "target": "vhf-left-bone-pelvis",
+      "sourceAabbCenter": [
+        312.7982177734375,
+        246.6637725830078,
+        923.1984252929688
+      ],
+      "targetAabbCenter": [
+        465.5124053955078,
+        433.88414001464844,
+        922.3163757324219
+      ],
+      "transformedSourceAabbCenter": [
+        462.47458597921906,
+        437.15692845412894,
+        919.2584589123574
+      ],
+      "residual": 5.412055640328517
+    },
+    {
+      "source": "bonehub-vhf-femur_left",
+      "target": "vhf-left-bone-femur",
+      "sourceAabbCenter": [
+        335.1787567138672,
+        235.75399017333984,
+        698.9923706054688
+      ],
+      "targetAabbCenter": [
+        446.61729431152344,
+        450.1209411621094,
+        696.77880859375
+      ],
+      "transformedSourceAabbCenter": [
+        445.5530780516075,
+        451.9175195455277,
+        694.794532291368
+      ],
+      "residual": 2.8805559497829956
+    },
+    {
+      "source": "bonehub-vhf-hip_right",
+      "target": "vhf-right-bone-pelvis",
+      "sourceAabbCenter": [
+        164.49711990356445,
+        248.29779815673828,
+        923.0078735351562
+      ],
+      "targetAabbCenter": [
+        614.1440734863281,
+        428.0095520019531,
+        924.7547607421875
+      ],
+      "transformedSourceAabbCenter": [
+        610.5672645431116,
+        429.7174274459276,
+        922.2807692006056
+      ],
+      "residual": 4.672369302208835
+    },
+    {
+      "source": "bonehub-vhf-femur_right",
+      "target": "vhf-right-bone-femur",
+      "sourceAabbCenter": [
+        141.34482192993164,
+        244.33192443847656,
+        696.1243438720703
+      ],
+      "targetAabbCenter": [
+        638.907470703125,
+        433.9564971923828,
+        695.7921752929688
+      ],
+      "transformedSourceAabbCenter": [
+        638.9227482147159,
+        435.79202200078646,
+        696.0354180109448
+      ],
+      "residual": 1.851634884223677
+    }
+  ],
+  "note": "Independent manifest arithmetic, not new surface registration, and not the centroid metric in prior ICP. Prior fit was in raw Denver coordinates; remove stored translation before comparison. Physical units unconfirmed.",
+  "decision": "No Denver fusion."
+}
