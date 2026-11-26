@@ -17,7 +17,9 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --no-audit --no-fund
-      - run: npx playwright test tests/marrow.spec.mjs --project=desktop-chromium --grep 'BONE ACID 003'
+      - run: npx playwright test tests/marrow.spec.mjs --project=desktop-chromium --grep 'GYROSCOPE 001'
+      - if: ${{ !cancelled() }}
+        run: npx playwright test tests/marrow.spec.mjs --project=desktop-chromium --grep 'BONE ACID 003'
       - if: ${{ !cancelled() }}
         run: npm test
       - if: ${{ !cancelled() }}
