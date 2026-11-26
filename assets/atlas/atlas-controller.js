@@ -667,6 +667,7 @@ function setupExpedition(){
  function restoreSelection(v){if(!pendingNexusSelection||!sameAxis(v))return false;const p=v.parts.find(p=>p.id===pendingNexusSelection);if(!p)return false;v.selected=p.id;v.surface=null;pendingNexusSelection=null;return true;}
  if(nexusParams.get('nexus')==='1')window.__NEXUS_ATLAS__=Object.freeze({
   profile:()=>motion?{active:true,version:1,settings:motion.settings()}: {active:false},
+  inspect:()=>{const v=vhfView;if(!sameAxis(v))return null;return {camera:{...v.camera,target:{...v.camera.target}},selection:v.selected,structures:v.parts.length,region:v.neighborhood||null};},
   capture:()=>{const v=vhfView;if(!sameAxis(v)||!v.parts.length)return null;cancelAxisFlight();motion?.reset();const c=v.camera;
    const idx=window.BodyVHF.axisLocation(v.landmarks,c,v.axisRegion);
    const region=typeof idx==='number'?['hip','thorax','neck','skull'][idx]:null;
