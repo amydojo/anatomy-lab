@@ -83,8 +83,8 @@ function create(canvas,onContextLost=()=>{}){
   if(!gl){status='fallback';return false;}
   const vert=[
    '#version 300 es','precision highp float;','in vec3 aPosition;','in vec3 aNormal;','in float aSkinWeight;',
-   'uniform vec2 uViewport;','uniform float uAnchorX;','uniform float uAnchorY;','uniform float uYaw;','uniform float uPitch;','uniform float uFrameSpan;','uniform float uZoom;','uniform vec3 uTarget;','uniform float uMotion;','uniform float uFlex;','uniform vec3 uPivot;','uniform float uMotionAxis;','uniform float uSoftSkin;','uniform float uJointGraph;','uniform mat4 uOriginPose;','uniform mat4 uInsertionPose;','out vec3 vNormal;','out vec3 vViewNormal;',
-   'void main(){','vec3 bone=aPosition;','vec3 n=aNormal;','float influence=uMotion>.5?1.:(uSoftSkin>.5?aSkinWeight:0.);','if(uJointGraph>.5){vec4 pt=vec4(aPosition,1.);bone=mix((uOriginPose*pt).xyz,(uInsertionPose*pt).xyz,aSkinWeight);n=normalize(mix(mat3(uOriginPose)*n,mat3(uInsertionPose)*n,aSkinWeight));}else if(influence>.00001){vec3 d=bone-uPivot;float ca=cos(uFlex*influence),sa=sin(uFlex*influence);bone=uPivot+(uMotionAxis>.5?vec3(d.x*ca-d.y*sa,d.x*sa+d.y*ca,d.z):vec3(d.x,d.y*ca-d.z*sa,d.y*sa+d.z*ca));n=uMotionAxis>.5?vec3(n.x*ca-n.y*sa,n.x*sa+n.y*ca,n.z):vec3(n.x,n.y*ca-n.z*sa,n.y*sa+n.z*ca);}','vec3 p=bone-uTarget;','float cy=cos(uYaw),sy=sin(uYaw),cp=cos(uPitch),sp=sin(uPitch);',
+   'uniform vec2 uViewport;','uniform float uAnchorX;','uniform float uAnchorY;','uniform float uYaw;','uniform float uPitch;','uniform float uFrameSpan;','uniform float uZoom;','uniform vec3 uTarget;','uniform float uMotion;','uniform float uFlex;','uniform vec3 uPivot;','uniform mat3 uPlayRotation;','uniform vec3 uPlayTranslation;','uniform float uMotionAxis;','uniform float uSoftSkin;','uniform float uJointGraph;','uniform mat4 uOriginPose;','uniform mat4 uInsertionPose;','out vec3 vNormal;','out vec3 vViewNormal;',
+   'void main(){','vec3 bone=aPosition;','vec3 n=aNormal;','float influence=uMotion>.5?1.:(uSoftSkin>.5?aSkinWeight:0.);','if(uJointGraph>.5){vec4 pt=vec4(aPosition,1.);bone=mix((uOriginPose*pt).xyz,(uInsertionPose*pt).xyz,aSkinWeight);n=normalize(mix(mat3(uOriginPose)*n,mat3(uInsertionPose)*n,aSkinWeight));}else if(influence>.00001){vec3 d=bone-uPivot;float ca=cos(uFlex*influence),sa=sin(uFlex*influence);bone=uPivot+(uMotionAxis>.5?vec3(d.x*ca-d.y*sa,d.x*sa+d.y*ca,d.z):vec3(d.x,d.y*ca-d.z*sa,d.y*sa+d.z*ca));n=uMotionAxis>.5?vec3(n.x*ca-n.y*sa,n.x*sa+n.y*ca,n.z):vec3(n.x,n.y*ca-n.z*sa,n.y*sa+n.z*ca);}','bone=uPlayRotation*bone+uPlayTranslation; n=uPlayRotation*n;','vec3 p=bone-uTarget;','float cy=cos(uYaw),sy=sin(uYaw),cp=cos(uPitch),sp=sin(uPitch);',
    'float x=p.x*cy+p.z*sy;','float z=p.z*cy-p.x*sy;','float y=p.y*cp-z*sp;','float z2=p.y*sp+z*cp;',
    'float scale=min(uViewport.x/3.25,uViewport.y/uFrameSpan)*uZoom;',
    'float w=max(.10,(7.4-z2)/7.4);',
@@ -417,7 +417,7 @@ function create(canvas,onContextLost=()=>{}){
    }
    return size;
   }
-  let drawCalls=0,submittedTriangles=0;
+  let drawCalls=0,submittedTriangles=0;const identityRotation=[1,0,0,0,1,0,0,0,1],identityTranslation=[0,0,0];
   gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(0,0,0,0);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   gl.useProgram(program);
   const uni=name=>{if(!uniformCache.has(name))uniformCache.set(name,gl.getUniformLocation(program,name));return uniformCache.get(name);};
@@ -459,6 +459,7 @@ function create(canvas,onContextLost=()=>{}){
    gl.uniform1f(uni('uMotion'),unposed?0:moving?1:0);gl.uniform1f(uni('uSoftSkin'),item.skinWeights?1:0);gl.uniform1f(uni('uMotionAxis'),selected==='shoulder'?1:0);
    gl.uniform1f(uni('uFlex'),(selected==='shoulder'?-1:1)*Number(flex)*Math.PI/180);
    gl.uniform3fv(uni('uPivot'),pivot);
+   const play=sourceView?.playground?.transform(item.id);gl.uniformMatrix3fv(uni('uPlayRotation'),false,play?.r||identityRotation);gl.uniform3fv(uni('uPlayTranslation'),play?.t||identityTranslation);
    const kind=item.connectiveKind;gl.uniform1f(uni('uMaterial'),item.id===highlight?4:kind==='fibrocartilage'||kind==='cartilage'?3:kind==='tendon'||kind==='ligament'?2:item.connective||item.group==='connective'?4:item.tissue?1:0);
    gl.uniform3fv(uni('uColor'),item.id===highlight?[1,.81,.48]:item.color);gl.uniform1f(uni('uDim'),dim);gl.uniform1f(uni('uAlpha'),alpha);
    gl.bindBuffer(gl.ARRAY_BUFFER,item.buffer);
@@ -474,7 +475,7 @@ function create(canvas,onContextLost=()=>{}){
    const wanted=new Set(),drawn=new Set(),resident=new Map(vhfMeshes.map(m=>[m.id,m])),desired=new Map();
    const level=p=>p.lodLevel||'exact',key=p=>p.id+':'+level(p);
    for(const p of parts){if(!V.visible(p,sourceView))continue;eligibleStructures++;eligibleTriangles+=p.indices.length/3;
-    if(!V.inView(p,cam)){culledStructures++;culledTriangles+=p.indices.length/3;continue;}wanted.add(p.id);}
+    if(!V.inView(sourceView.playground?.bounds(p)||p,cam)){culledStructures++;culledTriangles+=p.indices.length/3;continue;}wanted.add(p.id);}
    if(sourceView.selected)wanted.add(sourceView.selected);
    for(const p of parts)if(wanted.has(p.id))desired.set(p.id,axial&&!legacy?V.chooseLod(p,cam,sourceView.selected,resident.get(p.id)?.lodLevel):p);
    if(bounded){
@@ -500,8 +501,8 @@ function create(canvas,onContextLost=()=>{}){
     // Re-arm even after the final chunk: subsequent streamed assets must never inherit a closed gate.
     if((pending||vhfUploadGate)&&!vhfCacheFrame){const generation=vhfGeneration;vhfCacheFrame=requestAnimationFrame(()=>{vhfCacheFrame=0;vhfUploadGate=false;if(generation===vhfGeneration&&!document.hidden)window.dispatchEvent(new Event('body:vhf-residency-frame'));});}
    }
-   for(const m of vhfMeshes){if(!wanted.has(m.id)||!V.visible(m,sourceView)||!V.inView(m,cam))continue;m.lastUse=now;draw(m,1,1,true);drawn.add(m.id);}
-   sourceView.renderedIds=bounded?drawn:null;
+   for(const m of vhfMeshes){if(!wanted.has(m.id)||!V.visible(m,sourceView)||!V.inView(sourceView.playground?.bounds(m)||m,cam))continue;m.lastUse=now;draw(m,1,1,true);drawn.add(m.id);}
+   sourceView.renderedIds=bounded||sourceView.playground?drawn:null;
    if(drawn.size&&vhfFirstDrawMs===null)vhfFirstDrawMs=performance.now()-(parts.sourceInfo?.streamStartedAt??now);
    const bytes=vhfMeshes.reduce((n,m)=>n+m.bufferBytes,0);
    const lodCounts={overview:0,regional:0,exact:0};for(const m of vhfMeshes)lodCounts[m.lodLevel||'exact']++;
