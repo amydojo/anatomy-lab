@@ -7,11 +7,11 @@ export async function uploadGeometry(gl,packed,{signal,yieldFrame=frame,chunkByt
  const vertex=gl.createBuffer(),index=gl.createBuffer(),h={vertex,index,count:packed.indices.length,indexType:packed.indices.BYTES_PER_ELEMENT===2?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,bytes:0};
  function check(){require(!signal?.aborted&&!gl.isContextLost(),'upload interrupted');require(gl.getError()===gl.NO_ERROR,'WebGL allocation/upload error');}
  try{
-  require(vertex&&index,'buffer creation failed');
+  require(vertex&&index,'buffer creation failed');require(Number.isInteger(chunkBytes)&&chunkBytes>0,'invalid chunk size');
   for(const [target,handle,data] of [[gl.ARRAY_BUFFER,vertex,packed.vertices],[gl.ELEMENT_ARRAY_BUFFER,index,new Uint8Array(packed.indices.buffer,packed.indices.byteOffset,packed.indices.byteLength)]]){
    check();gl.bindBuffer(target,handle);gl.bufferData(target,data.byteLength,gl.STATIC_DRAW);check();
    const actual=gl.getBufferParameter(target,gl.BUFFER_SIZE);require(actual===data.byteLength,'GPU buffer size mismatch');h.bytes+=actual;
-   for(let offset=0;offset<data.byteLength;offset+=chunkBytes){await yieldFrame();check();gl.bindBuffer(target,handle);gl.bufferSubData(target,offset,data.subarray(offset,offset+chunkBytes));check();}
+   for(let offset=0;offset<data.byteLength;offset+=chunkBytes){if(offset>0)await yieldFrame();check();gl.bindBuffer(target,handle);gl.bufferSubData(target,offset,data.subarray(offset,offset+chunkBytes));check();}
   }
   require(h.bytes===packed.bytes,'GPU total mismatch');return h;
  }catch(e){disposeGeometry(gl,h);throw e;}
@@ -32,7 +32,8 @@ export class UnityGeometrySession{
   return this.ledger.queue(this.manifest.structures.filter(e=>visible(e)||e.id===selected).map(e=>{
    // Load complete overview coverage before requesting improvements.
    const current=this.ledger.resident.get(e.id)?.level;
-   const r=current?chooseLevel(e,camera,current,e.id===selected):e.levels.find(l=>l.level===e.overviewLevel);
+   const selectedLevel=current?chooseLevel(e,camera,current,e.id===selected):e.levels.find(l=>l.level===e.overviewLevel);
+   const r=selectedLevel.level==='exact'?e.levels.find(l=>l.level==='exact-display'):selectedLevel;
    return {id:e.id,entry:e,...r};
   }).filter(r=>r.level!=='exact'&&!this.failures.has(r.id+':'+r.level)),selected);
  }
