@@ -5,6 +5,7 @@ on:
     paths:
       - 'assets/atlas/unity-*.mjs'
       - 'scripts/build_unity_geometry.mjs'
+      - 'scripts/verify_unity_geometry.mjs'
       - 'tests/v15-nanite.test.mjs'
       - '.github/workflows/v15-nanite.yml'
   workflow_dispatch:
@@ -21,7 +22,7 @@ jobs:
         with:
           node-version: '22'
       - run: npm test
-      - run: node --check assets/atlas/unity-residency.mjs && node --check assets/atlas/unity-geometry-worker.mjs && node --check scripts/build_unity_geometry.mjs
+      - run: node --check assets/atlas/unity-residency.mjs && node --check assets/atlas/unity-geometry-worker.mjs && node --check scripts/build_unity_geometry.mjs && node --check scripts/verify_unity_geometry.mjs
   full-inventory:
     if: github.head_ref == 'feat/unity-nanite' || github.ref == 'refs/heads/feat/unity-nanite'
     runs-on: ubuntu-latest
@@ -33,10 +34,25 @@ jobs:
           node-version: '22'
       - run: python3 scripts/qualify_unity.py --output unity-qualified
       - run: node --max-old-space-size=4096 scripts/build_unity_geometry.mjs unity-qualified unity-nanite
+      - name: Independently audit completed derivative artifact
+        if: always()
+        run: |
+          test -f unity-nanite/manifest.json
+          source_hash=$(sha256sum unity-qualified/manifest.json | cut -d' ' -f1)
+          derivative_hash=$(sha256sum unity-nanite/manifest.json | cut -d' ' -f1)
+          printf '%s\n%s\n' "$source_hash" "$derivative_hash" > unity-nanite/manifest-pins.txt
+          node scripts/verify_unity_geometry.mjs unity-qualified unity-nanite "$source_hash" "$derivative_hash" unity-nanite/independent-audit.json
       - if: always()
         uses: actions/upload-artifact@v4
         with:
           name: unity-nanite-candidate
           path: unity-nanite/
+          retention-days: 7
+          if-no-files-found: warn
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unity-nanite-exact-source
+          path: unity-qualified/
           retention-days: 7
           if-no-files-found: warn
