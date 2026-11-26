@@ -1,0 +1,2235 @@
+name,id,system,chunk,vertices,triangles,region,tissue,selected
+Gingiva of upper jaw,fma59763,skeletal,0,883,1424,,bone,False
+Gingiva of lower jaw,fma59764,skeletal,0,726,1328,,bone,False
+Left lower first secondary molar tooth,fma55704,skeletal,0,807,1606,,bone,False
+Left lower first secondary premolar tooth,fma55693,skeletal,0,454,900,,bone,False
+Left lower second secondary molar tooth,fma55703,skeletal,0,760,1492,,bone,False
+Left lower second secondary premolar tooth,fma55692,skeletal,0,450,890,,bone,False
+Left lower central secondary incisor tooth,fma57143,skeletal,0,323,642,,bone,False
+Left lower lateral secondary incisor tooth,fma57141,skeletal,0,323,640,,bone,False
+Left lower secondary canine tooth,fma55687,skeletal,0,362,720,,bone,False
+Left upper first secondary molar tooth,fma55699,skeletal,0,912,1812,,bone,False
+Left upper first secondary premolar tooth,fma55690,skeletal,0,562,1098,,bone,False
+Left upper second secondary molar tooth,fma55700,skeletal,0,823,1598,,bone,False
+Left upper second secondary premolar tooth,fma55691,skeletal,0,571,1114,,bone,False
+Left upper central secondary incisor tooth,fma55682,skeletal,0,398,792,,bone,False
+Left upper lateral secondary incisor tooth,fma55683,skeletal,0,366,728,,bone,False
+Left upper secondary canine tooth,fma55799,skeletal,0,387,770,,bone,False
+Right lower first secondary molar tooth,fma55705,skeletal,0,805,1594,,bone,False
+Right lower first secondary premolar tooth,fma55694,skeletal,0,462,920,,bone,False
+Right lower second secondary molar tooth,fma55706,skeletal,0,735,1454,,bone,False
+Right lower second secondary premolar tooth,fma55695,skeletal,0,458,908,,bone,False
+Right lower central secondary incisor tooth,fma57142,skeletal,0,327,648,,bone,False
+Right lower lateral secondary incisor tooth,fma57140,skeletal,0,311,614,,bone,False
+Right lower secondary canine tooth,fma55686,skeletal,0,363,722,,bone,False
+Right upper second secondary molar tooth,fma55697,skeletal,0,848,1628,,bone,False
+Right upper first secondary molar tooth,fma55698,skeletal,0,915,1792,,bone,False
+Right upper first secondary premolar tooth,fma55689,skeletal,0,557,1096,,bone,False
+Right upper second secondary premolar tooth,fma55688,skeletal,0,573,1122,,bone,False
+Right upper central secondary incisor tooth,fma55681,skeletal,0,399,792,,bone,False
+Right upper lateral secondary incisor tooth,fma55680,skeletal,0,355,706,,bone,False
+Right upper secondary canine tooth,fma55798,skeletal,0,382,760,,bone,False
+Anterior chamber of left eyeball,fma58082,sensory,0,411,816,head-neck,organ,True
+Left anterior ethmoidal nerve,fma52677,nervous,0,167,286,head-neck,nerve,True
+Check ligament of left lateral rectus,fma49145,connective,0,876,1716,head-neck,ligament,True
+Left choroid,fma58300,sensory,0,3851,6360,,,False
+Left choroid,fma58300,sensory,0,1444,2244,,,False
+Left corona ciliaris,fma58484,sensory,0,12636,10150,,,False
+Left ciliary ganglion,fma53550,nervous,0,94,180,,,False
+Left cornea,fma58240,sensory,0,1209,1576,head-neck,organ,True
+Left frontal nerve,fma52640,nervous,0,160,316,,nerve,False
+Left common tendinous ring,fma49073,sensory,0,408,734,,,False
+Check ligament of left medial rectus,fma49148,connective,0,1034,2024,head-neck,ligament,True
+Inferior branch of left oculomotor nerve,fma52577,nervous,0,855,932,,nerve,False
+Left inferior oblique,fma49051,muscular,0,469,890,head-neck,muscle,True
+Left inferior rectus,fma49047,muscular,0,444,782,head-neck,muscle,True
+Left infratrochlear nerve,fma52699,nervous,0,137,248,,nerve,False
+Left iris,fma58237,sensory,0,932,1754,,,False
+Left lacrimal canaliculus,fma59583,sensory,0,347,590,head-neck,,False
+Left lacrimal gland,fma59103,sensory,0,741,1444,head-neck,,False
+Left lacrimal nerve,fma52630,nervous,0,259,464,head-neck,nerve,True
+Left lacrimal lake,fma59542,sensory,0,126,248,head-neck,,False
+Left nasolacrimal duct,fma59556,sensory,0,217,424,head-neck,,False
+Left lateral rectus,fma49055,muscular,0,407,728,head-neck,muscle,True
+Left lens,fma58243,sensory,0,753,1502,,,False
+Left levator palpebrae superioris,fma49049,muscular,0,639,1096,,muscle,False
+Left medial rectus,fma49057,muscular,0,319,566,head-neck,muscle,True
+Left lacrimal sac,fma59546,sensory,0,188,372,head-neck,,False
+Left nasociliary nerve,fma52670,nervous,0,171,236,,nerve,False
+Communicating branch of left nasociliary nerve with left ciliary ganglion,fma52674,nervous,0,163,228,,nerve,False
+Left ophthalmic nerve,fma52623,nervous,0,197,390,,nerve,False
+Left optic nerve,fma50878,nervous,0,280,446,head-neck,nerve,True
+Left posterior ethmoidal nerve,fma52716,nervous,0,146,212,head-neck,nerve,True
+Optic part of left retina,fma58608,sensory,0,2583,5150,head-neck,organ,True
+Left sclera,fma58272,sensory,0,4820,8690,head-neck,organ,True
+Left long ciliary nerve,fma82735,nervous,0,177,248,,nerve,False
+Short ciliary nerve,fma7041,nervous,0,411,510,,nerve,False
+Suspensory ligament of left lens,fma58840,sensory,0,4068,3854,,ligament,False
+Superior branch of left oculomotor nerve,fma52575,nervous,0,465,550,,nerve,False
+Left superior oblique,fma49053,muscular,0,436,792,head-neck,muscle,True
+Left superior rectus,fma49045,muscular,0,362,622,head-neck,muscle,True
+Tarsal plate of left upper eyelid,fma59092,sensory,0,268,526,,,False
+Left supra-orbital nerve,fma52657,nervous,0,341,646,,nerve,False
+Left supratrochlear nerve,fma52644,nervous,0,384,698,,nerve,False
+Tarsal plate of left lower eyelid,fma59090,sensory,0,230,450,,,False
+Trochlea of left superior oblique,fma49068,connective,0,231,422,head-neck,,False
+Left trochlear nerve,fma50882,nervous,0,323,598,,nerve,False
+Left vitreous body,fma58829,sensory,0,1328,2602,,,False
+Anterior chamber of right eyeball,fma58081,sensory,0,416,828,head-neck,organ,True
+Right anterior ethmoidal nerve,fma52676,nervous,0,153,234,head-neck,nerve,True
+Check ligament of right lateral rectus,fma49144,connective,0,901,1726,head-neck,ligament,True
+Check ligament of right medial rectus,fma49147,connective,0,1121,2114,head-neck,ligament,True
+Right choroid,fma58299,sensory,0,1519,2318,,,False
+Right choroid,fma58299,sensory,0,4102,6350,,,False
+Right corona ciliaris,fma58483,sensory,0,13965,11788,,,False
+Right ciliary ganglion,fma53549,nervous,0,125,246,,,False
+Right cornea,fma58239,sensory,0,1042,1012,head-neck,organ,True
+Right frontal nerve,fma52639,nervous,0,149,294,,nerve,False
+Right common tendinous ring,fma49072,sensory,0,420,736,,,False
+Tendon of right levator palpebrae superioris,fma54159,connective,0,1173,1674,,tendon,False
+Inferior branch of right oculomotor nerve,fma52576,nervous,0,774,870,,nerve,False
+Right inferior oblique,fma49050,muscular,0,507,922,head-neck,muscle,True
+Right inferior rectus,fma49046,muscular,0,438,778,head-neck,muscle,True
+Right infratrochlear nerve,fma52698,nervous,0,165,248,,nerve,False
+Right iris,fma58236,sensory,0,984,1796,,,False
+Right lacrimal canaliculus,fma59582,sensory,0,331,516,head-neck,,False
+Right lacrimal gland,fma59102,sensory,0,762,1496,head-neck,,False
+Right lacrimal nerve,fma52629,nervous,0,276,470,head-neck,nerve,True
+Right lacrimal lake,fma59541,sensory,0,126,248,head-neck,,False
+Right nasolacrimal duct,fma59555,sensory,0,221,432,head-neck,,False
+Right lateral rectus,fma49054,muscular,0,398,720,head-neck,muscle,True
+Right lens,fma58242,sensory,0,763,1522,,,False
+Right levator palpebrae superioris,fma49048,muscular,0,759,1206,,muscle,False
+Right medial rectus,fma49056,muscular,0,335,560,head-neck,muscle,True
+Right lacrimal sac,fma59545,sensory,0,193,382,head-neck,,False
+Right nasociliary nerve,fma52669,nervous,0,189,238,,nerve,False
+Communicating branch of right nasociliary nerve with right ciliary ganglion,fma52673,nervous,0,179,236,,nerve,False
+Right ophthalmic nerve,fma52622,nervous,0,197,390,,nerve,False
+Right optic nerve,fma50875,nervous,0,290,452,head-neck,nerve,True
+Right posterior ethmoidal nerve,fma52715,nervous,0,139,194,head-neck,nerve,True
+Optic part of right retina,fma58607,sensory,0,2594,5146,head-neck,organ,True
+Right sclera,fma58271,sensory,0,4953,8690,head-neck,organ,True
+Right long ciliary nerve,fma82734,nervous,0,192,296,,nerve,False
+Short ciliary nerve,fma7041,nervous,0,424,540,,nerve,False
+Suspensory ligament of right lens,fma58839,sensory,0,3524,2484,,ligament,False
+Superior branch of right oculomotor nerve,fma52574,nervous,0,430,558,,nerve,False
+Right superior oblique,fma49052,muscular,0,459,812,head-neck,muscle,True
+Right superior rectus,fma49044,muscular,0,366,618,head-neck,muscle,True
+Tarsal plate of right upper eyelid,fma59091,sensory,0,270,526,,,False
+Right supra-orbital nerve,fma52656,nervous,0,341,640,,nerve,False
+Right supratrochlear nerve,fma52643,nervous,0,377,678,,nerve,False
+Tarsal plate of right lower eyelid,fma59089,sensory,0,218,426,,,False
+Trochlea of right superior oblique,fma49067,connective,0,227,398,head-neck,,False
+Right trochlear nerve,fma50881,nervous,0,319,606,,nerve,False
+Right vitreous body,fma58828,sensory,0,1321,2564,,,False
+First lumbrical of right foot,fma37717,muscular,1,676,474,,muscle,False
+First lumbrical of left foot,fma37718,muscular,1,675,474,,muscle,False
+First plantar interosseous of right foot,fma37745,muscular,1,392,410,,muscle,False
+First plantar interosseous of left foot,fma37746,muscular,1,403,416,,muscle,False
+Second lumbrical of right foot,fma37719,muscular,1,208,194,,muscle,False
+Second lumbrical of left foot,fma37720,muscular,1,208,194,,muscle,False
+Second plantar interosseous of right foot,fma37743,muscular,1,366,380,,muscle,False
+Second plantar interosseous of left foot,fma37744,muscular,1,369,386,,muscle,False
+Third lumbrical of right foot,fma37485,muscular,1,457,304,,muscle,False
+Third lumbrical of left foot,fma37486,muscular,1,463,306,,muscle,False
+Third plantar interosseous of right foot,fma37741,muscular,1,776,584,,muscle,False
+Third plantar interosseous of left foot,fma37742,muscular,1,777,586,,muscle,False
+Fourth lumbrical of right foot,fma37483,muscular,1,364,276,,muscle,False
+Fourth lumbrical of left foot,fma37484,muscular,1,365,276,,muscle,False
+Abductor digiti minimi of right foot,fma37463,muscular,1,1123,796,,muscle,False
+Abductor digiti minimi of left foot,fma37464,muscular,1,1117,790,,muscle,False
+Flexor digiti minimi brevis of right foot,fma37471,muscular,1,671,572,,muscle,False
+Flexor digiti minimi brevis of left foot,fma37472,muscular,1,670,568,,muscle,False
+Interosseous membrane of right leg,fma35192,connective,1,1320,1240,,,False
+Interosseous membrane of left leg,fma35193,connective,1,1324,1240,,,False
+Lateral head of right flexor hallucis brevis,fma45973,muscular,1,1709,1180,,muscle,False
+Lateral head of left flexor hallucis brevis,fma45974,muscular,1,1716,1182,,muscle,False
+Lateral head of right gastrocnemius,fma45960,muscular,1,482,738,,muscle,False
+Lateral head of left gastrocnemius,fma45961,muscular,1,487,748,,muscle,False
+Long head of right biceps femoris,fma45888,muscular,1,718,1124,,muscle,False
+Long head of left biceps femoris,fma45889,muscular,1,726,1124,,muscle,False
+Medial head of right flexor hallucis brevis,fma45971,muscular,1,990,700,,muscle,False
+Medial head of left flexor hallucis brevis,fma45972,muscular,1,990,700,,muscle,False
+Medial head of right gastrocnemius,fma45957,muscular,1,647,882,,muscle,False
+Medial head of left gastrocnemius,fma45958,muscular,1,644,892,,muscle,False
+Oblique head of right adductor hallucis,fma46018,muscular,1,971,762,,muscle,False
+Oblique head of left adductor hallucis,fma46019,muscular,1,968,760,,muscle,False
+Opponens digiti minimi of right foot,fma86034,muscular,1,248,182,,muscle,False
+Opponens digiti minimi of left foot,fma86035,muscular,1,248,182,,muscle,False
+Right abductor hallucis,fma37459,muscular,1,628,554,,muscle,False
+Left abductor hallucis,fma37460,muscular,1,624,552,,muscle,False
+Right adductor brevis,fma22452,muscular,1,503,528,,muscle,False
+Left adductor brevis,fma22454,muscular,1,507,522,,muscle,False
+Right adductor longus,fma22456,muscular,1,408,574,,muscle,False
+Left adductor longus,fma22457,muscular,1,410,574,,muscle,False
+Right adductor magnus,fma22459,muscular,1,1786,1648,,muscle,False
+Left adductor magnus,fma22460,muscular,1,1801,1658,,muscle,False
+Right adductor minimus,fma43886,muscular,1,825,794,,muscle,False
+Left adductor minimus,fma43887,muscular,1,837,798,,muscle,False
+Right calcaneal tendon,fma258847,connective,1,1937,1442,,tendon,False
+Left calcaneal tendon,fma264844,connective,1,1915,1430,,tendon,False
+Right extensor digitorum longus,fma22548,muscular,1,1859,1326,arms-hands,muscle,True
+Left extensor digitorum longus,fma22549,muscular,1,1848,1326,arms-hands,muscle,True
+Right extensor hallucis brevis,fma51144,muscular,1,870,662,,muscle,False
+Left extensor hallucis brevis,fma51145,muscular,1,873,664,,muscle,False
+Right extensor hallucis longus,fma22546,muscular,1,618,526,,muscle,False
+Left extensor hallucis longus,fma22547,muscular,1,626,548,,muscle,False
+Right fibularis brevis,fma22554,skeletal,1,802,632,,bone,False
+Left fibularis brevis,fma22555,skeletal,1,790,624,,bone,False
+Right fibularis longus,fma22552,skeletal,1,1083,892,,bone,False
+Left fibularis longus,fma22553,skeletal,1,1081,890,,bone,False
+Right fibularis tertius,fma22550,skeletal,1,1017,716,,bone,False
+Left fibularis tertius,fma22551,skeletal,1,1004,716,,bone,False
+Right flexor accessorius,fma37465,muscular,1,555,576,,muscle,False
+Left flexor accessorius,fma37466,muscular,1,554,576,,muscle,False
+Right flexor digitorum brevis,fma37461,muscular,1,1662,1254,arms-hands,muscle,True
+Left flexor digitorum brevis,fma37462,muscular,1,1668,1272,arms-hands,muscle,True
+Right flexor digitorum longus,fma65016,muscular,1,1081,1006,arms-hands,muscle,True
+Left flexor digitorum longus,fma65017,muscular,1,1103,1024,arms-hands,muscle,True
+Right flexor hallucis longus,fma65014,muscular,1,605,660,,muscle,False
+Left flexor hallucis longus,fma65015,muscular,1,604,664,,muscle,False
+Right gemellus inferior,fma22336,muscular,1,393,460,,muscle,False
+Left gemellus inferior,fma22337,muscular,1,390,456,,muscle,False
+Right gemellus superior,fma22334,muscular,1,409,306,,muscle,False
+Left gemellus superior,fma22335,muscular,1,411,306,,muscle,False
+Right gluteus maximus,fma22328,muscular,1,1328,1236,,muscle,False
+Left gluteus maximus,fma22329,muscular,1,1336,1240,,muscle,False
+Right gluteus medius,fma22330,muscular,1,1129,1370,,muscle,False
+Left gluteus medius,fma22331,muscular,1,1126,1378,,muscle,False
+Right gluteus minimus,fma22332,muscular,1,1346,1432,,muscle,False
+Left gluteus minimus,fma22333,muscular,1,1350,1436,,muscle,False
+Right gracilis,fma43883,muscular,1,657,696,,muscle,False
+Left gracilis,fma43884,muscular,1,666,696,,muscle,False
+Right iliacus,fma22322,muscular,1,1475,1322,,muscle,False
+Left iliacus,fma22323,muscular,1,1478,1334,,muscle,False
+Right iliotibial tract,fma58776,skeletal,1,2355,3776,,bone,False
+Left iliotibial tract,fma58777,skeletal,1,2359,3776,,bone,False
+Right long plantar ligament,fma44249,connective,1,1417,1260,,ligament,False
+Left long plantar ligament,fma44250,connective,1,1419,1266,,ligament,False
+Right obturator externus,fma22326,muscular,1,498,562,,muscle,False
+Left obturator externus,fma22327,muscular,1,504,564,,muscle,False
+Right obturator internus,fma22324,muscular,1,1084,1250,,muscle,False
+Left obturator internus,fma22325,muscular,1,1091,1258,,muscle,False
+Right pectineus,fma22450,muscular,1,525,678,,muscle,False
+Left pectineus,fma22451,muscular,1,533,682,,muscle,False
+Right piriformis,fma22340,muscular,1,511,614,,muscle,False
+Left piriformis,fma22341,muscular,1,507,610,,muscle,False
+Right plantaris,fma22560,muscular,1,376,552,,muscle,False
+Left plantaris,fma22561,muscular,1,382,552,,muscle,False
+Right popliteus,fma22591,muscular,1,357,468,,muscle,False
+Left popliteus,fma22592,muscular,1,356,462,,muscle,False
+Right psoas major,fma22342,muscular,1,1401,1408,,muscle,False
+Left psoas major,fma22343,muscular,1,1378,1402,,muscle,False
+Right quadratus femoris,fma22338,muscular,1,743,780,,muscle,False
+Left quadratus femoris,fma22339,muscular,1,743,782,,muscle,False
+Right rectus femoris,fma38928,muscular,1,910,1250,,muscle,False
+Left rectus femoris,fma38929,muscular,1,918,1250,,muscle,False
+Right sartorius,fma22354,muscular,1,1020,756,,muscle,False
+Left sartorius,fma22355,muscular,1,1017,756,,muscle,False
+Right semimembranosus,fma22448,muscular,1,664,1014,,muscle,False
+Left semimembranosus,fma22449,muscular,1,659,1014,,muscle,False
+Right semitendinosus,fma22358,muscular,1,638,596,,muscle,False
+Left semitendinosus,fma22359,muscular,1,624,596,,muscle,False
+Right soleus,fma22558,muscular,1,792,1004,,muscle,False
+Left soleus,fma22559,muscular,1,778,976,,muscle,False
+Right tensor fasciae latae,fma22425,connective,1,678,626,,connective,False
+Left tensor fasciae latae,fma22426,connective,1,679,626,,connective,False
+Right tibialis anterior,fma22544,skeletal,1,1116,766,,bone,False
+Left tibialis anterior,fma22545,skeletal,1,1113,756,,bone,False
+Right tibialis posterior,fma65018,skeletal,1,2920,1944,,bone,False
+Left tibialis posterior,fma65019,skeletal,1,2917,1934,,bone,False
+Right vastus intermedius,fma38934,muscular,1,840,936,,muscle,False
+Left vastus intermedius,fma38935,muscular,1,839,936,,muscle,False
+Right vastus lateralis,fma38930,muscular,1,1091,1470,,muscle,False
+Left vastus lateralis,fma38931,muscular,1,1080,1470,,muscle,False
+Right vastus medialis,fma38932,muscular,1,784,1000,,muscle,False
+Left vastus medialis,fma38933,muscular,1,776,1000,,muscle,False
+Short head of right biceps femoris,fma45891,muscular,1,456,492,,muscle,False
+Short head of left biceps femoris,fma45892,muscular,1,450,480,,muscle,False
+Transverse head of right adductor hallucis,fma46020,muscular,1,950,654,,muscle,False
+Transverse head of left adductor hallucis,fma46021,muscular,1,951,656,,muscle,False
+Abdominal part of right pectoralis major,fma45874,muscular,1,563,726,thorax-shoulder,muscle,True
+Abdominal part of left pectoralis major,fma45875,muscular,1,564,722,thorax-shoulder,muscle,True
+Clavicular part of right pectoralis major,fma34690,muscular,1,917,998,thorax-shoulder,muscle,True
+Clavicular part of left pectoralis major,fma34691,muscular,1,922,998,thorax-shoulder,muscle,True
+Linea alba,fma11336,connective,1,285,436,,,False
+Left coccygeus,fma46444,muscular,1,1232,1392,,muscle,False
+superficial perineal muscle,fma19728,muscular,1,240,350,,muscle,False
+External anal sphincter,fma21930,muscular,1,240,350,,muscle,False
+external intercostal muscle,fma9756,muscular,1,36746,26416,thorax-shoulder,muscle,True
+External intercostal muscle,fma9756,muscular,2,36851,26534,thorax-shoulder,muscle,False
+Right external oblique,fma13336,muscular,2,17145,24600,,muscle,False
+Left external oblique,fma13337,muscular,2,17116,24600,,muscle,False
+Left iliococcygeus,fma45859,muscular,2,2244,2116,,muscle,False
+innermost intercostal muscle,fma9758,muscular,2,27286,21278,thorax-shoulder,muscle,True
+Innermost intercostal muscle,fma9758,muscular,2,27252,21206,thorax-shoulder,muscle,False
+internal intercostal muscle,fma9757,muscular,2,25147,19942,thorax-shoulder,muscle,True
+Internal intercostal muscle,fma9757,muscular,3,25053,19898,thorax-shoulder,muscle,False
+Right pectoralis minor,fma13375,muscular,3,2726,2612,thorax-shoulder,muscle,True
+Left pectoralis minor,fma13376,muscular,3,2729,2590,thorax-shoulder,muscle,True
+Left pubococcygeus,fma45855,muscular,3,1753,1866,,muscle,False
+Left puborectalis,fma45857,muscular,3,2765,2058,,muscle,False
+Right serratus anterior,fma13398,muscular,3,7818,10826,thorax-shoulder,muscle,True
+Left serratus anterior,fma13399,muscular,3,7810,10826,thorax-shoulder,muscle,True
+Right subclavius,fma13412,muscular,3,670,824,,muscle,False
+Left subclavius,fma13411,muscular,3,673,818,,muscle,False
+Right transversus thoracis,fma9761,muscular,3,3482,2458,,muscle,False
+Left transversus thoracis,fma9762,muscular,3,3482,2448,,muscle,False
+Set of right levatores costarum breves,fma74077,muscular,3,2937,1872,,muscle,False
+Set of left levatores costarum breves,fma74078,muscular,3,2922,1882,,muscle,False
+Set of right levatores costarum longi,fma74075,muscular,3,2656,2686,,muscle,False
+Set of left levatores costarum longi,fma74076,muscular,3,2619,2686,,muscle,False
+Sternocostal part of right pectoralis major,fma79979,muscular,3,3278,3480,thorax-shoulder,muscle,True
+Sternocostal part of left pectoralis major,fma79980,muscular,3,3271,3490,thorax-shoulder,muscle,True
+tendinous arch of levator ani,fma46442,connective,3,256,368,,,False
+Tendinous arch of levator ani,fma46442,connective,3,254,362,,,False
+Abductor digiti minimi of right hand,fma37396,muscular,3,542,380,arms-hands,muscle,True
+Abductor digiti minimi of left hand,fma37397,muscular,3,536,380,arms-hands,muscle,True
+Acromial part of right deltoid,fma34682,muscular,3,545,686,thorax-shoulder,muscle,True
+Acromial part of left deltoid,fma34683,muscular,3,544,686,thorax-shoulder,muscle,True
+Clavicular part of right deltoid,fma34680,muscular,3,2121,1486,thorax-shoulder,muscle,True
+Clavicular part of left deltoid,fma34681,muscular,3,2143,1500,thorax-shoulder,muscle,True
+Left flexor pollicis brevis,fma37389,muscular,3,547,490,arms-hands,muscle,True
+Right flexor pollicis brevis,fma37388,muscular,3,551,492,arms-hands,muscle,True
+Flexor digiti minimi brevis of right hand,fma37398,muscular,3,232,216,arms-hands,muscle,True
+Flexor digiti minimi brevis of left hand,fma37399,muscular,3,233,216,arms-hands,muscle,True
+Flexor retinaculum of right wrist,fma40120,sensory,3,1303,1414,head-neck,connective,True
+Flexor retinaculum of left wrist,fma40121,sensory,3,1299,1412,head-neck,connective,True
+Right extensor carpi ulnaris,fma38507,muscular,3,2167,1136,arms-hands,muscle,True
+Left extensor carpi ulnaris,fma38508,muscular,3,2185,1152,arms-hands,muscle,True
+Humeral head of right flexor carpi ulnaris,fma38617,muscular,3,694,680,arms-hands,muscle,True
+Humeral head of left flexor carpi ulnaris,fma38618,muscular,3,666,674,arms-hands,muscle,True
+Humeral head of right pronator teres,fma38560,muscular,3,984,856,arms-hands,muscle,True
+Humeral head of left pronator teres,fma38561,muscular,3,1002,860,arms-hands,muscle,True
+Right flexor digitorum superficialis,fma38470,muscular,3,1998,1912,arms-hands,muscle,True
+Left flexor digitorum superficialis,fma38471,muscular,3,1993,1912,arms-hands,muscle,True
+Interosseous membrane of right forearm,fma23707,connective,3,952,692,,,False
+Interosseous membrane of left forearm,fma23708,connective,3,952,696,,,False
+Lateral head of right triceps brachii,fma37697,muscular,3,656,838,arms-hands,muscle,True
+Lateral head of left triceps brachii,fma37698,muscular,3,661,830,arms-hands,muscle,True
+Long head of right biceps brachii,fma37686,muscular,3,466,492,arms-hands,muscle,True
+Long head of left biceps brachii,fma37687,muscular,3,457,492,arms-hands,muscle,True
+Long head of right triceps brachii,fma37699,muscular,3,504,560,arms-hands,muscle,True
+Long head of left triceps brachii,fma37700,muscular,3,504,562,arms-hands,muscle,True
+Medial head of right triceps brachii,fma37695,muscular,3,325,372,arms-hands,muscle,True
+Medial head of left triceps brachii,fma37696,muscular,3,325,374,arms-hands,muscle,True
+Oblique head of right adductor pollicis,fma46121,muscular,3,629,534,arms-hands,muscle,True
+Oblique head of left adductor pollicis,fma46122,muscular,3,620,528,arms-hands,muscle,True
+Opponens digiti minimi of right hand,fma37400,muscular,3,534,382,arms-hands,muscle,True
+Opponens digiti minimi of left hand,fma37401,muscular,3,532,382,arms-hands,muscle,True
+Right abductor pollicis brevis,fma37386,muscular,3,610,576,arms-hands,muscle,True
+Left abductor pollicis brevis,fma37387,muscular,3,607,578,arms-hands,muscle,True
+Right abductor pollicis longus,fma38516,muscular,3,655,592,arms-hands,muscle,True
+Left abductor pollicis longus,fma38517,muscular,3,657,600,arms-hands,muscle,True
+Right anconeus,fma37705,muscular,3,700,654,arms-hands,muscle,True
+Left anconeus,fma37706,muscular,3,693,640,arms-hands,muscle,True
+Right brachialis,fma37668,muscular,3,630,712,arms-hands,muscle,True
+Left brachialis,fma37669,muscular,3,621,702,arms-hands,muscle,True
+Right brachioradialis,fma38486,muscular,3,1012,1072,arms-hands,muscle,True
+Left brachioradialis,fma38487,muscular,3,991,1070,arms-hands,muscle,True
+Right coracobrachialis,fma37665,muscular,3,329,280,arms-hands,muscle,True
+Left coracobrachialis,fma37666,muscular,3,321,276,arms-hands,muscle,True
+Right extensor carpi radialis brevis,fma38498,muscular,3,585,522,arms-hands,muscle,True
+Left extensor carpi radialis brevis,fma38499,muscular,3,560,508,arms-hands,muscle,True
+Right extensor carpi radialis longus,fma38495,muscular,3,528,544,arms-hands,muscle,True
+Left extensor carpi radialis longus,fma38496,muscular,3,537,544,arms-hands,muscle,True
+Right extensor digiti minimi,fma38504,muscular,3,304,314,arms-hands,muscle,True
+Left extensor digiti minimi,fma38505,muscular,3,310,314,arms-hands,muscle,True
+Right extensor digitorum,fma38501,muscular,3,1313,1054,arms-hands,muscle,True
+Left extensor digitorum,fma38502,muscular,3,1305,1062,arms-hands,muscle,True
+Right extensor indicis,fma38525,muscular,3,426,340,arms-hands,muscle,True
+Left extensor indicis,fma38526,muscular,3,431,342,arms-hands,muscle,True
+Right extensor pollicis brevis,fma38519,muscular,3,497,438,arms-hands,muscle,True
+Left extensor pollicis brevis,fma38520,muscular,3,491,434,arms-hands,muscle,True
+Right extensor pollicis longus,fma38522,muscular,3,613,488,arms-hands,muscle,True
+Left extensor pollicis longus,fma38523,muscular,3,623,490,arms-hands,muscle,True
+Right flexor carpi radialis,fma38460,muscular,3,299,310,arms-hands,muscle,True
+Left flexor carpi radialis,fma38461,muscular,3,300,312,arms-hands,muscle,True
+Right flexor digitorum profundus,fma38479,muscular,3,1520,1304,arms-hands,muscle,True
+Left flexor digitorum profundus,fma38480,muscular,3,1521,1296,arms-hands,muscle,True
+Right flexor pollicis longus,fma38482,muscular,3,1311,824,arms-hands,muscle,True
+Left flexor pollicis longus,fma38484,muscular,3,1322,834,arms-hands,muscle,True
+Right flexor digitorum superficialis,fma38470,muscular,3,329,368,arms-hands,muscle,False
+Left flexor digitorum superficialis,fma38471,muscular,3,328,366,arms-hands,muscle,False
+Right infraspinatus muscle,fma32547,muscular,3,528,536,thorax-shoulder,muscle,True
+Left infraspinatus muscle,fma32548,muscular,3,510,530,thorax-shoulder,muscle,True
+Right opponens pollicis,fma37390,muscular,3,769,680,arms-hands,muscle,True
+Left opponens pollicis,fma37391,muscular,3,769,680,arms-hands,muscle,True
+Right palmaris longus,fma38463,muscular,3,2090,1500,arms-hands,muscle,True
+Left palmaris longus,fma38464,muscular,3,2094,1506,arms-hands,muscle,True
+Right pronator quadratus,fma38454,muscular,3,1724,1284,arms-hands,muscle,True
+Left pronator quadratus,fma38455,muscular,4,1737,1292,arms-hands,muscle,True
+Right subscapularis,fma13414,skeletal,4,2368,1524,thorax-shoulder,bone,True
+Left subscapularis,fma13415,skeletal,4,2342,1512,thorax-shoulder,bone,True
+Right supinator,fma38513,muscular,4,1229,1266,arms-hands,muscle,True
+Left supinator,fma38514,muscular,4,1253,1282,arms-hands,muscle,True
+Right supraspinatus,fma32544,muscular,4,622,564,thorax-shoulder,muscle,True
+Left supraspinatus,fma32545,muscular,4,627,564,thorax-shoulder,muscle,True
+Right teres major,fma32551,muscular,4,775,700,thorax-shoulder,muscle,True
+Left teres major,fma32552,muscular,4,783,702,thorax-shoulder,muscle,True
+Right teres minor,fma32553,muscular,4,316,372,thorax-shoulder,muscle,True
+Left teres minor,fma32554,muscular,4,307,364,thorax-shoulder,muscle,True
+Set of dorsal interossei of right hand,fma42404,muscular,4,2817,1792,arms-hands,muscle,True
+Set of dorsal interossei of left hand,fma42405,muscular,4,2807,1788,arms-hands,muscle,True
+Set of lumbricals of right hand,fma42398,muscular,4,2144,1640,arms-hands,muscle,True
+Set of lumbricals of left hand,fma42399,muscular,4,2140,1640,arms-hands,muscle,True
+Set of palmar interossei of right hand,fma42402,muscular,4,976,738,arms-hands,muscle,True
+Set of palmar interossei of left hand,fma42403,muscular,4,982,740,arms-hands,muscle,True
+Short head of right biceps brachii,fma37684,muscular,4,1035,804,arms-hands,muscle,True
+Short head of left biceps brachii,fma37685,muscular,4,1032,816,arms-hands,muscle,True
+Spinal part of right deltoid,fma34684,muscular,4,1063,1028,thorax-shoulder,muscle,True
+Spinal part of left deltoid,fma34685,muscular,4,1078,1046,thorax-shoulder,muscle,True
+Superficial head of right flexor pollicis brevis,fma65198,muscular,4,786,540,arms-hands,muscle,True
+Superficial head of left flexor pollicis brevis,fma65199,muscular,4,786,540,arms-hands,muscle,True
+Transverse head of right adductor pollicis,fma46123,muscular,4,535,582,arms-hands,muscle,True
+Transverse head of left adductor pollicis,fma46124,muscular,4,537,582,arms-hands,muscle,True
+Ulnar head of right pronator teres,fma38562,muscular,4,486,542,arms-hands,muscle,True
+Ulnar head of left pronator teres,fma38563,muscular,4,489,548,arms-hands,muscle,True
+Right extensor carpi ulnaris,fma38507,muscular,4,662,504,arms-hands,muscle,False
+Left extensor carpi ulnaris,fma38508,muscular,4,666,508,arms-hands,muscle,False
+Ulnar head of right flexor carpi ulnaris,fma38619,muscular,4,1262,868,arms-hands,muscle,True
+Ulnar head of left flexor carpi ulnaris,fma38620,muscular,4,1269,868,arms-hands,muscle,True
+Ascending part of right trapezius,fma33581,muscular,4,2787,2654,thorax-shoulder,muscle,True
+Ascending part of left trapezius,fma33583,muscular,4,2752,2640,thorax-shoulder,muscle,True
+Descending part of right trapezius,fma33586,muscular,4,2394,2618,thorax-shoulder,muscle,True
+Descending part of left trapezius,fma33587,muscular,4,2380,2622,thorax-shoulder,muscle,True
+Right lumbar rotator,fma23089,muscular,4,3271,2174,,muscle,False
+Left lumbar rotator,fma23090,muscular,4,3271,2174,,muscle,False
+Right cervical rotator,fma81752,muscular,4,3487,2252,,muscle,False
+Left cervical rotator,fma81753,muscular,4,3460,2246,,muscle,False
+thoracic rotator,fma23083,muscular,4,5805,3978,,muscle,False
+Thoracic rotator,fma23083,muscular,4,5814,3966,,muscle,False
+Right iliocostalis cervicis,fma22744,muscular,4,988,902,,muscle,False
+Left iliocostalis cervicis,fma22745,muscular,4,988,898,,muscle,False
+Right iliocostalis lumborum,fma22740,muscular,4,3264,3490,,muscle,False
+Left iliocostalis lumborum,fma22741,muscular,4,3278,3490,,muscle,False
+Right iliocostalis thoracis,fma22742,muscular,4,1684,1844,,muscle,False
+Left iliocostalis thoracis,fma22743,muscular,4,1703,1844,,muscle,False
+Right levator scapulae,fma32540,skeletal,4,1262,1314,thorax-shoulder,bone,True
+Left levator scapulae,fma32541,skeletal,4,1285,1316,thorax-shoulder,bone,True
+Right longissimus capitis,fma22754,muscular,4,860,780,,muscle,False
+Left longissimus capitis,fma22756,muscular,4,867,792,,muscle,False
+Right longissimus cervicis,fma22757,muscular,4,1065,916,,muscle,False
+Left longissimus cervicis,fma22758,muscular,4,1056,912,,muscle,False
+Right longissimus thoracis,fma22751,muscular,4,5774,4136,,muscle,False
+Left longissimus thoracis,fma22753,muscular,4,5816,4176,,muscle,False
+Right rhomboid major,fma13381,muscular,4,1824,1860,thorax-shoulder,muscle,True
+Left rhomboid major,fma13382,muscular,4,1806,1852,thorax-shoulder,muscle,True
+Right rhomboid minor,fma13383,muscular,4,645,746,thorax-shoulder,muscle,True
+Left rhomboid minor,fma13384,muscular,4,644,742,thorax-shoulder,muscle,True
+Right semispinalis capitis,fma22876,muscular,4,2307,1336,,muscle,False
+Left semispinalis capitis,fma22877,muscular,4,2315,1340,,muscle,False
+Right semispinalis cervicis,fma22874,muscular,4,1712,1402,,muscle,False
+Left semispinalis cervicis,fma22875,muscular,4,1701,1390,,muscle,False
+Right semispinalis thoracis,fma22872,muscular,4,2272,1690,,muscle,False
+Left semispinalis thoracis,fma22873,muscular,4,2301,1718,,muscle,False
+Right serratus posterior inferior,fma13405,muscular,4,3285,3832,thorax-shoulder,muscle,True
+Left serratus posterior inferior,fma13406,muscular,4,3263,3830,thorax-shoulder,muscle,True
+Right serratus posterior superior,fma13403,muscular,4,2778,3042,thorax-shoulder,muscle,True
+Left serratus posterior superior,fma13404,muscular,4,2765,3066,thorax-shoulder,muscle,True
+spinalis,fma77179,muscular,4,787,672,,muscle,False
+Spinalis,fma77179,muscular,4,792,680,,muscle,False
+Right spinalis thoracis,fma22779,muscular,4,2063,1632,,muscle,False
+Left spinalis thoracis,fma22780,muscular,4,2048,1632,,muscle,False
+Right splenius capitis,fma22728,muscular,4,1448,1716,head-neck,muscle,True
+Left splenius capitis,fma22729,muscular,4,1432,1716,head-neck,muscle,True
+Right splenius cervicis,fma22726,muscular,4,1635,1376,head-neck,muscle,True
+Left splenius cervicis,fma22727,muscular,4,1624,1376,head-neck,muscle,True
+lateral lumbar intertransversarius,fma22850,muscular,5,1089,762,,muscle,False
+Lateral lumbar intertransversarius,fma22850,muscular,5,1092,762,,muscle,False
+medial lumbar intertransversarius,fma22851,muscular,5,773,736,,muscle,False
+Medial lumbar intertransversarius,fma22851,muscular,5,770,734,,muscle,False
+set of anterior cervical intertransversarii,fma71442,muscular,5,718,620,,muscle,False
+Set of anterior cervical intertransversarii,fma71442,muscular,5,717,626,,muscle,False
+set of interspinales lumborum,fma71307,muscular,5,594,464,,muscle,False
+Set of interspinales lumborum,fma71307,muscular,5,589,464,,muscle,False
+Right interspinalis thoracis,fma22890,muscular,5,374,312,,muscle,False
+Left interspinalis thoracis,fma22891,muscular,5,372,312,,muscle,False
+set of interspinales cervicis,fma71309,muscular,5,748,626,,muscle,False
+Set of interspinales cervicis,fma71309,muscular,5,772,640,,muscle,False
+set of posterior cervical intertransversarii,fma71443,muscular,5,773,654,,muscle,False
+Set of posterior cervical intertransversarii,fma71443,muscular,5,777,664,,muscle,False
+Transverse part of right trapezius,fma33584,muscular,5,1989,1960,thorax-shoulder,muscle,True
+Transverse part of left trapezius,fma33585,muscular,5,1981,1962,thorax-shoulder,muscle,True
+Left digastric,fma46293,muscular,5,294,436,head-neck,muscle,True
+Right digastric,fma46292,muscular,5,334,464,head-neck,muscle,True
+Inferior oblique part of left longus colli,fma46288,muscular,5,335,498,head-neck,muscle,True
+Left platysma,fma45740,muscular,5,2097,3500,head-neck,muscle,True
+Left geniohyoid,fma46327,muscular,5,277,470,head-neck,muscle,True
+Left digastric,fma46293,muscular,5,361,380,head-neck,muscle,False
+Left longus capitis,fma46310,muscular,5,629,856,head-neck,muscle,True
+Left mylohyoid,fma46322,muscular,5,896,1278,head-neck,muscle,True
+Left obliquus capitis inferior,fma32537,muscular,5,506,684,head-neck,muscle,True
+Left obliquus capitis superior,fma32535,muscular,5,1160,948,head-neck,muscle,True
+Left omohyoid,fma13349,muscular,5,893,1178,head-neck,muscle,True
+Left rectus capitis anterior,fma46314,muscular,5,550,644,head-neck,muscle,True
+Left rectus capitis posterior major,fma32531,muscular,5,682,926,head-neck,muscle,True
+Left rectus capitis posterior minor,fma32533,muscular,5,607,710,head-neck,muscle,True
+Left rectus capitis lateralis,fma46318,muscular,5,544,622,head-neck,muscle,True
+Left scalenus anterior,fma13393,muscular,5,663,784,head-neck,muscle,True
+Left scalenus medius,fma13391,muscular,5,1288,1266,head-neck,muscle,True
+Left scalenus posterior,fma13389,muscular,5,985,1170,head-neck,muscle,True
+Left sternocleidomastoid,fma13409,muscular,5,1825,2248,head-neck,muscle,True
+Left sternohyoid,fma13347,muscular,5,581,804,head-neck,muscle,True
+Left sternothyroid,fma13351,muscular,5,473,574,head-neck,muscle,True
+Left stylohyoid,fma45827,muscular,5,513,596,head-neck,muscle,True
+Left thyrohyoid,fma13353,muscular,5,639,904,head-neck,muscle,True
+Left digastric,fma46293,muscular,5,584,762,head-neck,muscle,False
+Right digastric,fma46292,muscular,5,725,886,head-neck,muscle,False
+Right geniohyoid,fma46326,muscular,5,255,452,head-neck,muscle,True
+Right intermediate tendon,fma258850,connective,5,390,448,,tendon,False
+Right longus capitis,fma46309,muscular,5,777,938,head-neck,muscle,True
+Right mylohyoid,fma46321,muscular,5,923,1334,head-neck,muscle,True
+Right obliquus capitis inferior,fma32536,muscular,5,513,710,head-neck,muscle,True
+Right obliquus capitis superior,fma32534,muscular,5,1272,958,head-neck,muscle,True
+Right omohyoid,fma13348,muscular,5,1035,1270,head-neck,muscle,True
+Right platysma,fma45739,muscular,5,2504,3914,head-neck,muscle,True
+Right rectus capitis anterior,fma46313,muscular,5,557,506,head-neck,muscle,True
+Right rectus capitis posterior major,fma32530,muscular,5,757,1002,head-neck,muscle,True
+Right rectus capitis posterior minor,fma32532,muscular,5,682,770,head-neck,muscle,True
+Right rectus capitis lateralis,fma46317,muscular,5,481,552,head-neck,muscle,True
+Right scalenus anterior,fma13392,muscular,5,665,792,head-neck,muscle,True
+Right scalenus medius,fma13390,muscular,5,1376,1332,head-neck,muscle,True
+Right scalenus posterior,fma13388,muscular,5,1056,1204,head-neck,muscle,True
+Right sternocleidomastoid,fma13408,muscular,5,2166,2274,head-neck,muscle,True
+Right sternohyoid,fma13346,muscular,5,702,918,head-neck,muscle,True
+Right sternothyroid,fma13350,muscular,5,497,620,head-neck,muscle,True
+Right stylohyoid,fma45826,muscular,5,454,576,head-neck,muscle,True
+Right thyrohyoid,fma13352,muscular,5,746,886,head-neck,muscle,True
+Superior oblique part of left longus colli,fma46284,muscular,5,733,950,head-neck,muscle,True
+Vertical intermediate part of left longus colli,fma46286,muscular,5,582,660,head-neck,muscle,True
+Right anterior cerebral artery,fma50029,arterial,5,213,400,head-neck,artery,True
+Left anterior cerebral artery,fma50030,arterial,5,213,400,head-neck,artery,True
+Anterior communicating artery,fma50169,arterial,5,63,80,,artery,False
+anterior inferior cerebellar artery,fma50544,arterial,5,440,610,head-neck,artery,True
+Anterior inferior cerebellar artery,fma50544,arterial,5,431,604,head-neck,artery,False
+Right anterior spinal artery,fma50532,arterial,5,213,294,,artery,False
+Left anterior spinal artery,fma50533,arterial,5,213,294,,artery,False
+Right anterior choroidal artery,fma50088,arterial,5,258,288,,artery,False
+Left anterior choroidal artery,fma50089,arterial,5,264,296,,artery,False
+Right anterior temporal artery,fma50383,arterial,5,963,990,,artery,False
+Left anterior temporal artery,fma50384,arterial,5,966,1000,,artery,False
+Insular part of right middle cerebral artery,fma50369,arterial,5,419,834,head-neck,artery,True
+Insular part of left middle cerebral artery,fma50370,arterial,5,412,820,head-neck,artery,True
+Anterior temporal branch of right lateral occipital artery,fma50678,arterial,5,577,846,head-neck,artery,True
+Anterior temporal branch of left lateral occipital artery,fma50679,arterial,5,585,852,head-neck,artery,True
+Anterolateral central branch of right middle cerebral artery,fma50377,arterial,5,1245,968,head-neck,artery,True
+Anterolateral central branch of left middle cerebral artery,fma50378,arterial,5,1243,972,head-neck,artery,True
+Anterolateral central branch of right middle cerebral artery,fma50377,arterial,5,361,304,head-neck,artery,False
+Anterolateral central branch of left middle cerebral artery,fma50378,arterial,5,361,302,head-neck,artery,False
+artery of central sulcus,fma77439,arterial,5,440,854,,artery,False
+Artery of central sulcus,fma77439,arterial,5,440,854,,artery,False
+artery of central sulcus,fma77439,arterial,5,407,772,,artery,False
+Artery of central sulcus,fma77439,arterial,5,405,772,,artery,False
+Artery of right postcentral sulcus,fma50483,arterial,5,326,644,,artery,False
+Artery of left postcentral sulcus,fma50484,arterial,5,322,636,,artery,False
+Right anterior parietal artery,fma50486,arterial,5,241,472,head-neck,artery,True
+Left anterior parietal artery,fma50487,arterial,5,239,468,head-neck,artery,True
+Artery of right precentral sulcus,fma50480,arterial,5,388,766,,artery,False
+Artery of left precentral sulcus,fma50481,arterial,5,390,766,,artery,False
+Artery of right precentral sulcus,fma50480,arterial,5,330,652,,artery,False
+Artery of left precentral sulcus,fma50481,arterial,5,337,666,,artery,False
+Artery of right precentral sulcus,fma50480,arterial,5,222,430,,artery,False
+Artery of left precentral sulcus,fma50481,arterial,5,223,432,,artery,False
+Precuneal branch of right pericallosal artery,fma50361,arterial,5,357,338,,artery,False
+Precuneal branch of left pericallosal artery,fma50362,arterial,5,358,334,,artery,False
+Basilar artery,fma50542,arterial,5,139,260,,artery,False
+Branch of right middle cerebral artery to right angular gyrus,fma50476,arterial,5,436,778,head-neck,artery,True
+Branch of left middle cerebral artery to left angular gyrus,fma50477,arterial,5,419,752,head-neck,artery,True
+Branch of right anterior choroidal artery to posterior limb of right internal capsule,fma50146,arterial,5,350,282,,artery,False
+Branch of left anterior choroidal artery to posterior limb of left internal capsule,fma50147,arterial,5,348,282,,artery,False
+Right thalamogeniculate artery,fma50670,arterial,5,813,678,,artery,False
+Left thalamogeniculate artery,fma50671,arterial,5,807,672,,artery,False
+Right callosomarginal artery,fma50347,arterial,5,306,522,,artery,False
+Left callosomarginal artery,fma50348,arterial,5,308,520,,artery,False
+Right splenial artery,fma50684,arterial,5,142,262,,artery,False
+Left splenial artery,fma50685,arterial,5,144,262,,artery,False
+Right splenial artery,fma50684,arterial,5,295,570,,artery,False
+Left splenial artery,fma50685,arterial,5,306,590,,artery,False
+Hypothalamic branch of right posterior communicating artery,fma50428,arterial,5,193,156,,artery,False
+Hypothalamic branch of left posterior communicating artery,fma50429,arterial,5,195,156,,artery,False
+Middle temporal branch of right lateral occipital artery,fma50680,arterial,5,332,516,head-neck,artery,True
+Middle temporal branch of left lateral occipital artery,fma50681,arterial,5,343,528,head-neck,artery,True
+Intermediomedial branch of right callosomarginal artery,fma50351,arterial,5,337,562,,artery,False
+Intermediomedial branch of left callosomarginal artery,fma50352,arterial,5,326,552,,artery,False
+Right internal carotid artery,fma3949,arterial,5,220,418,head-neck,artery,True
+Left internal carotid artery,fma4062,arterial,5,223,422,head-neck,artery,True
+Lateral branch of right superior cerebellar artery,fma50578,arterial,5,593,544,head-neck,artery,True
+Lateral branch of left superior cerebellar artery,fma50579,arterial,5,604,550,head-neck,artery,True
+Lateral branch of right pontine artery,fma50568,arterial,5,481,498,,artery,False
+Lateral branch of left pontine artery,fma50569,arterial,5,489,500,,artery,False
+Right lateral frontobasal artery,fma50443,arterial,5,411,786,,artery,False
+Left lateral frontobasal artery,fma50444,arterial,5,412,786,,artery,False
+Right lateral frontobasal artery,fma50443,arterial,5,157,302,,artery,False
+Left lateral frontobasal artery,fma50444,arterial,5,157,302,,artery,False
+Right lateral occipital artery,fma50643,arterial,5,300,484,head-neck,artery,True
+Left lateral occipital artery,fma50644,arterial,5,297,484,head-neck,artery,True
+Medial branch of right superior cerebellar artery,fma50581,arterial,5,295,290,head-neck,artery,True
+Medial branch of left superior cerebellar artery,fma50582,arterial,5,298,292,head-neck,artery,True
+Medial branch of right pontine artery,fma50566,arterial,5,280,292,,artery,False
+Medial branch of left pontine artery,fma50567,arterial,5,280,292,,artery,False
+Right medial frontobasal artery,fma50343,arterial,5,425,486,,artery,False
+Left medial frontobasal artery,fma50344,arterial,5,427,484,,artery,False
+Right medial occipital artery,fma50645,arterial,5,593,662,head-neck,artery,True
+Left medial occipital artery,fma50646,arterial,5,576,660,head-neck,artery,True
+Sphenoid part of right middle cerebral artery,fma50366,arterial,5,345,686,head-neck,artery,True
+Sphenoid part of left middle cerebral artery,fma50367,arterial,5,343,682,head-neck,artery,True
+Middle temporal branch of right middle cerebral artery,fma50467,arterial,5,583,608,head-neck,artery,True
+Middle temporal branch of left middle cerebral artery,fma50468,arterial,5,585,618,head-neck,artery,True
+Insular part of right middle cerebral artery,fma50369,arterial,5,536,1064,head-neck,artery,False
+Insular part of left middle cerebral artery,fma50370,arterial,5,547,1084,head-neck,artery,False
+Right ophthalmic artery,fma49869,arterial,5,267,530,,artery,False
+Left ophthalmic artery,fma49870,arterial,5,267,530,,artery,False
+Paracentral branch of right callosomarginal artery,fma50357,arterial,5,288,476,,artery,False
+Paracentral branch of left callosomarginal artery,fma50358,arterial,5,293,484,,artery,False
+Paracentral branch of right callosomarginal artery,fma50357,arterial,5,329,354,,artery,False
+Paracentral branch of left callosomarginal artery,fma50358,arterial,5,343,368,,artery,False
+Paracentral branch of right callosomarginal artery,fma50357,arterial,5,288,336,,artery,False
+Paracentral branch of left callosomarginal artery,fma50358,arterial,5,298,346,,artery,False
+Right pericallosal artery,fma50359,arterial,5,675,576,,artery,False
+Left pericallosal artery,fma50360,arterial,5,671,578,,artery,False
+Right posterior inferior cerebellar artery,fma50519,arterial,5,270,322,head-neck,artery,True
+Left posterior inferior cerebellar artery,fma50520,arterial,5,273,324,head-neck,artery,True
+Right posterior inferior cerebellar artery,fma50519,arterial,5,406,282,head-neck,artery,False
+Left posterior inferior cerebellar artery,fma50520,arterial,5,406,282,head-neck,artery,False
+Right posterior inferior cerebellar artery,fma50519,arterial,5,344,226,head-neck,artery,False
+Left posterior inferior cerebellar artery,fma50520,arterial,5,344,226,head-neck,artery,False
+Right posterior inferior cerebellar artery,fma50519,arterial,5,338,212,head-neck,artery,False
+Left posterior inferior cerebellar artery,fma50520,arterial,5,334,212,head-neck,artery,False
+Right posterior inferior cerebellar artery,fma50519,arterial,5,259,284,head-neck,artery,False
+Left posterior inferior cerebellar artery,fma50520,arterial,5,256,284,head-neck,artery,False
+Right posterior inferior cerebellar artery,fma50519,arterial,5,270,312,head-neck,artery,False
+Left posterior inferior cerebellar artery,fma50520,arterial,5,275,314,head-neck,artery,False
+Right posterior inferior cerebellar artery,fma50519,arterial,5,282,278,head-neck,artery,False
+Left posterior inferior cerebellar artery,fma50520,arterial,5,277,278,head-neck,artery,False
+Right posterior inferior cerebellar artery,fma50519,arterial,5,122,84,head-neck,artery,False
+Left posterior inferior cerebellar artery,fma50520,arterial,5,122,84,head-neck,artery,False
+Right posterior inferior cerebellar artery,fma50519,arterial,5,136,86,head-neck,artery,False
+Left posterior inferior cerebellar artery,fma50520,arterial,5,136,86,head-neck,artery,False
+Right posterior inferior cerebellar artery,fma50519,arterial,5,234,172,head-neck,artery,False
+Left posterior inferior cerebellar artery,fma50520,arterial,5,234,172,head-neck,artery,False
+Right posterior inferior cerebellar artery,fma50519,arterial,5,210,162,head-neck,artery,False
+Left posterior inferior cerebellar artery,fma50520,arterial,5,208,162,head-neck,artery,False
+Right posterior inferior cerebellar artery,fma50519,arterial,5,757,656,head-neck,artery,False
+Left posterior inferior cerebellar artery,fma50520,arterial,5,754,654,head-neck,artery,False
+Right polar temporal artery,fma50380,arterial,5,263,348,,artery,False
+Left polar temporal artery,fma50381,arterial,5,264,346,,artery,False
+Right posterior communicating artery,fma50085,arterial,5,122,204,,artery,False
+Left posterior communicating artery,fma50086,arterial,5,122,204,,artery,False
+Postcommunicating part of right posterior cerebral artery,fma50641,arterial,5,233,450,head-neck,artery,True
+Postcommunicating part of left posterior cerebral artery,fma50642,arterial,5,231,446,head-neck,artery,True
+Right posterior inferior cerebellar artery,fma50519,arterial,5,560,612,head-neck,artery,False
+Left posterior inferior cerebellar artery,fma50520,arterial,5,569,618,head-neck,artery,False
+Right posterior parietal artery,fma50489,arterial,5,785,1498,head-neck,artery,True
+Left posterior parietal artery,fma50490,arterial,5,785,1498,head-neck,artery,True
+Posterior temporal branch of right middle cerebral artery,fma50470,arterial,5,386,732,head-neck,artery,True
+Posterior temporal branch of left middle cerebral artery,fma50471,arterial,5,386,732,head-neck,artery,True
+Trunk of inferior terminal branch of right middle cerebral artery,fma76128,arterial,5,208,368,head-neck,artery,True
+Trunk of inferior terminal branch of left middle cerebral artery,fma76129,arterial,5,210,368,head-neck,artery,True
+set of posterior temporal branches of lateral occipital artery,fma71502,arterial,5,320,458,head-neck,artery,True
+Set of posterior temporal branches of lateral occipital artery,fma71502,arterial,5,304,436,head-neck,artery,False
+Right thalamoperforating artery,fma50664,arterial,5,340,420,,artery,False
+Left thalamoperforating artery,fma50665,arterial,5,348,436,,artery,False
+Posteromedial central branch of right posterior cerebral artery,fma50660,arterial,5,189,240,head-neck,artery,True
+Posteromedial central branch of left posterior cerebral artery,fma50661,arterial,5,188,238,head-neck,artery,True
+Posteromedial branch of right callosomarginal artery,fma50353,arterial,5,360,476,,artery,False
+Posteromedial branch of left callosomarginal artery,fma50354,arterial,5,361,476,,artery,False
+Precommunicating part of right posterior cerebral artery,fma50639,arterial,5,155,282,head-neck,artery,True
+Precommunicating part of left posterior cerebral artery,fma50640,arterial,5,155,282,head-neck,artery,True
+Right prefrontal artery,fma50445,arterial,5,644,1192,,artery,False
+Left prefrontal artery,fma50478,arterial,5,640,1192,,artery,False
+Right vertebral artery,fma3958,arterial,5,330,492,,artery,False
+Left vertebral artery,fma4066,arterial,5,329,494,,artery,False
+Right superior cerebellar artery,fma50574,arterial,5,220,394,head-neck,artery,True
+Left superior cerebellar artery,fma50575,arterial,5,222,398,head-neck,artery,True
+Right posterior medial choroidal artery,fma50672,arterial,5,205,260,,artery,False
+Left posterior medial choroidal artery,fma50673,arterial,5,216,266,,artery,False
+Superior vermian branch of medial branch of right superior cerebellar artery,fma50696,arterial,5,231,320,head-neck,artery,True
+Superior vermian branch of medial branch of left superior cerebellar artery,fma50697,arterial,5,234,322,head-neck,artery,True
+Temporo-occipital branch of right middle cerebral artery,fma50473,arterial,5,493,616,head-neck,artery,True
+Temporo-occipital branch of left middle cerebral artery,fma50474,arterial,5,496,616,head-neck,artery,True
+Third ventricle,fma78454,cardiac,5,593,1130,,,False
+Fourth ventricle,fma78469,cardiac,5,1130,2150,,,False
+Left angular gyrus,fma72670,nervous,5,1674,2874,,,False
+Right angular gyrus,fma72669,nervous,5,1736,2886,,,False
+Anterior commissure,fma61961,nervous,5,348,652,,,False
+Brachium of left superior colliculus,fma73462,nervous,5,143,280,,,False
+Brachium of right superior colliculus,fma73461,nervous,5,138,266,,,False
+Central canal of spinal cord,fma78497,nervous,5,112,160,,,False
+Cerebral aqueduct,fma78467,nervous,5,222,352,head-neck,organ,True
+Left cingulate gyrus,fma72718,nervous,5,876,1480,,,False
+Right cingulate gyrus,fma72717,nervous,5,904,1538,,,False
+Commissure of fornix of forebrain,fma61970,nervous,5,1208,2338,head-neck,organ,True
+Corpus callosum,fma86464,nervous,5,4186,6650,,,False
+Habenula,fma62032,nervous,6,283,384,,,False
+Left inferior frontal gyrus,fma72658,nervous,6,1609,2702,,,False
+Right inferior frontal gyrus,fma72657,nervous,6,1582,2644,,,False
+Left inferior temporal gyrus,fma72688,nervous,6,1102,1828,,,False
+Right inferior temporal gyrus,fma72687,nervous,6,1124,1838,,,False
+Left insula,fma72978,nervous,6,1005,1962,,,False
+Right insula,fma72977,nervous,6,994,1928,,,False
+Left internal capsule,fma72907,nervous,6,1185,2362,,,False
+Right internal capsule,fma72906,nervous,6,1183,2362,,,False
+Interventricular foramen,fma75351,cardiac,6,515,1016,,,False
+Left amygdala,fma72833,nervous,6,201,380,,,False
+Left caudate nucleus,fma72827,nervous,6,712,1320,,,False
+Choroid plexus of cerebral hemisphere,fma61934,sensory,6,1652,2594,head-neck,organ,True
+Left fornix of forebrain,fma72925,nervous,6,746,1488,head-neck,organ,True
+Left globus pallidus,fma72831,nervous,6,780,1556,,,False
+White matter of left cerebral hemisphere,fma260794,nervous,6,7153,10580,head-neck,organ,True
+Left hippocampus,fma72714,nervous,6,394,784,,,False
+Hypothalamus,fma62008,nervous,6,778,1306,,,False
+Brachium of left inferior colliculus,fma73464,nervous,6,156,308,,,False
+Left inferior colliculus,fma73435,nervous,6,81,156,,,False
+Interpeduncular fossa,fma83740,nervous,6,85,58,,,False
+Lamina terminalis,fma61975,nervous,6,208,232,,,False
+Left lateral geniculate body,fma73304,nervous,6,112,196,,,False
+Left lateral ventricle,fma78450,cardiac,6,1978,3952,,,False
+Mammillary body,fma74877,nervous,6,104,204,,,False
+Medulla oblongata,fma62004,nervous,6,755,1326,head-neck,organ,True
+Midbrain,fma61993,nervous,6,1271,1532,head-neck,organ,True
+Optic chiasm,fma62045,nervous,6,441,866,,,False
+Left optic nerve,fma50878,nervous,6,293,538,head-neck,nerve,False
+Left optic tract,fma67936,nervous,6,556,1090,,,False
+Peduncle of midbrain,fma62394,nervous,6,1384,1796,head-neck,organ,True
+Pons,fma67943,nervous,6,1802,2818,head-neck,organ,True
+Left putamen,fma72829,nervous,6,831,1552,,,False
+Left stria medullaris of thalamus,fma73414,nervous,6,406,584,,,False
+Left stria terminalis,fma72940,nervous,6,513,648,,,False
+Left superior colliculus,fma73423,nervous,6,93,180,,,False
+Tuber cinereum,fma62327,nervous,6,485,584,,,False
+Cerebellum,fma67944,nervous,6,2725,5238,head-neck,organ,True
+Left thalamus,fma258716,nervous,6,696,1388,,,False
+Left fusiform gyrus,fma72690,nervous,6,753,1332,,,False
+Right fusiform gyrus,fma72689,nervous,6,745,1310,,,False
+Left parahippocampal gyrus,fma72706,nervous,6,388,652,,,False
+Right parahippocampal gyrus,fma72705,nervous,6,421,760,,,False
+Left middle frontal gyrus,fma72656,nervous,6,1498,2506,,,False
+Right middle frontal gyrus,fma72655,nervous,6,1507,2478,,,False
+Left middle temporal gyrus,fma72686,nervous,6,1022,1748,,,False
+Right middle temporal gyrus,fma72685,nervous,6,963,1632,,,False
+Left occipital lobe,fma72976,nervous,6,2064,3484,head-neck,,False
+Right occipital lobe,fma72975,nervous,6,2103,3554,head-neck,,False
+Orbital gyrus,fma256194,nervous,6,1212,2058,,,False
+Orbital gyrus,fma256194,nervous,6,1243,1968,,,False
+Pineal body,fma62033,endocrine,6,292,580,,,False
+Pituitary gland,fma13889,endocrine,6,592,1134,,,False
+Left postcentral gyrus,fma72666,nervous,6,1701,2972,,,False
+Right postcentral gyrus,fma72665,nervous,6,1741,3012,,,False
+Posterior commissure,fma62072,nervous,6,325,646,,,False
+Left precentral gyrus,fma72662,nervous,6,1969,3340,,,False
+Right precentral gyrus,fma72661,nervous,6,2034,3386,,,False
+Right caudate nucleus,fma72826,nervous,6,671,1278,,,False
+Choroid plexus of cerebral hemisphere,fma61934,sensory,6,1717,2570,head-neck,organ,False
+Right fornix of forebrain,fma72924,nervous,6,744,1484,head-neck,organ,True
+Right globus pallidus,fma72830,nervous,6,589,1174,,,False
+White matter of right cerebral hemisphere,fma260791,nervous,6,7200,10754,head-neck,organ,True
+Right hippocampus,fma72713,nervous,6,411,812,,,False
+Hypothalamus,fma62008,nervous,6,776,1270,,,False
+Brachium of right inferior colliculus,fma73463,nervous,6,133,260,,,False
+Right inferior colliculus,fma73434,nervous,6,104,204,,,False
+Interpeduncular fossa,fma83740,nervous,6,95,76,,,False
+Lamina terminalis,fma61975,nervous,6,205,226,,,False
+Right lateral geniculate body,fma73303,nervous,6,305,604,,,False
+Right lateral ventricle,fma78449,cardiac,6,1984,3962,,,False
+Mammillary body,fma74877,nervous,6,112,220,,,False
+Right medial geniculate body,fma73309,nervous,6,101,198,,,False
+Left medial geniculate body,fma73310,nervous,6,101,198,,,False
+Midbrain,fma61993,nervous,6,1187,1428,head-neck,organ,False
+Optic chiasm,fma62045,nervous,6,430,846,,,False
+Right optic nerve,fma50875,nervous,6,299,544,head-neck,nerve,False
+Right optic tract,fma62382,nervous,6,553,1068,,,False
+Peduncle of midbrain,fma62394,nervous,6,1480,1834,head-neck,organ,False
+Pons,fma67943,nervous,6,2197,3038,head-neck,organ,False
+Right putamen,fma72828,nervous,6,860,1554,,,False
+Right stria medullaris of thalamus,fma73413,nervous,6,390,576,,,False
+Stria terminalis,fma61974,nervous,6,554,648,,,False
+Right superior colliculus,fma73422,nervous,6,91,176,,,False
+Right thalamus,fma258714,nervous,6,381,758,,,False
+Tuber cinereum,fma62327,nervous,6,573,588,,,False
+Right amygdala,fma72832,nervous,6,201,382,,,False
+Cerebellum,fma67944,nervous,6,2781,5254,head-neck,organ,False
+Medulla oblongata,fma62004,nervous,6,817,1392,head-neck,organ,False
+Septum of telencephalon,fma61842,nervous,6,3259,2624,,,False
+Left superior frontal gyrus,fma72654,nervous,6,2348,4042,,,False
+Right superior frontal gyrus,fma72653,nervous,6,2430,4112,,,False
+Left superior parietal lobule,fma72672,nervous,6,2583,4216,head-neck,,False
+Right superior parietal lobule,fma72671,nervous,6,2592,4394,head-neck,,False
+Anterior part of left superior temporal gyrus,fma72801,nervous,6,871,1486,,,False
+Anterior part of right superior temporal gyrus,fma72800,nervous,6,842,1436,,,False
+Posterior part of left superior temporal gyrus,fma72805,nervous,6,965,1806,,,False
+Posterior part of right superior temporal gyrus,fma72804,nervous,6,1004,1840,,,False
+Left supramarginal gyrus,fma72668,nervous,6,1199,2104,,,False
+Right supramarginal gyrus,fma72667,nervous,7,1251,2090,,,False
+Tentorium cerebelli,fma83966,nervous,7,2889,4822,head-neck,organ,True
+Basilar artery,fma50542,arterial,7,125,238,,artery,False
+Celiac artery,fma50737,arterial,7,133,238,,artery,False
+Hepatic portal vein,fma50735,venous,7,396,788,,vein,False
+Hepatovenous segment IX,fma15747,venous,7,1696,2100,,vein,False
+Tributary of middle hepatic vein,fma15793,venous,7,230,456,,vein,False
+Left lobe branch of left hepatic artery,fma71710,arterial,7,370,482,,artery,False
+Caudate lobe tributary of left hepatic biliary tree,fma71889,digestive,7,234,348,,,False
+Left portal vein,fma15415,venous,7,317,470,,vein,False
+Pancreas,fma7198,digestive,7,1276,2534,,,False
+Pancreatic duct,fma10419,digestive,7,2745,1816,,,False
+Right portal vein,fma15414,venous,7,584,820,,vein,False
+Caudate lobe branch of right portal vein,fma82706,venous,7,177,310,,vein,False
+Caudate lobe branch of right hepatic artery,fma70447,arterial,7,209,352,,artery,False
+Right lobe branch of right hepatic artery,fma71708,arterial,7,454,450,,artery,False
+Superior mesenteric artery,fma14749,arterial,7,352,580,,artery,False
+Descending thoracic aorta,fma87217,arterial,7,300,502,thorax-shoulder,artery,True
+Abdominal aorta,fma3789,arterial,7,286,498,thorax-shoulder,artery,True
+Bronchial artery,fma68109,arterial,7,459,548,thorax-shoulder,artery,True
+Esophageal artery,fma4149,arterial,7,388,438,,artery,False
+Right superior intercostal artery,fma5042,arterial,7,103,184,thorax-shoulder,artery,True
+Right superior epigastric artery,fma3988,arterial,7,257,494,,artery,False
+Right internal thoracic artery,fma3969,arterial,7,392,780,,artery,False
+Right lateral thoracic artery,fma22675,arterial,7,284,516,,artery,False
+Right first posterior intercostal artery,fma66242,arterial,7,266,520,thorax-shoulder,artery,True
+Right second posterior intercostal artery,fma5041,arterial,7,296,584,thorax-shoulder,artery,True
+Posterior intercostal arteries,fma63822,arterial,7,4240,8352,thorax-shoulder,,False
+Right subcostal artery,fma4634,arterial,7,231,430,,artery,False
+Right musculophrenic artery,fma10692,arterial,7,280,556,,artery,False
+Left superior intercostal artery,fma4088,arterial,7,106,206,thorax-shoulder,artery,True
+Left superior epigastric artery,fma4083,arterial,7,266,498,,artery,False
+Left internal thoracic artery,fma4068,arterial,7,402,800,,artery,False
+Left first posterior intercostal artery,fma66243,arterial,7,255,502,thorax-shoulder,artery,True
+Left second posterior intercostal artery,fma4112,arterial,7,301,598,thorax-shoulder,artery,True
+Posterior intercostal arteries,fma63822,arterial,7,4077,7710,thorax-shoulder,,False
+Left lateral thoracic artery,fma22676,arterial,7,288,516,,artery,False
+Left subcostal artery,fma4654,arterial,7,236,416,,artery,False
+Left musculophrenic artery,fma4077,arterial,7,284,564,,artery,False
+Accessory hemiazygos vein,fma5011,venous,7,500,996,,vein,False
+Set of anterior intercostal veins,fma70839,venous,7,4335,8332,thorax-shoulder,,False
+Left superior intercostal vein,fma4797,venous,7,149,292,thorax-shoulder,vein,True
+Left subcostal vein,fma4951,venous,7,180,322,,vein,False
+Left musculophrenic vein,fma4786,venous,7,357,710,,vein,False
+Right superior intercostal vein,fma4877,venous,7,147,274,thorax-shoulder,vein,True
+Right internal thoracic vein,fma4758,venous,7,356,668,,vein,False
+Set of anterior intercostal veins,fma70839,venous,7,4421,8538,thorax-shoulder,,False
+Right subcostal vein,fma4844,venous,7,204,366,,vein,False
+Right musculophrenic vein,fma4772,venous,7,358,712,,vein,False
+Superior mesenteric artery,fma14749,arterial,7,343,564,,artery,False
+Celiac artery,fma50737,arterial,7,133,238,,artery,False
+Marginal colic artery,fma14824,arterial,7,617,788,,artery,False
+Ileal branch of inferior branch of ileocolic artery,fma14819,arterial,7,86,100,,artery,False
+Right renal artery,fma14752,arterial,7,119,196,,artery,False
+Right anterior segmental artery,fma8620,arterial,7,158,290,,artery,False
+Superior segmental branch of right renal artery,fma86340,arterial,7,188,288,,artery,False
+Inferior segmental branch of right renal artery,fma86346,arterial,7,139,260,,artery,False
+Right anterior segmental artery,fma8620,arterial,7,154,274,,artery,False
+Posterior segmental branch of right renal artery,fma86348,arterial,7,282,474,,artery,False
+Left renal artery,fma14753,arterial,7,165,286,,artery,False
+Inferior segmental branch of left renal artery,fma86347,arterial,7,160,300,,artery,False
+Superior segmental branch of left renal artery,fma86341,arterial,7,167,262,,artery,False
+Posterior segmental branch of left renal artery,fma86349,arterial,7,182,274,,artery,False
+Posterior segmental branch of left renal artery,fma86349,arterial,7,284,492,,artery,False
+Right dorsalis pedis artery,fma43916,arterial,7,189,374,,artery,False
+Deep dorsal vein of penis,fma21354,venous,7,287,518,,vein,False
+Descending branch of right lateral circumflex femoral artery,fma21422,arterial,7,577,1150,,artery,False
+Distal perforating artery,fma69517,arterial,7,218,412,,artery,False
+Dorsal venous arch of left foot,fma44882,venous,7,209,414,,vein,False
+Dorsal venous arch of left foot,fma44882,venous,7,308,548,,vein,False
+Dorsal venous arch of right foot,fma44881,venous,7,210,414,,vein,False
+Dorsal venous arch of right foot,fma44881,venous,7,309,546,,vein,False
+Descending branch of left lateral circumflex femoral artery,fma21423,arterial,7,577,1150,,artery,False
+Distal perforating artery,fma69517,arterial,7,241,406,,artery,False
+Left anterior tibial artery,fma43897,arterial,7,1917,3830,,artery,False
+Left anterior tibial recurrent artery,fma43908,arterial,7,788,1328,,artery,False
+Left arcuate artery,fma69495,arterial,7,250,494,,artery,False
+Left deep plantar artery,fma69515,arterial,7,223,442,,artery,False
+Left descending genicular artery,fma22508,arterial,7,736,1436,,artery,False
+Dorsal digital artery of foot,fma44660,arterial,7,730,1204,,artery,False
+Left dorsalis pedis artery,fma43917,arterial,7,189,374,,artery,False
+Left femoral artery,fma70250,arterial,7,107,208,,artery,False
+Left inferior lateral genicular artery,fma43893,arterial,7,388,770,,artery,False
+Left inferior medial genicular artery,fma43891,arterial,7,408,810,,artery,False
+Left lateral circumflex femoral artery,fma20802,arterial,7,159,284,,artery,False
+Left lateral plantar artery,fma43932,arterial,7,142,278,,artery,False
+Left lateral superior genicular artery,fma22589,arterial,7,285,566,,artery,False
+Left lateral tarsal artery,fma69491,arterial,7,216,428,,artery,False
+Left medial plantar artery,fma43930,arterial,7,205,376,,artery,False
+Left medial superior genicular artery,fma22587,arterial,7,255,504,,artery,False
+Left middle genicular artery,fma22563,arterial,7,459,762,,artery,False
+Left plantar arch,fma43944,arterial,7,208,408,,,False
+Left popliteal artery,fma77381,arterial,7,1842,3680,,artery,False
+Left posterior tibial artery,fma43899,arterial,7,1481,2906,,artery,False
+Left superficial medial plantar artery,fma43938,arterial,7,112,220,,artery,False
+Set of perforating arteries,fma70815,arterial,7,148,270,,,False
+Set of calcaneal branches of posterior tibial artery,fma71562,arterial,7,424,810,,artery,False
+Set of common plantar digital arteries,fma70821,arterial,7,428,684,,,False
+Set of dorsal digital arteries,fma70801,arterial,7,1333,2662,,,False
+Set of perforating arteries,fma70815,arterial,7,677,1350,,,False
+Set of plantar digital arteries proper,fma71564,arterial,7,260,398,,,False
+Plantar metatarsal artery,fma43956,arterial,7,307,598,,artery,False
+Left anterior tibial vein,fma44337,venous,7,321,624,,vein,False
+Left deep femoral vein,fma51043,venous,7,699,1394,,vein,False
+Set of perforating veins,fma70922,venous,7,344,666,,,False
+Left femoral vein,fma21189,venous,7,117,228,,vein,False
+Left great saphenous vein,fma21380,venous,7,3421,6608,,vein,False
+Left genicular vein,fma44888,venous,7,222,426,,vein,False
+Left genicular vein,fma44888,venous,7,247,490,,vein,False
+Tributary of plantar venous arch,fma44499,venous,7,140,274,,vein,False
+Tributary of plantar venous arch,fma44499,venous,7,207,370,,vein,False
+Left popliteal vein,fma44329,venous,7,1911,3650,,vein,False
+Left posterior tibial vein,fma44339,venous,7,1557,3040,,vein,False
+Set of perforating veins,fma70922,venous,7,410,642,,,False
+Set of plantar digital veins,fma70919,venous,7,973,1696,,,False
+Left small saphenous vein,fma44335,venous,7,1798,3592,,vein,False
+Left superficial epigastric vein,fma44341,venous,7,294,466,,vein,False
+Left genicular vein,fma44888,venous,7,351,666,,vein,False
+Left genicular vein,fma44888,venous,7,292,528,,vein,False
+Set of perforating arteries,fma70815,arterial,7,146,272,,,False
+Plantar venous arch of left foot,fma44884,venous,7,208,406,,vein,False
+Plantar venous arch of right foot,fma44883,venous,7,219,428,,vein,False
+Right anterior tibial artery,fma43896,arterial,7,1908,3812,,artery,False
+Right anterior tibial recurrent artery,fma43907,arterial,7,850,1332,,artery,False
+Right anterior tibial vein,fma44336,venous,7,316,624,,vein,False
+Right arcuate artery,fma69494,arterial,7,263,516,,artery,False
+Right deep femoral vein,fma51042,venous,7,700,1396,,vein,False
+Right deep plantar artery,fma69514,arterial,7,223,440,,artery,False
+Right descending genicular artery,fma22507,arterial,7,774,1436,,artery,False
+Set of perforating veins,fma70922,venous,7,366,702,,,False
+Dorsal digital artery of foot,fma44660,arterial,7,679,1094,,artery,False
+Right femoral artery,fma70249,arterial,7,118,230,,artery,False
+Right femoral vein,fma21188,venous,7,112,212,,vein,False
+Right great saphenous vein,fma21379,venous,7,3392,6606,,vein,False
+Right inferior lateral genicular artery,fma43892,arterial,7,391,776,,artery,False
+Right genicular vein,fma44887,venous,7,251,470,,vein,False
+Right inferior medial genicular artery,fma43890,arterial,7,394,784,,artery,False
+Right genicular vein,fma44887,venous,7,247,490,,vein,False
+Right lateral circumflex femoral artery,fma20801,arterial,7,158,292,,artery,False
+Right lateral plantar artery,fma43931,arterial,7,143,282,,artery,False
+Tributary of plantar venous arch,fma44499,venous,7,136,268,,vein,False
+Right lateral superior genicular artery,fma22588,arterial,7,279,554,,artery,False
+Right lateral tarsal artery,fma69490,arterial,7,214,424,,artery,False
+Right medial plantar artery,fma43929,arterial,7,204,376,,artery,False
+Tributary of plantar venous arch,fma44499,venous,7,203,380,,vein,False
+Right medial superior genicular artery,fma22586,arterial,7,256,506,,artery,False
+Right middle genicular artery,fma22562,arterial,7,469,754,,artery,False
+Right plantar arch,fma43943,arterial,7,211,412,,,False
+Right popliteal artery,fma77380,arterial,7,1847,3690,,artery,False
+Right popliteal vein,fma44328,venous,7,1931,3664,,vein,False
+Right posterior tibial artery,fma43898,arterial,7,1466,2888,,artery,False
+Right posterior tibial vein,fma44338,venous,7,1589,3032,,vein,False
+Set of perforating veins,fma70922,venous,7,428,642,,,False
+Set of plantar digital veins,fma70919,venous,7,966,1632,,,False
+Right small saphenous vein,fma44334,venous,7,1798,3592,,vein,False
+Right superficial epigastric vein,fma44340,venous,7,261,426,,vein,False
+Right superficial medial plantar artery,fma43937,arterial,7,104,204,,artery,False
+Right genicular vein,fma44887,venous,7,356,686,,vein,False
+Right genicular vein,fma44887,venous,7,311,548,,vein,False
+Left anterior tibial vein,fma44337,venous,7,1409,2814,,vein,False
+Left fibular vein,fma44886,venous,7,196,314,,vein,False
+Set of dorsal digital veins,fma70917,venous,7,748,1100,,,False
+Dorsal metacarpal vein,fma22954,venous,7,485,944,arms-hands,vein,True
+Left fibular vein,fma44886,venous,8,1260,2334,,vein,False
+Left lateral circumflex femoral vein,fma44922,venous,8,420,794,,vein,False
+Left medial circumflex femoral vein,fma44919,venous,8,165,292,,vein,False
+Right fibular vein,fma44885,venous,8,147,272,,vein,False
+Plantar metatarsal vein,fma44504,venous,8,459,814,,vein,False
+Set of perforating veins,fma70922,venous,8,151,272,,,False
+Right anterior tibial vein,fma44336,venous,8,1405,2806,,vein,False
+Right fibular vein,fma44885,venous,8,213,364,,vein,False
+Set of calcaneal branches of posterior tibial artery,fma71562,arterial,8,450,856,,artery,False
+Set of common plantar digital arteries,fma70821,arterial,8,434,656,,,False
+Set of dorsal digital arteries,fma70801,arterial,8,1331,2658,,,False
+Set of dorsal digital veins,fma70917,venous,8,743,1108,,,False
+Dorsal metacarpal vein,fma22954,venous,8,483,942,arms-hands,vein,False
+Right fibular vein,fma44885,venous,8,1264,2324,,vein,False
+Right lateral circumflex femoral vein,fma44920,venous,8,426,810,,vein,False
+Right medial circumflex femoral vein,fma44918,venous,8,167,298,,vein,False
+Set of perforating arteries,fma70815,arterial,8,676,1348,,,False
+Set of plantar digital arteries proper,fma71564,arterial,8,359,434,,,False
+Set of plantar digital arteries proper,fma71564,arterial,8,863,1440,,,False
+Plantar metatarsal artery,fma43956,arterial,8,313,596,,artery,False
+Plantar metatarsal vein,fma44504,venous,8,469,792,,vein,False
+Superficial dorsal vein of penis,fma21384,venous,8,164,324,,vein,False
+Right inferior thyroid artery,fma10697,arterial,8,203,296,,artery,False
+Left inferior thyroid artery,fma10680,arterial,8,197,286,,artery,False
+Acromial branch of left thoraco-acromial artery,fma23069,arterial,8,209,412,,artery,False
+Left anterior circumflex humeral artery,fma22683,arterial,8,379,718,,artery,False
+Left anterior circumflex humeral vein,fma77955,venous,8,383,722,,vein,False
+Left anterior interosseous artery,fma22813,arterial,8,220,432,,artery,False
+Left inferior ulnar collateral artery,fma22713,arterial,8,133,260,arms-hands,artery,True
+Left axillary artery,fma22656,arterial,8,309,614,,artery,False
+Left axillary vein,fma13331,venous,8,249,464,,vein,False
+Left basilic vein,fma22910,venous,8,2019,4034,,vein,False
+Left brachial artery,fma22692,arterial,8,383,762,arms-hands,artery,True
+Left cephalic vein,fma13326,venous,8,2544,5032,,vein,False
+Left circumflex scapular artery,fma23181,arterial,8,222,428,thorax-shoulder,artery,True
+Left circumflex scapular vein,fma77950,venous,8,179,330,thorax-shoulder,vein,True
+Left common interosseous artery,fma22808,arterial,8,220,436,,artery,False
+Left costocervical trunk,fma4086,arterial,8,136,232,,,False
+Left deep brachial artery,fma22697,arterial,8,277,550,arms-hands,artery,True
+Left deep cervical artery,fma4134,arterial,8,186,330,,artery,False
+Left deep palmar arch,fma22840,arterial,8,384,762,,,False
+Dorsal venous network of left hand,fma62507,venous,8,475,946,,vein,False
+Left deep palmar venous arch,fma22913,venous,8,507,972,,vein,False
+Deltoid branch of left thoraco-acromial artery,fma23073,arterial,8,151,294,thorax-shoulder,artery,True
+Dorsal carpal branch of left radial artery,fma22773,arterial,8,158,298,arms-hands,artery,True
+Left dorsal scapular artery,fma10552,arterial,8,536,996,thorax-shoulder,artery,True
+Left lateral thoracic vein,fma71212,venous,8,402,800,,vein,False
+Left median antebrachial vein,fma22969,venous,8,601,1168,,vein,False
+Left median cubital vein,fma22965,venous,8,277,550,,vein,False
+Left dorsal carpal branch of ulnar artery,fma22822,arterial,8,288,542,arms-hands,artery,True
+Left palmar metacarpal artery,fma22865,arterial,8,538,958,arms-hands,artery,True
+Left palmar metacarpal vein,fma22921,venous,8,203,372,arms-hands,vein,True
+Left posterior circumflex humeral artery,fma22687,arterial,8,139,274,,artery,False
+Left posterior circumflex humeral artery,fma22687,arterial,8,220,404,,artery,False
+Left posterior ulnar recurrent artery,fma22805,arterial,8,190,328,arms-hands,artery,True
+Left radial artery,fma22734,arterial,8,856,1708,arms-hands,artery,True
+Left radial recurrent artery,fma22766,arterial,8,288,572,,artery,False
+Left radial vein,fma22949,venous,8,573,1084,,vein,False
+Left recurrent interosseous artery,fma268669,arterial,8,145,286,,artery,False
+Left subscapular artery,fma22679,arterial,8,408,772,thorax-shoulder,artery,True
+Left subscapular vein,fma23115,venous,8,220,436,thorax-shoulder,vein,True
+Left superficial palmar arterial arch,fma22837,arterial,8,328,650,,artery,False
+Left superficial palmar venous arch,fma22916,venous,8,429,820,,vein,False
+Left suprascapular vein,fma50860,venous,8,227,434,thorax-shoulder,vein,True
+Left suprascapular artery,fma10681,arterial,8,264,424,thorax-shoulder,artery,True
+Trunk of left thoraco-acromial artery,fma66564,arterial,8,235,466,,artery,False
+Left thoracodorsal artery,fma66322,arterial,8,260,462,,artery,False
+Left thoracodorsal vein,fma71215,venous,8,187,370,,vein,False
+Left thyrocervical trunk,fma4084,arterial,8,79,122,,,False
+Left superficial cervical artery,fma10683,arterial,8,271,368,,artery,False
+Left transverse cervical artery,fma10682,arterial,8,190,348,,artery,False
+Left ulnar artery,fma22798,arterial,8,784,1564,arms-hands,artery,True
+Left anterior ulnar recurrent artery,fma22802,arterial,8,93,180,arms-hands,artery,True
+Left ulnar vein,fma22952,venous,8,652,1300,arms-hands,vein,True
+Radial collateral branch of left deep brachial artery,fma23127,arterial,8,161,318,arms-hands,artery,True
+Radial collateral branch of right deep brachial artery,fma23126,arterial,8,149,294,arms-hands,artery,True
+Acromial branch of right thoraco-acromial artery,fma23068,arterial,8,211,412,,artery,False
+Right anterior circumflex humeral artery,fma22682,arterial,8,376,712,,artery,False
+Right anterior circumflex humeral vein,fma77954,venous,8,429,754,,vein,False
+Right anterior interosseous artery,fma22812,arterial,8,226,438,,artery,False
+Right inferior ulnar collateral artery,fma22712,arterial,8,136,264,arms-hands,artery,True
+Right axillary artery,fma22655,arterial,8,293,582,,artery,False
+Right axillary vein,fma13330,venous,8,253,472,,vein,False
+Right basilic vein,fma22909,venous,8,1998,3992,,vein,False
+Right brachial artery,fma22691,arterial,8,344,684,arms-hands,artery,True
+Right cephalic vein,fma13325,venous,8,2520,4976,,vein,False
+Right circumflex scapular artery,fma23180,arterial,8,225,430,thorax-shoulder,artery,True
+Right circumflex scapular vein,fma77949,venous,8,187,336,thorax-shoulder,vein,True
+Right common interosseous artery,fma22807,arterial,8,222,430,,artery,False
+Right costocervical trunk,fma5039,arterial,8,138,240,,,False
+Right deep brachial artery,fma22696,arterial,8,260,516,arms-hands,artery,True
+Right deep cervical artery,fma10660,arterial,8,203,348,,artery,False
+Right deep palmar arch,fma22839,arterial,8,382,760,,,False
+Dorsal venous network of right hand,fma62506,venous,8,486,952,,vein,False
+Right deep palmar venous arch,fma22912,venous,8,524,966,,vein,False
+Deltoid branch of right thoraco-acromial artery,fma23072,arterial,8,146,286,thorax-shoulder,artery,True
+Dorsal carpal branch of right radial artery,fma22772,arterial,8,157,294,arms-hands,artery,True
+Right dorsal scapular artery,fma4057,arterial,8,534,978,thorax-shoulder,artery,True
+Right lateral thoracic vein,fma71211,venous,8,403,802,,vein,False
+Right median antebrachial vein,fma22968,venous,8,604,1184,,vein,False
+Right median cubital vein,fma22964,venous,8,277,550,,vein,False
+Right dorsal carpal branch of ulnar artery,fma22821,arterial,8,294,562,arms-hands,artery,True
+Right palmar metacarpal artery,fma22864,arterial,8,530,936,arms-hands,artery,True
+Right palmar metacarpal vein,fma22920,venous,8,185,346,arms-hands,vein,True
+Right posterior circumflex humeral artery,fma22685,arterial,8,156,306,,artery,False
+Right posterior circumflex humeral artery,fma22685,arterial,8,196,384,,artery,False
+Right posterior ulnar recurrent artery,fma22804,arterial,8,196,320,arms-hands,artery,True
+Right radial artery,fma22733,arterial,8,823,1642,arms-hands,artery,True
+Right radial recurrent artery,fma22764,arterial,8,288,572,,artery,False
+Right radial vein,fma22948,venous,8,635,1162,,vein,False
+Right recurrent interosseous artery,fma268667,arterial,8,141,278,,artery,False
+Right subscapular artery,fma22678,arterial,8,413,756,thorax-shoulder,artery,True
+Right subscapular vein,fma23114,venous,8,231,458,thorax-shoulder,vein,True
+Right superficial palmar arterial arch,fma22835,arterial,8,332,660,,artery,False
+Right superficial palmar venous arch,fma22915,venous,8,458,852,,vein,False
+Right suprascapular vein,fma50859,venous,8,224,436,thorax-shoulder,vein,True
+Right suprascapular artery,fma10698,arterial,8,253,420,thorax-shoulder,artery,True
+Trunk of right thoraco-acromial artery,fma66563,arterial,8,238,472,,artery,False
+Right thoracodorsal artery,fma66321,arterial,8,260,462,,artery,False
+Right thoracodorsal vein,fma71214,venous,8,191,372,,vein,False
+Right thyrocervical trunk,fma3992,arterial,8,75,106,,,False
+Right superficial cervical artery,fma10700,arterial,8,301,376,,artery,False
+Right transverse cervical artery,fma10699,arterial,8,180,324,,artery,False
+Right ulnar artery,fma22797,arterial,8,758,1512,arms-hands,artery,True
+Right anterior ulnar recurrent artery,fma22801,arterial,8,96,186,arms-hands,artery,True
+Right ulnar vein,fma22951,venous,8,671,1336,arms-hands,vein,True
+Left medial brachial vein,fma22936,venous,8,324,626,,vein,False
+Left arteria radialis indicis,fma22778,arterial,8,137,270,arms-hands,,False
+Left first common palmar digital artery,fma85118,arterial,8,131,244,,artery,False
+Left second common palmar digital artery,fma85120,arterial,8,153,302,,artery,False
+Left third common palmar digital artery,fma85122,arterial,8,158,306,,artery,False
+Set of dorsal digital arteries,fma70801,arterial,8,1066,1688,,,False
+Proper palmar digital vein of left little finger,fma85103,venous,8,321,598,,vein,False
+Left palmar metacarpal vein,fma22921,venous,8,147,266,arms-hands,vein,False
+Proper palmar digital vein of left little finger,fma85103,venous,8,120,192,,vein,False
+Common palmar digital vein,fma22923,venous,8,156,274,,vein,False
+Left palmar metacarpal vein,fma22921,venous,8,119,202,arms-hands,vein,False
+Proper palmar digital vein of left index finger,fma85097,venous,8,81,126,,vein,False
+Proper palmar digital vein of left index finger,fma85097,venous,8,110,198,,vein,False
+Proper palmar digital vein of left middle finger,fma85099,venous,8,93,166,,vein,False
+Proper palmar digital vein of left ring finger,fma85101,venous,8,140,228,,vein,False
+Proper palmar digital vein of left ring finger,fma85101,venous,8,115,206,,vein,False
+Proper palmar digital vein of left little finger,fma85103,venous,8,146,240,,vein,False
+Pectoral branch of left thoraco-acromial artery,fma23064,arterial,8,373,742,,artery,False
+Middle collateral branch of left deep brachial artery,fma23125,arterial,8,210,416,arms-hands,artery,True
+Left arteria radialis indicis,fma22778,arterial,8,117,182,arms-hands,,False
+Medial proper palmar digital artery of left index finger,fma23051,arterial,8,112,176,,artery,False
+Lateral proper palmar digital artery of left middle finger,fma22860,arterial,8,113,176,,artery,False
+Lateral proper palmar digital artery of left ring finger,fma85116,arterial,8,112,162,,artery,False
+Lateral proper palmar digital artery of left little finger,fma23055,arterial,8,80,132,,artery,False
+Left fourth common palmar digital artery,fma85124,arterial,8,122,202,,artery,False
+Left arteria princeps pollicis,fma22907,arterial,8,138,236,arms-hands,,False
+Left arteria princeps pollicis,fma22907,arterial,8,99,186,arms-hands,,False
+Proper palmar digital vein of left middle finger,fma85099,venous,8,114,192,,vein,False
+Right medial brachial vein,fma22935,venous,8,318,564,,vein,False
+Right arteria radialis indicis,fma22777,arterial,8,144,282,arms-hands,,False
+Right first common palmar digital artery,fma22856,arterial,8,131,254,,artery,False
+Right second common palmar digital artery,fma85119,arterial,8,156,304,,artery,False
+Right third common palmar digital artery,fma85121,arterial,8,163,318,,artery,False
+Set of dorsal digital arteries,fma70801,arterial,8,1068,1698,,,False
+Set of dorsal metacarpal arteries,fma70800,arterial,8,484,948,arms-hands,,False
+Set of dorsal metacarpal arteries,fma70800,arterial,8,486,948,arms-hands,,False
+Proper palmar digital vein of right little finger,fma85102,venous,8,334,608,,vein,False
+Right palmar metacarpal vein,fma22920,venous,8,145,264,arms-hands,vein,False
+Proper palmar digital vein of right little finger,fma85102,venous,8,117,194,,vein,False
+Common palmar digital vein,fma22923,venous,8,150,260,,vein,False
+Right palmar metacarpal vein,fma22920,venous,8,113,208,arms-hands,vein,False
+Proper palmar digital vein of right index finger,fma85096,venous,8,114,146,,vein,False
+Proper palmar digital vein of right index finger,fma85096,venous,8,112,198,,vein,False
+Proper palmar digital vein of right middle finger,fma85098,venous,8,88,166,,vein,False
+Proper palmar digital vein of right middle finger,fma85098,venous,8,119,192,,vein,False
+Proper palmar digital vein of right ring finger,fma85100,venous,8,123,214,,vein,False
+Proper palmar digital vein of right ring finger,fma85100,venous,8,118,204,,vein,False
+Proper palmar digital vein of right little finger,fma85102,venous,8,143,246,,vein,False
+Pectoral branch of right thoraco-acromial artery,fma23063,arterial,8,376,748,,artery,False
+Middle collateral branch of right deep brachial artery,fma23124,arterial,8,187,370,arms-hands,artery,True
+Right arteria radialis indicis,fma22777,arterial,8,104,176,arms-hands,,False
+Medial proper palmar digital artery of right index finger,fma23050,arterial,8,115,176,,artery,False
+Lateral proper palmar digital artery of right middle finger,fma22858,arterial,8,114,176,,artery,False
+Lateral proper palmar digital artery of right ring finger,fma85115,arterial,8,97,158,,artery,False
+Medial proper palmar digital artery of right middle finger,fma85112,arterial,8,112,180,,artery,False
+Lateral proper palmar digital artery of right little finger,fma23054,arterial,8,78,134,,artery,False
+Medial proper palmar digital artery of right ring finger,fma23052,arterial,8,99,158,,artery,False
+Right fourth common palmar digital artery,fma85123,arterial,8,125,204,,artery,False
+Right arteria princeps pollicis,fma22905,arterial,8,145,234,arms-hands,,False
+Right arteria princeps pollicis,fma22905,arterial,8,105,194,arms-hands,,False
+Right superior ulnar collateral artery,fma22707,arterial,8,164,324,arms-hands,artery,True
+Left superior ulnar collateral artery,fma22708,arterial,8,164,324,arms-hands,artery,True
+Caudate lobe branch of right hepatic artery,fma70447,arterial,8,209,352,,artery,False
+Right lobe branch of right hepatic artery,fma71708,arterial,8,454,450,,artery,False
+Left portal vein,fma15415,venous,8,2428,2662,,vein,False
+Right portal vein,fma15414,venous,8,1497,1458,,vein,False
+Hepatovenous segment VII,fma15745,venous,8,1454,1876,,vein,False
+Middle hepatic vein,fma14340,venous,8,638,1178,,vein,False
+Left hepatic vein,fma14339,venous,8,527,884,,vein,False
+Right hepatic vein,fma14338,venous,8,1558,1936,,vein,False
+Left anterior cusp of pulmonary valve,fma7247,cardiac,8,699,1256,,,False
+Anterolateral head of lateral papillary muscle of left ventricle,fma7265,muscular,8,511,776,,muscle,False
+Anterior papillary muscle of right ventricle,fma7260,muscular,8,548,820,,muscle,False
+Anterior leaflet of mitral valve,fma7242,cardiac,8,1356,2322,,,False
+Anterior leaflet of tricuspid valve,fma7238,cardiac,8,1254,2230,,,False
+Cavity of left ventricle,fma9466,cardiac,8,749,1468,,,False
+Cavity of right ventricle,fma9291,cardiac,8,817,1610,,,False
+Cavity of right atrium,fma11359,cardiac,8,697,1286,,,False
+Cavity of left atrium,fma9465,cardiac,8,547,992,,,False
+Left posterior cusp of aortic valve,fma7254,cardiac,8,522,906,,,False
+Posterior cusp of pulmonary valve,fma7250,cardiac,8,570,992,,,False
+Wall of ventricle,fma13884,cardiac,8,5903,8236,,,False
+Lateral papillary muscle of left ventricle,fma7264,muscular,8,455,722,,muscle,False
+Posterior papillary muscle of right ventricle,fma7261,muscular,8,462,654,,muscle,False
+Right posterior cusp of aortic valve,fma7252,cardiac,8,214,314,,,False
+Posterior leaflet of mitral valve,fma7243,cardiac,8,1766,2402,,,False
+Posterior leaflet of tricuspid valve,fma7239,cardiac,8,1374,2352,,,False
+Right anterior cusp of pulmonary valve,fma7249,cardiac,8,756,1354,,,False
+Anterior cusp of aortic valve,fma7253,cardiac,8,503,912,,,False
+Septal leaflet of tricuspid valve,fma7240,cardiac,8,1324,2144,,,False
+Septal papillary muscle of right ventricle,fma7262,muscular,8,510,790,,muscle,False
+Wall of left atrium,fma9531,cardiac,8,2414,4090,,,False
+Wall of right atrium,fma9457,cardiac,8,2545,3912,,,False
+Cricoid cartilage,fma9615,skeletal,8,838,1514,head-neck,cartilage,True
+Inferior lingular bronchial tree,fma68227,respiratory,8,273,446,thorax-shoulder,organ,True
+Left medial basal segmental bronchial tree,fma68230,respiratory,8,208,342,thorax-shoulder,organ,True
+Left anterior segmental bronchial tree,fma68222,respiratory,8,248,406,thorax-shoulder,organ,True
+Left apical segmental bronchial tree,fma68223,respiratory,8,216,362,thorax-shoulder,organ,True
+Left lateral basal segmental bronchial tree,fma68232,respiratory,8,164,278,thorax-shoulder,organ,True
+Left posterior basal segmental bronchial tree,fma68233,respiratory,8,152,254,thorax-shoulder,organ,True
+Left posterior segmental bronchial tree,fma68225,respiratory,8,166,266,thorax-shoulder,organ,True
+Left superior segmental bronchial tree,fma68228,respiratory,8,248,404,thorax-shoulder,organ,True
+Lateral segmental bronchial tree,fma68215,respiratory,8,214,356,thorax-shoulder,organ,True
+Left main bronchus,fma7396,respiratory,8,1500,2594,thorax-shoulder,organ,True
+Medial segmental bronchial tree,fma68214,respiratory,9,244,422,thorax-shoulder,organ,True
+Right anterior basal segmental bronchial tree,fma68321,respiratory,9,213,362,thorax-shoulder,organ,True
+Right anterior segmental bronchial tree,fma68212,respiratory,9,197,330,thorax-shoulder,organ,True
+Right apical segmental bronchial tree,fma68211,respiratory,9,188,324,thorax-shoulder,organ,True
+Right lateral basal segmental bronchial tree,fma68220,respiratory,9,188,298,thorax-shoulder,organ,True
+Right medial basal segmental bronchial tree,fma68218,respiratory,9,99,140,thorax-shoulder,organ,True
+Right posterior basal segmental bronchial tree,fma68221,respiratory,9,178,290,thorax-shoulder,organ,True
+Right posterior segmental bronchial tree,fma68213,respiratory,9,272,474,thorax-shoulder,organ,True
+Right superior segmental bronchial tree,fma68216,respiratory,9,162,238,thorax-shoulder,organ,True
+Left apical segmental bronchial tree,fma68223,respiratory,9,139,198,thorax-shoulder,organ,False
+Left apical segmental bronchial tree,fma68223,respiratory,9,95,128,thorax-shoulder,organ,False
+Left apical segmental bronchial tree,fma68223,respiratory,9,105,124,thorax-shoulder,organ,False
+Left apical segmental bronchial tree,fma68223,respiratory,9,97,114,thorax-shoulder,organ,False
+Left apical segmental bronchial tree,fma68223,respiratory,9,70,64,thorax-shoulder,organ,False
+Left posterior segmental bronchial tree,fma68225,respiratory,9,78,86,thorax-shoulder,organ,False
+Left posterior segmental bronchial tree,fma68225,respiratory,9,68,64,thorax-shoulder,organ,False
+Left anterior segmental bronchial tree,fma68222,respiratory,9,212,336,thorax-shoulder,organ,False
+Left anterior segmental bronchial tree,fma68222,respiratory,9,150,188,thorax-shoulder,organ,False
+Left anterior segmental bronchial tree,fma68222,respiratory,9,87,82,thorax-shoulder,organ,False
+Right posterior basal segmental bronchial tree,fma68221,respiratory,9,191,312,thorax-shoulder,organ,False
+Left anterior segmental bronchial tree,fma68222,respiratory,9,81,106,thorax-shoulder,organ,False
+Left anterior segmental bronchial tree,fma68222,respiratory,9,100,114,thorax-shoulder,organ,False
+Left anterior segmental bronchial tree,fma68222,respiratory,9,116,116,thorax-shoulder,organ,False
+Left anterior segmental bronchial tree,fma68222,respiratory,9,113,126,thorax-shoulder,organ,False
+Inferior lingular bronchial tree,fma68227,respiratory,9,125,198,thorax-shoulder,organ,False
+Superior lingular bronchial tree,fma68226,respiratory,9,107,134,thorax-shoulder,organ,True
+Superior lingular bronchial tree,fma68226,respiratory,9,87,70,thorax-shoulder,organ,False
+Superior lingular bronchial tree,fma68226,respiratory,9,87,88,thorax-shoulder,organ,False
+Left superior segmental bronchial tree,fma68228,respiratory,9,123,190,thorax-shoulder,organ,False
+Left superior segmental bronchial tree,fma68228,respiratory,9,93,106,thorax-shoulder,organ,False
+Right posterior basal segmental bronchial tree,fma68221,respiratory,9,201,216,thorax-shoulder,organ,False
+Left superior segmental bronchial tree,fma68228,respiratory,9,83,98,thorax-shoulder,organ,False
+Left superior segmental bronchial tree,fma68228,respiratory,9,82,90,thorax-shoulder,organ,False
+Left superior segmental bronchial tree,fma68228,respiratory,9,93,120,thorax-shoulder,organ,False
+Left superior segmental bronchial tree,fma68228,respiratory,9,74,58,thorax-shoulder,organ,False
+Right posterior basal segmental bronchial tree,fma68221,respiratory,9,140,204,thorax-shoulder,organ,False
+Right posterior basal segmental bronchial tree,fma68221,respiratory,9,280,426,thorax-shoulder,organ,False
+Right medial basal segmental bronchial tree,fma68218,respiratory,9,141,160,thorax-shoulder,organ,False
+Right posterior basal segmental bronchial tree,fma68221,respiratory,9,223,344,thorax-shoulder,organ,False
+Right lateral basal segmental bronchial tree,fma68220,respiratory,9,220,334,thorax-shoulder,organ,False
+Right lateral basal segmental bronchial tree,fma68220,respiratory,9,224,316,thorax-shoulder,organ,False
+Right lateral basal segmental bronchial tree,fma68220,respiratory,9,186,234,thorax-shoulder,organ,False
+Right anterior basal segmental bronchial tree,fma68321,respiratory,9,237,314,thorax-shoulder,organ,False
+Right anterior basal segmental bronchial tree,fma68321,respiratory,9,174,246,thorax-shoulder,organ,False
+Right superior segmental bronchial tree,fma68216,respiratory,9,295,450,thorax-shoulder,organ,False
+Right superior segmental bronchial tree,fma68216,respiratory,9,355,604,thorax-shoulder,organ,False
+Right superior segmental bronchial tree,fma68216,respiratory,9,191,256,thorax-shoulder,organ,False
+Right superior segmental bronchial tree,fma68216,respiratory,9,305,508,thorax-shoulder,organ,False
+Right superior segmental bronchial tree,fma68216,respiratory,9,240,388,thorax-shoulder,organ,False
+Right superior segmental bronchial tree,fma68216,respiratory,9,165,250,thorax-shoulder,organ,False
+Right superior segmental bronchial tree,fma68216,respiratory,9,257,426,thorax-shoulder,organ,False
+Right superior segmental bronchial tree,fma68216,respiratory,9,200,290,thorax-shoulder,organ,False
+Lateral segmental bronchial tree,fma68215,respiratory,9,250,320,thorax-shoulder,organ,False
+Lateral segmental bronchial tree,fma68215,respiratory,9,404,540,thorax-shoulder,organ,False
+Lateral segmental bronchial tree,fma68215,respiratory,9,291,398,thorax-shoulder,organ,False
+Medial segmental bronchial tree,fma68214,respiratory,9,327,546,thorax-shoulder,organ,False
+Medial segmental bronchial tree,fma68214,respiratory,9,311,474,thorax-shoulder,organ,False
+Medial segmental bronchial tree,fma68214,respiratory,9,195,256,thorax-shoulder,organ,False
+Right anterior segmental bronchial tree,fma68212,respiratory,9,328,516,thorax-shoulder,organ,False
+Right anterior segmental bronchial tree,fma68212,respiratory,9,248,386,thorax-shoulder,organ,False
+Right anterior segmental bronchial tree,fma68212,respiratory,9,176,250,thorax-shoulder,organ,False
+Right anterior segmental bronchial tree,fma68212,respiratory,9,195,288,thorax-shoulder,organ,False
+Right anterior segmental bronchial tree,fma68212,respiratory,9,296,494,thorax-shoulder,organ,False
+Right anterior segmental bronchial tree,fma68212,respiratory,9,270,422,thorax-shoulder,organ,False
+Right posterior segmental bronchial tree,fma68213,respiratory,9,351,484,thorax-shoulder,organ,False
+Right posterior segmental bronchial tree,fma68213,respiratory,9,268,376,thorax-shoulder,organ,False
+Right posterior segmental bronchial tree,fma68213,respiratory,9,174,264,thorax-shoulder,organ,False
+Right posterior segmental bronchial tree,fma68213,respiratory,9,135,192,thorax-shoulder,organ,False
+Right posterior segmental bronchial tree,fma68213,respiratory,9,136,190,thorax-shoulder,organ,False
+Right apical segmental bronchial tree,fma68211,respiratory,9,262,408,thorax-shoulder,organ,False
+Right apical segmental bronchial tree,fma68211,respiratory,9,209,328,thorax-shoulder,organ,False
+Right apical segmental bronchial tree,fma68211,respiratory,9,208,292,thorax-shoulder,organ,False
+Right apical segmental bronchial tree,fma68211,respiratory,9,135,192,thorax-shoulder,organ,False
+Right apical segmental bronchial tree,fma68211,respiratory,9,178,248,thorax-shoulder,organ,False
+Right apical segmental bronchial tree,fma68211,respiratory,9,121,164,thorax-shoulder,organ,False
+Right apical segmental bronchial tree,fma68211,respiratory,9,118,156,thorax-shoulder,organ,False
+Left posterior basal segmental bronchial tree,fma68233,respiratory,9,121,182,thorax-shoulder,organ,False
+Left posterior basal segmental bronchial tree,fma68233,respiratory,9,147,228,thorax-shoulder,organ,False
+Left posterior basal segmental bronchial tree,fma68233,respiratory,9,109,106,thorax-shoulder,organ,False
+Left posterior basal segmental bronchial tree,fma68233,respiratory,9,81,100,thorax-shoulder,organ,False
+Left posterior basal segmental bronchial tree,fma68233,respiratory,9,78,58,thorax-shoulder,organ,False
+Left lateral basal segmental bronchial tree,fma68232,respiratory,9,131,216,thorax-shoulder,organ,False
+Left lateral basal segmental bronchial tree,fma68232,respiratory,9,122,136,thorax-shoulder,organ,False
+Left lateral basal segmental bronchial tree,fma68232,respiratory,9,67,64,thorax-shoulder,organ,False
+Left anterior basal segmental bronchial tree,fma68231,respiratory,9,167,260,thorax-shoulder,organ,True
+Left anterior basal segmental bronchial tree,fma68231,respiratory,9,170,268,thorax-shoulder,organ,False
+Left medial basal segmental bronchial tree,fma68230,respiratory,9,74,88,thorax-shoulder,organ,False
+Left anterior basal segmental bronchial tree,fma68231,respiratory,9,100,122,thorax-shoulder,organ,False
+Right main bronchus proper,fma68418,respiratory,9,1444,2346,thorax-shoulder,organ,True
+Superior lingular bronchial tree,fma68226,respiratory,9,213,338,thorax-shoulder,organ,False
+Trachea,fma7394,respiratory,9,1172,2196,head-neck,organ,True
+Left coccygeus,fma46444,muscular,9,1078,1380,,muscle,False
+External anal sphincter,fma21930,muscular,9,229,344,,muscle,False
+Left iliococcygeus,fma45859,muscular,9,1812,1982,,muscle,False
+Left pubococcygeus,fma45855,muscular,9,1261,1592,,muscle,False
+Left puborectalis,fma45857,muscular,9,2073,1796,,muscle,False
+Right coccygeus,fma46443,muscular,9,1213,1396,,muscle,False
+External anal sphincter,fma21930,muscular,9,240,350,,muscle,False
+Right iliococcygeus,fma45858,muscular,9,2045,1812,,muscle,False
+Right pubococcygeus,fma45854,muscular,9,1946,1906,,muscle,False
+Right puborectalis,fma45856,muscular,9,3088,2172,,muscle,False
+Tendinous arch of levator ani,fma46442,connective,9,210,310,,,False
+Tendinous arch of levator ani,fma46442,connective,9,224,344,,,False
+Right major alar cartilage,fma59505,skeletal,9,210,350,,cartilage,False
+Left major alar cartilage,fma59506,skeletal,9,236,388,,cartilage,False
+Left lateral nasal cartilage,fma59513,respiratory,9,296,380,head-neck,cartilage,True
+Septal nasal cartilage,fma59503,respiratory,9,263,342,head-neck,cartilage,True
+Right lateral nasal cartilage,fma59512,respiratory,9,312,408,head-neck,cartilage,True
+Spleen,fma7196,lymphatic,9,624,1206,,,False
+Splenic artery,fma14773,arterial,9,744,900,,artery,False
+Esophagus,fma7131,digestive,9,173,296,,,False
+Stomach,fma7148,digestive,9,852,1686,,,False
+Appendix,fma14542,digestive,9,241,436,,,False
+Ascending colon,fma14545,digestive,9,1176,2112,,,False
+Descending colon,fma14547,digestive,9,1572,2844,,,False
+Taenia libera,fma15044,digestive,9,7258,4974,,,False
+Taenia mesocolica,fma15042,digestive,9,8142,5260,,,False
+Taenia omentalis,fma15043,digestive,9,4521,3502,,,False
+Rectum,fma14544,digestive,9,823,1538,,,False
+Transverse colon,fma14546,digestive,9,1350,2416,,,False
+Duodenum,fma7206,digestive,9,883,1678,,,False
+Proximal part of ileum,fma14964,digestive,9,196,378,,,False
+Proximal part of ileum,fma14964,digestive,9,144,276,,,False
+Middle part of ileum,fma14965,digestive,9,94,172,,,False
+Middle part of ileum,fma14965,digestive,9,173,312,,,False
+Middle part of ileum,fma14965,digestive,9,158,286,,,False
+Middle part of ileum,fma14965,digestive,9,149,278,,,False
+Middle part of ileum,fma14965,digestive,9,176,344,,,False
+Middle part of ileum,fma14965,digestive,9,118,198,,,False
+Middle part of ileum,fma14965,digestive,9,114,212,,,False
+Middle part of ileum,fma14965,digestive,9,101,196,,,False
+Middle part of ileum,fma14965,digestive,9,116,228,,,False
+Proximal part of ileum,fma14964,digestive,9,157,286,,,False
+Middle part of ileum,fma14965,digestive,9,141,260,,,False
+Distal part of ileum,fma14966,digestive,9,117,228,,,False
+Distal part of ileum,fma14966,digestive,9,141,264,,,False
+Distal part of ileum,fma14966,digestive,9,168,326,,,False
+Distal part of ileum,fma14966,digestive,9,97,184,,,False
+Distal part of ileum,fma14966,digestive,9,118,226,,,False
+Distal part of ileum,fma14966,digestive,9,129,236,,,False
+Distal part of ileum,fma14966,digestive,9,134,262,,,False
+Distal part of ileum,fma14966,digestive,9,113,220,,,False
+Distal part of ileum,fma14966,digestive,9,139,258,,,False
+Proximal part of ileum,fma14964,digestive,9,135,226,,,False
+Distal part of ileum,fma14966,digestive,9,106,202,,,False
+Distal part of ileum,fma14966,digestive,9,129,246,,,False
+Ileocecal junction,fma11338,digestive,9,155,286,,,False
+Proximal part of ileum,fma14964,digestive,9,136,256,,,False
+Proximal part of ileum,fma14964,digestive,9,125,208,,,False
+Proximal part of ileum,fma14964,digestive,9,137,266,,,False
+Proximal part of ileum,fma14964,digestive,9,154,294,,,False
+Proximal part of ileum,fma14964,digestive,9,114,198,,,False
+Proximal part of ileum,fma14964,digestive,9,175,328,,,False
+Proximal part of jejunum,fma16981,digestive,9,201,308,,,False
+Middle part of jejunum,fma16982,digestive,9,127,240,,,False
+Middle part of jejunum,fma16982,digestive,9,133,262,,,False
+Middle part of jejunum,fma16982,digestive,9,98,192,,,False
+Middle part of jejunum,fma16982,digestive,9,155,294,,,False
+Distal part of jejunum,fma16983,digestive,9,123,226,,,False
+Distal part of jejunum,fma16983,digestive,9,130,240,,,False
+Distal part of jejunum,fma16983,digestive,9,91,176,,,False
+Distal part of jejunum,fma16983,digestive,9,119,230,,,False
+Distal part of jejunum,fma16983,digestive,9,147,264,,,False
+Distal part of jejunum,fma16983,digestive,9,227,432,,,False
+Proximal part of jejunum,fma16981,digestive,9,135,234,,,False
+Distal part of jejunum,fma16983,digestive,9,117,222,,,False
+Distal part of jejunum,fma16983,digestive,9,141,258,,,False
+Distal part of jejunum,fma16983,digestive,9,154,284,,,False
+Distal part of jejunum,fma16983,digestive,9,275,494,,,False
+Proximal part of jejunum,fma16981,digestive,9,99,160,,,False
+Proximal part of jejunum,fma16981,digestive,9,202,378,,,False
+Proximal part of jejunum,fma16981,digestive,9,94,172,,,False
+Proximal part of jejunum,fma16981,digestive,9,79,152,,,False
+Proximal part of jejunum,fma16981,digestive,9,188,330,,,False
+Proximal part of jejunum,fma16981,digestive,9,99,190,,,False
+Middle part of jejunum,fma16982,digestive,9,128,236,,,False
+Parenchyma of pancreas,fma63120,digestive,9,1139,2258,,,False
+Pancreatic duct tree,fma63103,digestive,9,2534,1956,,,False
+Trunk of anterior interventricular branch of left coronary artery,fma74912,arterial,9,356,666,,artery,False
+First right anterior branch of anterior interventricular branch of left coronary artery,fma3872,arterial,9,91,108,,artery,False
+Diagonal branch of anterior descending branch of left coronary artery,fma3860,arterial,9,283,424,,artery,False
+Diagonal branch of anterior descending branch of left coronary artery,fma3860,arterial,9,156,192,,artery,False
+Diagonal branch of anterior descending branch of left coronary artery,fma3860,arterial,9,363,526,,artery,False
+Diagonal branch of anterior descending branch of left coronary artery,fma3860,arterial,9,275,408,,artery,False
+Diagonal branch of anterior descending branch of left coronary artery,fma3860,arterial,9,142,158,,artery,False
+Diagonal branch of anterior descending branch of left coronary artery,fma3860,arterial,9,242,286,,artery,False
+Diagonal branch of anterior descending branch of left coronary artery,fma3860,arterial,9,122,150,,artery,False
+Diagonal branch of anterior descending branch of left coronary artery,fma3860,arterial,9,214,254,,artery,False
+Third right anterior branch of anterior interventricular branch of left coronary artery,fma3876,arterial,9,305,408,,artery,False
+Diagonal branch of anterior descending branch of left coronary artery,fma3860,arterial,9,326,580,,artery,False
+Conus branch of anterior interventricular branch of left coronary artery,fma3868,arterial,9,234,414,,artery,False
+Conus branch of anterior interventricular branch of left coronary artery,fma3868,arterial,9,191,302,,artery,False
+First right anterior branch of anterior interventricular branch of left coronary artery,fma3872,arterial,9,222,314,,artery,False
+Second right anterior branch of anterior interventricular branch of left coronary artery,fma3874,arterial,9,275,446,,artery,False
+Third right anterior branch of anterior interventricular branch of left coronary artery,fma3876,arterial,9,214,302,,artery,False
+Diagonal branch of anterior descending branch of left coronary artery,fma3860,arterial,9,203,286,,artery,False
+Circumflex branch of left coronary artery,fma3895,arterial,9,325,646,,artery,False
+Circumflex branch of left coronary artery,fma3895,arterial,9,304,374,,artery,False
+Circumflex branch of left coronary artery,fma3895,arterial,9,358,448,,artery,False
+Circumflex branch of left coronary artery,fma3895,arterial,9,234,298,,artery,False
+Circumflex branch of left coronary artery,fma3895,arterial,9,229,248,,artery,False
+Circumflex branch of left coronary artery,fma3895,arterial,9,147,166,,artery,False
+Coronary sinus,fma4706,venous,9,319,602,,,False
+Great cardiac vein,fma4707,venous,9,322,608,,vein,False
+Anterior interventricular vein,fma66403,venous,9,227,318,,vein,False
+Anterior interventricular vein,fma66403,venous,9,261,404,,vein,False
+Anterior interventricular vein,fma66403,venous,9,323,420,,vein,False
+Anterior interventricular vein,fma66403,venous,9,182,232,,vein,False
+Anterior interventricular vein,fma66403,venous,9,257,412,,vein,False
+Anterior interventricular vein,fma66403,venous,9,125,236,,vein,False
+Anterior interventricular vein,fma66403,venous,9,178,258,,vein,False
+Anterior interventricular vein,fma66403,venous,9,136,208,,vein,False
+Anterior interventricular vein,fma66403,venous,9,319,430,,vein,False
+Marginal branch of right coronary artery,fma3818,arterial,9,254,334,,artery,False
+Marginal branch of right coronary artery,fma3818,arterial,9,176,216,,artery,False
+Right conus artery,fma3807,arterial,9,272,426,,artery,False
+First anterior ventricular branch of right coronary artery,fma3815,arterial,9,292,442,,artery,False
+Marginal branch of right coronary artery,fma3818,arterial,9,348,558,,artery,False
+First anterior ventricular branch of right coronary artery,fma3815,arterial,9,233,318,,artery,False
+Marginal branch of right coronary artery,fma3818,arterial,9,186,284,,artery,False
+Marginal branch of right coronary artery,fma3818,arterial,9,148,200,,artery,False
+Right conus artery,fma3807,arterial,9,227,292,,artery,False
+First anterior ventricular branch of right coronary artery,fma3815,arterial,9,194,248,,artery,False
+Middle cardiac vein,fma4713,venous,9,289,462,,vein,False
+Middle cardiac vein,fma4713,venous,9,184,252,,vein,False
+Middle cardiac vein,fma4713,venous,9,321,362,,vein,False
+Middle cardiac vein,fma4713,venous,9,207,200,,vein,False
+Middle cardiac vein,fma4713,venous,9,365,360,,vein,False
+Middle cardiac vein,fma4713,venous,9,178,168,,vein,False
+Middle cardiac vein,fma4713,venous,9,187,258,,vein,False
+Middle cardiac vein,fma4713,venous,9,170,234,,vein,False
+Middle cardiac vein,fma4713,venous,9,216,274,,vein,False
+Middle cardiac vein,fma4713,venous,9,453,542,,vein,False
+Middle cardiac vein,fma4713,venous,9,308,298,,vein,False
+Middle cardiac vein,fma4713,venous,9,169,268,,vein,False
+Middle cardiac vein,fma4713,venous,9,226,354,,vein,False
+Middle cardiac vein,fma4713,venous,9,125,156,,vein,False
+Posterior interventricular branch of right coronary artery,fma3840,arterial,9,339,466,,artery,False
+Posterior interventricular branch of right coronary artery,fma3840,arterial,9,278,408,,artery,False
+Posterior interventricular branch of right coronary artery,fma3840,arterial,9,287,392,,artery,False
+Posterior interventricular branch of right coronary artery,fma3840,arterial,9,163,236,,artery,False
+Posterior interventricular branch of right coronary artery,fma3840,arterial,9,265,304,,artery,False
+Posterior interventricular branch of right coronary artery,fma3840,arterial,9,187,218,,artery,False
+Posterior interventricular branch of right coronary artery,fma3840,arterial,9,193,198,,artery,False
+Posterior interventricular branch of right coronary artery,fma3840,arterial,9,126,126,,artery,False
+Posterior interventricular branch of right coronary artery,fma3840,arterial,9,197,280,,artery,False
+Posterior vein of left ventricle,fma4712,venous,9,309,490,,vein,False
+Posterior vein of left ventricle,fma4712,venous,9,227,252,,vein,False
+Left marginal vein,fma4708,venous,9,256,416,,vein,False
+Left marginal vein,fma4708,venous,9,192,274,,vein,False
+Left marginal vein,fma4708,venous,9,184,236,,vein,False
+Posterior vein of left ventricle,fma4712,venous,9,330,344,,vein,False
+Posterior vein of left ventricle,fma4712,venous,9,370,496,,vein,False
+Posterior vein of left ventricle,fma4712,venous,9,376,434,,vein,False
+Posterior vein of left ventricle,fma4712,venous,9,326,422,,vein,False
+Posterior vein of left ventricle,fma4712,venous,9,175,224,,vein,False
+Posterior vein of left ventricle,fma4712,venous,9,170,182,,vein,False
+Posterior vein of left ventricle,fma4712,venous,9,119,126,,vein,False
+Posterior vein of left ventricle,fma4712,venous,9,303,300,,vein,False
+First posterior ventricular branch of right coronary artery,fma3837,arterial,9,307,488,,artery,False
+First posterior ventricular branch of right coronary artery,fma3837,arterial,9,185,218,,artery,False
+First posterior ventricular branch of right coronary artery,fma3837,arterial,9,188,232,,artery,False
+First posterior ventricular branch of right coronary artery,fma3837,arterial,9,255,332,,artery,False
+First posterior ventricular branch of right coronary artery,fma3837,arterial,9,139,186,,artery,False
+First posterior ventricular branch of right coronary artery,fma3837,arterial,9,297,376,,artery,False
+First posterior ventricular branch of right coronary artery,fma3837,arterial,9,231,318,,artery,False
+First posterior ventricular branch of right coronary artery,fma3837,arterial,9,197,254,,artery,False
+First posterior ventricular branch of right coronary artery,fma3837,arterial,9,236,308,,artery,False
+Trunk of right coronary artery,fma3802,arterial,9,498,990,,artery,False
+Small cardiac vein,fma4714,venous,9,210,402,,vein,False
+Anterior cardiac vein,fma76767,venous,9,257,392,,vein,False
+Right marginal vein,fma4716,venous,9,380,518,,vein,False
+Right marginal vein,fma4716,venous,9,186,274,,vein,False
+Right marginal vein,fma4716,venous,9,153,216,,vein,False
+Anterior cardiac vein,fma76767,venous,9,186,270,,vein,False
+Small cardiac vein,fma4714,venous,9,383,750,,vein,False
+Septal branch of anterior interventricular artery,fma3892,arterial,9,417,466,,artery,False
+Septal branch of anterior interventricular artery,fma3892,arterial,9,284,328,,artery,False
+Septal branch of anterior interventricular artery,fma3892,arterial,9,253,332,,artery,False
+First septal branch of right posterior interventricular artery,fma3847,arterial,9,282,324,,artery,False
+Second septal branch of right posterior interventricular artery,fma3848,arterial,9,281,318,,artery,False
+Trunk of left coronary artery,fma3855,arterial,9,121,204,,artery,False
+Left genioglossus,fma46702,muscular,9,1583,2542,,muscle,False
+Left hyoglossus,fma46704,muscular,9,876,1392,,muscle,False
+Left inferior pharyngeal constrictor,fma46636,respiratory,9,1514,2178,,,False
+Left levator veli palatini,fma46729,muscular,9,1668,2708,,muscle,False
+Right middle pharyngeal constrictor,fma46633,respiratory,9,1673,2536,,,False
+Left palatopharyngeus,fma46672,respiratory,9,4580,9108,,,False
+Left pterygomandibular raphe,fma55620,connective,9,414,570,,,False
+Left salpingopharyngeus,fma46670,respiratory,9,1140,2012,,,False
+Left stylopharyngeus,fma46668,respiratory,9,687,978,,,False
+Left superior pharyngeal constrictor,fma46632,respiratory,9,2342,3378,,,False
+Left tensor veli palatini,fma46732,muscular,9,1799,3050,,muscle,False
+Pharyngeal raphe,fma55077,connective,10,6023,4006,,,False
+Right genioglossus,fma46698,muscular,10,1272,2080,,muscle,False
+Right hyoglossus,fma46703,muscular,10,836,1352,,muscle,False
+Right inferior pharyngeal constrictor,fma46635,respiratory,10,1535,2216,,,False
+Right levator veli palatini,fma46728,muscular,10,1708,2708,,muscle,False
+Left middle pharyngeal constrictor,fma46634,respiratory,10,1632,2508,,,False
+Right palatopharyngeus,fma46671,respiratory,10,4574,9108,,,False
+Right pterygomandibular raphe,fma55619,connective,10,381,544,,,False
+Right salpingopharyngeus,fma46669,respiratory,10,1142,2012,,,False
+Right stylopharyngeus,fma46667,respiratory,10,3069,5664,,,False
+Right superior pharyngeal constrictor,fma46631,respiratory,10,2401,3418,,,False
+Right tensor veli palatini,fma46731,muscular,10,1752,3050,,muscle,False
+Tongue,fma54640,digestive,10,265,502,,,False
+Uvular muscle,fma46733,muscular,10,699,1254,,muscle,False
+Left stylohyoid ligament,fma72311,connective,10,982,1266,head-neck,ligament,True
+Right stylohyoid ligament,fma72309,connective,10,949,1266,head-neck,ligament,True
+Left sublingual gland,fma59805,digestive,10,143,230,,,False
+Left submandibular gland,fma59803,digestive,10,123,228,,,False
+Right sublingual gland,fma59804,digestive,10,141,240,,,False
+Right submandibular gland,fma59802,digestive,10,121,226,,,False
+Cricoid cartilage,fma9615,skeletal,10,838,1514,head-neck,cartilage,False
+Epiglottis,fma55130,respiratory,10,1821,1780,,,False
+Hyo-epiglottic ligament,fma55227,connective,10,1004,1028,,ligament,False
+Hyoid bone,fma52749,skeletal,10,604,1036,head-neck,bone,True
+Left cuneiform cartilage,fma55118,skeletal,10,91,174,,cartilage,False
+Left aryepiglotticus,fma46605,muscular,10,4468,2602,,muscle,False
+Left arytenoid cartilage,fma55114,skeletal,10,280,528,head-neck,cartilage,True
+Left corniculate cartilage,fma55116,skeletal,10,109,134,,cartilage,False
+Left conus elasticus,fma55252,connective,10,1280,1626,,,False
+Left lateral crico-arytenoid,fma46581,muscular,10,1438,2266,head-neck,muscle,True
+Left lateral thyrohyoid ligament,fma55141,connective,10,411,694,head-neck,ligament,True
+Left oblique arytenoid,fma46585,muscular,10,1713,2008,head-neck,muscle,True
+Oblique part of left cricothyroid,fma46614,muscular,10,1860,2498,,muscle,False
+Left posterior crico-arytenoid,fma46578,muscular,10,1200,2098,head-neck,muscle,True
+Straight part of left cricothyroid,fma46612,muscular,10,1710,2096,,muscle,False
+Left thyro-arytenoid,fma46590,muscular,10,1318,1928,head-neck,muscle,True
+Left thyro-arytenoid,fma46590,muscular,10,2168,2636,head-neck,muscle,False
+Left thyrohyoid membrane,fma55134,connective,10,1073,1612,head-neck,,False
+Left vocal ligament,fma55246,connective,10,1832,1116,,ligament,False
+Left vocalis,fma46593,muscular,10,180,252,,muscle,False
+Median cricothyroid ligament,fma55237,connective,10,1265,1236,,ligament,False
+Median thyrohyoid ligament,fma55138,connective,10,1155,1598,head-neck,ligament,True
+Right aryepiglotticus,fma46604,muscular,10,3302,2066,,muscle,False
+Right arytenoid cartilage,fma55113,skeletal,10,279,534,head-neck,cartilage,True
+Right corniculate cartilage,fma55115,skeletal,10,108,172,,cartilage,False
+Right conus elasticus,fma55251,connective,10,3074,2412,,,False
+Right cuneiform cartilage,fma55117,skeletal,10,88,170,,cartilage,False
+Right lateral crico-arytenoid,fma46580,muscular,10,1357,2206,head-neck,muscle,True
+Right lateral thyrohyoid ligament,fma55140,connective,10,418,716,head-neck,ligament,True
+Right oblique arytenoid,fma46584,muscular,10,1668,1966,head-neck,muscle,True
+Oblique part of right cricothyroid,fma46613,muscular,10,1714,2460,,muscle,False
+Right posterior crico-arytenoid,fma46577,muscular,10,1160,2094,head-neck,muscle,True
+Straight part of right cricothyroid,fma46611,muscular,10,977,1160,,muscle,False
+Right thyro-arytenoid,fma46589,muscular,10,1362,1970,head-neck,muscle,True
+Right thyro-arytenoid,fma46589,muscular,10,2384,2870,head-neck,muscle,False
+Right thyrohyoid membrane,fma55133,connective,10,988,1496,head-neck,,False
+Right vocal ligament,fma55245,connective,10,717,600,,ligament,False
+Right vocalis,fma46592,muscular,10,169,252,,muscle,False
+Thyro-epiglottic ligament,fma55230,connective,10,989,878,,ligament,False
+Thyroid cartilage,fma55099,skeletal,10,1081,2058,head-neck,cartilage,True
+Transverse arytenoid,fma46582,muscular,10,2642,2914,head-neck,muscle,True
+Skin,fma7163,integumentary,10,22902,44744,,skin,False
+External ear,fma52781,sensory,10,894,1350,head-neck,organ,True
+Eyebrow,fma54237,integumentary,10,13875,6174,,,False
+Hair of head,fma54241,integumentary,11,5751,5592,,,False
+Lip,fma59816,integumentary,11,2013,1134,,,False
+Pubic hair,fma54319,integumentary,11,5308,2718,,,False
+Caudate lobe of liver,fma13365,digestive,11,600,1176,,,False
+Gallbladder,fma7202,digestive,11,649,1292,,,False
+Hepatovenous segment II,fma15739,venous,11,1757,3150,,vein,False
+Hepatovenous segment III,fma15741,venous,11,1312,2270,,vein,False
+Hepatovenous segment IV,fma15742,venous,11,3872,3946,,vein,False
+Hepatovenous segment V,fma15743,venous,11,1809,2516,,vein,False
+Hepatovenous segment VI,fma15744,venous,11,2263,4278,,vein,False
+Hepatovenous segment VIII,fma15746,venous,11,2454,4214,,vein,False
+Hepatovenous segment VIII,fma15746,venous,11,2793,4750,,vein,False
+Left posterior basal segmental artery,fma8647,arterial,11,194,384,,artery,False
+Left lateral basal segmental artery,fma8646,arterial,11,64,58,,artery,False
+Left anterior basal segmental artery,fma8645,arterial,11,312,528,,artery,False
+Left medial basal segmental artery,fma8644,arterial,11,208,330,,artery,False
+Left medial basal segmental artery,fma8644,arterial,11,197,320,,artery,False
+Left anterior basal segmental artery,fma8645,arterial,11,94,122,,artery,False
+Left anterior basal segmental artery,fma8645,arterial,11,87,102,,artery,False
+Left superior segmental artery,fma8642,arterial,11,310,552,,artery,False
+Left superior segmental artery,fma8642,arterial,11,85,94,,artery,False
+Left superior segmental artery,fma8642,arterial,11,89,110,,artery,False
+Left superior segmental artery,fma8642,arterial,11,193,356,,artery,False
+Left posterior basal segmental artery,fma8647,arterial,11,110,140,,artery,False
+Left superior segmental artery,fma8642,arterial,11,85,122,,artery,False
+Left superior segmental artery,fma8642,arterial,11,222,380,,artery,False
+Left superior segmental artery,fma8642,arterial,11,93,130,,artery,False
+Inferior lingular artery,fma8640,arterial,11,267,464,,artery,False
+Inferior lingular artery,fma8640,arterial,11,231,348,,artery,False
+Superior lingular artery,fma8639,arterial,11,276,460,,artery,False
+Superior lingular artery,fma8639,arterial,11,85,84,,artery,False
+Superior lingular artery,fma8639,arterial,11,132,208,,artery,False
+Superior lingular artery,fma8639,arterial,11,105,200,,artery,False
+Left anterior segmental artery,fma13279,arterial,11,310,526,,artery,False
+Left posterior basal segmental artery,fma8647,arterial,11,213,360,,artery,False
+Left anterior segmental artery,fma13279,arterial,11,127,210,,artery,False
+Left anterior segmental artery,fma13279,arterial,11,146,278,,artery,False
+Left anterior segmental artery,fma13279,arterial,11,217,382,,artery,False
+Left anterior segmental artery,fma13279,arterial,11,131,150,,artery,False
+Left anterior segmental artery,fma13279,arterial,11,307,544,,artery,False
+Left anterior segmental artery,fma13279,arterial,11,101,120,,artery,False
+Left anterior segmental artery,fma13279,arterial,11,133,190,,artery,False
+Left posterior segmental artery,fma8635,arterial,11,173,298,,artery,False
+Left posterior segmental artery,fma8635,arterial,11,117,148,,artery,False
+Left posterior segmental artery,fma8635,arterial,11,122,192,,artery,False
+Left posterior basal segmental artery,fma8647,arterial,11,78,90,,artery,False
+Left apical segmental artery,fma8634,arterial,11,189,356,,artery,False
+Left apical segmental artery,fma8634,arterial,11,119,170,,artery,False
+Left apical segmental artery,fma8634,arterial,11,132,194,,artery,False
+Left apical segmental artery,fma8634,arterial,11,122,186,,artery,False
+Left posterior basal segmental artery,fma8647,arterial,11,238,400,,artery,False
+Left posterior basal segmental artery,fma8647,arterial,11,140,216,,artery,False
+Left lateral basal segmental artery,fma8646,arterial,11,191,376,,artery,False
+Left lateral basal segmental artery,fma8646,arterial,11,141,206,,artery,False
+Left lateral basal segmental artery,fma8646,arterial,11,143,220,,artery,False
+Left pulmonary artery,fma50873,arterial,11,601,1198,,artery,False
+Left superior pulmonary vein,fma49916,venous,11,209,414,,vein,False
+Left posterior segmental vein,fma9438,venous,11,131,224,,vein,False
+Left posterior segmental vein,fma9438,venous,11,170,316,,vein,False
+Left posterior segmental vein,fma9438,venous,11,196,304,,vein,False
+Left posterior segmental vein,fma9438,venous,11,97,148,,vein,False
+Left anterior segmental vein,fma8667,venous,11,193,378,,vein,False
+Left anterior segmental vein,fma8667,venous,11,140,224,,vein,False
+Left anterior segmental vein,fma8667,venous,11,87,126,,vein,False
+Left superior pulmonary vein,fma49916,venous,11,227,448,,vein,False
+Inferior lingular vein,fma8669,venous,11,147,252,,vein,False
+Inferior lingular vein,fma8669,venous,11,114,134,,vein,False
+Left apical segmental vein,fma9437,venous,11,106,204,,vein,False
+Superior lingular vein,fma8668,venous,11,168,316,,vein,False
+Superior lingular vein,fma8668,venous,11,119,170,,vein,False
+Left posterior segmental vein,fma9438,venous,11,261,462,,vein,False
+Left posterior segmental vein,fma9438,venous,11,90,112,,vein,False
+Left posterior segmental vein,fma9438,venous,11,106,190,,vein,False
+Left posterior segmental vein,fma9438,venous,11,105,168,,vein,False
+Left posterior segmental vein,fma9438,venous,11,108,174,,vein,False
+Left inferior pulmonary vein,fma49913,venous,11,157,310,,vein,False
+Left posterior basal segmental vein,fma9451,venous,11,169,298,,vein,False
+Left posterior basal segmental vein,fma9451,venous,11,114,194,,vein,False
+Left apical segmental vein,fma9437,venous,11,90,174,,vein,False
+Left posterior basal segmental vein,fma9451,venous,11,82,102,,vein,False
+Left posterior basal segmental vein,fma9451,venous,11,115,182,,vein,False
+Left inferior pulmonary vein,fma49913,venous,11,164,324,,vein,False
+Left lateral basal segmental vein,fma9450,venous,11,143,264,,vein,False
+Left lateral basal segmental vein,fma9450,venous,11,81,142,,vein,False
+Left lateral basal segmental vein,fma9450,venous,11,106,158,,vein,False
+Left lateral basal segmental vein,fma9450,venous,11,90,108,,vein,False
+Left inferior pulmonary vein,fma49913,venous,11,263,522,,vein,False
+Left anterior basal segmental vein,fma8678,venous,11,125,224,,vein,False
+Left anterior basal segmental vein,fma8678,venous,11,92,134,,vein,False
+Left apical segmental vein,fma9437,venous,11,176,294,,vein,False
+Left anterior basal segmental vein,fma8678,venous,11,204,374,,vein,False
+Left anterior basal segmental vein,fma8678,venous,11,94,150,,vein,False
+Left apical segmental vein,fma9437,venous,11,103,188,,vein,False
+Left apical segmental vein,fma9437,venous,11,116,198,,vein,False
+Left apical segmental vein,fma9437,venous,11,75,112,,vein,False
+Left apical segmental vein,fma9437,venous,11,104,174,,vein,False
+Left posterior segmental vein,fma9438,venous,11,100,142,,vein,False
+Pulmonary trunk,fma8612,arterial,11,674,958,,,False
+Apical part of right apical segmental artery,fma68662,arterial,11,210,320,,artery,False
+Apical part of right posterior segmental artery,fma68670,arterial,11,88,90,,artery,False
+Apical part of right posterior segmental artery,fma68670,arterial,11,100,120,,artery,False
+Posterior part of right posterior segmental artery,fma68673,arterial,11,254,438,,artery,False
+Posterior part of right posterior segmental artery,fma68673,arterial,11,114,124,,artery,False
+Posterior part of right posterior segmental artery,fma68673,arterial,11,145,196,,artery,False
+Right upper lobar artery,fma68197,arterial,11,280,400,,artery,False
+Posterior branch of right anterior segmental artery,fma68677,arterial,11,158,288,,artery,False
+Anterior branch of right anterior segmental artery,fma68683,arterial,11,148,216,,artery,False
+Anterior branch of right anterior segmental artery,fma68683,arterial,11,87,96,,artery,False
+Anterior branch of right anterior segmental artery,fma68683,arterial,11,115,160,,artery,False
+Anterior part of right apical segmental artery,fma68665,arterial,11,138,200,,artery,False
+Anterior branch of right anterior segmental artery,fma68683,arterial,11,106,124,,artery,False
+Posterior branch of right anterior segmental artery,fma68677,arterial,11,90,110,,artery,False
+Posterior branch of right anterior segmental artery,fma68677,arterial,11,208,318,,artery,False
+Anterior branch of lateral segmental artery,fma68691,arterial,11,196,308,,artery,False
+Posterior branch of lateral segmental artery,fma68690,arterial,11,119,182,,artery,False
+Posterior branch of lateral segmental artery,fma68690,arterial,11,67,66,,artery,False
+Anterior branch of lateral segmental artery,fma68691,arterial,11,79,74,,artery,False
+Superior branch of medial segmental artery,fma68693,arterial,11,71,64,,artery,False
+Inferior branch of medial segmental artery,fma68694,arterial,11,85,100,,artery,False
+Inferior branch of medial segmental artery,fma68694,arterial,11,124,170,,artery,False
+Anterior part of right apical segmental artery,fma68665,arterial,11,267,430,,artery,False
+Superior branch of medial segmental artery,fma68693,arterial,11,235,448,,artery,False
+Lateral branch of right superior segmental artery,fma68712,arterial,11,184,302,,artery,False
+Lateral branch of right superior segmental artery,fma68712,arterial,11,140,166,,artery,False
+Lateral branch of right superior segmental artery,fma68712,arterial,11,57,52,,artery,False
+Medial branch of right superior segmental artery,fma68706,arterial,11,161,226,,artery,False
+Medial branch of right superior segmental artery,fma68706,arterial,11,260,422,,artery,False
+Medial branch of right superior segmental artery,fma68706,arterial,11,184,266,,artery,False
+Superior branch of right superior segmental artery,fma68709,arterial,11,169,278,,artery,False
+Superior branch of right superior segmental artery,fma68709,arterial,11,161,230,,artery,False
+Superior branch of right superior segmental artery,fma68709,arterial,11,303,468,,artery,False
+Anterior part of right apical segmental artery,fma68665,arterial,11,129,192,,artery,False
+Lateral branch of right anterior basal segmental artery,fma68725,arterial,11,224,382,,artery,False
+Basal branch of right anterior basal segmental artery,fma68723,arterial,11,101,130,,artery,False
+Basal branch of right anterior basal segmental artery,fma68723,arterial,11,199,254,,artery,False
+Lateral branch of right lateral basal segmental artery,fma68728,arterial,11,111,190,,artery,False
+Lateral branch of right lateral basal segmental artery,fma68728,arterial,11,172,294,,artery,False
+Lateral branch of right lateral basal segmental artery,fma68728,arterial,11,182,360,,artery,False
+Lateral branch of right lateral basal segmental artery,fma68728,arterial,11,190,254,,artery,False
+Mediobasal branch of right posterior basal segmental artery,fma68741,arterial,11,157,252,,artery,False
+Accessory subsuperior branch of right posterior basal segmental artery,fma68735,arterial,11,110,138,,artery,False
+Accessory subsuperior branch of right posterior basal segmental artery,fma68735,arterial,11,75,68,,artery,False
+Anterior part of right apical segmental artery,fma68665,arterial,11,118,152,,artery,False
+Mediobasal branch of right posterior basal segmental artery,fma68741,arterial,11,71,70,,artery,False
+Laterobasal branch of right posterior basal segmental artery,fma68738,arterial,11,246,408,,artery,False
+Laterobasal branch of right posterior basal segmental artery,fma68738,arterial,11,209,336,,artery,False
+Apical part of right apical segmental artery,fma68662,arterial,11,100,110,,artery,False
+Apical part of right apical segmental artery,fma68662,arterial,11,228,324,,artery,False
+Apical part of right apical segmental artery,fma68662,arterial,11,142,202,,artery,False
+Apical part of right posterior segmental artery,fma68670,arterial,11,437,804,,artery,False
+Right pulmonary artery,fma50872,arterial,11,336,668,,artery,False
+Right superior pulmonary vein,fma49914,venous,11,171,324,,vein,False
+Inferior part of right anterior segmental vein,fma68928,venous,11,157,252,,vein,False
+Right posterior segmental vein,fma8663,venous,11,135,218,,vein,False
+Right posterior segmental vein,fma8663,venous,11,108,166,,vein,False
+Right posterior segmental vein,fma8663,venous,11,77,110,,vein,False
+Right posterior segmental vein,fma8663,venous,11,100,164,,vein,False
+Right posterior segmental vein,fma8663,venous,11,106,188,,vein,False
+Superior part of right anterior segmental vein,fma68926,venous,11,171,298,,vein,False
+Right anterior segmental vein,fma8662,venous,11,107,194,,vein,False
+Right anterior segmental vein,fma8662,venous,11,86,124,,vein,False
+Superior part of medial segmental vein,fma68982,venous,11,228,420,,vein,False
+Trunk of right apical segmental vein,fma68880,venous,11,139,264,,vein,False
+Inferior part of medial segmental vein,fma68983,venous,11,239,448,,vein,False
+Inferior part of medial segmental vein,fma68983,venous,11,71,100,,vein,False
+Anterior part of lateral segmental vein,fma68945,venous,11,193,382,,vein,False
+Anterior part of lateral segmental vein,fma68945,venous,11,106,204,,vein,False
+Anterior part of lateral segmental vein,fma68945,venous,11,158,302,,vein,False
+Posterior part of lateral segmental vein,fma68944,venous,11,171,334,,vein,False
+Posterior part of lateral segmental vein,fma68944,venous,11,127,232,,vein,False
+Posterior part of lateral segmental vein,fma68944,venous,11,114,206,,vein,False
+Right inferior pulmonary vein,fma49911,venous,11,113,196,,vein,False
+Right posterior basal segmental vein,fma9428,venous,11,155,302,,vein,False
+Anterior part of right apical segmental vein,fma68921,venous,11,134,188,,vein,False
+Right posterior basal segmental vein,fma9428,venous,11,145,234,,vein,False
+Right posterior basal segmental vein,fma9428,venous,11,95,120,,vein,False
+Right posterior basal segmental vein,fma9428,venous,11,126,204,,vein,False
+Right posterior basal segmental vein,fma9428,venous,11,118,172,,vein,False
+Right posterior basal segmental vein,fma9428,venous,11,127,218,,vein,False
+Right posterior basal segmental vein,fma9428,venous,11,101,170,,vein,False
+Right anterior basal segmental vein,fma8673,venous,11,162,304,,vein,False
+Right superior segmental vein,fma8670,venous,11,179,342,,vein,False
+Right superior segmental vein,fma8670,venous,11,190,308,,vein,False
+Right superior segmental vein,fma8670,venous,11,67,100,,vein,False
+Anterior part of right apical segmental vein,fma68921,venous,11,103,178,,vein,False
+Right medial basal segmental vein,fma9422,venous,11,143,206,,vein,False
+Right medial basal segmental vein,fma9422,venous,11,73,80,,vein,False
+Right anterior basal segmental vein,fma8673,venous,11,129,250,,vein,False
+Right posterior basal segmental vein,fma9428,venous,11,89,122,,vein,False
+Right posterior basal segmental vein,fma9428,venous,11,98,170,,vein,False
+Right lateral basal segmental vein,fma9425,venous,11,144,258,,vein,False
+Right lateral basal segmental vein,fma9425,venous,11,88,150,,vein,False
+Right lateral basal segmental vein,fma9425,venous,11,85,152,,vein,False
+Right lateral basal segmental vein,fma9425,venous,11,106,190,,vein,False
+Right superior segmental vein,fma8670,venous,11,97,134,,vein,False
+Apical part of right apical segmental vein,fma8681,venous,11,130,226,,vein,False
+Right superior segmental vein,fma8670,venous,11,95,146,,vein,False
+Right superior segmental vein,fma8670,venous,11,99,134,,vein,False
+Apical part of right apical segmental vein,fma8681,venous,11,107,204,,vein,False
+Apical part of right apical segmental vein,fma8681,venous,11,81,102,,vein,False
+Right posterior segmental vein,fma8663,venous,11,185,356,,vein,False
+Right posterior segmental vein,fma8663,venous,11,125,216,,vein,False
+Anterior superior tributary of right hepatic biliary tree,fma71867,digestive,11,279,466,,,False
+Anterior inferior tributary of right hepatic biliary tree,fma71868,digestive,11,739,846,,,False
+Anterior superior segmental branch of right portal vein,fma15420,venous,11,262,492,,vein,False
+Anterior inferior segmental branch of right portal vein,fma15421,venous,11,509,800,,vein,False
+Anterior inferior segmental hepatic artery,fma70443,arterial,11,726,814,,artery,False
+Anterior superior segmental hepatic artery,fma70442,arterial,11,247,476,,artery,False
+Caudate lobe branch of left hepatic artery,fma70455,arterial,11,204,344,,artery,False
+Common hepatic artery,fma14771,arterial,11,184,348,,artery,False
+Common hepatic duct,fma14668,digestive,11,315,626,,,False
+Cystic duct,fma14539,digestive,11,155,276,,,False
+Hepatic artery proper,fma14772,arterial,11,176,348,,artery,False
+Pre-hepatic portal vein,fma71904,venous,11,396,788,,vein,False
+Anterior inferior segmental tributary of middle hepatic vein,fma15800,venous,11,311,616,,vein,False
+Medial inferior segmental tributary of middle hepatic vein,fma15801,venous,11,334,664,,vein,False
+Medial inferior segmental tributary of middle hepatic vein,fma15801,venous,11,155,306,,vein,False
+Anterior inferior segmental tributary of middle hepatic vein,fma15800,venous,11,150,288,,vein,False
+Lateral superior tributary of left hepatic biliary tree,fma71887,digestive,11,251,408,,,False
+Lateral inferior tributary of left hepatic biliary tree,fma71888,digestive,11,364,520,,,False
+Lateral superior tributary of left hepatic biliary tree,fma71887,digestive,11,318,462,,,False
+Lateral superior segmental hepatic artery,fma70452,arterial,11,219,370,,artery,False
+Lateral inferior segmental hepatic artery,fma70453,arterial,11,273,442,,artery,False
+Lateral superior segmental hepatic artery,fma70452,arterial,11,291,368,,artery,False
+Left duct of caudate lobe of liver,fma76903,digestive,11,231,342,,,False
+Trunk of left hepatic artery,fma70457,arterial,11,351,698,,artery,False
+Left hepatic duct,fma14670,digestive,11,372,736,,,False
+Lateral inferior segmental tributary of left hepatic vein,fma15804,venous,11,347,654,,vein,False
+Lateral superior segmental tributary of left hepatic vein,fma15803,venous,11,289,566,,vein,False
+Lateral inferior segmental tributary of left hepatic vein,fma15804,venous,11,210,366,,vein,False
+Lateral inferior segmental tributary of left hepatic vein,fma15804,venous,11,192,348,,vein,False
+Medial superior segmental tributary of left hepatic vein,fma15802,venous,11,280,554,,vein,False
+Trunk of left portal vein,fma82697,venous,11,354,704,,vein,False
+Medial inferior tributary of left hepatic biliary tree,fma71886,digestive,11,369,592,,,False
+Medial superior tributary of left hepatic biliary tree,fma71885,digestive,11,301,488,,,False
+Medial superior tributary of left hepatic biliary tree,fma71885,digestive,11,354,466,,,False
+Medial inferior segmental hepatic artery,fma70450,arterial,11,356,622,,artery,False
+Medial superior segmental hepatic artery,fma70449,arterial,11,444,530,,artery,False
+Posterior inferior tributary of right hepatic biliary tree,fma71870,digestive,11,369,618,,,False
+Posterior superior tributary of right hepatic biliary tree,fma71869,digestive,11,211,294,,,False
+Posterior superior tributary of right hepatic biliary tree,fma71869,digestive,11,460,496,,,False
+Posterior inferior segmental branch of right portal vein,fma15424,venous,11,326,646,,vein,False
+Posterior superior segmental branch of right portal vein,fma15423,venous,11,165,322,,vein,False
+Posterior superior segmental branch of right portal vein,fma15423,venous,11,383,500,,vein,False
+Posterior inferior segmental hepatic artery,fma70446,arterial,11,343,520,,artery,False
+Posterior superior segmental hepatic artery,fma70445,arterial,11,403,522,,artery,False
+Posterior superior segmental hepatic artery,fma70445,arterial,11,406,442,,artery,False
+Trunk of right hepatic artery,fma70456,arterial,11,223,442,,artery,False
+Posterior inferior segmental tributary of right hepatic vein,fma15797,venous,11,292,546,,vein,False
+Posterior superior segmental tributary of right hepatic vein,fma15796,venous,11,281,558,,vein,False
+Posterior inferior segmental tributary of right hepatic vein,fma15797,venous,11,247,478,,vein,False
+Anterior superior segmental tributary of right hepatic vein,fma15798,venous,11,422,818,,vein,False
+Trunk of right portal vein,fma82695,venous,11,105,206,,vein,False
+Right hepatic duct,fma14669,digestive,11,115,226,,,False
+Caudate lobe branch of left portal vein,fma15425,venous,11,259,384,,vein,False
+Lateral inferior segmental branch of left portal vein,fma15432,venous,11,439,850,,vein,False
+Lateral superior segmental branch of left portal vein,fma15431,venous,11,386,716,,vein,False
+Medial superior segmental branch of left portal vein,fma15428,venous,11,549,950,,vein,False
+Medial inferior segmental branch of left portal vein,fma15429,venous,11,428,844,,vein,False
+Left adrenal gland,fma15630,endocrine,11,791,1578,,,False
+Right adrenal gland,fma15629,endocrine,11,734,1464,,,False
+Diaphragm,fma13295,muscular,11,8469,15074,thorax-shoulder,muscle,True
+Corpus cavernosum of penis,fma19618,reproductive,11,698,1070,,,False
+Corpus spongiosum of penis,fma19617,reproductive,11,280,544,,,False
+Glans penis,fma18247,reproductive,11,900,1328,,,False
+Left deferent duct,fma19236,reproductive,11,689,822,,,False
+Left epididymis,fma18257,reproductive,11,180,230,,,False
+Left seminal vesicle,fma19388,reproductive,11,240,362,,,False
+Left testis,fma7212,reproductive,11,107,210,,,False
+Prostate,fma9600,reproductive,11,223,442,,,False
+Right deferent duct,fma19235,reproductive,11,667,736,,,False
+Right epididymis,fma18256,reproductive,11,115,76,,,False
+Right testis,fma7211,reproductive,11,108,212,,,False
+Right seminal vesicle,fma19387,reproductive,11,232,354,,,False
+Left ureter,fma15572,urinary,11,441,760,,,False
+Left kidney,fma7205,urinary,11,762,1512,,,False
+Right ureter,fma15571,urinary,11,551,818,,,False
+Right kidney,fma7204,urinary,11,747,1480,,,False
+Urethra,fma19667,urinary,11,269,306,,,False
+Urinary bladder,fma15900,urinary,11,126,224,,,False
+Left lobe of thymus,fma71195,lymphatic,11,491,824,,,False
+Right lobe of thymus,fma71194,lymphatic,11,455,764,,,False
+Right hip bone,fma16586,skeletal,11,1036,1898,,bone,False
+Xiphoid process,fma7488,skeletal,11,464,864,thorax-shoulder,bone,True
+Tenth thoracic vertebra,fma10037,skeletal,11,1251,2160,thorax-shoulder,bone,True
+Eleventh thoracic vertebra,fma10059,skeletal,11,1238,2006,thorax-shoulder,bone,True
+Twelfth thoracic vertebra,fma10081,skeletal,11,1228,2062,thorax-shoulder,bone,True
+First lumbar vertebra,fma13072,skeletal,11,1391,2404,,bone,False
+First thoracic vertebra,fma9165,skeletal,11,915,1398,thorax-shoulder,bone,True
+Second lumbar vertebra,fma13073,skeletal,11,1493,2492,,bone,False
+Second thoracic vertebra,fma9187,skeletal,11,965,1570,thorax-shoulder,bone,True
+Third cervical vertebra,fma12521,skeletal,11,1184,1766,head-neck,bone,True
+Third lumbar vertebra,fma13074,skeletal,11,1420,2454,,bone,False
+Third thoracic vertebra,fma9209,skeletal,11,997,1696,thorax-shoulder,bone,True
+Fourth cervical vertebra,fma12522,skeletal,11,1288,2062,head-neck,bone,True
+Fourth lumbar vertebra,fma13075,skeletal,12,1503,2630,,bone,False
+Fourth thoracic vertebra,fma9248,skeletal,12,1004,1684,thorax-shoulder,bone,True
+Fifth cervical vertebra,fma12523,skeletal,12,1396,1934,head-neck,bone,True
+Fifth lumbar vertebra,fma13076,skeletal,12,1469,2640,,bone,False
+Fifth thoracic vertebra,fma9922,skeletal,12,1089,1832,thorax-shoulder,bone,True
+Sixth cervical vertebra,fma12524,skeletal,12,1257,1928,head-neck,bone,True
+Sixth thoracic vertebra,fma9945,skeletal,12,1127,1830,thorax-shoulder,bone,True
+Seventh cervical vertebra,fma12525,skeletal,12,1162,1520,head-neck,bone,True
+Seventh thoracic vertebra,fma9968,skeletal,12,1223,2094,thorax-shoulder,bone,True
+Eighth thoracic vertebra,fma9991,skeletal,12,1195,2048,thorax-shoulder,bone,True
+Ninth thoracic vertebra,fma10014,skeletal,12,1153,2040,thorax-shoulder,bone,True
+Atlas,fma12519,skeletal,12,1114,1514,head-neck,bone,True
+Axis,fma12520,skeletal,12,1408,2028,head-neck,bone,True
+Body of sternum,fma7487,skeletal,12,2511,2810,thorax-shoulder,bone,True
+Distal phalanx of left second toe,fma32653,skeletal,12,168,238,,bone,False
+Distal phalanx of left third toe,fma32655,skeletal,12,188,336,,bone,False
+Distal phalanx of left fourth toe,fma32657,skeletal,12,146,226,,bone,False
+Distal phalanx of left big toe,fma32651,skeletal,12,249,366,,bone,False
+Distal phalanx of left index finger,fma23953,skeletal,12,198,318,arms-hands,bone,True
+Distal phalanx of left little finger,fma23959,skeletal,12,154,198,arms-hands,bone,True
+Distal phalanx of left little toe,fma32659,skeletal,12,160,220,,bone,False
+Distal phalanx of left middle finger,fma23955,skeletal,12,170,260,arms-hands,bone,True
+Distal phalanx of left ring finger,fma23957,skeletal,12,138,192,arms-hands,bone,True
+Distal phalanx of left thumb,fma23951,skeletal,12,185,262,arms-hands,bone,True
+Distal phalanx of right second toe,fma32652,skeletal,12,168,196,,bone,False
+Distal phalanx of right third toe,fma32654,skeletal,12,161,258,,bone,False
+Distal phalanx of right fourth toe,fma32656,skeletal,12,142,240,,bone,False
+Distal phalanx of right big toe,fma32650,skeletal,12,271,404,,bone,False
+Distal phalanx of right index finger,fma24460,skeletal,12,187,208,arms-hands,bone,True
+Distal phalanx of right little finger,fma24463,skeletal,12,138,184,arms-hands,bone,True
+Distal phalanx of right little toe,fma32658,skeletal,12,178,210,,bone,False
+Distal phalanx of right middle finger,fma24461,skeletal,12,141,170,arms-hands,bone,True
+Distal phalanx of right ring finger,fma24462,skeletal,12,114,112,arms-hands,bone,True
+Distal phalanx of right thumb,fma24459,skeletal,12,181,228,arms-hands,bone,True
+Ethmoid,fma52740,skeletal,12,5334,8618,head-neck,bone,True
+Frontal bone,fma52734,skeletal,12,3315,5112,head-neck,bone,True
+Hyoid bone,fma52749,skeletal,12,604,1036,head-neck,bone,False
+Intervertebral disk of axis,fma25058,skeletal,12,996,1872,,bone,False
+Intervertebral disk of fourth thoracic vertebra,fma13501,skeletal,12,999,1310,thorax-shoulder,bone,True
+Intervertebral disk of fifth thoracic vertebra,fma13502,skeletal,12,1280,1530,thorax-shoulder,bone,True
+Intervertebral disk of sixth thoracic vertebra,fma13503,skeletal,12,1831,2104,thorax-shoulder,bone,True
+Intervertebral disk of seventh thoracic vertebra,fma13504,skeletal,12,1813,2146,thorax-shoulder,bone,True
+Intervertebral disk of eighth thoracic vertebra,fma13505,skeletal,12,2675,2548,thorax-shoulder,bone,True
+Intervertebral disk of ninth thoracic vertebra,fma13506,skeletal,12,2552,2420,thorax-shoulder,bone,True
+Intervertebral disk of tenth thoracic vertebra,fma13507,skeletal,12,2554,2456,thorax-shoulder,bone,True
+Intervertebral disk of eleventh thoracic vertebra,fma13508,skeletal,12,2892,2648,thorax-shoulder,bone,True
+Intervertebral disk,fma10446,skeletal,12,3614,2852,,bone,False
+Intervertebral disk of first lumbar vertebra,fma16033,skeletal,12,3399,2882,,bone,False
+Intervertebral disk of third cervical vertebra,fma13896,skeletal,12,582,728,head-neck,bone,True
+Intervertebral disk of second lumbar vertebra,fma16034,skeletal,12,2955,2604,,bone,False
+Intervertebral disk of third lumbar vertebra,fma16035,skeletal,12,3750,2922,,bone,False
+Intervertebral disk of fourth lumbar vertebra,fma16036,skeletal,12,3137,2710,,bone,False
+Intervertebral disk of fifth lumbar vertebra,fma16037,skeletal,12,1765,2048,,bone,False
+Intervertebral disk of fourth cervical vertebra,fma13897,skeletal,12,626,840,head-neck,bone,True
+Intervertebral disk of fifth cervical vertebra,fma13898,skeletal,12,629,864,head-neck,bone,True
+Intervertebral disk of sixth cervical vertebra,fma13899,skeletal,12,850,834,head-neck,bone,True
+Intervertebral disk of seventh cervical vertebra,fma13900,skeletal,12,828,956,head-neck,bone,True
+Intervertebral disk of first thoracic vertebra,fma10458,skeletal,12,950,1062,thorax-shoulder,bone,True
+Intervertebral disk of second thoracic vertebra,fma13495,skeletal,12,1128,1230,thorax-shoulder,bone,True
+Intervertebral disk of third thoracic vertebra,fma13500,skeletal,12,1410,1388,thorax-shoulder,bone,True
+Left tenth rib,fma8472,skeletal,12,754,1500,thorax-shoulder,bone,True
+Left eleventh rib,fma8532,skeletal,12,537,1070,thorax-shoulder,bone,True
+Left twelfth rib,fma8534,skeletal,12,367,730,thorax-shoulder,bone,True
+Left first rib,fma7987,skeletal,12,507,1010,thorax-shoulder,bone,True
+Left second rib,fma8012,skeletal,12,656,1230,thorax-shoulder,bone,True
+Left third rib,fma8039,skeletal,12,802,1594,thorax-shoulder,bone,True
+Left fourth rib,fma8148,skeletal,12,981,1946,thorax-shoulder,bone,True
+Left fifth rib,fma8093,skeletal,12,1095,2136,thorax-shoulder,bone,True
+Left sixth rib,fma8202,skeletal,12,1147,2258,thorax-shoulder,bone,True
+Left seventh rib,fma8256,skeletal,12,1122,2206,thorax-shoulder,bone,True
+Left eighth rib,fma8310,skeletal,12,936,1832,thorax-shoulder,bone,True
+Left ninth rib,fma8391,skeletal,12,843,1666,thorax-shoulder,bone,True
+Left clavicle,fma13323,skeletal,12,426,826,thorax-shoulder,bone,True
+Left first costal cartilage,fma8005,skeletal,12,391,594,thorax-shoulder,cartilage,True
+Left first metacarpal bone,fma24465,skeletal,12,293,556,arms-hands,bone,True
+Left first metatarsal bone,fma24508,skeletal,12,497,944,,bone,False
+Left second costal cartilage,fma8031,skeletal,12,309,546,thorax-shoulder,cartilage,True
+Left second metacarpal bone,fma24467,skeletal,12,328,592,arms-hands,bone,True
+Left second metatarsal bone,fma24510,skeletal,12,401,618,,bone,False
+Left third costal cartilage,fma8058,skeletal,12,306,560,thorax-shoulder,cartilage,True
+Left third metacarpal bone,fma24469,skeletal,12,328,586,arms-hands,bone,True
+Left third metatarsal bone,fma24512,skeletal,12,367,628,,bone,False
+Left fourth costal cartilage,fma8167,skeletal,12,318,564,thorax-shoulder,cartilage,True
+Left fourth metacarpal bone,fma24471,skeletal,12,267,432,arms-hands,bone,True
+Left fourth metatarsal bone,fma24514,skeletal,12,353,610,,bone,False
+Left fifth costal cartilage,fma8112,skeletal,12,365,642,thorax-shoulder,cartilage,True
+Left fifth metacarpal bone,fma24473,skeletal,12,265,468,arms-hands,bone,True
+Left fifth metatarsal bone,fma24516,skeletal,12,366,702,,bone,False
+Left sixth costal cartilage,fma8221,skeletal,12,350,616,thorax-shoulder,cartilage,True
+Left seventh costal cartilage,fma8275,skeletal,12,523,768,thorax-shoulder,cartilage,True
+Left calcaneus,fma24498,skeletal,12,632,1122,,bone,False
+Left capitate,fma24447,skeletal,12,230,388,arms-hands,bone,True
+Left cuboid bone,fma24529,skeletal,12,449,806,,bone,False
+Left femur,fma24475,skeletal,12,459,884,,bone,False
+Left fibula,fma24481,skeletal,12,149,278,,bone,False
+Left hamate,fma24449,skeletal,12,274,440,arms-hands,bone,True
+Left humerus,fma23131,skeletal,12,586,962,arms-hands,bone,True
+Left inferior nasal concha,fma54738,respiratory,12,435,662,head-neck,,False
+Left intermediate cuneiform bone,fma24524,skeletal,12,291,440,,bone,False
+Left lacrimal bone,fma53646,sensory,12,347,604,head-neck,,False
+Sesamoid bone of left foot,fma45098,skeletal,12,78,100,,bone,False
+Left lateral cuneiform bone,fma24526,skeletal,12,389,648,,bone,False
+Left lunate,fma24438,skeletal,12,184,308,arms-hands,bone,True
+Left maxilla,fma53650,skeletal,12,2678,3598,head-neck,bone,True
+Sesamoid bone of left foot,fma45098,skeletal,12,95,142,,bone,False
+Left medial cuneiform bone,fma24522,skeletal,12,513,872,,bone,False
+Left nasal bone,fma53648,skeletal,12,236,388,head-neck,bone,True
+Left palatine bone,fma53656,skeletal,12,986,1606,head-neck,bone,True
+Left parietal bone,fma52789,skeletal,12,2927,3732,head-neck,bone,True
+Left patella,fma24487,skeletal,12,177,304,,bone,False
+Left pisiform,fma24442,skeletal,12,116,210,arms-hands,bone,True
+Left radius,fma23465,skeletal,12,250,406,arms-hands,bone,True
+Left scaphoid,fma24436,skeletal,12,172,304,arms-hands,bone,True
+Left scapula,fma13396,skeletal,12,3097,6180,thorax-shoulder,bone,True
+Left talus,fma24483,skeletal,12,666,1144,,bone,False
+Left temporal bone,fma52739,skeletal,12,1835,2828,head-neck,bone,True
+Left tibia,fma24478,skeletal,12,331,620,,bone,False
+Left trapezium,fma24444,skeletal,12,222,348,arms-hands,bone,True
+Left trapezoid,fma24445,skeletal,12,278,396,arms-hands,bone,True
+Left triquetral,fma24440,skeletal,12,178,300,arms-hands,bone,True
+Left ulna,fma23468,skeletal,12,283,434,arms-hands,bone,True
+Left zygomatic bone,fma52893,skeletal,12,721,1056,head-neck,bone,True
+Left hip bone,fma16587,skeletal,12,986,1808,,bone,False
+Mandible,fma52748,skeletal,12,1207,2348,head-neck,bone,True
+Manubrium,fma7486,skeletal,12,1094,1892,thorax-shoulder,bone,True
+Middle phalanx of left ring finger,fma23942,skeletal,12,208,326,arms-hands,bone,True
+Middle phalanx of right ring finger,fma24457,skeletal,12,214,306,arms-hands,bone,True
+Middle phalanx of left second toe,fma32643,skeletal,12,196,322,,bone,False
+Middle phalanx of left third toe,fma32645,skeletal,13,181,288,,bone,False
+Middle phalanx of left fourth toe,fma32647,skeletal,13,181,280,,bone,False
+Middle phalanx of left index finger,fma23938,skeletal,13,184,300,arms-hands,bone,True
+Middle phalanx of left little finger,fma23944,skeletal,13,190,252,arms-hands,bone,True
+Middle phalanx of left little toe,fma230988,skeletal,13,142,224,,bone,False
+Middle phalanx of left middle finger,fma23940,skeletal,13,220,366,arms-hands,bone,True
+Middle phalanx of right second toe,fma32642,skeletal,13,189,258,,bone,False
+Middle phalanx of right third toe,fma32644,skeletal,13,190,292,,bone,False
+Middle phalanx of right fourth toe,fma32646,skeletal,13,216,342,,bone,False
+Middle phalanx of right index finger,fma24455,skeletal,13,186,256,arms-hands,bone,True
+Middle phalanx of right little finger,fma24458,skeletal,13,168,206,arms-hands,bone,True
+Middle phalanx of right little toe,fma230986,skeletal,13,102,136,,bone,False
+Middle phalanx of right middle finger,fma24456,skeletal,13,221,330,arms-hands,bone,True
+Navicular bone of left foot,fma24501,skeletal,13,396,624,,bone,False
+Navicular bone of right foot,fma24500,skeletal,13,404,618,,bone,False
+Occipital bone,fma52735,skeletal,13,2938,4912,head-neck,bone,True
+Proximal phalanx of right big toe,fma43253,skeletal,13,272,468,,bone,False
+Proximal phalanx of left third toe,fma32637,skeletal,13,237,388,,bone,False
+Proximal phalanx of left fourth toe,fma32639,skeletal,13,245,418,,bone,False
+Proximal phalanx of left index finger,fma71915,skeletal,13,218,384,arms-hands,bone,True
+Proximal phalanx of left little finger,fma66791,skeletal,13,162,270,arms-hands,bone,True
+Proximal phalanx of left little toe,fma32641,skeletal,13,226,386,,bone,False
+Proximal phalanx of left middle finger,fma71908,skeletal,13,253,440,arms-hands,bone,True
+Proximal phalanx of left ring finger,fma71916,skeletal,13,200,366,arms-hands,bone,True
+Proximal phalanx of left thumb,fma65470,skeletal,13,197,336,arms-hands,bone,True
+Proximal phalanx of right second toe,fma32634,skeletal,13,225,392,,bone,False
+Proximal phalanx of right third toe,fma32636,skeletal,13,264,398,,bone,False
+Proximal phalanx of right fourth toe,fma32638,skeletal,13,244,418,,bone,False
+Proximal phalanx of right index finger,fma24451,skeletal,13,213,360,arms-hands,bone,True
+Proximal phalanx of right little finger,fma24454,skeletal,13,186,312,arms-hands,bone,True
+Proximal phalanx of right little toe,fma32640,skeletal,13,228,386,,bone,False
+Proximal phalanx of right middle finger,fma24452,skeletal,13,266,448,arms-hands,bone,True
+Proximal phalanx of right ring finger,fma24453,skeletal,13,202,364,arms-hands,bone,True
+Proximal phalanx of right thumb,fma24450,skeletal,13,196,316,arms-hands,bone,True
+Proximal phalanx of left second toe,fma32635,skeletal,13,230,374,,bone,False
+Proximal phalanx of left big toe,fma43254,skeletal,13,310,502,,bone,False
+Right tenth rib,fma8445,skeletal,13,754,1500,thorax-shoulder,bone,True
+Right eleventh rib,fma8531,skeletal,13,538,1070,thorax-shoulder,bone,True
+Right twelfth rib,fma8533,skeletal,13,372,740,thorax-shoulder,bone,True
+Right first costal cartilage,fma7875,skeletal,13,401,616,thorax-shoulder,cartilage,True
+Right first rib,fma7857,skeletal,13,519,1032,thorax-shoulder,bone,True
+Right second costal cartilage,fma7886,skeletal,13,346,596,thorax-shoulder,cartilage,True
+Right second rib,fma7882,skeletal,13,648,1230,thorax-shoulder,bone,True
+Right third costal cartilage,fma7913,skeletal,13,355,590,thorax-shoulder,cartilage,True
+Right third rib,fma7909,skeletal,13,800,1594,thorax-shoulder,bone,True
+Right fourth costal cartilage,fma7976,skeletal,13,332,580,thorax-shoulder,cartilage,True
+Right fourth rib,fma7957,skeletal,13,979,1942,thorax-shoulder,bone,True
+Right fifth costal cartilage,fma8070,skeletal,13,358,596,thorax-shoulder,cartilage,True
+Right fifth rib,fma8066,skeletal,13,1093,2136,thorax-shoulder,bone,True
+Right sixth costal cartilage,fma8194,skeletal,13,444,642,thorax-shoulder,cartilage,True
+Right sixth rib,fma8175,skeletal,13,1147,2254,thorax-shoulder,bone,True
+Right seventh costal cartilage,fma8248,skeletal,13,514,618,thorax-shoulder,cartilage,True
+Right seventh rib,fma8229,skeletal,13,1122,2206,thorax-shoulder,bone,True
+Right eighth rib,fma8283,skeletal,13,928,1832,thorax-shoulder,bone,True
+Right ninth rib,fma8364,skeletal,13,842,1666,thorax-shoulder,bone,True
+Right radius,fma23464,skeletal,13,249,408,arms-hands,bone,True
+Right first metacarpal bone,fma24464,skeletal,13,287,526,arms-hands,bone,True
+Right first metatarsal bone,fma24507,skeletal,13,492,908,,bone,False
+Right second metacarpal bone,fma24466,skeletal,13,347,610,arms-hands,bone,True
+Right second metatarsal bone,fma24509,skeletal,13,434,612,,bone,False
+Right third metacarpal bone,fma24468,skeletal,13,345,586,arms-hands,bone,True
+Right third metatarsal bone,fma24511,skeletal,13,381,620,,bone,False
+Right fourth metacarpal bone,fma24470,skeletal,13,280,422,arms-hands,bone,True
+Right fourth metatarsal bone,fma24513,skeletal,13,333,554,,bone,False
+Right fifth metacarpal bone,fma24472,skeletal,13,236,428,arms-hands,bone,True
+Right fifth metatarsal bone,fma24515,skeletal,13,371,670,,bone,False
+Right calcaneus,fma24497,skeletal,13,641,1076,,bone,False
+Right capitate,fma24446,skeletal,13,245,406,arms-hands,bone,True
+Right clavicle,fma13322,skeletal,13,420,820,thorax-shoulder,bone,True
+Right cuboid bone,fma24528,skeletal,13,488,822,,bone,False
+Right femur,fma24474,skeletal,13,480,930,,bone,False
+Right fibula,fma24480,skeletal,13,162,298,,bone,False
+Right hamate,fma24448,skeletal,13,316,490,arms-hands,bone,True
+Right humerus,fma23130,skeletal,13,794,1070,arms-hands,bone,True
+Right inferior nasal concha,fma54737,respiratory,13,530,636,head-neck,,False
+Right intermediate cuneiform bone,fma24523,skeletal,13,278,430,,bone,False
+Right lacrimal bone,fma53645,sensory,13,378,658,head-neck,,False
+Sesamoid bone of right foot,fma45097,skeletal,13,73,80,,bone,False
+Right lateral cuneiform bone,fma24525,skeletal,13,380,600,,bone,False
+Right lunate,fma24437,skeletal,13,191,324,arms-hands,bone,True
+Right maxilla,fma53649,skeletal,13,2591,3660,head-neck,bone,True
+Sesamoid bone of right foot,fma45097,skeletal,13,103,156,,bone,False
+Right medial cuneiform bone,fma24521,skeletal,13,553,838,,bone,False
+Right nasal bone,fma53647,skeletal,13,253,392,head-neck,bone,True
+Right palatine bone,fma53655,skeletal,13,994,1486,head-neck,bone,True
+Right parietal bone,fma52788,skeletal,13,2734,3694,head-neck,bone,True
+Right patella,fma24486,skeletal,13,176,304,,bone,False
+Right pisiform,fma24441,skeletal,13,110,190,arms-hands,bone,True
+Right scaphoid,fma24435,skeletal,13,185,302,arms-hands,bone,True
+Right scapula,fma13395,skeletal,13,2896,5756,thorax-shoulder,bone,True
+Right talus,fma24482,skeletal,13,709,1184,,bone,False
+Right temporal bone,fma52738,skeletal,13,1976,2906,head-neck,bone,True
+Right tibia,fma24477,skeletal,13,334,634,,bone,False
+Right trapezium,fma24443,skeletal,13,272,424,arms-hands,bone,True
+Right trapezoid,fma23725,skeletal,13,267,354,arms-hands,bone,True
+Right triquetral,fma24439,skeletal,13,139,170,arms-hands,bone,True
+Right ulna,fma23467,skeletal,13,305,482,arms-hands,bone,True
+Right zygomatic bone,fma52892,skeletal,13,717,1146,head-neck,bone,True
+Sacrum,fma16202,skeletal,13,2771,5058,,bone,False
+Sphenoid bone,fma52736,skeletal,13,2791,4238,head-neck,bone,True
+Vomer,fma9710,skeletal,13,820,1586,head-neck,bone,True
+Mesentery of small intestine,fma14643,digestive,13,45140,25172,,,False
+Mesoappendix,fma16549,digestive,13,512,814,,,False
+Transverse mesocolon,fma14647,digestive,13,850,872,,,False
+Ascending branch of left colic artery,fma14828,arterial,13,233,320,,artery,False
+Left colic vein,fma15394,venous,13,217,306,,vein,False
+Anterior inferior pancreaticoduodenal artery,fma70479,arterial,13,210,342,,artery,False
+Anterior cecal artery,fma14816,arterial,13,96,118,,artery,False
+Anterior superior pancreaticoduodenal artery,fma14782,arterial,13,270,422,,artery,False
+Appendicular artery,fma14818,arterial,13,577,622,,artery,False
+Arch of aorta,fma3768,arterial,13,337,596,thorax-shoulder,artery,True
+Ascending aorta,fma3736,arterial,13,225,388,thorax-shoulder,artery,True
+Ascending branch of inferior branch of ileocolic artery,fma14820,arterial,13,257,348,,artery,False
+Ileocolic vein,fma15408,venous,13,267,428,,vein,False
+Azygos vein,fma4838,venous,13,2010,4016,,vein,False
+Brachiocephalic artery,fma3932,arterial,13,158,258,,artery,False
+Bronchial branch of arch of aorta,fma14177,arterial,13,503,624,thorax-shoulder,artery,True
+Caudal pancreatic artery,fma14793,arterial,13,475,418,,artery,False
+Splenic artery,fma14773,arterial,13,590,426,,artery,False
+Celiac trunk,fma14812,arterial,13,133,238,,,False
+Left superficial dorsal vein of penis,fma21386,venous,13,544,1072,,vein,False
+Descending aorta,fma3784,arterial,13,535,1002,thorax-shoulder,artery,True
+Descending branch of left colic artery,fma14829,arterial,13,286,464,,artery,False
+Left colic vein,fma15394,venous,13,298,436,,vein,False
+Dorsal pancreatic artery,fma14787,arterial,13,244,456,,artery,False
+Set of oesophageal branches of thoracic aorta,fma71537,arterial,13,545,686,thorax-shoulder,artery,True
+Trunk of gastroduodenal artery,fma76574,arterial,13,117,200,,artery,False
+Great pancreatic artery,fma14792,arterial,13,141,264,,artery,False
+Hemiazygos vein,fma4944,venous,13,471,938,,vein,False
+Ileal artery,fma14809,arterial,13,123,168,,artery,False
+Ileal vein,fma15405,venous,13,123,184,,vein,False
+Ileocolic artery,fma14815,arterial,13,131,234,,artery,False
+Ileocolic vein,fma15408,venous,13,149,222,,vein,False
+Inferior vena cava,fma10951,venous,13,223,324,thorax-shoulder,vein,True
+Inferior mesenteric artery,fma14750,arterial,13,207,368,,artery,False
+Inferior mesenteric vein,fma15391,venous,13,136,242,,vein,False
+Inferior pancreatic artery,fma14790,arterial,13,227,400,,artery,False
+Inferior pancreaticoduodenal artery,fma14805,arterial,13,154,260,,artery,False
+Inferior phrenic vein,fma68068,venous,13,314,430,,vein,False
+Inferior phrenic vein,fma68068,venous,13,410,420,,vein,False
+Inferior phrenic vein,fma68068,venous,13,360,320,,vein,False
+Inferior phrenic vein,fma68068,venous,13,242,252,,vein,False
+Inferior phrenic vein,fma68068,venous,13,370,280,,vein,False
+Inferior phrenic vein,fma68068,venous,13,118,218,,vein,False
+Anterior division of left renal artery,fma70487,arterial,13,207,410,,artery,False
+Anterior division of left renal artery,fma70487,arterial,13,240,410,,artery,False
+Anterior division of left renal artery,fma70487,arterial,13,221,278,,artery,False
+Anterior division of left renal artery,fma70487,arterial,13,1106,1260,,artery,False
+Anterior division of left renal artery,fma70487,arterial,13,337,668,,artery,False
+Anterior division of left renal artery,fma70487,arterial,13,378,748,,artery,False
+Left common iliac artery,fma14766,arterial,13,127,246,,artery,False
+Left common iliac vein,fma21388,venous,13,228,398,,vein,False
+Left external iliac artery,fma18807,arterial,13,226,442,,artery,False
+Left inferior suprarenal artery,fma69266,arterial,13,676,742,,artery,False
+Left internal iliac artery,fma18810,arterial,13,189,262,,artery,False
+Left internal iliac vein,fma18888,venous,13,130,202,,vein,False
+Left internal iliac vein,fma18888,venous,13,118,172,,vein,False
+Left internal iliac vein,fma18888,venous,13,140,172,,vein,False
+Left middle suprarenal artery,fma14756,arterial,13,495,490,,artery,False
+Posterior division of left renal artery,fma70490,arterial,13,226,264,,artery,False
+Posterior division of left renal artery,fma70490,arterial,13,173,252,,artery,False
+Posterior division of left renal artery,fma70490,arterial,13,158,234,,artery,False
+Trunk of left renal artery,fma66364,arterial,13,132,258,,artery,False
+Left renal vein,fma14336,venous,13,327,638,,vein,False
+Left renal vein,fma14336,venous,13,2324,2280,,vein,False
+Left subclavian artery,fma4694,arterial,13,313,558,,artery,False
+Left suprarenal vein,fma14349,venous,13,297,374,,vein,False
+Ureteric segment of left renal artery,fma70493,arterial,13,414,514,,artery,False
+Left brachiocephalic vein,fma4761,venous,14,375,744,,vein,False
+Left common carotid artery,fma4058,arterial,14,122,164,head-neck,artery,True
+Left external iliac vein,fma18886,venous,14,326,580,,vein,False
+Left internal jugular vein,fma4762,venous,14,154,272,head-neck,vein,True
+Left subclavian vein,fma4763,venous,14,254,402,,vein,False
+Left ascending lumbar vein,fma4950,venous,14,197,388,,vein,False
+Left colic artery,fma14826,arterial,14,130,180,,artery,False
+Left colic vein,fma15394,venous,14,67,102,,vein,False
+Left dorsal artery of penis,fma20819,arterial,14,753,1116,,artery,False
+Left dorsal artery of penis,fma20819,arterial,14,181,320,,artery,False
+Left gastric artery,fma14768,arterial,14,478,904,,artery,False
+Left gastric vein,fma15399,venous,14,581,986,,vein,False
+Left gastro-epiploic artery,fma14796,arterial,14,280,532,,artery,False
+Left gastroepiploic vein,fma15390,venous,14,238,300,,vein,False
+Left iliolumbar vein,fma18904,venous,14,1204,2352,,vein,False
+Left inferior epigastric artery,fma20689,arterial,14,752,1500,,artery,False
+Left inferior epigastric vein,fma21164,venous,14,825,1642,,vein,False
+Left inferior gluteal vein,fma18913,venous,14,1250,2496,,vein,False
+Left inferior phrenic artery,fma14747,arterial,14,467,544,,artery,False
+Left inferior phrenic artery,fma14747,arterial,14,439,486,,artery,False
+Left inferior phrenic artery,fma14747,arterial,14,277,290,,artery,False
+Left inferior phrenic artery,fma14747,arterial,14,283,298,,artery,False
+Left inferior phrenic artery,fma14747,arterial,14,400,416,,artery,False
+Left inferior phrenic artery,fma14747,arterial,14,192,202,,artery,False
+Left inferior phrenic artery,fma14747,arterial,14,183,176,,artery,False
+Left external iliac vein,fma18886,venous,14,99,166,,vein,False
+Left external iliac vein,fma18886,venous,14,100,186,,vein,False
+Left external iliac vein,fma18886,venous,14,88,112,,vein,False
+Left internal pudendal vein,fma18919,venous,14,869,1638,,vein,False
+Left lateral sacral vein,fma18907,venous,14,389,670,,vein,False
+Left obturator vein,fma18916,venous,14,546,1088,,vein,False
+Left superficial epigastric artery,fma20736,arterial,14,332,576,,artery,False
+Left superior epigastric vein,fma4785,venous,14,392,646,,vein,False
+Left superior gluteal vein,fma18910,venous,14,257,310,,vein,False
+Left testicular artery,fma14760,arterial,14,1376,2732,,artery,False
+Left testicular vein,fma14345,venous,14,1609,3186,,vein,False
+Marginal artery of colon,fma14831,arterial,14,617,786,,artery,False
+Median sacral vein,fma77168,venous,14,555,1026,,vein,False
+Middle colic artery,fma14810,arterial,14,546,702,,artery,False
+Middle colic vein,fma15406,venous,14,547,716,,vein,False
+Splenic artery,fma14773,arterial,14,1273,1100,,artery,False
+Pancreaticoduodenal vein,fma15398,venous,14,471,540,,vein,False
+Posterior inferior pancreaticoduodenal artery,fma70480,arterial,14,240,372,,artery,False
+Posterior cecal artery,fma14817,arterial,14,118,74,,artery,False
+Posterior superior pancreaticoduodenal artery,fma14784,arterial,14,270,380,,artery,False
+Anterior division of right renal artery,fma70486,arterial,14,217,386,,artery,False
+Anterior division of right renal artery,fma70486,arterial,14,314,604,,artery,False
+Anterior division of right renal artery,fma70486,arterial,14,314,604,,artery,False
+Anterior division of right renal artery,fma70486,arterial,14,259,454,,artery,False
+Anterior division of right renal artery,fma70486,arterial,14,335,492,,artery,False
+Anterior division of right renal artery,fma70486,arterial,14,1006,1212,,artery,False
+Right common carotid artery,fma3941,arterial,14,350,688,head-neck,artery,True
+Right common iliac artery,fma14765,arterial,14,116,218,,artery,False
+Right common iliac vein,fma21387,venous,14,192,344,,vein,False
+Right external iliac artery,fma18806,arterial,14,204,376,,artery,False
+Right external iliac vein,fma18885,venous,14,329,594,,vein,False
+Right internal iliac artery,fma18809,arterial,14,179,240,,artery,False
+Right internal iliac vein,fma18887,venous,14,148,200,,vein,False
+Right internal iliac vein,fma18887,venous,14,131,196,,vein,False
+Right internal iliac vein,fma18887,venous,14,145,184,,vein,False
+Posterior division of right renal artery,fma70489,arterial,14,279,460,,artery,False
+Posterior division of right renal artery,fma70489,arterial,14,212,350,,artery,False
+Posterior division of right renal artery,fma70489,arterial,14,281,486,,artery,False
+Trunk of right renal artery,fma66363,arterial,14,145,282,,artery,False
+Right renal vein,fma14335,venous,14,170,328,,vein,False
+Right renal vein,fma14335,venous,14,2388,2386,,vein,False
+Right subclavian artery,fma3953,arterial,14,219,398,,artery,False
+Right suprarenal vein,fma14343,venous,14,386,452,,vein,False
+Ureteric segment of right renal artery,fma70492,arterial,14,173,268,,artery,False
+Ureteric segment of right renal artery,fma70492,arterial,14,211,314,,artery,False
+Right brachiocephalic vein,fma4751,venous,14,274,544,,vein,False
+Right inferior suprarenal artery,fma69265,arterial,14,534,634,,artery,False
+Right internal jugular vein,fma4754,venous,14,153,226,head-neck,vein,True
+Right middle suprarenal artery,fma14755,arterial,14,530,514,,artery,False
+Right subclavian vein,fma4755,venous,14,199,350,,vein,False
+Right ascending lumbar vein,fma4843,venous,14,869,1734,,vein,False
+Right colic artery,fma14811,arterial,14,656,854,,artery,False
+Right colic vein,fma15407,venous,14,651,992,,vein,False
+Right dorsal artery of penis,fma20818,arterial,14,722,1122,,artery,False
+Right dorsal artery of penis,fma20818,arterial,14,183,338,,artery,False
+Right gastric artery,fma14776,arterial,14,251,448,,artery,False
+Right gastric vein,fma15400,venous,14,250,456,,vein,False
+Right gastro-epiploic artery,fma14781,arterial,14,427,812,,artery,False
+Right gastroepiploic vein,fma15397,venous,14,326,452,,vein,False
+Right iliolumbar vein,fma18903,venous,14,1266,2334,,vein,False
+Right inferior epigastric artery,fma20688,arterial,14,759,1514,,artery,False
+Right inferior epigastric vein,fma21163,venous,14,858,1712,,vein,False
+Right inferior gluteal vein,fma18912,venous,14,1267,2530,,vein,False
+Right internal iliac vein,fma18887,venous,14,79,94,,vein,False
+Right internal iliac vein,fma18887,venous,14,111,202,,vein,False
+Right internal iliac vein,fma18887,venous,14,70,74,,vein,False
+Right internal pudendal vein,fma18918,venous,14,856,1618,,vein,False
+Right lateral sacral vein,fma18906,venous,14,399,682,,vein,False
+Right obturator vein,fma18915,venous,14,575,1056,,vein,False
+Right superficial epigastric artery,fma20735,arterial,14,371,642,,artery,False
+Right superior epigastric vein,fma4771,venous,14,385,690,,vein,False
+Right superior gluteal vein,fma18909,venous,14,242,328,,vein,False
+Right testicular artery,fma14759,arterial,14,1439,2846,,artery,False
+Right testicular vein,fma14341,venous,14,1556,3000,,vein,False
+Right inferior phrenic artery,fma14746,arterial,14,458,598,,artery,False
+Right inferior phrenic artery,fma14746,arterial,14,396,436,,artery,False
+Right inferior phrenic artery,fma14746,arterial,14,275,304,,artery,False
+Right inferior phrenic artery,fma14746,arterial,14,309,356,,artery,False
+Right inferior phrenic artery,fma14746,arterial,14,204,218,,artery,False
+Right inferior phrenic artery,fma14746,arterial,14,279,234,,artery,False
+Right inferior phrenic artery,fma14746,arterial,14,302,282,,artery,False
+Right inferior phrenic artery,fma14746,arterial,14,236,196,,artery,False
+Lumbar vein,fma15370,venous,14,1068,1942,,vein,False
+Lumbar artery,fma14735,arterial,14,1409,2652,,artery,False
+Lumbar vein,fma15370,venous,14,1076,1962,,vein,False
+Lumbar artery,fma14735,arterial,14,1421,2748,,artery,False
+Right superficial dorsal vein of penis,fma21385,venous,14,308,612,,vein,False
+Sigmoid artery,fma14830,arterial,14,855,1068,,artery,False
+Sigmoid vein,fma15395,venous,14,854,962,,vein,False
+Splenic artery,fma14773,arterial,14,782,930,,artery,False
+Splenic vein,fma14331,venous,14,660,724,,vein,False
+Trunk of superior mesenteric artery,fma66358,arterial,14,277,516,,artery,False
+Superior vena cava,fma4720,venous,14,296,554,thorax-shoulder,vein,True
+Pancreaticoduodenal vein,fma15398,venous,14,254,376,,vein,False
+Superior mesenteric vein,fma14332,venous,14,361,478,,vein,False
+Superior phrenic vein,fma78121,venous,14,407,394,,vein,False
+Superior phrenic vein,fma78121,venous,14,272,270,,vein,False
+Superior phrenic vein,fma78121,venous,14,310,302,,vein,False
+Superior phrenic vein,fma78121,venous,14,240,270,,vein,False
+Superior phrenic vein,fma78121,venous,14,374,296,,vein,False
+Superior phrenic vein,fma78121,venous,14,513,394,,vein,False
+Superior phrenic vein,fma78121,venous,14,290,198,,vein,False
+Pancreaticoduodenal vein,fma15398,venous,14,240,354,,vein,False
+Superior rectal artery,fma14832,arterial,14,164,242,,artery,False
+Superior rectal vein,fma15393,venous,14,175,262,,vein,False
+Ascending lumbar vein,fma12858,venous,14,660,1304,,vein,False
+Inferior vena cava,fma10951,venous,14,296,422,thorax-shoulder,vein,False
