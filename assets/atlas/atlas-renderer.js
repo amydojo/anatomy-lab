@@ -84,16 +84,32 @@ function create(canvas,onContextLost=()=>{}){
   if(!gl){status='fallback';return false;}
   const vert=[
    '#version 300 es','precision highp float;','in vec3 aPosition;','in vec3 aNormal;','in float aSkinWeight;',
-   'uniform vec2 uViewport;','uniform float uAnchorX;','uniform float uAnchorY;','uniform float uYaw;','uniform float uPitch;','uniform float uFrameSpan;','uniform float uZoom;','uniform float uMarrowDistance;','uniform float uMarrowLocal;','uniform mat3 uMarrowBasis;','uniform vec3 uTarget;','uniform float uMotion;','uniform float uFlex;','uniform vec3 uPivot;','uniform mat3 uPlayRotation;','uniform vec3 uPlayTranslation;','uniform float uMotionAxis;','uniform float uSoftSkin;','uniform float uJointGraph;','uniform mat4 uOriginPose;','uniform mat4 uInsertionPose;','out vec3 vNormal;','out vec3 vViewNormal;',
+   'uniform vec2 uViewport;','uniform float uAnchorX;','uniform float uAnchorY;','uniform float uYaw;','uniform float uPitch;','uniform float uFrameSpan;','uniform float uZoom;','uniform float uMarrowDistance;','uniform float uMarrowLocal;','uniform mat3 uMarrowBasis;','uniform vec3 uTarget;','uniform float uMotion;','uniform float uFlex;','uniform vec3 uPivot;','uniform mat3 uPlayRotation;','uniform vec3 uPlayTranslation;','uniform float uMotionAxis;','uniform float uSoftSkin;','uniform float uJointGraph;','uniform mat4 uOriginPose;','uniform mat4 uInsertionPose;','out vec3 vNormal;','out vec3 vViewNormal;','out highp vec3 vVehicleLocal;','out highp vec3 vVehicleView;',
    'void main(){','vec3 bone=aPosition;','vec3 n=aNormal;','float influence=uMotion>.5?1.:(uSoftSkin>.5?aSkinWeight:0.);','if(uJointGraph>.5){vec4 pt=vec4(aPosition,1.);bone=mix((uOriginPose*pt).xyz,(uInsertionPose*pt).xyz,aSkinWeight);n=normalize(mix(mat3(uOriginPose)*n,mat3(uInsertionPose)*n,aSkinWeight));}else if(influence>.00001){vec3 d=bone-uPivot;float ca=cos(uFlex*influence),sa=sin(uFlex*influence);bone=uPivot+(uMotionAxis>.5?vec3(d.x*ca-d.y*sa,d.x*sa+d.y*ca,d.z):vec3(d.x,d.y*ca-d.z*sa,d.y*sa+d.z*ca));n=uMotionAxis>.5?vec3(n.x*ca-n.y*sa,n.x*sa+n.y*ca,n.z):vec3(n.x,n.y*ca-n.z*sa,n.y*sa+n.z*ca);}','bone=uPlayRotation*bone+uPlayTranslation; n=uPlayRotation*n;','vec3 p=bone-uTarget;','float cy=cos(uYaw),sy=sin(uYaw),cp=cos(uPitch),sp=sin(uPitch);',
    'float x=p.x*cy+p.z*sy;','float z=p.z*cy-p.x*sy;','float y=p.y*cp-z*sp;','float z2=p.y*sp+z*cp;','if(uMarrowLocal>.5){x=dot(p,uMarrowBasis[0]);y=dot(p,uMarrowBasis[1]);z2=dot(p,uMarrowBasis[2]);}',
    'float scale=min(uViewport.x/3.25,uViewport.y/uFrameSpan)*uZoom;',
    'float w=max(.10,(7.4-z2)/7.4);',
    'if(uMarrowDistance>0.0){float D=uMarrowDistance; float depth=D-z2; float near=.004; float far=20.0; w=depth/D; float clipZ=((far+near)/(far-near)*depth-2.0*far*near/(far-near))/D; gl_Position=vec4(x*scale/(uViewport.x*.5)+(uAnchorX-.5)*2.0*w,y*scale/(uViewport.y*.5)-(uAnchorY-.5)*2.0*w,clipZ,w);}else{gl_Position=vec4(x*scale/(uViewport.x*.5)+(uAnchorX-.5)*2.0*w,(y-.04)*scale/(uViewport.y*.5)-(uAnchorY-.5)*2.0*w,-z2/15.0,w);}',
-   'vNormal=n;','float nz=n.z*cy-n.x*sy; vViewNormal=uMarrowLocal>.5?vec3(dot(n,uMarrowBasis[0]),dot(n,uMarrowBasis[1]),dot(n,uMarrowBasis[2])):vec3(n.x*cy+n.z*sy,n.y*cp-nz*sp,n.y*sp+nz*cp);','}'
+   'vNormal=n; vVehicleLocal=aPosition; vVehicleView=vec3(x,y,z2);','float nz=n.z*cy-n.x*sy; vViewNormal=uMarrowLocal>.5?vec3(dot(n,uMarrowBasis[0]),dot(n,uMarrowBasis[1]),dot(n,uMarrowBasis[2])):vec3(n.x*cy+n.z*sy,n.y*cp-nz*sp,n.y*sp+nz*cp);','}'
   ].join('\n');
-  const frag=['#version 300 es','precision mediump float;','in vec3 vNormal;','uniform vec3 uColor;','uniform float uDim;','uniform float uAlpha;','uniform float uVisual;','uniform float uMaterial;','in vec3 vViewNormal;','out vec4 outColor;',
+  const frag=['#version 300 es','precision mediump float;','in vec3 vNormal;','uniform vec3 uColor;','uniform float uDim;','uniform float uAlpha;','uniform float uVisual;','uniform float uMaterial;','uniform float uVehicle;','uniform vec4 uVehicleMaterial;','uniform float uVehicleDetail;','uniform float uVehicleEnergy;','uniform float uVehicleGrind;','uniform highp float uMarrowDistance;','in highp vec3 vVehicleLocal;','in highp vec3 vVehicleView;','in vec3 vViewNormal;','out vec4 outColor;',
     'void main(){','float light=.60+.40*abs(dot(normalize(vNormal),normalize(vec3(.42,.70,.65))));',
+    // Dedicated vehicle branch precedes the unchanged anatomy shader.
+    'if(uVehicle>.5){',
+    'vec3 N=normalize(vViewNormal); vec3 V=normalize(vec3(-vVehicleView.xy,uMarrowDistance-vVehicleView.z)); if(dot(N,V)<0.)N=-N;',
+    'float rough=uVehicleMaterial.x, spec=uVehicleMaterial.y, metal=uVehicleMaterial.z, emission=uVehicleMaterial.w;',
+    'vec3 base=pow(max(uColor,vec3(.001)),vec3(2.2)); vec3 P=vVehicleLocal*1000.;',
+    'float detail=uVehicleDetail; float aa=max(length(fwidth(P)),.001);',
+    'if(detail>1.5&&detail<2.5){vec2 g=P.xz*1.75; float tread=(.5+.5*cos(g.x*6.283))* (.5+.5*cos(g.y*6.283)); base*=1.-.22*tread*(1.-smoothstep(.12,.8,aa)); rough=min(1.,rough+.05*tread);}',
+    'if(detail>2.5&&detail<3.5){float brush=.5+.5*sin(P.z*21.); base*=1.-.09*brush*(1.-smoothstep(.07,.5,aa)); float wear=smoothstep(3.7,5.,-P.y); base=mix(base,base*.63,wear*.26); emission+=uVehicleGrind*wear*.07;}',
+    'if(detail>.5&&detail<1.5){float satin=.5+.5*sin(P.z*3.2+sin(P.x*1.8)); rough+=.035*satin*(1.-smoothstep(.08,.65,aa));}',
+    'if(detail>3.5){float radius=length(vec2(P.x,abs(P.z)-22.)); float core=1.-smoothstep(3.0,4.6,radius); base*=mix(.45,1.,core); emission*=.45+core*1.3; emission+=.12*uVehicleEnergy;}',
+    'vec3 L=normalize(vec3(-.55,.72,.56)), R=normalize(vec3(.78,-.25,.56)), H=normalize(L+V), H2=normalize(R+V); float nv=max(.001,dot(N,V));',
+    'float power=mix(110.,4.,rough*rough); vec3 f0=mix(vec3(.035+.055*spec),base,metal); vec3 F=f0+(1.-f0)*pow(1.-nv,5.);',
+    'float key=max(0.,dot(N,L)), fill=max(0.,dot(N,R)); float shine=pow(max(0.,dot(N,H)),power)*spec; float strip=pow(max(0.,dot(N,H2)),power*.48)*spec;',
+    'vec3 diffuse=base*(1.-metal*.78)*(.22+.72*key+.26*fill); vec3 reflection=F*(.28+.35*max(N.y,0.)+.48*shine+.27*strip);',
+    'float rim=pow(1.-nv,2.); vec3 color=diffuse+reflection+vec3(.19,.22,.30)*rim*(.10+spec*.13)+base*emission*uVehicleEnergy;',
+    'outColor=vec4(pow(clamp(color*uDim,0.,1.),vec3(1./2.2)),uAlpha);return;}',
     'if(uVisual<.5){outColor=vec4(uColor*light*uDim,uAlpha);return;}',
     'vec3 n=normalize(vViewNormal); if(n.z<0.)n=-n;',
     'float key=max(0.,dot(n,vec3(-.48,.64,.60))); float fill=max(0.,dot(n,vec3(.75,.12,.65))); float rim=1.-abs(n.z);',
@@ -121,7 +137,7 @@ function create(canvas,onContextLost=()=>{}){
  }catch(e){status='fallback';onContextLost(e.message);}});
  try{setup();}catch(e){status='fallback';onContextLost(e.message);}
  function makeBuffer(part,id,group,color,tissue=false){
-  if(part.positions&&part.indices){const flat=part.packed||window.BodyVHF.packVertices(part.positions,part.indices),indices=part.indices,buffer=gl.createBuffer(),indexBuffer=gl.createBuffer();if(!buffer||!indexBuffer){if(buffer)gl.deleteBuffer(buffer);if(indexBuffer)gl.deleteBuffer(indexBuffer);throw Error('Source allocation failed: '+id);}gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,flat,gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,indexBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,indices,gl.STATIC_DRAW);return {id,name:part.name,group,color,tissue,buffer,indexBuffer,indexType:indices.BYTES_PER_ELEMENT===2?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,bufferBytes:flat.byteLength+indices.byteLength,count:indices.length,min:part.min,max:part.max};}
+  if(part.positions&&part.indices){const flat=part.packed||window.BodyVHF.packVertices(part.positions,part.indices),indices=part.indices,buffer=gl.createBuffer(),indexBuffer=gl.createBuffer();if(!buffer||!indexBuffer){if(buffer)gl.deleteBuffer(buffer);if(indexBuffer)gl.deleteBuffer(indexBuffer);throw Error('Source allocation failed: '+id);}gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,flat,gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,indexBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,indices,gl.STATIC_DRAW);return {id,name:part.name,group,color,tissue,buffer,indexBuffer,indexType:indices.BYTES_PER_ELEMENT===2?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,bufferBytes:flat.byteLength+indices.byteLength,count:indices.length,min:part.min,max:part.max,vehicleMaterial:part.material};}
 
   if(!Array.isArray(part.vertices)||!Array.isArray(part.faces)||part.vertices.length<50||part.faces.length<50)throw Error('Incomplete sourced mesh: '+id);
   const vs=part.vertices,normal=new Float32Array(vs.length*3);
@@ -462,7 +478,7 @@ function create(canvas,onContextLost=()=>{}){
    gl.uniform1f(uni('uFlex'),(selected==='shoulder'?-1:1)*Number(flex)*Math.PI/180);
    gl.uniform3fv(uni('uPivot'),pivot);
    const play=item.id.startsWith('__marrow_')?window.BodyMarrowBoard.transform(item.id,sourceView.marrowBoard):sourceView?.playground?.transform(item.id);gl.uniformMatrix3fv(uni('uPlayRotation'),false,play?.r||identityRotation);gl.uniform3fv(uni('uPlayTranslation'),play?.t||identityTranslation);
-   const kind=item.connectiveKind;gl.uniform1f(uni('uMaterial'),item.id===highlight?4:kind==='fibrocartilage'||kind==='cartilage'?3:kind==='tendon'||kind==='ligament'?2:item.connective||item.group==='connective'?4:item.tissue?1:0);
+   const vm=item.vehicleMaterial,vs=sourceView?.marrowBoard?.vehicle;gl.uniform1f(uni('uVehicle'),vm?1:0);if(vm){gl.uniform4fv(uni('uVehicleMaterial'),vm.slice(0,4));gl.uniform1f(uni('uVehicleDetail'),vm[4]);gl.uniform1f(uni('uVehicleEnergy'),.75+(vs?.energy||0)*.55+(vs?.deploy||0)*.35+(vs?.capture||0)*.3);gl.uniform1f(uni('uVehicleGrind'),vs?.grindLevel||0);}const kind=item.connectiveKind;gl.uniform1f(uni('uMaterial'),item.id===highlight?4:kind==='fibrocartilage'||kind==='cartilage'?3:kind==='tendon'||kind==='ligament'?2:item.connective||item.group==='connective'?4:item.tissue?1:0);
    gl.uniform3fv(uni('uColor'),item.id===highlight?[1,.81,.48]:item.color);gl.uniform1f(uni('uDim'),dim);gl.uniform1f(uni('uAlpha'),alpha);
    gl.bindBuffer(gl.ARRAY_BUFFER,item.buffer);
    gl.enableVertexAttribArray(locP);gl.vertexAttribPointer(locP,3,gl.FLOAT,false,28,0);
