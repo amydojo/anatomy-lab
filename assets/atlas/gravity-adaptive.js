@@ -4,7 +4,7 @@
  const clamp=(x,a,b)=>Math.max(a,Math.min(b,x)),fields=['panX','panY','orbitX','orbitY','zoom'],zero=()=>Object.fromEntries(fields.map(k=>[k,0]));
  const profiles=Object.freeze({explorer:Object.freeze({response:1,precision:1,inertia:.085,acceleration:.055,curve:1.6}),microsurgeon:Object.freeze({response:.7,precision:.55,inertia:.025,acceleration:.045,curve:2.05}),cinematographer:Object.freeze({response:.85,precision:.8,inertia:.22,acceleration:.16,curve:1.55})});
  function shape(x,y,dead=.18,curve=1.6){x=clamp(Number(x)||0,-1,1);y=clamp(Number(y)||0,-1,1);const m=Math.hypot(x,y);if(m<=dead)return [0,0];const v=Math.pow(clamp((m-dead)/(1-dead),0,1),curve);return [x/m*v,y/m*v];}
- function intent(i){return {version:1,...Object.fromEntries(fields.map(k=>[k,clamp(Number(i[k])||0,-1,1)])),precision:!!(i.precision||i.buttons?.[10])};}
+ function intent(i){return {version:1,...Object.fromEntries(fields.map(k=>[k,clamp(Number(i[k])||0,-1,1)])),precision:!!(i.precision||i.buttons?.[10]),boost:!!i.boost};}
  function matrixUnits(matrix,width,height,z){if(!matrix||matrix.length!==16||!matrix.every(Number.isFinite)||!(width>0&&height>0)||[1,3,4,7].some(i=>Math.abs(matrix[i])>1e-9))return null;const w=matrix[11]*z+matrix[15];if(!(w>0)||!matrix[0]||!matrix[5])return null;return {x:2*w/(width*Math.abs(matrix[0])),y:2*w/(height*Math.abs(matrix[5]))};}
  // Atlas uses a fixed virtual eye at z=7.4 and scales the projection, not the eye.
  function units(c,p){const base=Math.min(c.width/3.25,c.height/Math.max(.2,c.frameSpan))*c.zoom;if(!(base>0))return null;const z=p?root.BodyGravity.project(c,p).z:0;if(!Number.isFinite(z)||z>=6.4||z< -20)return null;const u=(7.4-z)/(7.4*base);return {x:u,y:u};}
@@ -74,12 +74,14 @@
  function flightClearance(c,boxes){const e=eye(c);let d=Infinity;for(const b of boxes||[]){if(!b?.min||!b?.max)continue;d=Math.min(d,Math.hypot(...xyz.map((k,i)=>Math.max(b.min[i]-e[k],0,e[k]-b.max[i]))));}return Number.isFinite(d)?d:2;}
  function flightSpeed(clearance){return clamp(.10+.95*Math.pow(Math.max(0,clearance),.85),.10,8);}
  function flightTau(k,desired,velocity,config){const angular=k.startsWith('orbit');if(!desired)return angular?.075:.11;if(velocity*desired<0)return .075;return angular?.075:(k==='zoom'?.24:.16);}
- function flightStep(c,motion,dt,b,p,boxes,selected=false){
+  // Hold-to-boost is a velocity modifier, never a lens change or a separate mode.
+ function boostFactor(clearance,blend){const t=clamp((clearance-.35)/2.15,0,1);return 1+.8*clamp(blend,0,1)*t*t*(3-2*t);}
+ function flightStep(c,motion,dt,b,p,boxes,selected=false,boost=0){
   if(!finite(c.target)||!Number.isFinite(dt)||dt<=0)return false;
   dt=Math.min(.05,dt);const start={...c,target:{...c.target}},local=finite(p)?toView(start,sub(p,start.target)):null,orbit=local&&-local.z>FLIGHT_NEAR;
   c.yaw+=motion.orbitX*1.6*dt;c.pitch+=motion.orbitY*1.15*dt;
   if(orbit&&(motion.orbitX||motion.orbitY))c.target=sub(p,fromView(c,local));
-  const clearance=flightClearance(c,boxes?.length?boxes:[b]),speed=flightSpeed(clearance);
+  const clearance=flightClearance(c,boxes?.length?boxes:[b]),speed=flightSpeed(clearance)*boostFactor(clearance,selected?0:boost);
   let shift=fromView(c,{x:motion.panX*speed*dt,y:-motion.panY*speed*dt,z:0});
   if(motion.zoom){
    const throttle=Math.sign(motion.zoom)*Math.pow(Math.min(1,Math.abs(motion.zoom)),1.25);
@@ -114,8 +116,8 @@
  }
 
  function create(profile='explorer',overrides={}){
-  let config,v=zero(),filtered=1,lastCamera=null,precisionState=false,lastMode=null,lastPivotKey=null;
-  function reset(){v=zero();filtered=1;lastCamera=null;precisionState=false;lastMode=null;lastPivotKey=null;}
+  let config,v=zero(),filtered=1,lastCamera=null,precisionState=false,lastMode=null,lastPivotKey=null,boostBlend=0;
+  function reset(){v=zero();filtered=1;lastCamera=null;precisionState=false;lastMode=null;lastPivotKey=null;boostBlend=0;}
   function configure(name,over={}){config={...profiles[name]||profiles.explorer};for(const [k,lo,hi] of [['response',.2,2],['precision',.15,1.5],['inertia',.01,.4]])if(over[k]!=null&&Number.isFinite(Number(over[k])))config[k]=clamp(Number(over[k]),lo,hi);reset();}
   configure(profile,overrides);
   function active(){return fields.some(k=>Math.abs(v[k])>0);}
@@ -129,7 +131,7 @@
    let p=null,pivotKey=null,selected=false;try{if(world?.orbitPivot&&!legacy){const ref=world.orbitPivot(c);p=ref?.point||null;pivotKey=ref?.key||null;selected=ref?.kind==='surface';}else p=world?.inspectionPoint?.(c)||null;}catch{}
    if(p&&!c.flight&&!world?.orthographic){const q=G.project(c,p);if(!(q.z<6.4&&q.z> -20&&(!legacy||(q.x>=0&&q.x<=c.width&&q.y>=0&&q.y<=c.height))))p=null;}
    const mode=p?'inspection':'roam';
-   if(lastMode!==null&&(mode!==lastMode||pivotKey!==lastPivotKey)){v=zero();filtered=1;}
+   if(lastMode!==null&&(mode!==lastMode||pivotKey!==lastPivotKey)){v=zero();filtered=1;boostBlend=0;}
    lastMode=mode;lastPivotKey=pivotKey;
    const u=c.flight||world?.orthographic?null:units(c,p),nominal=c.flight||world?.orthographic?null:units(c,null),ratio=u&&nominal?clamp(u.x/nominal.x,.2,3.5):1;
    filtered+=(ratio-filtered)*(-Math.expm1(-dt/.12));
@@ -145,15 +147,15 @@
     v[k]=desired===0&&end<dt?0:desired+(v[k]-desired)*decay;
     if(desired===0&&Math.abs(v[k])<=.00200000000001)v[k]=0;
    }
-   if(c.flight){let changed=false;const boxes=world?.flightBoxes?.(),n=Math.max(1,Math.ceil(dt/.025));for(let j=0;j<n;j++)changed=flightStep(c,motion,dt/n,b,p,boxes,selected)||changed;return changed;}
+   if(c.flight){const desiredBoost=i.boost&&!i.precision&&!selected&&(i.zoom>0||Math.abs(i.panX)+Math.abs(i.panY)>0)?1:0;const oldBoost=boostBlend;boostBlend=i.precision||selected?0:desiredBoost+(boostBlend-desiredBoost)*Math.exp(-dt/(desiredBoost?.4:.18));if(!desiredBoost&&boostBlend<.002)boostBlend=0;let changed=false;const boxes=world?.flightBoxes?.(),n=Math.max(1,Math.ceil(dt/.025));for(let j=0;j<n;j++)changed=flightStep(c,motion,dt/n,b,p,boxes,selected,oldBoost+(boostBlend-oldBoost)*(j+1)/n*(i.precision||selected?0:1))||changed;return changed;}
    if(!legacy)return spatialStep(base,c,motion,dt,b,maxZoom,p,world?.orthographic===true,world?.wideMobility===true);
    const pan=Math.abs(motion.panX)+Math.abs(motion.panY)>0,anchorPoint=!pan?(p||(motion.zoom?{...c.target}:null)):null,old=anchorPoint?G.project(c,anchorPoint):null;
    const changed=base(c,motion,dt,b,maxZoom);if(changed&&old)G.anchor(c,anchorPoint,old,b);return changed;
   }
-  return Object.freeze({read,step,active,reset,configure,settings:()=>({...config}),velocity:()=>({...v})});
+  return Object.freeze({read,step,active,reset,configure,settings:()=>({...config}),velocity:()=>({...v}),boost:()=>boostBlend});
  }
  function wheelPixels(e,height){return clamp((Number(e.deltaY)||0)*(e.deltaMode===1?16:e.deltaMode===2?height:1),-240,240);}
  function pointAtPixel(c,x,y,depth=0){const u=units(c,null)?.x*(7.4-depth)/7.4;if(!(u>0))return null;const a=(x-c.width*(Number.isFinite(c.anchorX)?c.anchorX:.5))*u,b=.04-(y-c.height*(Number.isFinite(c.anchorY)?c.anchorY:.5))*u,cy=Math.cos(c.yaw),sy=Math.sin(c.yaw),cp=Math.cos(c.pitch),sp=Math.sin(c.pitch),h=depth*cp-b*sp;return {x:c.target.x+a*cy-h*sy,y:c.target.y+b*cp+depth*sp,z:c.target.z+a*sy+h*cy};}
  function snapshot(c,t,spaceId){return {version:1,t,spaceId,yaw:c.yaw,pitch:c.pitch,zoom:c.zoom,target:{...c.target},frameSpan:c.frameSpan,anchorX:c.anchorX??.5,anchorY:c.anchorY??.5};}
- root.BodyGravityAdaptive=Object.freeze({version:1,spatialVersion:2,profiles,shape,intent,matrixUnits,units,create,wheelPixels,pointAtPixel,snapshot,eye,basis,toView,fromView,pivotCapture,pivotResolve,spatialStep,travelEnvelope,radialDelta,WIDE_PITCH,flightFit,flightStep,flightClearance,flightSpeed,flightTau,FLIGHT_NEAR,FLIGHT_FAR});
+ root.BodyGravityAdaptive=Object.freeze({version:1,spatialVersion:2,profiles,shape,intent,matrixUnits,units,create,wheelPixels,pointAtPixel,snapshot,eye,basis,toView,fromView,pivotCapture,pivotResolve,spatialStep,travelEnvelope,radialDelta,WIDE_PITCH,flightFit,flightStep,flightClearance,flightSpeed,flightTau,boostFactor,FLIGHT_NEAR,FLIGHT_FAR});
 })(globalThis);
