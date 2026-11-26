@@ -20,9 +20,9 @@ globalThis.BodyVHF=(function sourceModule(){
  for(let i=0;i<8;i++){
   const x0=(i&1?p.max[0]:p.min[0])-c.target.x,y0=(i&2?p.max[1]:p.min[1])-c.target.y,z0=(i&4?p.max[2]:p.min[2])-c.target.z;
   const x=x0*cy+z0*sy,z=z0*cy-x0*sy,y=y0*cp-z*sp,z2=y0*sp+z*cp,D=c.marrowDistance||7.4,w=(D-z2)/D;
-  if(!Number.isFinite(w)||w<=(c.marrowDistance?.004/D:.10))return true; // perspective clamp: conservatively retain
+  if(!Number.isFinite(w)||(!c.marrowDistance&&w<=.10))return true; // perspective clamp: conservatively retain
   const X=x*scale/(c.width*.5)+(ax-.5)*2*w,Y=(y-(c.marrowDistance?0:.04))*scale/(c.height*.5)-(ay-.5)*2*w,Z=c.marrowDistance?((20.004/19.996)*(D-z2)-.16/19.996)/D:-z2/15;
-  const margin=.005*Math.max(1,w);
+  const margin=.005*Math.max(1,Math.abs(w));
   let mask=0;if(X < -w-margin)mask|=1;if(X>w+margin)mask|=2;if(Y< -w-margin)mask|=4;if(Y>w+margin)mask|=8;if(Z< -w-margin)mask|=16;if(Z>w+margin)mask|=32;
   outside&=mask;if(!outside)return true;
  }
