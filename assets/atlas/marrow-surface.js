@@ -96,7 +96,7 @@ function rig(s,world){let mode=0,yaw=0,pitch=.72,sensitivity=1,close=false,recen
  const offsets=[];for(const x of [-.018,.018])for(const y of [-.009,.012])for(const z of [-.038,.038]){const q=sub(add(s.p,add(mul(unit(cross(s.f,s.n)),x),add(mul(s.n,y),mul(s.f,z)))),target),depth=distance-dot(q,back);offsets.push({x:dot(q,right),y:dot(q,vertical),depth});}
  const framed=offsets.every(q=>q.depth>.004&&Math.abs(q.x*lens/q.depth)<c.width*.47&&Math.abs(q.y*lens/q.depth)<c.height*.43);
  angular=h>0?rotationAngle(old,orient)/h:0;const angularAcceleration=h>0?Math.abs(angular-oldAngular)/h:0;lastMode=MODES[mode];
- return {mode:lastMode,yaw:c.yaw,pitch:c.pitch,distance,target:target.slice(),framed,obstructed:!!hit,basis:c.marrowBasis.slice(),fovDegrees:FOV*180/Math.PI,controlYaw:yaw,angularVelocity:angular,angularAcceleration,trackingError:len(sub(target,s.p)),horizonRoll:Math.asin(clamp(right[1],-1,1)),blockedSeconds:blockedFor,recoverySeconds:recovery,cameraDt:h,transition};
+ return {mode:lastMode,yaw:c.yaw,pitch:c.pitch,distance,target:target.slice(),framed,obstructed:!!hit,basis:c.marrowBasis.slice(),fovDegrees:52,controlYaw:yaw,angularVelocity:angular,angularAcceleration,trackingError:len(sub(target,s.p)),horizonRoll:Math.asin(clamp(right[1],-1,1)),blockedSeconds:blockedFor,recoverySeconds:recovery,cameraDt:h,transition};
  }};return api;}
 root.BodyMarrowSurface=Object.freeze({create,rig,legacyRig,contact,transport,STEP});
 })(globalThis);
