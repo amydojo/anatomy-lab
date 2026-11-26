@@ -34,7 +34,7 @@ const cap=mag?.16:.65,speed=len(s.v);if(speed>cap&&s.ground)s.v=mul(s.v,cap/spee
 const next=add(s.p,mul(s.v,dt)),delta=sub(next,s.p),sweep=len(delta)>1e-8?world.ray(s.p,delta,len(delta)+H*.25):null;
 if(sweep&&dot(s.v,sweep.normal)<0){s.impact=Math.max(0,-dot(s.v,sweep.normal));s.p=add(sweep.point,mul(sweep.normal,H));s.v=plane(s.v,sweep.normal);if((sweep.normal[1]>.3||mag)&&jumpLock<=0){if(!s.ground)s.landings++;s.ground=true;s.air=0;s.n=sweep.normal;s.id=sweep.id;s.name=sweep.name;}}
 else s.p=next;
-if(s.ground){const h=contact(world,s.p,s.n,s.f,s.id,mag);if(h){const prev=s.n;s.n=unit(mix(prev,h.normal,.32));s.p=add(h.point,mul(h.normal,H));s.f=unit(plane(s.f,s.n),s.f);s.v=plane(s.v,s.n);s.id=h.id;s.name=h.name;edgeLatch=false;if(h.normal[1]>.55)safe={...h,forward:s.f.slice()};}
+if(s.ground){let h=contact(world,s.p,s.n,s.f,s.id,mag);if(h&&mag&&len(delta)>.0001){const travel=dot(sub(add(h.point,mul(h.normal,H)),old),unit(delta));if(travel<len(delta)*.15&&dot(h.normal,s.n)>.85)h=null;}if(h){const prev=s.n;s.n=unit(mix(prev,h.normal,.32));s.p=add(h.point,mul(h.normal,H));s.f=unit(plane(s.f,s.n),s.f);s.v=plane(s.v,s.n);s.id=h.id;s.name=h.name;edgeLatch=false;if(h.normal[1]>.55)safe={...h,forward:s.f.slice()};}
 else if(mag){ // No invisible support: stop at the previous verified contact and turn back along it.
  s.p=old;s.v=[0,0,0];if(!edgeLatch){s.edgeSaves++;s.f=mul(s.f,-1);edgeLatch=true;}}
 else{s.ground=false;s.air=0;s.falls++;}}
