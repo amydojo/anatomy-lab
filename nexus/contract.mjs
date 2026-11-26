@@ -3,7 +3,7 @@ export const VERSION=1;
 export const routes=Object.freeze([
  {id:'explore',verb:'Explore',name:'EXPEDITION',href:'/atlas/?source=axis&expedition=1&nexus=1',status:'Shared baseline · continuous axial world',source:'6d51fc01364afdb647064bf9ddc0fae36c17cdbf'},
  {id:'understand',verb:'Understand',name:'ATLAS',href:'/atlas/?nexus=1&expedition=1',status:'Shared baseline · structured anatomy',source:'6d51fc01364afdb647064bf9ddc0fae36c17cdbf'},
- {id:'create',verb:'Create',name:'SOMATIC',href:'https://anatomy-hliltg27o-amy-dos-projects.vercel.app/somatic/',status:'Separate preview · guarded return candidate · upstream runtime gate failed',source:'b2102ea3d05863a434fd607e2e7b6fbb58bd2c88',external:true},
+ {id:'create',verb:'Create',name:'SOMATIC',href:'https://anatomy-iwo0scp5f-amy-dos-projects.vercel.app/somatic/',status:'Separate preview · guarded return candidate · upstream runtime gate failed',source:'1307531683256682e517e19eceece620aac99b45',external:true},
  {id:'unity-world',name:'Whole skeleton / WORLD',href:'https://anatomy-iv6o2iw9f-amy-dos-projects.vercel.app/atlas/?source=unity&expedition=1&expeditionDiagnostics=1',status:'Experimental · 143 labels verified offline; runtime gate pending',source:'20f471860199cbde10821b4caac5ee809671dbe2',external:true},
  {id:'morphology',name:'Upper-body tissues',href:'https://anatomy-pviacubpt-amy-dos-projects.vercel.app/atlas/morphology/',status:'Separate preview · acquired tissue packs',source:'3b9c111aebdad00d115ebd689f4f124fdb27697d',external:true},
  ...['skull','thorax','shoulder','hip','knee','ankle'].map(region=>({id:'region-'+region,name:region[0].toUpperCase()+region.slice(1),href:'/atlas/?nexus=1&region='+region,status:'Atlas region'})),
