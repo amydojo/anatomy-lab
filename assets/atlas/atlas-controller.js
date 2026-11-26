@@ -659,6 +659,7 @@ function setupExpedition(){
  const nexusParams=new URLSearchParams(location.search);
  const gravityActive=nexusParams.get('nexus')==='1'&&!!window.BodyGravityAdaptive&&!!window.BodyGravity;
  const motion=gravityActive?window.BodyGravityAdaptive.create(nexusParams.get('gravityProfile')||'explorer'):null;
+ const nexusInput={reads:0,steps:0,changes:0,stalls:0,lastDt:null,lastZoom:0};
  const gravityWorld={inspectionPoint:()=>{const v=vhfView;if(!v?.active||!v.selected||!v.surface)return null;const p=v.parts.find(p=>p.id===v.selected);return p&&window.BodyVHF.visible(p,v)&&(!v.renderedIds||v.renderedIds.has(p.id))?v.surface:null;}};
  if(motion){hud.querySelector('.expedition-help')?.append(document.createElement('br'),document.createTextNode('Hold L3 · Precision'));}
  let pendingNexusSelection=null;
@@ -667,7 +668,7 @@ function setupExpedition(){
  function restoreSelection(v){if(!pendingNexusSelection||!sameAxis(v))return false;const p=v.parts.find(p=>p.id===pendingNexusSelection);if(!p)return false;v.selected=p.id;v.surface=null;pendingNexusSelection=null;return true;}
  if(nexusParams.get('nexus')==='1')window.__NEXUS_ATLAS__=Object.freeze({
   profile:()=>motion?{active:true,version:1,settings:motion.settings()}: {active:false},
-  inspect:()=>{const v=vhfView;if(!sameAxis(v))return null;return {camera:{...v.camera,target:{...v.camera.target}},selection:v.selected,structures:v.parts.length,region:v.neighborhood||null};},
+  inspect:()=>{const v=vhfView;if(!sameAxis(v))return null;return {camera:{...v.camera,target:{...v.camera.target}},selection:v.selected,structures:v.parts.length,region:v.neighborhood||null,streamRunning:!!v.stream?.running,streamFailed:v.stream?.failures.size||0,controller:{status:status.textContent,focused:document.hasFocus(),hidden:document.hidden,enabled,loaded,model:model.getStatus(),view:state.data.view,pointers:pointers.size,modal:!!document.getElementById('nexus-experience-menu')?.open,evidenceHidden:$('evidence-sheet').hidden,seamHidden:$('seam').hidden,activeFrame:!!activeFrameRoute,...nexusInput}};},
   capture:()=>{const v=vhfView;if(!sameAxis(v)||!v.parts.length)return null;cancelAxisFlight();motion?.reset();const c=v.camera;
    const idx=window.BodyVHF.axisLocation(v.landmarks,c,v.axisRegion);
    const region=typeof idx==='number'?['hip','thorax','neck','skull'][idx]:null;
@@ -678,7 +679,7 @@ function setupExpedition(){
    cancelAxisFlight();motion?.reset();Object.assign(v.camera,{yaw:c.yaw,pitch:c.pitch,zoom:c.zoom,frameSpan:c.frameSpan,target:{...c.target},anchorX:.5,anchorY:.5});v.category=categories.includes(s.category)?s.category:'All';v.selected=null;v.surface=null;v.isolated=null;pendingNexusSelection=typeof s.selection==='string'&&s.selection.length<=200?s.selection:null;restoreSelection(v);render();return true;}
  });
  const controls=window.BodyExpedition.mount({
-  ...(motion?{navigate:(c,i,dt,b,m)=>motion.step(window.BodyExpedition.advance,c,i,dt,b,m,gravityWorld),readInput:pad=>motion.read(pad,window.BodyExpedition.read),hasMotion:motion.active,resetMotion:motion.reset}:{}),
+  ...(motion?{navigate:(c,i,dt,b,m)=>{nexusInput.steps++;nexusInput.lastDt=dt;nexusInput.lastZoom=i.zoom;if(dt>.15)nexusInput.stalls++;const changed=motion.step(window.BodyExpedition.advance,c,i,dt,b,m,gravityWorld);if(changed)nexusInput.changes++;return changed;},readInput:pad=>{nexusInput.reads++;return motion.read(pad,window.BodyExpedition.read);},hasMotion:motion.active,resetMotion:motion.reset}:{}),
   camera:()=>vhfView?.active?vhfView.camera:state.data.camera,
   bounds:()=>vhfView?.active?vhfView.bounds:model.getViewBounds(U.getRegion()||state.data.region),
   maxZoom:()=>{if(vhfView?.active)return 14;const radius=model.getViewBounds(U.getRegion()||state.data.region)?.radius;
