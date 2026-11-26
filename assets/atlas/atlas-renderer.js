@@ -76,7 +76,8 @@ function create(canvas,onContextLost=()=>{}){
 
  const detail=new Map(),detailData=new Map();let shoulderPivot=[-1.1,1.9,0],shoulderGraph=null;let destroyed=false,rebuilding=false,recoveryScheduled=false;let uniformCache=new Map();const boundsCache=new Map();
  function disposeMesh(item){gl.deleteBuffer(item.buffer);if(item.indexBuffer)gl.deleteBuffer(item.indexBuffer);}
- function cleanup(){clearVhfStage();vhfGeneration++;if(vhfCacheFrame)cancelAnimationFrame(vhfCacheFrame);vhfCacheFrame=0;if(gl){for(const m of vhfMeshes)disposeMesh(m);}vhfMeshes=[];if(gl){for(const item of [...buffers,...overviewBones,...overviewMuscles,...expansionBones,...expansionMuscles,...expansionConnective,...[...connectiveDetail.values()].flat(),...(facialOverview?[facialOverview]:[]),...facialDetail,...osteologyOverview,...[...expansionDetail.values()].flat(),...[...osteologyDetail.values()].flat(),...[...detail.values()].flat()])disposeMesh(item);if(program)gl.deleteProgram(program);}buffers=[];overviewBones=[];overviewMuscles=[];expansionBones=[];expansionMuscles=[];expansionConnective=[];connectiveDetail.clear();facialOverview=null;facialDetail=[];osteologyOverview=[];osteologyDetail.clear();expansionDetail.clear();detail.clear();program=null;uniformCache.clear();boundsCache.clear();}
+ let marrowMesh=null;
+ function cleanup(){if(marrowMesh&&gl)disposeMesh(marrowMesh);marrowMesh=null;clearVhfStage();vhfGeneration++;if(vhfCacheFrame)cancelAnimationFrame(vhfCacheFrame);vhfCacheFrame=0;if(gl){for(const m of vhfMeshes)disposeMesh(m);}vhfMeshes=[];if(gl){for(const item of [...buffers,...overviewBones,...overviewMuscles,...expansionBones,...expansionMuscles,...expansionConnective,...[...connectiveDetail.values()].flat(),...(facialOverview?[facialOverview]:[]),...facialDetail,...osteologyOverview,...[...expansionDetail.values()].flat(),...[...osteologyDetail.values()].flat(),...[...detail.values()].flat()])disposeMesh(item);if(program)gl.deleteProgram(program);}buffers=[];overviewBones=[];overviewMuscles=[];expansionBones=[];expansionMuscles=[];expansionConnective=[];connectiveDetail.clear();facialOverview=null;facialDetail=[];osteologyOverview=[];osteologyDetail.clear();expansionDetail.clear();detail.clear();program=null;uniformCache.clear();boundsCache.clear();}
  function compile(type,source){const sh=gl.createShader(type);gl.shaderSource(sh,source);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(sh));return sh;}
  function setup(){
   gl=canvas.getContext('webgl2',{alpha:true,antialias:true,depth:true,premultipliedAlpha:false,powerPreference:'low-power'});
@@ -459,7 +460,7 @@ function create(canvas,onContextLost=()=>{}){
    gl.uniform1f(uni('uMotion'),unposed?0:moving?1:0);gl.uniform1f(uni('uSoftSkin'),item.skinWeights?1:0);gl.uniform1f(uni('uMotionAxis'),selected==='shoulder'?1:0);
    gl.uniform1f(uni('uFlex'),(selected==='shoulder'?-1:1)*Number(flex)*Math.PI/180);
    gl.uniform3fv(uni('uPivot'),pivot);
-   const play=sourceView?.playground?.transform(item.id);gl.uniformMatrix3fv(uni('uPlayRotation'),false,play?.r||identityRotation);gl.uniform3fv(uni('uPlayTranslation'),play?.t||identityTranslation);
+   const play=item.id==='__marrow_board__'?sourceView?.marrowBoard:sourceView?.playground?.transform(item.id);gl.uniformMatrix3fv(uni('uPlayRotation'),false,play?.r||identityRotation);gl.uniform3fv(uni('uPlayTranslation'),play?.t||identityTranslation);
    const kind=item.connectiveKind;gl.uniform1f(uni('uMaterial'),item.id===highlight?4:kind==='fibrocartilage'||kind==='cartilage'?3:kind==='tendon'||kind==='ligament'?2:item.connective||item.group==='connective'?4:item.tissue?1:0);
    gl.uniform3fv(uni('uColor'),item.id===highlight?[1,.81,.48]:item.color);gl.uniform1f(uni('uDim'),dim);gl.uniform1f(uni('uAlpha'),alpha);
    gl.bindBuffer(gl.ARRAY_BUFFER,item.buffer);
@@ -502,6 +503,7 @@ function create(canvas,onContextLost=()=>{}){
     if((pending||vhfUploadGate)&&!vhfCacheFrame){const generation=vhfGeneration;vhfCacheFrame=requestAnimationFrame(()=>{vhfCacheFrame=0;vhfUploadGate=false;if(generation===vhfGeneration&&!document.hidden)window.dispatchEvent(new Event('body:vhf-residency-frame'));});}
    }
    for(const m of vhfMeshes){if(!wanted.has(m.id)||!V.visible(m,sourceView)||!V.inView(sourceView.playground?.bounds(m)||m,cam))continue;m.lastUse=now;draw(m,1,1,true);drawn.add(m.id);}
+   if(sourceView.marrowBoard){if(!marrowMesh){const positions=[],indices=[];function cube(x,y,z,a,b,c){const n=positions.length/3;for(let j=0;j<8;j++)positions.push(x+(j&1?a:-a),y+(j&2?b:-b),z+(j&4?c:-c));for(const k of [0,2,1,1,2,3,4,5,6,5,7,6,0,1,4,1,5,4,2,6,3,3,6,7,0,4,2,2,4,6,1,3,5,3,7,5])indices.push(n+k);}cube(0,.003,0,.012,.002,.035);for(const x of [-.011,.011])for(const z of [-.022,.022])cube(x,-.004,z,.004,.004,.005);marrowMesh=makeBuffer({positions:new Float32Array(positions),indices:new Uint16Array(indices)},'__marrow_board__','marrow',[.38,.83,.72]);}draw(marrowMesh,1,1,true);}else if(marrowMesh){disposeMesh(marrowMesh);marrowMesh=null;}
    sourceView.renderedIds=bounded||sourceView.playground?drawn:null;
    if(drawn.size&&vhfFirstDrawMs===null)vhfFirstDrawMs=performance.now()-(parts.sourceInfo?.streamStartedAt??now);
    const bytes=vhfMeshes.reduce((n,m)=>n+m.bufferBytes,0);
