@@ -25,8 +25,8 @@ export function bindGeometry(gl,h,{position,normal,weight}){
 // One upload at a time. No exact-source request is required to obtain display LOD.
 // Host supplies a worker-backed prepare() to keep CPU processing off input thread.
 export class UnityGeometrySession{
- constructor({gl,manifest,source,root,exactRoot,prepare,budget}){
-  this.gl=gl;this.manifest=validateManifest(manifest,source);this.source=source;this.root=root;this.exactRoot=exactRoot;this.prepare=prepare;this.ledger=new Residency(budget);this.active=null;this.closed=false;this.failures=new Map();
+ constructor({gl,manifest,source,sourceHash,root,exactRoot,prepare,budget=32*1024*1024,headroom=Math.floor(budget/8)}){
+  this.gl=gl;this.manifest=validateManifest(manifest,source,sourceHash);this.source=source;this.root=root;this.exactRoot=exactRoot;this.prepare=prepare;this.ledger=new Residency(budget,headroom);this.active=null;this.closed=false;this.failures=new Map();
  }
  requests(camera,selected,visible=()=>true){
   return this.ledger.queue(this.manifest.structures.filter(e=>visible(e)||e.id===selected).map(e=>{
@@ -47,6 +47,7 @@ export class UnityGeometrySession{
    const abort=new AbortController();this.active=abort;let h;
    try{
     const packed=await this.prepare(r,this.root,abort.signal);
+    require(!abort.signal.aborted&&!this.closed,'preparation canceled');
     require(packed.bytes===r.gpuBytes,'prepared bytes mismatch');
     h=await uploadGeometry(this.gl,packed,{signal:abort.signal});
     require(!this.closed&&!abort.signal.aborted,'session closed');
@@ -58,6 +59,9 @@ export class UnityGeometrySession{
  }
  // Exact original GLB is verified separately; host parser/picking retains source identity.
  async exact(id,signal){const e=this.manifest.structures.find(s=>s.id===id);require(e,'unknown source ID');return verifiedBytes(new URL(e.exact.file,this.exactRoot),e.exact,{signal});}
+ diagnostics(){return {...this.ledger.diagnostics(),failures:[...this.failures],closed:this.closed,active:!!this.active};}
+ cancel(){this.active?.abort();}
+ touch(id,now=performance.now()){this.ledger.touch(id,now);}
  retry(){this.failures.clear();}
  dispose(){this.closed=true;this.active?.abort();for(const r of this.ledger.resident.values())disposeGeometry(this.gl,r.handle);this.ledger.resident.clear();}
 }
