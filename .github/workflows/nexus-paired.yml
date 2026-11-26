@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
         with:
-          ref: b2102ea3d05863a434fd607e2e7b6fbb58bd2c88
+          ref: 1307531683256682e517e19eceece620aac99b45
           path: .nexus-companion
       - uses: actions/setup-node@v4
         with:
