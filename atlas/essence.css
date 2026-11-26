@@ -48,3 +48,5 @@
 #nexus-experience-menu[data-essence] input{width:100%;min-height:44px;background:#181613;color:inherit;border:1px solid #665d50;padding:10px}
 @media(max-width:700px){#nexus-experience-menu[data-essence]{inset:auto 0 0;width:100%;max-height:58dvh;border-radius:12px 12px 0 0;padding:16px max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom))}#atlas-app[data-essence]:not([data-essence=studio]) #expedition-control{left:12px;top:12px}#atlas-app[data-essence]~#nexus-open{right:12px;top:12px}}
 @media(prefers-reduced-motion:reduce){#nexus-experience-menu[data-essence] *{scroll-behavior:auto!important;transition:none!important}}
+
+#nexus-experience-menu[data-essence] button{display:block;width:100%;text-align:left;padding:10px 8px;border-radius:0;cursor:pointer}#nexus-experience-menu[data-essence] [hidden]{display:none!important}#nexus-experience-menu[data-essence]::backdrop{background:#0002!important}#atlas-app[data-essence]~#nexus-open{z-index:1000;position:fixed}#atlas-app[data-essence=studio]~#nexus-open{top:auto;bottom:18px}
