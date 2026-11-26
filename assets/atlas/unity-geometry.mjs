@@ -8,20 +8,20 @@ export function gpuBytes(vertices,indexCount,indexWidth){
  require(count(vertices)&&count(indexCount)&&indexCount%3===0&&[2,4].includes(indexWidth),'invalid geometry counts');
  return vertices*16+indexCount*indexWidth;
 }
-export function validateManifest(m,source){
- require(m.schema===SCHEMA&&validHash(m.sourceManifestSha256)&&m.sourceRevision===source.revision,'manifest identity');
+export function validateManifest(m,source,sourceHash){
+ require(m.schema===SCHEMA&&validHash(sourceHash)&&m.sourceManifestSha256===sourceHash&&m.sourceRevision===source.revision,'manifest identity');
  require(source.schema==='body-live-unity-source-1'&&source.structures.length===143&&m.structures.length===143,'coverage');
  const ids=new Set();
  for(const e of m.structures){
   const s=source.structures.find(x=>x.id===e.id);
-  require(s&&!ids.has(e.id)&&s.sha256===e.sourceHash&&s.file===e.exact.file&&s.bytes===e.exact.bytes,'source mismatch '+e.id);ids.add(e.id);
+  require(s&&!ids.has(e.id)&&validHash(s.sha256)&&s.sha256===e.sourceHash&&s.sha256===e.exact.sha256&&s.file===e.exact.file&&s.bytes===e.exact.bytes&&s.vertices===e.exact.vertices&&s.triangles===e.exact.triangles&&e.exact.file===e.id+'.glb'&&/^bonehub-vhf-[a-z0-9_]+$/.test(e.id),'source mismatch '+e.id);ids.add(e.id);
   require(e.min.length===3&&e.max.length===3&&e.min.every((x,i)=>Number.isFinite(x)&&Number.isFinite(e.max[i])&&x<=e.max[i]),'bounds');
-  require(e.levels.length&&new Set(e.levels.map(l=>l.level)).size===e.levels.length,'levels');
+  require(e.levels.some(l=>l.level==='exact-display')&&e.levels.some(l=>l.level===e.overviewLevel)&&new Set(e.levels.map(l=>l.level)).size===e.levels.length,'levels');
   for(const l of e.levels){
    require(['overview','regional','exact-display'].includes(l.level)&&validHash(l.sha256)&&validHash(l.decodedSha256)&&count(l.bytes)&&count(l.decodedBytes)&&l.decodedBytes===16+l.vertices*12+l.triangles*3*l.indexWidth&&l.gpuBytes===gpuBytes(l.vertices,l.triangles*3,l.indexWidth),'level counts');
    require(typeof l.file==='string'&&/^[a-z0-9_.-]+\.bld\.gz$/.test(l.file),'unsafe file');
    require(Number.isFinite(l.error)&&l.error>=0&&l.error<=l.limit&&Number.isFinite(l.limit),'error certificate');
-   require(l.level==='exact-display'?l.error===0&&l.triangles===s.triangles:l.certificate?.method==='face-correspondence-bound-v1'&&l.certificate.maxSurfaceDistanceUpperBound===l.error,'qualification');
+   require(l.level==='exact-display'?l.error===0&&l.triangles===s.triangles&&l.vertices===s.vertices:l.certificate?.method==='face-correspondence-bound-v1'&&l.certificate.maxSurfaceDistanceUpperBound===l.error,'qualification');
   }
  }
  return m;
@@ -93,16 +93,25 @@ export function packCompact(mesh){
 // Strict budget includes committed and in-flight GPU allocations. Adapter must dispose
 // abandoned/failed handles; only complete handles may be committed.
 export class Residency {
- constructor(budget=BUDGET){require(count(budget),'invalid budget');this.budget=budget;this.resident=new Map();this.pending=new Map();this.serial=0;this.peak=0;}
+ constructor(budget=BUDGET,headroom=0){require(count(budget)&&Number.isSafeInteger(headroom)&&headroom>=0&&headroom<budget,'invalid budget/headroom');this.budget=budget;this.headroom=headroom;this.resident=new Map();this.pending=new Map();this.serial=0;this.peak=0;this.denied=0;}
  get bytes(){return [...this.resident.values(),...this.pending.values()].reduce((n,r)=>n+r.bytes,0);}
+ get committedBytes(){return [...this.resident.values()].reduce((n,r)=>n+r.bytes,0);}
+ diagnostics(){return {budget:this.budget,headroom:this.headroom,committedBytes:this.committedBytes,stagedBytes:this.bytes-this.committedBytes,peakBytes:this.peak,denied:this.denied,residentCount:this.resident.size,pendingCount:this.pending.size};}
  reserve(id,level,bytes,now,protectedIds=new Set(),dispose=()=>{}){
   require(count(bytes)&&Number.isFinite(now),'invalid reservation');
-  if(this.pending.has(id)||this.resident.get(id)?.level===level||bytes>this.budget)return null;
+  if(this.pending.size)return null; // one in-flight transaction; conservative steady-state accounting
+  const old=this.resident.get(id),steady=this.budget-this.headroom;
+  if(this.pending.has(id)||old?.level===level)return null;
+  // Reserve headroom for replacements, not steady allocations. Plan before
+  // evicting anything; an impossible request must not churn unrelated meshes.
+  const fits=(total)=>total+bytes<=this.budget&&total+bytes-(old?.bytes||0)<=steady;
+  let total=this.bytes;const victims=[];
   for(const [key,r] of [...this.resident].sort((a,b)=>a[1].lastUse-b[1].lastUse)){
-   if(this.bytes+bytes<=this.budget)break;
-   if(key!==id&&!protectedIds.has(key)&&!this.pending.has(key)&&now-r.lastUse>=5000){dispose(r.handle);this.resident.delete(key);}
+   if(fits(total))break;
+   if(key!==id&&!protectedIds.has(key)&&!this.pending.has(key)&&now-r.lastUse>=5000){victims.push([key,r]);total-=r.bytes;}
   }
-  if(this.bytes+bytes>this.budget)return null;
+  if(!fits(total)){this.denied++;return null;}
+  for(const [key,r] of victims){dispose(r.handle);this.resident.delete(key);}
   const token={id,level,bytes,serial:++this.serial};this.pending.set(id,token);this.peak=Math.max(this.peak,this.bytes);return token;
  }
  commit(token,handle,actualBytes,now,dispose=()=>{}){
@@ -130,4 +139,12 @@ export function partitionExact(mesh,maxTriangles=16384){
   out.push({positions:new Float32Array(p),indices:p.length/3<=65536?new Uint16Array(i):new Uint32Array(i),sourceFaces:faces});
  }
  split(ids);return out;
+}
+
+// Both pins must originate outside the downloaded manifests (reviewed deployment).
+export async function openVerifiedManifests({sourceUrl,derivativeUrl,sourceHash,derivativeHash,fetcher=fetch,digest=async b=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',b)),x=>x.toString(16).padStart(2,'0')).join(''),signal}){
+ require(validHash(sourceHash)&&validHash(derivativeHash),'independent manifest pins required');
+ async function read(url,pin){const r=await fetcher(url,{signal});require(r.ok,'manifest unavailable');const b=await r.arrayBuffer();require(await digest(b)===pin,'manifest digest mismatch');return JSON.parse(new TextDecoder().decode(b));}
+ const [source,manifest]=await Promise.all([read(sourceUrl,sourceHash),read(derivativeUrl,derivativeHash)]);
+ validateManifest(manifest,source,sourceHash);return {source,manifest,sourceHash,derivativeHash};
 }
