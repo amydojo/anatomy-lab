@@ -21,7 +21,8 @@ function create(world,hit,opts={}){const home={...hit,point:hit.point.slice(),no
   if(i.land){lock=false;landPending=true;}if(lift){lock=false;landPending=false;liftGrace=.24;}else liftGrace=Math.max(0,liftGrace-STEP);
   const up=s.ground?n:flightUp,forward=tangent(up,frame),right=unit(cross(forward,up)),input=i.stick;
   let desired=input&&Math.hypot(...input)>.001?unit(add(mul(right,input[0]),mul(forward,-input[1]))):i.direction?tangent(up,i.direction):s.f;
-  if(i.cameraForward&&input&&Math.hypot(...input)>.001){const projected=plane(i.cameraForward,up),cf=len(projected)>.25?unit(projected):forward,cr=unit(cross(cf,up));desired=unit(add(mul(cr,input[0]),mul(cf,-input[1])));}
+  if(Number.isFinite(i.controlYaw)&&input&&Math.hypot(...input)>.001){const cf=rotate(forward,up,i.controlYaw),cr=unit(cross(cf,up));desired=unit(add(mul(cr,input[0]),mul(cf,-input[1])));}
+  else if(i.cameraForward&&input&&Math.hypot(...input)>.001){const projected=plane(i.cameraForward,up),cf=len(projected)>.25?unit(projected):forward,cr=unit(cross(cf,up));desired=unit(add(mul(cr,input[0]),mul(cf,-input[1])));}
   if(s.ground&&(lift||jump)){launch(true);if(jump){v=add(v,mul(n,.14));lock=false;}jump=false;}
   if(s.ground){
    const speed=len(v),goal=mul(desired,wantedSpeed);v=mix(plane(v,n),goal,damp(brake?18:throttle?9:5,STEP));const d=len(v)*STEP;
@@ -52,7 +53,7 @@ function create(world,hit,opts={}){const home={...hit,point:hit.point.slice(),no
  return {s,advance,reset,gravity:()=>{s.mode='magnetic';},terrain:()=>null,visual:()=>{const a=clamp(acc/STEP,0,1);return {...s,p:mix(prev.p,s.p,a),n:unit(mix(prev.n,s.n,a),s.n),f:visualForward.slice(),frame:viewFrame.slice()};},report:()=>({...s,p:s.p.slice(),n:s.n.slice(),v:s.v.slice(),f:s.f.slice(),speed:len(v),flightCollision:world.stats(),terrain:{id:s.id,kind:'exact-3d-triangle-contact'}})};
 }
 // Board-centric local-up orbit. Same basis is used by renderer and input.
-function rig(s,world){let orbit=0,pitch=.87,distance=.32,up=s.n.slice(),forward=tangent(up,s.frame),center=false,mode=0,look=[0,0],assistPitch=0,assistYaw=0;return {yaw:()=>orbit,forward:()=>rotate(forward,up,orbit+assistYaw),toggle:()=>{mode=1-mode;},recenter:()=>{center=true;},step(s,i,dt,_unused,c){
+function legacyRig(s,world){let orbit=0,pitch=.87,distance=.32,up=s.n.slice(),forward=tangent(up,s.frame),center=false,mode=0,look=[0,0],assistPitch=0,assistYaw=0;return {yaw:()=>orbit,forward:()=>rotate(forward,up,orbit+assistYaw),toggle:()=>{mode=1-mode;},recenter:()=>{center=true;},step(s,i,dt,_unused,c){
  dt=clamp(dt,0,.25);const old=up;up=approachNormal(up,s.n,dt,12,4.5);forward=tangent(up,transport(forward,old,up));look=mix(look,[i.x||0,i.y||0],damp(24,dt));if(Math.abs(i.x||0)+Math.abs(i.y||0)>.001){orbit+=look[0]*1.9*dt;pitch=clamp(pitch+look[1]*1.15*dt,.48,1.32);center=false;}else if(center){orbit*=Math.exp(-dt*7);if(Math.abs(orbit)<.01)center=false;}
  const target=add(s.p,mul(up,.009)),want=mode?.22:.30+(s.glide?.07:0)+len(s.v)*.16;
  function candidate(yo,po){const f=tangent(up,rotate(forward,up,orbit+yo)),right=unit(cross(f,up)),a=clamp(pitch+po,.42,1.48),back=unit(add(mul(f,-Math.cos(a)),mul(up,Math.sin(a)))),vertical=unit(cross(back,right)),ob=world.ray(target,back,want+.008),safe=ob?Math.max(.018,ob.distance-.012):want;return {f,right,vertical,back,safe,ob,a,yo,po};}
@@ -66,5 +67,36 @@ function rig(s,world){let orbit=0,pitch=.87,distance=.32,up=s.n.slice(),forward=
  const framed=offsets.every(q=>q.depth>.004&&Math.abs(q.x*lens/q.depth)<c.width*.47&&Math.abs(q.y*lens/q.depth)<c.height*.43);
  return {yaw:c.yaw,pitch:chosen.a,distance,target,framed,obstructed:!!ob,basis:c.marrowBasis,assistYaw,assistPitch};
  }};}
-root.BodyMarrowSurface=Object.freeze({create,rig,contact,transport,STEP});
+// GYROSCOPE: physics transports the steering frame. Only explicit look input
+// changes its yaw offset; the presentation camera can never write to it.
+const WORLD_UP=[0,1,0],MODES=['STEADY','CHASE','IMMERSIVE'],FOV=52*Math.PI/180;
+function spring(p,v,goal,dt,omega){const e=Math.exp(-omega*dt),d=sub(p,goal),j=add(v,mul(d,omega));return [add(goal,mul(add(d,mul(j,dt)),e)),mul(sub(v,mul(j,omega*dt)),e)];}
+function basis(f,up,pitch,roll=0){const right=unit(cross(f,up),[1,0,0]),back=unit(add(mul(f,-Math.cos(pitch)),mul(up,Math.sin(pitch)))),vertical=unit(cross(back,right));return [rotate(right,back,roll),rotate(vertical,back,roll),back];}
+function rotationAngle(a,b){return Math.acos(clamp((dot(a[0],b[0])+dot(a[1],b[1])+dot(a[2],b[2])-1)*.5,-1,1));}
+function blendBasis(a,b,t,maxAngle){const theta=rotationAngle(a,b);if(theta<1e-7)return b.map(v=>v.slice());let axis=add(add(cross(a[0],b[0]),cross(a[1],b[1])),cross(a[2],b[2]));if(len(axis)<1e-6){const v=add(a[0],b[0]),w=add(a[1],b[1]),z=add(a[2],b[2]);axis=[v,w,z].sort((x,y)=>len(y)-len(x))[0];if(len(axis)<1e-7)axis=a[0];}const angle=Math.min(theta*t,maxAngle);return a.map(v=>unit(rotate(v,unit(axis),angle),v));}
+function rig(s,world){let mode=0,yaw=0,pitch=.72,sensitivity=1,close=false,recenter=false,look=[0,0],physical=s,worldForward=tangent(WORLD_UP,s.frame||s.f),orient=basis(worldForward,WORLD_UP,pitch),target=s.p.slice(),targetV=[0,0,0],distance=.36,distanceV=0,angular=0,transition=false,blockedFor=0,obstructedLast=false,recovery=0,lastMode='STEADY';
+ const api={yaw:()=>yaw,controlYaw:()=>yaw,forward:()=>rotate(tangent(physical.n,physical.frame||physical.f),physical.n,yaw),mode:()=>MODES[mode],setMode:m=>{const next=MODES.indexOf(m);if(next>=0&&next!==mode){mode=next;transition=true;}return MODES[mode];},cycle:()=>api.setMode(MODES[(mode+1)%3]),toggle:()=>{close=!close;},sensitivity:()=>sensitivity,setSensitivity:v=>{if(Number.isFinite(v))sensitivity=clamp(v,.35,1.8);return sensitivity;},recenter:()=>{recenter=true;},step(s,i,dt,_unused,c){
+ physical=s;const rawDt=Math.max(0,dt),h=clamp(rawDt,0,.05),trackDt=clamp(rawDt,0,.10),old=orient.map(v=>v.slice()),oldAngular=angular;
+ look=mix(look,[clamp(i.x||0,-1,1),clamp(i.y||0,-1,1)],damp(18,h));if(Math.abs(i.x||0)+Math.abs(i.y||0)>.001){yaw+=look[0]*1.45*sensitivity*h;pitch=clamp(pitch+look[1]*1.05*sensitivity*h,.22,1.22);recenter=false;}else{look=[0,0];if(recenter){yaw*=Math.exp(-h*5);pitch+= (.72-pitch)*damp(5,h);if(Math.abs(yaw)<.005&&Math.abs(pitch-.72)<.005){yaw=0;pitch=.72;recenter=false;}}}
+ const f=rotate(worldForward,WORLD_UP,yaw),speed=len(s.v||[0,0,0]),localUp=s.n,localF=rotate(tangent(localUp,s.frame||s.f),localUp,yaw),roll=mode===1?clamp(dot(s.v||[0,0,0],unit(cross(f,WORLD_UP)))*.25,-.055,.055):0;
+ const desired=mode===2?basis(localF,localUp,pitch):basis(f,WORLD_UP,pitch,roll);
+ if(mode===2||transition){orient=blendBasis(orient,desired,damp(7,h),1.7*h);if(rotationAngle(orient,desired)<.004){orient=desired;transition=false;}}else orient=desired;
+ const [right,vertical,back]=orient;
+ const ahead=mode===1?mul(s.v||[0,0,0],.19):[0,0,0],goal=add(s.p,ahead);
+ [target,targetV]=spring(target,targetV,goal,trackDt,13);
+ // Bounded tracking lag: avoid losing the board on a dropped frame. No angular
+ // obstruction correction, no view-basis or input change from collision.
+ const lag=sub(target,s.p);if(len(lag)>.075){target=add(s.p,mul(unit(lag),.075));targetV=[0,0,0];}
+ const want=(close?.24:.36)+(mode===1?Math.min(.10,speed*.24):0),hit=world.ray(target,back,want+.012),safe=hit?Math.max(.007,hit.distance-.010):want;
+ if(hit){blockedFor+=rawDt;recovery=0;}else{if(obstructedLast)recovery=0;else recovery+=rawDt;blockedFor=0;}
+ // Safety may shorten the camera instantly; outward recovery is damped.
+ [distance,distanceV]=spring([distance],[distanceV],[safe],trackDt,9).map(v=>v[0]);if(distance>safe){distance=safe;distanceV=0;}distance=Math.max(.007,distance);obstructedLast=!!hit;
+ const span=Math.max(.001,Math.min(c.width/3.25,c.height/c.frameSpan)),lens=c.height*.5/Math.tan(FOV*.5);
+ c.marrowBasis=[...right,...vertical,...back];c.target={x:target[0],y:target[1],z:target[2]};c.marrowDistance=distance;c.anchorX=.5;c.anchorY=.53;c.zoom=lens/(distance*span);c.yaw=Math.atan2(-back[0],-back[2]);c.pitch=Math.asin(clamp(back[1],-1,1));
+ const offsets=[];for(const x of [-.018,.018])for(const y of [-.009,.012])for(const z of [-.038,.038]){const q=sub(add(s.p,add(mul(unit(cross(s.f,s.n)),x),add(mul(s.n,y),mul(s.f,z)))),target),depth=distance-dot(q,back);offsets.push({x:dot(q,right),y:dot(q,vertical),depth});}
+ const framed=offsets.every(q=>q.depth>.004&&Math.abs(q.x*lens/q.depth)<c.width*.47&&Math.abs(q.y*lens/q.depth)<c.height*.43);
+ angular=h>0?rotationAngle(old,orient)/h:0;const angularAcceleration=h>0?Math.abs(angular-oldAngular)/h:0;lastMode=MODES[mode];
+ return {mode:lastMode,yaw:c.yaw,pitch:c.pitch,distance,target:target.slice(),framed,obstructed:!!hit,basis:c.marrowBasis.slice(),fovDegrees:FOV*180/Math.PI,controlYaw:yaw,angularVelocity:angular,angularAcceleration,trackingError:len(sub(target,s.p)),horizonRoll:Math.asin(clamp(right[1],-1,1)),blockedSeconds:blockedFor,recoverySeconds:recovery,cameraDt:h,transition};
+ }};return api;}
+root.BodyMarrowSurface=Object.freeze({create,rig,legacyRig,contact,transport,STEP});
 })(globalThis);
