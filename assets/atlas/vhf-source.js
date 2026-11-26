@@ -21,8 +21,8 @@ globalThis.BodyVHF=(function sourceModule(){
   const x0=(i&1?p.max[0]:p.min[0])-c.target.x,y0=(i&2?p.max[1]:p.min[1])-c.target.y,z0=(i&4?p.max[2]:p.min[2])-c.target.z;
   const x=x0*cy+z0*sy,z=z0*cy-x0*sy,y=y0*cp-z*sp,z2=y0*sp+z*cp,w=(c.flight?-z2:7.4-z2)/7.4;
   if(!Number.isFinite(w)||(!c.flight&&w<=.10))return true; // perspective clamp: conservatively retain
-  const X=x*scale/(c.width*.5)+(ax-.5)*2*w,Y=(y-(c.flight?0:.04))*scale/(c.height*.5)-(ay-.5)*2*w,Z=c.flight?((250+.005)/(250-.005)*(-z2)-2*250*.005/(250-.005))/7.4:-z2/15;
-  const margin=.005*Math.max(1,w);
+  const X=x*scale/(c.width*.5)+(ax-.5)*2*w,Y=(y-(c.flight?0:.04))*scale/(c.height*.5)-(ay-.5)*2*w,Z=c.flight?((250+.0015)/(250-.0015)*(-z2)-2*250*.0015/(250-.0015))/7.4:-z2/15;
+  const margin=(c.flight?.025:.005)*Math.max(1,Math.abs(w));
   let mask=0;if(X < -w-margin)mask|=1;if(X>w+margin)mask|=2;if(Y< -w-margin)mask|=4;if(Y>w+margin)mask|=8;if(Z< -w-margin)mask|=16;if(Z>w+margin)mask|=32;
   outside&=mask;if(!outside)return true;
  }
@@ -55,7 +55,7 @@ globalThis.BodyVHF=(function sourceModule(){
    if(Math.abs(det)<1e-12)continue;
    const sx=o[0]-ax,sy=o[1]-ay,sz=o[2]-az,u=(sx*hx+sy*hy+sz*hz)/det;if(u<0||u>1)continue;
    const qx=sy*uz-sz*uy,qy=sz*ux-sx*uz,qz=sx*uy-sy*ux,v=(d[0]*qx+d[1]*qy+d[2]*qz)/det;if(v<0||u+v>1)continue;
-   const t=(vx*qx+vy*qy+vz*qz)/det;if(t>0&&t<best&&(!c.flight||t*7.4>=.005&&t*7.4<=250)){best=t;id=p.id;}
+   const t=(vx*qx+vy*qy+vz*qz)/det;if(t>0&&t<best&&(!c.flight||t*7.4>=.0015&&t*7.4<=250)){best=t;id=p.id;}
   }
  }
  return id?{id,point:{x:world.o[0]+world.d[0]*best,y:world.o[1]+world.d[1]*best,z:world.o[2]+world.d[2]*best}}:null;

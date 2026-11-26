@@ -88,7 +88,7 @@ function create(canvas,onContextLost=()=>{}){
    'float x=p.x*cy+p.z*sy;','float z=p.z*cy-p.x*sy;','float y=p.y*cp-z*sp;','float z2=p.y*sp+z*cp;',
    'float scale=min(uViewport.x/3.25,uViewport.y/uFrameSpan)*uZoom;',
    'float w=uFlight>.5?-z2/7.4:max(.10,(7.4-z2)/7.4);',
-   'float depth=uFlight>.5?((250.0+.005)/(250.0-.005)*(-z2)-2.0*250.0*.005/(250.0-.005))/7.4:-z2/15.0;', 'gl_Position=vec4(x*scale/(uViewport.x*.5)+(uAnchorX-.5)*2.0*w,(y-(uFlight>.5?0.0:.04))*scale/(uViewport.y*.5)-(uAnchorY-.5)*2.0*w,depth,w);',
+   'float depth=uFlight>.5?((250.0+.0015)/(250.0-.0015)*(-z2)-2.0*250.0*.0015/(250.0-.0015))/7.4:-z2/15.0;', 'gl_Position=vec4(x*scale/(uViewport.x*.5)+(uAnchorX-.5)*2.0*w,(y-(uFlight>.5?0.0:.04))*scale/(uViewport.y*.5)-(uAnchorY-.5)*2.0*w,depth,w);',
    'vNormal=n;','float nz=n.z*cy-n.x*sy; vViewNormal=vec3(n.x*cy+n.z*sy,n.y*cp-nz*sp,n.y*sp+nz*cp);','}'
   ].join('\n');
   const frag=['#version 300 es','precision mediump float;','in vec3 vNormal;','uniform vec3 uColor;','uniform float uDim;','uniform float uAlpha;','uniform float uVisual;','uniform float uMaterial;','in vec3 vViewNormal;','out vec4 outColor;',
