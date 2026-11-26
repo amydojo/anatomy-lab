@@ -1,0 +1,29 @@
+name: PRESENCE playable world qualification
+on:
+  pull_request:
+    branches: ['feat/v15-expedition-gamepad']
+permissions:
+  contents: read
+jobs:
+  presence:
+    if: github.head_ref == 'feat/nexus-experience'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npm test
+      - run: npx playwright test tests/nexus-presence.spec.mjs --project=desktop-chromium
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: presence-world-evidence
+          path: |
+            test-results/
+            artifacts/results.json
+          if-no-files-found: warn
