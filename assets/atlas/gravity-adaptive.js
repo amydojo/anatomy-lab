@@ -46,19 +46,19 @@
    out[k]=clamp(origin[k]+delta[k],lower,upper)-origin[k];
   }return out;
  }
- function spatialStep(base,c,motion,dt,b,maxZoom,p){
+ function spatialStep(base,c,motion,dt,b,maxZoom,p,orthographic=false){
   if(!finite(c.target)||!Number.isFinite(c.zoom)||c.zoom<=0)return false;
   const start={...c,target:{...c.target}},previousEye=eye(start);
   const local=finite(p)?toView(start,sub(p,start.target)):null;
   // Keep explicit pivot even off screen; unsafe projection depth falls back to free look.
-  const inspection=local&&local.z<6.4&&local.z> -20;
+  const inspection=local&&(orthographic||(local.z<6.4&&local.z> -20));
   const angular=Math.min(1,Math.min(c.width,c.height)*.55/(Math.max(.001,Math.min(c.width/3.25,c.height/Math.max(.2,c.frameSpan))*c.zoom)*7.4));
   base(c,{...motion,panX:0,panY:0,orbitX:motion.orbitX*(inspection?1:angular),orbitY:motion.orbitY*(inspection?1:angular)},dt,b,maxZoom);
   const rotated=c.yaw!==start.yaw||c.pitch!==start.pitch,zoomed=c.zoom!==start.zoom;
   if(inspection&&(rotated||zoomed)){
    // Orbit about the same world point; zoom preserves its pixel, at constant depth.
    const ratio=start.zoom/c.zoom;
-   c.target=sub(p,fromView(c,{x:local.x*ratio,y:.04+(local.y-.04)*ratio,z:local.z}));
+   c.target=sub(p,fromView(c,{x:local.x*ratio,y:orthographic?local.y*ratio:.04+(local.y-.04)*ratio,z:local.z}));
   }else if(!inspection&&rotated)c.target=sub(previousEye,fromView(c,{x:0,y:.04,z:7.4}));
   if(motion.panX||motion.panY){
    const scale=Math.max(.001,Math.min(c.width/3.25,c.height/Math.max(.2,c.frameSpan))*c.zoom);
@@ -83,14 +83,14 @@
    const dt=Math.min(.05,seconds),i=intent(raw),G=root.BodyGravity;
    const legacy=world?.legacyOrbit===true;
    let p=null,pivotKey=null;try{if(world?.orbitPivot&&!legacy){const ref=world.orbitPivot(c);p=ref?.point||null;pivotKey=ref?.key||null;}else p=world?.inspectionPoint?.(c)||null;}catch{}
-   if(p){const q=G.project(c,p);if(!(q.z<6.4&&q.z> -20&&(!legacy||(q.x>=0&&q.x<=c.width&&q.y>=0&&q.y<=c.height))))p=null;}
+   if(p&&!world?.orthographic){const q=G.project(c,p);if(!(q.z<6.4&&q.z> -20&&(!legacy||(q.x>=0&&q.x<=c.width&&q.y>=0&&q.y<=c.height))))p=null;}
    const mode=p?'inspection':'roam';
    if(lastMode!==null&&(mode!==lastMode||pivotKey!==lastPivotKey)){v=zero();filtered=1;}
    lastMode=mode;lastPivotKey=pivotKey;
-   const u=units(c,p),nominal=units(c,null),ratio=u&&nominal?clamp(u.x/nominal.x,.2,3.5):1;
+   const u=world?.orthographic?null:units(c,p),nominal=world?.orthographic?null:units(c,null),ratio=u&&nominal?clamp(u.x/nominal.x,.2,3.5):1;
    filtered+=(ratio-filtered)*(-Math.expm1(-dt/.12));
    if(i.precision!==precisionState){v=zero();precisionState=i.precision;}
-   const macro=clamp((c.zoom-2)/12,0,1),prox=p?G.proximity(c,p):1,gain=config.response*(i.precision?.25*config.precision:1),motion=zero();
+   const macro=clamp((c.zoom-2)/12,0,1),prox=p&&!world?.orthographic?G.proximity(c,p):1,gain=config.response*(i.precision?.25*config.precision:1),motion=zero();
    for(const k of fields){
     const desired=i[k]*gain*(k.startsWith('pan')?filtered*prox:1);
     const tau=Math.max(.008,desired===0?config.inertia*(1-.75*macro)*(i.precision?.4:1):config.acceleration);
@@ -101,7 +101,7 @@
     v[k]=desired===0&&end<dt?0:desired+(v[k]-desired)*decay;
     if(desired===0&&Math.abs(v[k])<=.00200000000001)v[k]=0;
    }
-   if(!legacy)return spatialStep(base,c,motion,dt,b,maxZoom,p);
+   if(!legacy)return spatialStep(base,c,motion,dt,b,maxZoom,p,world?.orthographic===true);
    const pan=Math.abs(motion.panX)+Math.abs(motion.panY)>0,anchorPoint=!pan?(p||(motion.zoom?{...c.target}:null)):null,old=anchorPoint?G.project(c,anchorPoint):null;
    const changed=base(c,motion,dt,b,maxZoom);if(changed&&old)G.anchor(c,anchorPoint,old,b);return changed;
   }

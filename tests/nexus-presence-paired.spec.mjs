@@ -1,8 +1,8 @@
 import {test,expect} from '@playwright/test';
 import {routes} from '../nexus/contract.mjs';
-const worldOrigin='https://anatomy-nexusfixture-amy-dos-projects.vercel.app',creativeOrigin=new URL(routes.find(r=>r.id==='create').href).origin;
+const worldOrigin='https://anatomy-nexusfixture-amy-dos-projects.vercel.app',creativeOrigin=worldOrigin;
 test('PRESENCE direct world to creative performance and exact regional return',async({page},info)=>{test.setTimeout(180000);
- for(const [origin,prefix] of [[worldOrigin,''],[creativeOrigin,'/.nexus-companion']])await page.context().route(origin+'/**',async route=>{const u=new URL(route.request().url());const response=await route.fetch({url:'http://127.0.0.1:4173'+prefix+u.pathname+u.search});await route.fulfill({response});});
+ for(const [origin,prefix] of [[worldOrigin,'']])await page.context().route(origin+'/**',async route=>{const u=new URL(route.request().url());const response=await route.fetch({url:'http://127.0.0.1:4173'+prefix+u.pathname+u.search});await route.fulfill({response});});
  await page.goto(worldOrigin+'/play/');await expect.poll(()=>page.evaluate(()=>window.__PRESENCE__?.state().rendered.length||0),{timeout:90000}).toBeGreaterThan(0);
  const hit=await page.evaluate(()=>{const r=document.getElementById('atlas-canvas').getBoundingClientRect();for(const y of [.5,.42,.58,.34,.66])for(const x of [.5,.46,.54,.4,.6]){const h=window.__PRESENCE__.target(r.width*x,r.height*y);if(h)return {x:r.left+r.width*x,y:r.top+r.height*y,id:h.id};}return null;});expect(hit).toBeTruthy();await page.mouse.click(hit.x,hit.y);await expect.poll(()=>page.evaluate(()=>window.__PRESENCE__.state().selected?.id)).toBe(hit.id);
  await page.getByRole('button',{name:'Approach · △',exact:true}).click();await expect.poll(()=>page.evaluate(()=>window.__PRESENCE__.state().camera.zoom)).toBeGreaterThan(1);const before=await page.evaluate(()=>window.__PRESENCE__.save());await page.screenshot({path:info.outputPath('world-before-performance.png')});

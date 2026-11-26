@@ -1,9 +1,9 @@
 import {test,expect} from '@playwright/test';
 import {routes} from '../nexus/contract.mjs';
 const launcherOrigin='https://anatomy-nexusfixture-amy-dos-projects.vercel.app';
-const companionOrigin=new URL(routes.find(r=>r.id==='create').href).origin;
+const companionOrigin=launcherOrigin;
 async function setup(page){
- for(const [origin,prefix] of [[launcherOrigin,''],[companionOrigin,'/.nexus-companion']])await page.context().route(origin+'/**',async route=>{const url=new URL(route.request().url());const response=await route.fetch({url:'http://127.0.0.1:4173'+prefix+url.pathname+url.search});await route.fulfill({response});});
+ for(const [origin,prefix] of [[launcherOrigin,'']])await page.context().route(origin+'/**',async route=>{const url=new URL(route.request().url());const response=await route.fetch({url:'http://127.0.0.1:4173'+prefix+url.pathname+url.search});await route.fulfill({response});});
  await page.addInitScript(()=>{window.__essPad=Array(17).fill(false);Object.defineProperty(navigator,'getGamepads',{configurable:true,value:()=>[{connected:true,mapping:'standard',index:0,axes:[0,0,0,0],buttons:window.__essPad.map(pressed=>({pressed,value:pressed?1:0}))}]});});
  await page.goto(launcherOrigin+'/nexus/');await page.locator('[data-route=create]').first().click();await expect.poll(()=>page.evaluate(()=>window.__SOMATIC__?.report().structures||0),{timeout:90000}).toBeGreaterThan(0);await page.bringToFront();await expect(page.locator('#stage')).toHaveAttribute('data-essence','ambient');
 }
