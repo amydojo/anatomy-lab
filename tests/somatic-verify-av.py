@@ -1,6 +1,7 @@
 import json, pathlib, subprocess, math, array
 files=list(pathlib.Path('test-results').rglob('synesthesia-av.*'))
 assert files, 'missing audiovisual export'
+files+=list(pathlib.Path('test-results').rglob('morphology-av.*'))
 for p in files:
  data=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_streams','-show_packets','-of','json',str(p)]))
  streams=data['streams']; v=next(s for s in streams if s['codec_type']=='video'); a=next(s for s in streams if s['codec_type']=='audio')
