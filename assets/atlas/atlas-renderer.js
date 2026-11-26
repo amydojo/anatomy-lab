@@ -390,19 +390,20 @@ function create(canvas,onContextLost=()=>{}){
  function setVisualMode(mode){visualMode=({legacy:0,atlas:1,specimen:2,cinema:3})[mode]??0;}
  let opticalDensity=null,limitContext=null,limits=null;
  function setOpticalDensity(value){opticalDensity=Number.isFinite(value)?value:null;}
- function resize(){
+ function resize(marrow=false){
   const rect=canvas.getBoundingClientRect(),w=Math.max(1,rect.width),h=Math.max(1,rect.height),native=window.devicePixelRatio||1;
   let dpr=Math.min(native,2),width=Math.ceil(w*dpr),height=Math.ceil(h*dpr);
   if(opticalDensity!==null&&gl&&status==='ready'&&window.BodyOptical){
    if(limitContext!==gl||!limits){const viewport=gl.getParameter(gl.MAX_VIEWPORT_DIMS),size=gl.getParameter(gl.MAX_RENDERBUFFER_SIZE);limits=[Math.min(viewport[0],size),Math.min(viewport[1],size)];limitContext=gl;}
    const dims=window.BodyOptical.dimensions(w,h,native,opticalDensity,limits[0],limits[1]);({width,height}=dims);dpr=dims.scale;
   }
+  if(marrow){const cap=Math.min(1,Math.sqrt(650000/(w*h)),dpr);width=Math.max(1,Math.ceil(w*cap));height=Math.max(1,Math.ceil(h*cap));dpr=cap;}
   if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
   return {width:w,height:h,dpr};
  }
  function render(camera,selected,mode='clean',layer=0,reveal=0,flex=0,highlight=null,secondary=0,transitionFrom=null,tissueFocus=false,sourceView=null){
   if(destroyed)return {width:canvas.clientWidth,height:canvas.clientHeight,dpr:1};
-  const size=resize();
+  const size=resize(!!sourceView?.marrowBoard);
   if(!gl||status!=='ready'||gl.isContextLost?.())return size;
   // Resizing can invalidate a GPU context; never query locations from a stale program.
   if(!program||!gl.isProgram(program)){
