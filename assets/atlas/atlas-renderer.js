@@ -461,7 +461,7 @@ function create(canvas,onContextLost=()=>{}){
    gl.uniform1f(uni('uMotion'),unposed?0:moving?1:0);gl.uniform1f(uni('uSoftSkin'),item.skinWeights?1:0);gl.uniform1f(uni('uMotionAxis'),selected==='shoulder'?1:0);
    gl.uniform1f(uni('uFlex'),(selected==='shoulder'?-1:1)*Number(flex)*Math.PI/180);
    gl.uniform3fv(uni('uPivot'),pivot);
-   const play=item.id.startsWith('__marrow_')?(item.id.includes('_front_')?sourceView?.marrowBoard?.front||sourceView?.marrowBoard:item.id.includes('_rear_')?sourceView?.marrowBoard?.rear||sourceView?.marrowBoard:sourceView?.marrowBoard):sourceView?.playground?.transform(item.id);gl.uniformMatrix3fv(uni('uPlayRotation'),false,play?.r||identityRotation);gl.uniform3fv(uni('uPlayTranslation'),play?.t||identityTranslation);
+   const play=item.id.startsWith('__marrow_')?window.BodyMarrowBoard.transform(item.id,sourceView.marrowBoard):sourceView?.playground?.transform(item.id);gl.uniformMatrix3fv(uni('uPlayRotation'),false,play?.r||identityRotation);gl.uniform3fv(uni('uPlayTranslation'),play?.t||identityTranslation);
    const kind=item.connectiveKind;gl.uniform1f(uni('uMaterial'),item.id===highlight?4:kind==='fibrocartilage'||kind==='cartilage'?3:kind==='tendon'||kind==='ligament'?2:item.connective||item.group==='connective'?4:item.tissue?1:0);
    gl.uniform3fv(uni('uColor'),item.id===highlight?[1,.81,.48]:item.color);gl.uniform1f(uni('uDim'),dim);gl.uniform1f(uni('uAlpha'),alpha);
    gl.bindBuffer(gl.ARRAY_BUFFER,item.buffer);
@@ -514,23 +514,14 @@ function create(canvas,onContextLost=()=>{}){
    }else{if(marrowDisplay.size)clearMarrowDisplay();for(const m of vhfMeshes){if(!wanted.has(m.id)||!V.visible(m,sourceView)||!V.inView(sourceView.playground?.bounds(m)||m,cam))continue;m.lastUse=now;draw(m,1,1,true);drawn.add(m.id);}}
 
    if(sourceView.marrowBoard){
-    if(!marrowMesh){
-     function geometry(id,color,make){const positions=[],indices=[];function cube(x,y,z,a,b,c){const n=positions.length/3;for(let j=0;j<8;j++)positions.push(x+(j&1?a:-a),y+(j&2?b:-b),z+(j&4?c:-c));for(const k of [0,2,1,1,2,3,4,5,6,5,7,6,0,1,4,1,5,4,2,6,3,3,6,7,0,4,2,2,4,6,1,3,5,3,7,5])indices.push(n+k);}make(cube);return makeBuffer({positions:new Float32Array(positions),indices:new Uint16Array(indices)},'__marrow_'+id,'marrow',color);}
-     const glyph={M:['101','111','111','101','101'],A:['010','101','111','101','101'],P:['110','101','110','100','100'],O:['111','101','101','101','111'],D:['110','101','101','101','110'],F:['111','100','110','100','100'],U:['101','101','101','101','111']};
-     marrowMesh=[geometry('shaft',[.27,.17,.38],cube=>{cube(0,.002,0,.004,.003,.011);cube(0,.004,0,.006,.002,.003);})];
-     for(const [side,sign,word] of [['front',1,'MAPO'],['rear',-1,'DOFU']]){
-      marrowMesh.push(geometry(side+'_deck',[.055,.025,.09],cube=>{cube(0,.003,sign*.020,.012,.002,.015);cube(0,.004,sign*.033,.009,.003,.003);cube(0,.003,sign*.009,.009,.002,.004);}));
-      marrowMesh.push(geometry(side+'_acid',[.80,1,.06],cube=>{cube(0,-.004,sign*.023,.007,.004,.006);for(let l=0;l<4;l++)for(let y=0;y<5;y++)for(let x=0;x<3;x++)if(glyph[word[l]][y][x]==='1')cube((l*4+x-7)*.00135,.0054,sign*.020+(y-2)*.0022,.00061,.0003,.00098);}));
-      marrowMesh.push(geometry(side+'_violet',[.83,.10,.64],cube=>{for(const z of [.027,.031])cube(0,.0055,sign*z,.009,.0005,.001);}));
-     }
-    }
-    for(const m of marrowMesh)draw(m,1,1,true);
+    if(!marrowMesh){marrowMesh=window.BodyMarrowBoard.geometry(sourceView.marrowBoard.vehicle?.skin).map(p=>makeBuffer(p,p.id,'marrow',p.color));}
+    for(const m of marrowMesh)draw(m,window.BodyMarrowBoard.intensity(m.id,sourceView.marrowBoard),1,true);
    }else if(marrowMesh){for(const m of marrowMesh)disposeMesh(m);marrowMesh=null;}
    sourceView.renderedIds=bounded||sourceView.playground?drawn:null;
    if(drawn.size&&vhfFirstDrawMs===null)vhfFirstDrawMs=performance.now()-(parts.sourceInfo?.streamStartedAt??now);
    const bytes=vhfMeshes.reduce((n,m)=>n+m.bufferBytes,0);
    const lodCounts={overview:0,regional:0,exact:0};for(const m of vhfMeshes)lodCounts[m.lodLevel||'exact']++;
-   frameStats={drawCalls,submittedTriangles,marrowDisplayTriangles:[...marrowDisplay.values()].reduce((n,q)=>n+q.chunks.reduce((a,m)=>a+m.count/3,0),0),marrowDisplayBytes:[...marrowDisplay.values()].reduce((n,q)=>n+q.chunks.reduce((a,m)=>a+m.bufferBytes,0),0),drawnSourceIds:[...drawn],residentSourceIds:vhfMeshes.map(m=>m.id),...(axial?{firstDrawMs:vhfFirstDrawMs,uploadChunks:vhfChunkCount,maxUploadChunkCpuMs:vhfMaxChunkMs,stagedGpuBufferBytes:vhfStage?.mesh.bufferBytes||0,preparedCpuBytes:parts.reduce((n,p)=>n+(p.packed?.byteLength||0)+(p.lods||[]).reduce((a,l)=>a+(l.packed?.byteLength||0),0),0),lodCounts,gpuFailedIds:[...vhfFailed]}:{}),eligibleStructures,eligibleTriangles,culledStructures,culledTriangles,residentStructures:vhfMeshes.length,residentTriangles:vhfMeshes.reduce((n,m)=>n+m.count/3,0),estimatedSourceGpuBufferBytes:bytes,residency:bounded?{targetBytes:32*1024*1024,overTarget:bytes>32*1024*1024,pending,failed:vhfFailed.size,evictions:vhfEvictions,uploads:vhfUploads,uploadCpuMs:vhfUploadMs}:null};
+   frameStats={drawCalls,submittedTriangles,marrowVehicleDrawCalls:marrowMesh?.length||0,marrowVehicleTriangles:marrowMesh?.reduce((n,m)=>n+m.count/3,0)||0,marrowDisplayTriangles:[...marrowDisplay.values()].reduce((n,q)=>n+q.chunks.reduce((a,m)=>a+m.count/3,0),0),marrowDisplayBytes:[...marrowDisplay.values()].reduce((n,q)=>n+q.chunks.reduce((a,m)=>a+m.bufferBytes,0),0),drawnSourceIds:[...drawn],residentSourceIds:vhfMeshes.map(m=>m.id),...(axial?{firstDrawMs:vhfFirstDrawMs,uploadChunks:vhfChunkCount,maxUploadChunkCpuMs:vhfMaxChunkMs,stagedGpuBufferBytes:vhfStage?.mesh.bufferBytes||0,preparedCpuBytes:parts.reduce((n,p)=>n+(p.packed?.byteLength||0)+(p.lods||[]).reduce((a,l)=>a+(l.packed?.byteLength||0),0),0),lodCounts,gpuFailedIds:[...vhfFailed]}:{}),eligibleStructures,eligibleTriangles,culledStructures,culledTriangles,residentStructures:vhfMeshes.length,residentTriangles:vhfMeshes.reduce((n,m)=>n+m.count/3,0),estimatedSourceGpuBufferBytes:bytes,residency:bounded?{targetBytes:32*1024*1024,overTarget:bytes>32*1024*1024,pending,failed:vhfFailed.size,evictions:vhfEvictions,uploads:vhfUploads,uploadCpuMs:vhfUploadMs}:null};
    return size;
   }
   const region=detail.has(selected)?selected:null;
