@@ -3,8 +3,8 @@
 #stage[data-essence] #mark{top:max(14px,env(safe-area-inset-top));left:20px;gap:2px;letter-spacing:.08em}
 #stage[data-essence] #mark strong{font-size:clamp(17px,2.2vw,32px);font-weight:500}
 #stage[data-essence] #mark small{font-size:10px}
-#stage[data-essence]:not([data-essence=studio]) #desk{display:none!important}
-#stage[data-essence=studio] #desk{display:block!important;position:absolute;inset:12px 12px 12px auto;transform:none;width:min(420px,46vw);max-height:none;background:var(--ess-surface);backdrop-filter:none;z-index:11}
+#stage[data-essence] #desk:not([data-essence-desk=true]){display:none!important}
+#stage[data-essence=studio] #desk[data-essence-desk=true]{display:block!important;position:absolute;inset:12px 12px 12px auto;transform:none;width:min(420px,46vw);max-height:none;background:var(--ess-surface);backdrop-filter:none;z-index:11}
 #stage[data-essence=studio] #mark{display:none}
 #stage[data-essence=immersion] #mark,#stage[data-essence=immersion] #essence-tools,#stage[data-essence=immersion] #now-playing{display:none!important}
 #stage[data-essence] #return{display:none!important}
@@ -27,7 +27,7 @@
 #stage[data-essence] #deck-play{display:none}
 #stage[data-essence] .signal-grid,#stage[data-essence] #deck-routes,#stage[data-essence] #deck-tempo,#stage[data-essence] #tissue-live{display:none}
 #stage[data-essence=studio] .signal-grid,#stage[data-essence=studio] #deck-routes,#stage[data-essence=studio] #deck-tempo,#stage[data-essence=studio] #tissue-live{display:initial}
-#stage[data-essence] #deck-actions button[data-advanced=true]{display:none}
+#stage[data-essence]:not([data-essence-audio=advanced]) #deck-actions button[data-advanced=true],#stage[data-essence]:not([data-essence-audio=advanced]) #matrix{display:none}
 #stage[data-essence] #desk button,#stage[data-essence] #desk select{min-height:44px}
 #stage[data-essence] button:focus-visible,#stage[data-essence] input:focus-visible,#stage[data-essence] select:focus-visible{outline:3px solid #f6e3ad;outline-offset:2px}
 #stage[data-essence] .essence-fields{display:grid;gap:8px;margin-top:12px}
@@ -36,3 +36,5 @@
 @media(min-width:1500px){#stage[data-essence] #director-menu,#stage[data-essence] #audio-deck,#stage[data-essence] #tissue-menu{width:min(540px,38vw)}#essence-tools{font-size:22px;min-height:54px}}
 @media(max-width:700px){#stage[data-essence] #director-menu,#stage[data-essence] #audio-deck,#stage[data-essence] #tissue-menu,#stage[data-essence] #controller-guide,#stage[data-essence=studio] #desk{inset:auto 0 0;width:100%;max-height:58dvh;padding:14px 16px max(14px,env(safe-area-inset-bottom));border-radius:12px 12px 0 0}#stage[data-essence] #mark{left:12px;top:12px}#essence-tools{right:12px;top:12px}#stage[data-essence] #rec-indicator:not([hidden]){top:65px;bottom:auto;left:12px;font-size:12px}#stage[data-essence] #now-playing:not([hidden]){top:65px;bottom:auto;right:12px}}
 @media(prefers-reduced-motion:reduce){#stage[data-essence] *{scroll-behavior:auto!important;transition:none!important}}
+
+#stage[data-essence] #nexus-experiences{display:none}#stage[data-essence] #desk[data-essence-desk=true] #nexus-experiences{display:inline-block}#stage[data-essence] #controller-guide:not([hidden])~#essence-tools{display:none}#stage[data-essence] #director-menu:not([hidden])~#now-playing{display:none}#stage[data-essence=studio] #desk[data-essence-desk=true] #matrix{display:block}
