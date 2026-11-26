@@ -9,7 +9,7 @@ if(query.get('presence')==='1'&&query.get('source')==='axis'&&query.get('axisMod
  const $=id=>document.getElementById(id),actions=$('presence-actions'),names=['Pelvis / lumbar spine','Thoracic cage','Cervical spine','Cranium'];
  let target=null,targetPixel=null,lastTarget=0,lastCamera='',dirty=true,restored=false,lastSelected=null,firstInput=null,started=performance.now(),raf=0,lastFrame=null,frames=[],pickTimes=[],lastActionKey='',pendingSave=false,saveTimer=0;
  const guide=settings(readLocal('settings',{})).guide;
- const stats=()=>({firstObservedInteractionMs:firstInput,firstReadyMs:api.state().firstReadyMs,renderIntervals:summary(frames),pickingCpuMs:summary(pickTimes),region:api.state().region});
+ const stats=()=>({firstObservedInteractionMs:firstInput,firstReadyMs:api.state().firstReadyMs,cameraChangeCallbackIntervals:summary(frames),controllerMetrics:window.__BODY_EXPEDITION_DIAGNOSTICS__?.report()?.metrics||null,pickingCpuMs:summary(pickTimes),region:api.state().region});
  function summary(a){const s=[...a].sort((a,b)=>a-b);return {samples:s.length,median:s.length?s[Math.floor(s.length/2)]:null,p95:s.length?s[Math.min(s.length-1,Math.ceil(s.length*.95)-1)]:null};}
  window.__PRESENCE_UI__=Object.freeze({stats});
  const save=()=>{const s=validateSession(api.save());return s&&writeLocal('presence-session',s);};
