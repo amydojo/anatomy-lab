@@ -25,9 +25,14 @@ export function bindGeometry(gl,h,{position,normal,weight}){
 // One upload at a time. No exact-source request is required to obtain display LOD.
 // Host supplies a worker-backed prepare() to keep CPU processing off input thread.
 export const PROVIDER_VERSION='1.1.0';
+export function overviewPreflight(manifest,budget=32*1024*1024,headroom=Math.floor(budget/8)){
+ const records=manifest.structures.map(e=>e.levels.find(l=>l.level===e.overviewLevel));
+ const bytes=records.reduce((n,l)=>n+l.gpuBytes,0),transfer=records.reduce((n,l)=>n+l.bytes,0);
+ return {labels:records.length,overviewGpuBytes:bytes,overviewTransferBytes:transfer,budget,headroom,steadyLimit:budget-headroom,coverageFits:bytes<=budget-headroom,payloadFits:transfer<5000000};
+}
 export class UnityGeometrySession{
- constructor({gl,manifest,source,sourceHash,root,exactRoot,prepare,budget=32*1024*1024,headroom=Math.floor(budget/8)}){
-  this.gl=gl;this.manifest=validateManifest(manifest,source,sourceHash);this.source=source;this.root=root;this.exactRoot=exactRoot;this.prepare=prepare;this.ledger=new Residency(budget,headroom);this.active=null;this.closed=false;this.failures=new Map();
+ constructor({gl,manifest,source,sourceHash,root,exactRoot,prepare,budget=32*1024*1024,headroom=Math.floor(budget/8),allowPartialDiagnostic=false}){
+  this.gl=gl;this.manifest=validateManifest(manifest,source,sourceHash);this.preflight=overviewPreflight(this.manifest,budget,headroom);require(allowPartialDiagnostic||this.preflight.coverageFits,'overview exceeds steady residency ceiling; full coverage blocked');this.source=source;this.root=root;this.exactRoot=exactRoot;this.prepare=prepare;this.ledger=new Residency(budget,headroom);this.active=null;this.closed=false;this.failures=new Map();
  }
  requests(camera,selected,visible=()=>true){
   return this.ledger.queue(this.manifest.structures.filter(e=>visible(e)||e.id===selected).map(e=>{
@@ -60,7 +65,7 @@ export class UnityGeometrySession{
  }
  // Exact original GLB is verified separately; host parser/picking retains source identity.
  async exact(id,signal){const e=this.manifest.structures.find(s=>s.id===id);require(e,'unknown source ID');return verifiedBytes(new URL(e.exact.file,this.exactRoot),e.exact,{signal});}
- diagnostics(){return {...this.ledger.diagnostics(),failures:[...this.failures],closed:this.closed,active:!!this.active};}
+ diagnostics(){return {preflight:this.preflight,...this.ledger.diagnostics(),failures:[...this.failures],closed:this.closed,active:!!this.active};}
  cancel(){this.active?.abort();}
  touch(id,now=performance.now()){this.ledger.touch(id,now);}
  retry(){this.failures.clear();}
@@ -86,12 +91,12 @@ export function createGeometryWorker(){
 
 // Factory is the production-facing entry point. Low-level session constructor is
 // retained for deterministic fixtures; never use it with unverified network data.
-export async function openUnityGeometryProvider({gl,sourceUrl,derivativeUrl,sourceHash,derivativeHash,root,exactRoot,budget,headroom,signal}){
+export async function openUnityGeometryProvider({gl,sourceUrl,derivativeUrl,sourceHash,derivativeHash,root,exactRoot,budget,headroom,signal,allowPartialDiagnostic=false}){
  const pins=await openVerifiedManifests({sourceUrl,derivativeUrl,sourceHash,derivativeHash,signal});
  if(signal?.aborted)throw Error('provider opening canceled');
  const worker=createGeometryWorker();
  let session;
- try{session=new UnityGeometrySession({gl,...pins,root,exactRoot,budget,headroom,prepare:worker.prepare});}
+ try{session=new UnityGeometrySession({gl,...pins,root,exactRoot,budget,headroom,allowPartialDiagnostic,prepare:worker.prepare});}
  catch(e){worker.close();throw e;}
  const provider={version:PROVIDER_VERSION,manifest:pins.manifest,source:pins.source,pins:{sourceHash,derivativeHash},step:(...args)=>session.step(...args),exact:(...args)=>session.exact(...args),touch:(...args)=>session.touch(...args),cancel:()=>session.cancel(),retry:()=>session.retry(),diagnostics:()=>session.diagnostics(),getDrawables:()=>[...session.ledger.resident].map(([id,r])=>({id,level:r.level,handle:r.handle,bytes:r.bytes})),dispose:()=>{session.dispose();worker.close();}};
  return Object.freeze(provider);
