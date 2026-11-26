@@ -41,8 +41,9 @@ globalThis.BodyVHF=(function sourceModule(){
  return flat;
 }
  function intersect(parts,view,c,x,y,ray,boxHit,visible){
- const {o,d}=ray(c,x,y);let best=Infinity,id=null;
+ const world=ray(c,x,y);let best=Infinity,id=null;
  for(const p of parts){
+  const transform=view.playground?.transform(p.id),{o,d}=transform?globalThis.BodyPlayground.ray(transform,world.o,world.d):world;
   if((view.renderedIds&&!view.renderedIds.has(p.id))||!visible(p,view)||!boxHit(o,d,p.min,p.max))continue;
   const positions=p.positions,indices=p.indices,len=indices?indices.length/3:p.faces.length;
   for(let i=0;i<len;i++){
@@ -57,7 +58,7 @@ globalThis.BodyVHF=(function sourceModule(){
    const t=(vx*qx+vy*qy+vz*qz)/det;if(t>0&&t<best){best=t;id=p.id;}
   }
  }
- return id?{id,point:{x:o[0]+d[0]*best,y:o[1]+d[1]*best,z:o[2]+d[2]*best}}:null;
+ return id?{id,point:{x:world.o[0]+world.d[0]*best,y:world.o[1]+world.d[1]*best,z:world.o[2]+world.d[2]*best}}:null;
 }
  function parse(buffer,manifest,world=false,axis=false){
   const dv=new DataView(buffer);
