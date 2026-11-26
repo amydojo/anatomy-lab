@@ -11,7 +11,7 @@ export const compositions=[
  {name:'THE INSTRUMENT',specimen:'exact-arms-hands',focus:['Bone','Muscle','Connective'],context:['Artery','Vein'],opacity:.35,ink:[.84,.78,.66],type:1}
 ];
 export function compositionLayers(cats,c){const out=defaults(cats);for(const k of cats){out[k].visible=c.focus.includes(k)||c.context.includes(k);out[k].opacity=c.context.includes(k)?c.opacity:1;}return out;}
-export function effectiveLayers(base,signal,master,reduced,bypass,mode){const out=structuredClone(base);if(reduced||bypass||!signal?.active)return out;const r=clamp(master),v=clamp(signal.bass),mid=clamp(signal.mid),onset=clamp(signal.onset);if(mode==='VISCERAL'){if(out.Muscle)out.Muscle.opacity=clamp(out.Muscle.opacity-v*.45*r);for(const k of ['Artery','Vein'])if(out[k])out[k].hue=(out[k].hue+mid*.16*r)%1;}if(mode==='IRON HEART'||mode==='SUBSTRUCTURE'){if(out.Muscle)out.Muscle.opacity=clamp(out.Muscle.opacity-onset*.35*r);if(out.Bone)out.Bone.opacity=clamp(out.Bone.opacity+onset*.35*r);}return out;}
+
 
 export function layerParameters(base){return Object.fromEntries(Object.entries(base).flatMap(([k,v])=>[['tissue:'+k+':opacity',v.opacity],['tissue:'+k+':hue',v.hue]]));}
 export function applyLayerParameters(base,values){const out=structuredClone(base);for(const [k,v] of Object.entries(out)){for(const prop of ['opacity','hue']){const n=values?.['tissue:'+k+':'+prop];if(Number.isFinite(n))v[prop]=clamp(n);}}return out;}

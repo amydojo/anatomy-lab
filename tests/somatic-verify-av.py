@@ -4,6 +4,9 @@ assert files, 'missing audiovisual export'
 morph=list(pathlib.Path('test-results').rglob('morphology-av.*'))
 assert morph, 'missing facial audiovisual export'
 files+=morph
+visceral=list(pathlib.Path('test-results').rglob('visceral-av.*'))
+assert visceral, 'missing visceral audiovisual export'
+files+=visceral
 for p in files:
  data=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_streams','-show_packets','-of','json',str(p)]))
  streams=data['streams']; v=next(s for s in streams if s['codec_type']=='video'); a=next(s for s in streams if s['codec_type']=='audio')
