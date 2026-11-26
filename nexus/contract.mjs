@@ -1,13 +1,20 @@
 // NEXUS v1: pure contracts; never treat a route visit as a restored camera.
 export const VERSION=1;
 export const routes=Object.freeze([
- {id:'explore',verb:'Explore',name:'EXPEDITION',href:'/atlas/?source=axis&expedition=1&nexus=1',status:'Shared baseline · continuous axial world',source:'6d51fc01364afdb647064bf9ddc0fae36c17cdbf'},
+ {id:'explore',verb:'Explore',name:'EXPEDITION',href:'/atlas/?source=axis&axisMode=regional&axisRegion=2&expedition=1&nexus=1&essence=1&presence=1&gravity=1',status:'Regional anatomical playground',source:'6d51fc01364afdb647064bf9ddc0fae36c17cdbf'},
  {id:'understand',verb:'Understand',name:'ATLAS',href:'/atlas/?nexus=1&expedition=1',status:'Shared baseline · structured anatomy',source:'6d51fc01364afdb647064bf9ddc0fae36c17cdbf'},
  {id:'create',verb:'Create',name:'SOMATIC',href:'https://anatomy-iwo0scp5f-amy-dos-projects.vercel.app/somatic/',status:'Separate preview · guarded return candidate · upstream runtime gate failed',source:'1307531683256682e517e19eceece620aac99b45',external:true},
- {id:'unity-world',name:'Whole skeleton / WORLD',href:'https://anatomy-iv6o2iw9f-amy-dos-projects.vercel.app/atlas/?source=unity&expedition=1&expeditionDiagnostics=1',status:'Experimental · 143 labels verified offline; runtime gate pending',source:'20f471860199cbde10821b4caac5ee809671dbe2',external:true},
+ {id:'unity-world',name:'Whole skeleton (experimental)',href:'https://anatomy-iv6o2iw9f-amy-dos-projects.vercel.app/atlas/?source=unity&expedition=1&expeditionDiagnostics=1',status:'Experimental · 143 labels offline; runtime unqualified',source:'20f471860199cbde10821b4caac5ee809671dbe2',external:true},
  {id:'morphology',name:'Upper-body tissues',href:'https://anatomy-pviacubpt-amy-dos-projects.vercel.app/atlas/morphology/',status:'Separate preview · acquired tissue packs',source:'3b9c111aebdad00d115ebd689f4f124fdb27697d',external:true},
  ...['skull','thorax','shoulder','hip','knee','ankle'].map(region=>({id:'region-'+region,name:region[0].toUpperCase()+region.slice(1),href:'/atlas/?nexus=1&region='+region,status:'Atlas region'})),
- ...['hip','knee','shoulder'].map(region=>({id:'lab-'+region,name:region[0].toUpperCase()+region.slice(1)+' lab',href:'/'+region+'/',status:'Educational joint lab'}))
+ {id:'axis-continuum',name:'Continuous axial preview',href:'/atlas/?source=axis&expedition=1&nexus=1',status:'Experimental · stream and zoom gates unresolved'},
+ ...['hip','knee','shoulder'].map(region=>({id:'lab-'+region,name:region[0].toUpperCase()+region.slice(1)+' lab',href:'/'+region+'/',status:'Educational joint lab'})),
+ {id:'lab-dissection',name:'Hip dissection',href:'/hip/dissection/',status:'Classic educational lab'},
+ {id:'lab-hip-spatial',name:'Hip spatial lab',href:'/hip/spatial/',status:'Classic educational lab'},
+ {id:'lab-knee-spatial',name:'Knee spatial lab',href:'/knee/spatial/',status:'Classic educational lab'},
+ {id:'source-atlas',name:'Anatomy sources',href:'/atlas/sources/',status:'Source and limitations'},
+ {id:'source-references',name:'Educational references',href:'/references/',status:'Educational references'},
+ {id:'source-classic',name:'Classic directory',href:'/',status:'Original joint-lab directory'}
 ].map(Object.freeze));
 export const actions=Object.freeze({travel:'travel',pan:'pan',orbit:'orbit',approach:'approach',select:'select',inspect:'inspect',precision:'precision',reframe:'reframe',back:'back',context:'context',experience:'experience',previous:'previous',next:'next',clean:'clean'});
 export const mapping=Object.freeze({spatial:{leftStick:'pan',rightStick:'orbit',L2R2:'approach',cross:'select',R3:'reframe'},explore:{circle:'back',square:'isolate',triangle:'dive',share:'experience',options:'clean'},create:{circle:'previous look',triangle:'next look',square:'typography',cross:'reveal',share:'specimen browser',options:'clean',L3:'guide / hold Audio Deck'},createNexus:{share:'experience',specimen:'experience menu → Browse specimens',options:'clean'},menu:{cross:'select',circle:'back',dpad:'focus',leftStick:'focus'}});

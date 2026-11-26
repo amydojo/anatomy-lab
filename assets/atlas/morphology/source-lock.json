@@ -1,0 +1,97 @@
+{
+  "schema": "body-live-morphology-source-lock-1",
+  "repo": "ashemag/human-atlas",
+  "revision": "1c38bf35c254a891200d3cedecfd57abebe83d8d",
+  "files": {
+    "atlas.json": {
+      "gitBlob": "0f81b5621479a0c0548f4683c316f33bd4d6545b",
+      "bytes": 1335285,
+      "sha256": "c359f4bcd2cba90b7411d66d5e9fc04dc81294d46cd5c1e8b212c824f2e5bbee"
+    },
+    "body-0.bin": {
+      "gitBlob": "21d12e12e04dd9bae99abf337fab82470e40bd78",
+      "bytes": 4019496,
+      "sha256": "b33b2b5aac20f35fbf6871f916607bf3c4d386321c8c0fdadcca6b5d24e3641e"
+    },
+    "body-1.bin": {
+      "gitBlob": "b2a0a781478031ca966f57d73d6bd0b8652edcf7",
+      "bytes": 4526484,
+      "sha256": "aa077a4675f0d0dd3c9b0af39dc8cf6bcb348c3bf7d283478d4206ce30a5a0de"
+    },
+    "body-10.bin": {
+      "gitBlob": "c6116c8705b4234b54ebb60a0dd376682da9cf8e",
+      "bytes": 4046108,
+      "sha256": null
+    },
+    "body-11.bin": {
+      "gitBlob": "f437a61bfd8c976108abf3e3a607784af3eb3575",
+      "bytes": 4037528,
+      "sha256": "e8c1afe7f30fe710ad164ec9cd2287a32881606e7eb590af47d76b3f84405027"
+    },
+    "body-12.bin": {
+      "gitBlob": "88e823456d067922f9c27c2405a69fe983eef68b",
+      "bytes": 4000292,
+      "sha256": "61a6c8da89bb20df50c575964ac81aa4090eabfc2cb27ad2155aea325f31c6c0"
+    },
+    "body-13.bin": {
+      "gitBlob": "24a9953b6677cf07cd6beea9f221a0690c6efa44",
+      "bytes": 4004548,
+      "sha256": "4c51b6be85d5b705d2b52b79b9ad1cdae0b65ad03c9402a2f2673c7633fd94f3"
+    },
+    "body-14.bin": {
+      "gitBlob": "a9562c717b3509a6f9264a988be0ab8e0142f9b4",
+      "bytes": 2300452,
+      "sha256": null
+    },
+    "body-2.bin": {
+      "gitBlob": "796cf2dc1f686456a6c9ccca374c5a3403f12e40",
+      "bytes": 4438056,
+      "sha256": null
+    },
+    "body-3.bin": {
+      "gitBlob": "368a55dd62c761caf2aee044439e9563b500f276",
+      "bytes": 4041436,
+      "sha256": "6febb76b50423331f66802a63bb43f04f99ce08129837015910eed43d0719268"
+    },
+    "body-4.bin": {
+      "gitBlob": "92dad79d99d03d5bd0778203259a43e1f5583097",
+      "bytes": 4020544,
+      "sha256": "0509e6c996fe5b935ace770a5dbf2d83a474330b7e541a844052a080bbf814bb"
+    },
+    "body-5.bin": {
+      "gitBlob": "833e5cd9852f995db00382b4b582fb177da13e5f",
+      "bytes": 4022564,
+      "sha256": "32a967198ffed45839968228898f3d246c67f86fb26892c3ae270be30e2f1149"
+    },
+    "body-6.bin": {
+      "gitBlob": "b200756a91d61c43139fb3786ed1d95584b2cac2",
+      "bytes": 4035584,
+      "sha256": null
+    },
+    "body-7.bin": {
+      "gitBlob": "d4bb70330113d6ea66faf12eaa6230fdf26b41e1",
+      "bytes": 4006940,
+      "sha256": null
+    },
+    "body-8.bin": {
+      "gitBlob": "0d33357f8ea6e9a50df28bc2bb6eccb9dd23c89b",
+      "bytes": 4028452,
+      "sha256": null
+    },
+    "body-9.bin": {
+      "gitBlob": "cca9f569eea7ec8cda5cd00f7f9ac2b36d278d68",
+      "bytes": 4018260,
+      "sha256": null
+    }
+  },
+  "facial": {
+    "repo": "choxos/OMFAtlas",
+    "revision": "c835665a9ade09ee0b993cee6eee1b25b7f7311b",
+    "manifestSha256": "450d79cfc5a042dbd9605a0a09f3441dbf8f4f49f0e06839abafdbae51b8231d",
+    "binarySha256": "7f24687034d706fc08830f617da35f77cb951cd77621a562fa064fa09d5a1b69",
+    "manifestGitBlob": "de8608c724c50f15955bf0269767e0ec65a390a7",
+    "binaryGitBlob": "0332821585e1b03ac4258d891b3ec220ab3ff30a",
+    "license": "CC-BY-SA-2.1-JP",
+    "attribution": "BodyParts3D, Copyright© The Database Center for Life Science licensed by CC Attribution-Share Alike 2.1 Japan"
+  }
+}

@@ -99,7 +99,7 @@
   const root = document.createElement('div');
   root.id = 'v4-root';
   root.innerHTML = '<header class="v4-header">'+
-    '<a class="v4-brand" href="/">BODY <span>/</span> LIVE</a>'+
+    '<a class="v4-brand" href="/play/">BODY <span>/</span> LIVE</a>'+
     '<button class="v4-region-button" data-action="regions" aria-label="Change anatomical region">'+html(data.name)+' <span aria-hidden="true">⌄</span></button>'+
     '<div class="v4-header-tools"><button class="v4-square" data-action="search" aria-label="Find anatomical structures">⌕</button>'+
     '<button class="v4-square" data-action="reset" aria-label="Reset anatomy position and selection">↺</button></div>'+
@@ -286,10 +286,10 @@
   }
   function showModal(kind){
     lastFocused=document.activeElement;state.menu=kind;modal.classList.add('open');
-    el('v4-modal-title').textContent=kind==='regions'?'Choose a joint':kind==='search'?'Find a structure':kind==='lessons'?'Experiments':'Connected anatomy';
+    el('v4-modal-title').textContent=kind==='regions'?'Explore & joint labs':kind==='search'?'Find a structure':kind==='lessons'?'Experiments':'Connected anatomy';
     if(kind==='regions'){
       el('v4-modal-content').innerHTML='<div class="v4-menu-list">'+
-        [['Atlas','/','Whole-body view'],['Hip / Live','/hip/','The body’s main motors'],['Hip / Exposed','/hip/dissection/','Five-step virtual dissection'],['Knee / Live','/knee/','The constrained hinge'],['Shoulder / Live','/shoulder/','The suspended socket']].map(([name,route,sub])=>'<a href="'+route+'">'+html(name)+'<small>'+html(sub)+'</small></a>').join('')+'</div>';
+        [['Enter anatomy','/play/','Return to the anatomical playground'],['Collections','/nexus/','Activities, specimens and settings'],['Hip / Live','/hip/','The body’s main motors'],['Hip / Exposed','/hip/dissection/','Five-step virtual dissection'],['Knee / Live','/knee/','The constrained hinge'],['Shoulder / Live','/shoulder/','The suspended socket']].map(([name,route,sub])=>'<a href="'+route+'">'+html(name)+'<small>'+html(sub)+'</small></a>').join('')+'</div>';
     }else if(kind==='search'){
       el('v4-modal-content').innerHTML='<input class="v4-search-input" id="v4-search" type="search" placeholder="Try ACL, piriformis, sciatic…" aria-label="Search anatomy">'+
         '<div class="v4-menu-list" id="v4-search-results"></div>';

@@ -1,0 +1,132 @@
+{
+  "schema": "body-live-morphology-1",
+  "specimens": [
+    {
+      "id": "bp4-head-neck",
+      "name": "Head & neck · BP3D 4.0",
+      "region": "Face / neck",
+      "space": "bp4-reference",
+      "status": "Source reference; not VHF",
+      "packs": [
+        "skull",
+        "neck"
+      ]
+    },
+    {
+      "id": "bp3-face",
+      "name": "Facial expression · BP3D 3.0 extension",
+      "region": "Face",
+      "space": "bp4-upstream-registered-experimental",
+      "status": "Upstream similarity registration; no independent clinical validation; optional overlay",
+      "packs": [
+        "skull",
+        "facial"
+      ]
+    },
+    {
+      "id": "bp4-thorax",
+      "name": "Thorax · BP3D 4.0",
+      "region": "Thorax",
+      "space": "bp4-reference",
+      "status": "Source reference; not VHF",
+      "packs": [
+        "thorax"
+      ]
+    },
+    {
+      "id": "bp4-arm",
+      "name": "Right arm & hand · BP3D 4.0",
+      "region": "Upper extremity",
+      "space": "bp4-reference",
+      "status": "Source reference; not VHF",
+      "packs": [
+        "elbow",
+        "wrist"
+      ]
+    }
+  ],
+  "packs": {
+    "skull": {
+      "url": "/atlas/regions/skull.json",
+      "sha256": "db163e067391b0d736d47e3e472402d5432b87a81d143f2da4860e06a25800a5",
+      "format": "region-json",
+      "revision": "1c38bf35c254a891200d3cedecfd57abebe83d8d",
+      "license": "CC BY 4.0",
+      "attribution": "BodyParts3D © Database Center for Life Science",
+      "counts": {
+        "bone": 14,
+        "muscle": 16
+      },
+      "triangles": 52334,
+      "frame": "existing reference display derivative"
+    },
+    "neck": {
+      "url": "/atlas/regions/neck.json",
+      "sha256": "bb0c6e2aabbee322995f340656e1bc83aeb7510b7a5d1b898d054d65f2aa67c6",
+      "format": "region-json",
+      "revision": "1c38bf35c254a891200d3cedecfd57abebe83d8d",
+      "license": "CC BY 4.0",
+      "attribution": "BodyParts3D © Database Center for Life Science",
+      "counts": {
+        "bone": 8,
+        "muscle": 14
+      },
+      "triangles": 37498,
+      "frame": "existing reference display derivative"
+    },
+    "thorax": {
+      "url": "/atlas/regions/thorax.json",
+      "sha256": "ab2a4d8ef8c32cecc33428fcf712a19ae43ac94209881f9c084c3eb84ef40f18",
+      "format": "region-json",
+      "revision": "1c38bf35c254a891200d3cedecfd57abebe83d8d",
+      "license": "CC BY 4.0",
+      "attribution": "BodyParts3D © Database Center for Life Science",
+      "counts": {
+        "bone": 30,
+        "muscle": 11
+      },
+      "triangles": 149686,
+      "frame": "existing reference display derivative"
+    },
+    "elbow": {
+      "url": "/atlas/regions/elbow.json",
+      "sha256": "b95077904da9ff164ce483b0a54113a920bad36369805a576b3e313a217cd5c4",
+      "format": "region-json",
+      "revision": "1c38bf35c254a891200d3cedecfd57abebe83d8d",
+      "license": "CC BY 4.0",
+      "attribution": "BodyParts3D © Database Center for Life Science",
+      "counts": {
+        "bone": 3,
+        "muscle": 10
+      },
+      "triangles": 9474,
+      "frame": "existing reference display derivative"
+    },
+    "wrist": {
+      "url": "/atlas/regions/wrist.json",
+      "sha256": "261844080e58237a139cd724c8cfb793caab2d58a9783174d82d267ecb1e8324",
+      "format": "region-json",
+      "revision": "1c38bf35c254a891200d3cedecfd57abebe83d8d",
+      "license": "CC BY 4.0",
+      "attribution": "BodyParts3D © Database Center for Life Science",
+      "counts": {
+        "bone": 15,
+        "muscle": 10
+      },
+      "triangles": 13884,
+      "frame": "existing reference display derivative"
+    },
+    "facial": {
+      "url": "/atlas/assets/v10-facial-reference.json",
+      "sha256": "08b3115da430f23952e365fd8547c39f5a9f1de33700053c6c7bc2964acd0497",
+      "format": "facial-json",
+      "revision": "c835665a9ade09ee0b993cee6eee1b25b7f7311b",
+      "license": "CC-BY-SA-2.1-JP",
+      "attribution": "BodyParts3D, Copyright© The Database Center for Life Science licensed by CC Attribution-Share Alike 2.1 Japan",
+      "counts": {
+        "muscle": 47
+      },
+      "frame": "existing registered and reduced derivative"
+    }
+  }
+}
