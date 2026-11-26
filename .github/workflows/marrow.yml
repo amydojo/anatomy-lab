@@ -1,0 +1,27 @@
+name: MARROW experimental qualification
+on:
+  pull_request:
+    branches: ['feat/nexus-experience']
+permissions:
+  contents: read
+jobs:
+  marrow:
+    if: github.head_ref == 'experiment/marrow-001'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npm test
+      - run: npx playwright test tests/marrow.spec.mjs --project=desktop-chromium
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: marrow-runtime
+          path: test-results/
+          if-no-files-found: warn
