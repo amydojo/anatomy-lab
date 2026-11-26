@@ -26,7 +26,7 @@
    return {x:camera.width*(Number.isFinite(camera.anchorX)?camera.anchorX:.50)+x*scale*perspective,
      y:camera.height*(Number.isFinite(camera.anchorY)?camera.anchorY:.50)-(y2-.04)*scale*perspective,z:z2,world:view};
  }
- function attachOrbit(canvas,{state,render,pick,onInteract=()=>{},onGestureEnd=()=>{},onDoubleTap=()=>{},getBounds=()=>null,minZoom=.7,maxZoom=2.5,deepZoomEnabled=()=>false,deepMaxZoom=14}){
+ function attachOrbit(canvas,{state,render,pick,onInteract=()=>{},onGestureEnd=()=>{},onDoubleTap=()=>{},getBounds=()=>null,minZoom=.7,maxZoom=2.5,deepZoomEnabled=()=>false,deepMaxZoom=14,adaptiveWheel=()=>false}){
    const pointers=new Map();
    let origin=null,travel=false,scheduled=0,lastTap=null,gestureStarted=false,wheelIdle=0;
    // Region extents are source-derived. Never let focal-point zoom/pan escape
@@ -145,6 +145,22 @@
    }
    function wheel(e){
      if(!Number.isFinite(e.deltaY)||!e.deltaY)return;
+     const adaptive=adaptiveWheel()&&window.BodyGravityAdaptive&&window.BodyGravity;
+     if(adaptive){
+       if(e.ctrlKey||e.metaKey||e.defaultPrevented)return;
+       const rect=canvas.getBoundingClientRect(),c={width:rect.width,height:rect.height,target:{...state.target}};
+       for(const k of ['yaw','pitch','zoom','frameSpan','anchorX','anchorY'])c[k]=state[k];
+       const delta=window.BodyGravityAdaptive.wheelPixels(e,rect.height);
+       const next=clamp(c.zoom*Math.exp(-delta*.0025*(e.shiftKey?.25:1)),minZoom,zoomLimit());
+       e.preventDefault();if(next===c.zoom)return;
+       const p=window.BodyGravityAdaptive.pointAtPixel(c,e.clientX-rect.left,e.clientY-rect.top);
+       const old=p?window.BodyGravity.project(c,p):null;
+       beginMove();c.zoom=next;
+       if(old)window.BodyGravity.anchor(c,p,old,bounds());
+       state.zoom=c.zoom;for(const k of ['x','y','z'])state.target[k]=c.target[k];constrainTarget();
+       clearTimeout(wheelIdle);wheelIdle=setTimeout(()=>{if(!pointers.size&&gestureStarted){onGestureEnd();gestureStarted=false;}},190);
+       schedule();return;
+     }
      beginMove();e.preventDefault();
      const step=deepZoom()?1.18:1.09;
      const before=state.zoom,after=clamp(before*(e.deltaY<0?step:1/step),minZoom,zoomLimit());

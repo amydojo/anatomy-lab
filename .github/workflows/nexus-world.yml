@@ -1,0 +1,35 @@
+name: NEXUS WORLD read-only qualification
+on:
+  pull_request:
+    branches: ['feat/v15-expedition-gamepad']
+permissions:
+  contents: read
+jobs:
+  world:
+    if: github.head_ref == 'feat/nexus-experience'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop-chromium, webkit-mobile]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 20f471860199cbde10821b4caac5ee809671dbe2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: python3 scripts/verify_unity_world.py --published
+      - run: npx playwright test tests/v15-unity-world.spec.mjs --project=${{ matrix.project }}
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-world-${{ matrix.project }}
+          path: |
+            test-results/
+            artifacts/results.json
+          if-no-files-found: warn

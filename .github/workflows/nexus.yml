@@ -1,0 +1,31 @@
+name: NEXUS qualification
+on:
+  pull_request:
+    branches: ['feat/v15-expedition-gamepad']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  nexus:
+    if: github.head_ref == 'feat/nexus-experience' || github.ref == 'refs/heads/feat/nexus-experience'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: node --test tests/nexus.test.mjs tests/nexus-continuity.test.mjs
+      - run: npm test
+      - run: npx playwright test tests/nexus.spec.mjs tests/nexus-continuity.spec.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-browser-evidence
+          path: |
+            test-results/
+            artifacts/
+          if-no-files-found: ignore
