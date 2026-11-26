@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {inventory,rigid,compareCandidates,historicalScreen,selection,streamRequest} from '../assets/atlas/strata/core.mjs';
+const read=p=>JSON.parse(fs.readFileSync(new URL('../'+p,import.meta.url)));
+const c=read('assets/atlas/strata/manifest.json'),m=read('assets/atlas/vhf/world/lower-body-manifest.json');
+const I=[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]];
+test('exact inventory and all 100 soft tissue structures',()=>{const l=inventory(m,c);assert.equal(l.size,8);assert.equal([...l.values()].filter(x=>x.tissue!=='Bone').reduce((n,x)=>n+x.entries.length,0),100);assert.equal([...l.values()].reduce((n,x)=>n+x.bytes,0),46814812);});
+test('tampered manifest rejected',()=>{const bad=structuredClone(m);bad.structures[0].triangles++;assert.throws(()=>inventory(bad,c));});
+test('historical sacral failure remains binding',()=>{const x=historicalScreen(c.historical).find(x=>x.id==='sacrum_coccyx');assert.deepEqual(x.failures,['median','centroidDelta']);});
+test('canonical and over-budget streams forbidden',()=>{const l=c.layers[0];assert.throws(()=>streamRequest(l,{world:'canonical'}));assert.throws(()=>streamRequest(l,{maxBytes:1}));assert.equal(streamRequest(l).level,'exact');});
+test('reflection, shear and scale rejected',()=>{for(const x of [-1,2]){const bad=structuredClone(I);bad[0][0]=x;assert.throws(()=>rigid(bad));}const bad=structuredClone(I);bad[0][1]=.1;assert.throws(()=>rigid(bad));});
+test('held-out error separate from fit; no promotion',()=>{const pts=[[0,0,0],[1,0,0],[0,1,0],[0,0,1],[2,2,2],[3,3,3]].map((source,i)=>({id:String(i),source,target:source.map(x=>x+(i>=4?1:0))}));const result=compareCandidates([{id:'identity',matrix:I}],pts.slice(0,4),pts.slice(4))[0];assert.equal(result.fit.rms,0);assert.ok(Math.abs(result.heldOut.rms-Math.sqrt(3))<1e-12);assert.equal(result.canonicalAllowed,false);assert.throws(()=>compareCandidates([{id:'identity',matrix:I}],pts.slice(0,4),[pts[0],pts[5]]));});
+test('semantic and isolation filters',()=>{const entries=m.structures;assert.equal(selection(entries,{tissue:'Muscle',side:'Left'}).length,38);assert.equal(selection(entries,{isolated:entries[0].id}).length,1);assert.equal(selection(entries,{query:'no-such-structure'}).length,0);});
