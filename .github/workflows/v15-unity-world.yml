@@ -1,0 +1,72 @@
+name: UNITY WORLD publication and browser evidence
+on:
+  push:
+    branches: ['feat/unity-world']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: unity-world-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/feat/unity-world'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: read
+    outputs:
+      revision: ${{ steps.commit.outputs.revision }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/unity-world
+      - name: Verify and publish pinned acquisition
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$(git branch --show-current)" = feat/unity-world
+          if [ ! -f assets/atlas/vhf/unity/v1/manifest.json ]; then
+            gh api repos/amydojo/anatomy-lab/actions/artifacts/15078885236/zip > /tmp/unity.zip
+            python3 scripts/verify_unity_world.py /tmp/unity.zip --publish
+          fi
+      - id: commit
+        run: |
+          test "$(git branch --show-current)" = feat/unity-world
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- assets/atlas/vhf/unity/v1
+          if ! git diff --cached --quiet; then
+            git commit -m "assets(unity): publish 82 exact meshes and immutable 143-label manifest"
+            git push origin HEAD:refs/heads/feat/unity-world
+          fi
+          echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+  browser:
+    needs: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop-chromium, webkit-mobile]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.publish.outputs.revision }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: npm test
+      - run: npm run test:e2e -- --project=${{ matrix.project }} tests/v15-unity-world.spec.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unity-world-${{ matrix.project }}
+          path: |
+            test-results/
+            artifacts/results.json
+          if-no-files-found: warn
