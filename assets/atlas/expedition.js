@@ -54,10 +54,10 @@
     if(!longTasksSupported)metrics.longTaskMs=null;
     return {schema:'body-live-expedition-diagnostics-1',elapsedMs:clock()-start,rollingCapacity:1800,metrics,events:events.slice(),unsupported:{gpuFrameTimeMs:'unavailable',airplayEncoding:'unavailable',physicalInputLatencyMs:'unavailable'},notes:['Frame intervals measure successive active controller callbacks, not display presentation. Missed slots assume nominal 60 Hz, not measured dropped frames. CPU render duration measures submission, not GPU completion.']};}};
  }
- function mount({camera,bounds,maxZoom,canMove,begin,end,render,command,status,diagnostic=null,onOpticalTick=()=>{},onOpticalSuspend=()=>{},getPads=()=>navigator.getGamepads?.()||[]}){
+ function mount({camera,bounds,maxZoom,canMove,begin,end,render,command,status,diagnostic=null,navigate=advance,readInput=read,hasMotion=()=>false,resetMotion=()=>{},onSelection=()=>{},onOpticalTick=()=>{},onOpticalSuspend=()=>{},getPads=()=>navigator.getGamepads?.()||[]}){
   let enabled=false,frame=0,last=0,active=false,padIndex=null,armed=false,prior=[];
   const finish=()=>{if(active){active=false;end();}};
-  const reset=()=>{diagnostic?.suspend();onOpticalSuspend();finish();padIndex=null;armed=false;prior=[];last=0;};
+  const reset=()=>{resetMotion();diagnostic?.suspend();onOpticalSuspend();finish();padIndex=null;armed=false;prior=[];last=0;};
   function tick(now){
    if(!enabled)return;frame=requestAnimationFrame(tick);
    if(document.hidden||!canMove()){reset();return;}
@@ -67,17 +67,17 @@
    const pad=pads.find(p=>p.index===padIndex)||pads[0];
    if(!pad){reset();status('Press any controller button to connect');return;}
    if(padIndex!==pad.index){reset();padIndex=pad.index;diagnostic?.event('controller-connected',{index:pad.index,mapping:pad.mapping});}
-   const input=read(pad),dt=last?(now-last)/1000:0;last=now;
+   const input=readInput(pad),dt=last?(now-last)/1000:0;last=now;
    if(!armed){if(!moving(input)&&!input.buttons.some(Boolean))armed=true;status(armed?'Controller ready':'Release controls to begin');return;}
    status('Controller ready');
    const edges=input.buttons.map((b,i)=>b&&!prior[i]);prior=input.buttons;
    // Discrete actions take priority over continuous navigation in the same frame.
-   const action=[9,0,1,2,3,11,12,13,14,15,4,5].find(i=>edges[i]);
-   if(action!==undefined){onOpticalSuspend();diagnostic?.idle();finish();const start=diagnostic?performance.now():0;command(action);if(diagnostic&&action===0)diagnostic.sample('selectionCpuMs',performance.now()-start);return;}
-   const isMoving=moving(input);const qualityChanged=onOpticalTick(now,isMoving);
+   const action=[...(root.location&&new URLSearchParams(root.location.search).get('nexus')==='1'?[8]:[]),9,0,1,2,3,11,12,13,14,15,4,5].find(i=>edges[i]);
+   if(action!==undefined){resetMotion();onOpticalSuspend();diagnostic?.idle();finish();const start=diagnostic?performance.now():0;const result=command(action);if(action===0&&result===true)onSelection(pad);if(diagnostic&&action===0)diagnostic.sample('selectionCpuMs',performance.now()-start);return;}
+   const isMoving=moving(input)||hasMotion();const qualityChanged=onOpticalTick(now,isMoving);
    if(isMoving){
     if(!active){active=true;begin();}
-    if(advance(camera(),input,dt,bounds(),maxZoom())){diagnostic?.active(now);render();if(diagnostic)diagnostic.sample('inputToRenderSubmissionMs',performance.now()-pollStart);}else{diagnostic?.idle();if(qualityChanged)render();}
+    if(navigate(camera(),input,dt,bounds(),maxZoom())){diagnostic?.active(now);render();if(diagnostic)diagnostic.sample('inputToRenderSubmissionMs',performance.now()-pollStart);}else{diagnostic?.idle();if(qualityChanged)render();}
    }else{diagnostic?.idle();finish();if(qualityChanged)render();}
   }
   function setEnabled(next){enabled=!!next;cancelAnimationFrame(frame);frame=0;reset();if(enabled)frame=requestAnimationFrame(tick);}

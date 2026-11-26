@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {routes,settings,defaults,makeMenuInput,remember,resolveHandoff,mapping} from '../nexus/contract.mjs';
+const pad=(pressed=[],axes=[0,0,0,0],index=0)=>({connected:true,mapping:'standard',index,axes,buttons:Array.from({length:17},(_,i)=>({pressed:pressed.includes(i),value:pressed.includes(i)?1:0}))});
+test('pinned independent origins and three experiences',()=>{assert.deepEqual(routes.slice(0,3).map(r=>r.id),['explore','understand','create']);assert.equal(routes[2].href,'/somatic/');assert.equal(routes[2].external,false);assert.match(routes[2].archiveHref,/^https:\/\/.+\/somatic\/$/);assert.equal(new Set(routes.map(r=>r.id)).size,routes.length);});
+test('held connect action suppressed, edge only, neutral rearm',()=>{const m=makeMenuInput();assert.equal(m.step(pad([0])),null);assert.equal(m.step(pad()),null);assert.equal(m.step(pad([0])),'select');assert.equal(m.step(pad([0])),null);assert.equal(m.step(pad()),null);assert.equal(m.step(pad([1])),'back');m.reset();assert.equal(m.step(pad([0])),null);});
+test('analog deadzone and disconnect',()=>{const m=makeMenuInput();m.step(pad());assert.equal(m.step(pad([],[0,.4])),null);assert.equal(m.step(pad([],[0,.8])),'down');assert.equal(m.step(null),null);assert.equal(m.step(pad([0])),null);});
+test('settings validated, not camera parameters',()=>{assert.deepEqual(settings({}),defaults);assert.equal(settings({menuDeadzone:10}).menuDeadzone,.85);assert.equal(settings({interfaceScale:99}).interfaceScale,1);});
+test('history bounded and excludes unknown identifiers',()=>{assert.deepEqual(remember(['explore','bogus','create'],'create'),['create','explore']);assert.equal(remember(routes.map(r=>r.id),'create').length,8);});
+test('handoff refuses camera and selected structure even with region',()=>{let h=resolveHandoff({version:1,region:'skull',camera:{zoom:8},selection:'x'},'create');assert.equal(h.region,'skull');assert.equal(h.camera,null);assert.equal(h.selection,null);assert.equal(resolveHandoff({version:2,region:'skull'},'create').region,null);assert.equal(resolveHandoff({version:1,region:'unknown'},'create').region,null);});
+test('explicit controller conflict',()=>{assert.equal(mapping.explore.share,'experience');assert.equal(mapping.create.share,'specimen browser');});

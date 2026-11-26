@@ -1,0 +1,27 @@
+name: SOMATIC NEXUS companion qualification
+on:
+  pull_request:
+    branches: ['experiment/somatic-001']
+permissions:
+  contents: read
+jobs:
+  adapter:
+    if: github.head_ref == 'feat/nexus-somatic-adapter'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: node --test tests/somatic-nexus.test.mjs
+      - run: npx playwright test tests/somatic-nexus.spec.mjs tests/somatic-essence.spec.mjs tests/somatic-presence.spec.mjs --project=desktop-chromium
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: somatic-nexus-evidence
+          path: test-results/
+          if-no-files-found: ignore

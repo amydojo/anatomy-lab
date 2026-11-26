@@ -1,0 +1,53 @@
+name: PLAYGROUND sandbox qualification
+on:
+  pull_request:
+    branches: ['feat/v15-expedition-gamepad']
+permissions:
+  contents: read
+concurrency:
+  group: playground-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  sandbox:
+    if: github.head_ref == 'feat/nexus-experience'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npm test
+      - run: npx playwright test tests/nexus-playground.spec.mjs --project=desktop-chromium --grep "actual source draw"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playground-desktop
+          path: |
+            test-results/
+            artifacts/results.json
+          if-no-files-found: warn
+  mobile:
+    if: github.head_ref == 'feat/nexus-experience'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright test tests/nexus-playground.spec.mjs --project=webkit-mobile --project=chromium-mobile --grep "mobile viewport"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playground-mobile
+          path: |
+            test-results/
+            artifacts/results.json
+          if-no-files-found: warn

@@ -1,0 +1,100 @@
+name: BODY LIVE unified qualification
+on:
+  push:
+    branches: ['feat/body-live-unified']
+  pull_request:
+    branches: ['feat/v15-expedition-gamepad']
+permissions:
+  contents: read
+jobs:
+  unit:
+    if: github.ref == 'refs/heads/feat/body-live-unified' || github.head_ref == 'feat/body-live-unified'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check assets/atlas/atlas-controller.js && node --check somatic/somatic.js
+      - run: npm test
+  startup-smoke:
+    if: github.ref == 'refs/heads/feat/body-live-unified' || github.head_ref == 'feat/body-live-unified'
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop-chromium, chromium-mobile, webkit-mobile]
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 12
+    steps:
+      - run: apt-get update && apt-get install -y git-lfs
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright test tests/flight-startup.spec.mjs --project=${{ matrix.project }} --workers=1 --retries=0
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: startup-${{ matrix.project }}
+          path: |
+            test-results/
+            artifacts/
+  browser:
+    if: github.ref == 'refs/heads/feat/body-live-unified' || github.head_ref == 'feat/body-live-unified'
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop-chromium, chromium-mobile, webkit-mobile]
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 25
+    steps:
+      - name: Install Git LFS in browser container
+        run: apt-get update && apt-get install -y git-lfs
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright test tests/unified.spec.mjs tests/navigation-cleanup.spec.mjs tests/nexus-playground.spec.mjs --project=${{ matrix.project }}
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unified-${{ matrix.project }}
+          path: |
+            test-results/
+            artifacts/
+  inherited-gates:
+    if: github.ref == 'refs/heads/feat/body-live-unified' || github.head_ref == 'feat/body-live-unified'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 30
+    steps:
+      - name: Install Git LFS in browser container
+        run: apt-get update && apt-get install -y git-lfs
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright test tests/v15-gravity.spec.mjs tests/nexus.spec.mjs tests/nexus-continuity.spec.mjs tests/nexus-presence.spec.mjs tests/nexus-paired.spec.mjs tests/nexus-presence-paired.spec.mjs tests/nexus-essence.spec.mjs tests/nexus-essence-creative.spec.mjs tests/somatic-presence.spec.mjs --project=desktop-chromium
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unified-inherited
+          path: |
+            test-results/
+            artifacts/

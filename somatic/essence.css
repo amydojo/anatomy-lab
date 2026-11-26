@@ -1,0 +1,42 @@
+/* ESSENCE: opt-in presentation only. No renderer or recording changes. */
+#stage[data-essence]{--ess-surface:#211e1a;--ess-ink:#eee6d9;--ess-line:#5d5549}
+#stage[data-essence] #mark{top:max(14px,env(safe-area-inset-top));left:20px;gap:2px;letter-spacing:.08em}
+#stage[data-essence] #mark strong{font-size:clamp(17px,2.2vw,32px);font-weight:500}
+#stage[data-essence] #mark small{font-size:10px}
+#stage[data-essence] #desk:not([data-essence-desk=true]){display:none!important}
+#stage[data-essence=studio] #desk[data-essence-desk=true]{display:block!important;position:absolute;inset:12px 12px 12px auto;transform:none;width:min(420px,46vw);max-height:none;background:var(--ess-surface);backdrop-filter:none;z-index:11}
+#stage[data-essence=studio] #mark{display:none}
+#stage[data-essence=immersion] #mark,#stage[data-essence=immersion] #essence-tools,#stage[data-essence=immersion] #now-playing{display:none!important}
+#stage[data-essence] #return{display:none!important}
+#stage[data-essence=immersion] #return:not([hidden]){display:block!important;opacity:.7;right:14px;top:14px;font-size:12px}
+#essence-tools{position:absolute;z-index:6;top:max(14px,env(safe-area-inset-top));right:18px;min-height:44px;background:#211e1a;color:#eee6d9;font-size:15px;padding:8px 16px;border:1px solid #665d50;border-radius:6px}
+#stage[data-essence=contextual] #essence-tools,#stage[data-essence=studio] #essence-tools{display:none}
+#stage[data-essence] #director-menu,#stage[data-essence] #audio-deck,#stage[data-essence] #tissue-menu,#stage[data-essence] #controller-guide{inset:12px 12px 12px auto;width:min(420px,46vw);max-height:none;padding:18px;gap:10px;background:var(--ess-surface);backdrop-filter:none;border:1px solid var(--ess-line);box-shadow:none}
+#stage[data-essence] #director-menu h2,#stage[data-essence] #audio-deck h2,#stage[data-essence] #tissue-menu h2,#stage[data-essence] #controller-guide h2{font-size:clamp(22px,2.4vw,36px);letter-spacing:-.03em}
+#stage[data-essence] #director-content,#stage[data-essence] .deck-layout,#stage[data-essence] .guide-grid{display:block;overflow:auto}
+#stage[data-essence] .deck-main,#stage[data-essence] #deck-actions{overflow:visible}
+#stage[data-essence] #director-menu button,#stage[data-essence] #audio-deck button,#stage[data-essence] #tissue-menu button{font-size:clamp(14px,1.3vw,21px);min-height:44px;border-radius:5px}
+#stage[data-essence] .director-rows button{border:0;border-bottom:1px solid #514a40}
+#stage[data-essence] .director-rows .selected,#stage[data-essence] #deck-actions .selected{background:#e6d7bd;color:#211e1a;outline:2px solid #f6ead4;outline-offset:-2px}
+#stage[data-essence] .spec-detail{border:0;padding:12px 0}
+#stage[data-essence] .tissue-rows{grid-template-columns:1fr}
+#stage[data-essence] #rec-indicator:not([hidden]){display:block!important;top:auto;bottom:18px;left:18px;right:auto;z-index:13;font-size:16px;background:#38211b;color:#ffd6c4;pointer-events:none}
+#stage[data-essence] #now-playing:not([hidden]){bottom:18px;left:auto;right:18px;font-size:13px;max-width:55%;padding:6px 10px}
+#stage[data-essence] #message:not([hidden]){z-index:14}
+#stage[data-essence] #controller-hud{top:auto;bottom:70px;left:18px;right:auto;width:min(340px,80%);box-shadow:none;backdrop-filter:none}
+#stage[data-essence] #deck-play{display:none}
+#stage[data-essence] .signal-grid,#stage[data-essence] #deck-routes,#stage[data-essence] #deck-tempo,#stage[data-essence] #tissue-live{display:none}
+#stage[data-essence=studio] .signal-grid,#stage[data-essence=studio] #deck-routes,#stage[data-essence=studio] #deck-tempo,#stage[data-essence=studio] #tissue-live{display:initial}
+#stage[data-essence]:not([data-essence-audio=advanced]) #deck-actions button[data-advanced=true],#stage[data-essence]:not([data-essence-audio=advanced]) #matrix{display:none}
+#stage[data-essence] #desk button,#stage[data-essence] #desk select{min-height:44px}
+#stage[data-essence] button:focus-visible,#stage[data-essence] input:focus-visible,#stage[data-essence] select:focus-visible{outline:3px solid #f6e3ad;outline-offset:2px}
+#stage[data-essence] .essence-fields{display:grid;gap:8px;margin-top:12px}
+#stage[data-essence] .essence-fields label{display:grid;gap:4px}
+#stage[data-essence] .essence-fields input{max-width:100%}
+@media(min-width:1500px){#stage[data-essence] #director-menu,#stage[data-essence] #audio-deck,#stage[data-essence] #tissue-menu{width:min(540px,38vw)}#essence-tools{font-size:22px;min-height:54px}}
+@media(max-width:700px){#stage[data-essence] #director-menu,#stage[data-essence] #audio-deck,#stage[data-essence] #tissue-menu,#stage[data-essence] #controller-guide,#stage[data-essence=studio] #desk{inset:auto 0 0;width:100%;max-height:58dvh;padding:14px 16px max(14px,env(safe-area-inset-bottom));border-radius:12px 12px 0 0}#stage[data-essence] #mark{left:12px;top:12px}#essence-tools{right:12px;top:12px}#stage[data-essence] #rec-indicator:not([hidden]){top:65px;bottom:auto;left:12px;font-size:12px}#stage[data-essence] #now-playing:not([hidden]){top:65px;bottom:auto;right:12px}}
+@media(prefers-reduced-motion:reduce){#stage[data-essence] *{scroll-behavior:auto!important;transition:none!important}}
+
+#stage[data-essence] #nexus-experiences{display:none}#stage[data-essence] #desk[data-essence-desk=true] #nexus-experiences{display:inline-block}#stage[data-essence] #controller-guide:not([hidden])~#essence-tools{display:none}#stage[data-essence] #director-menu:not([hidden])~#now-playing{display:none}#stage[data-essence=studio] #desk[data-essence-desk=true] #matrix{display:block}
+
+#stage[data-essence] .essence-adjust{display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:4px}#stage[data-essence] .essence-adjust>button:last-child{text-align:center;justify-content:center}#essence-playback{position:absolute;z-index:13;bottom:18px;right:18px;color:#d7e6c8;background:#211e1a;padding:6px 10px;border-radius:4px;font-size:14px;pointer-events:none}#stage[data-essence] #now-playing{display:none!important}#stage[data-essence] #director-menu footer{position:sticky;bottom:0;background:#211e1a;margin:0;padding-top:8px}#stage[data-essence] #director-menu[data-tool=typography] #director-content{overflow:auto}@media(max-width:700px){#essence-playback{top:65px;right:12px;bottom:auto;font-size:12px}#stage[data-essence=contextual] #director-menu:not([hidden])~#essence-playback{top:65px}}

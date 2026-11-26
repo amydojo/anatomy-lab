@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import '../assets/atlas/expedition.js';
+import '../assets/atlas/gravity.js';
+import '../assets/atlas/gravity-adaptive.js';
+const E=globalThis.BodyExpedition,G=globalThis.BodyGravity,A=globalThis.BodyGravityAdaptive;
+const b={min:[-100,-100,-100],max:[100,100,100]};
+const camera=(zoom=1)=>({yaw:0,pitch:0,zoom,width:800,height:600,frameSpan:3,target:{x:0,y:0,z:0}});
+const input=(x=0,more={})=>({panX:x,panY:0,orbitX:0,orbitY:0,zoom:0,...more});
+test('standard perspective and ortho projection units',()=>{const p=[2,0,0,0,0,3,0,0,0,0,-1,-1,0,0,-.2,0];assert.deepEqual(A.matrixUnits(p,800,600,-5),{x:.00625,y:1/180});p[11]=0;p[15]=1;assert.deepEqual(A.matrixUnits(p,800,600,-5),{x:.00125,y:1/900});});
+test('screen displacement stable across 1–14x at target plane',()=>{const ds=[1,2,4,8,14].map(z=>{const c=camera(z),m=A.create(),p={x:0,y:0,z:0},q=G.project(c,p);for(let j=0;j<60;j++)m.step(E.advance,c,input(.25),1/60,b,14,null);return Math.abs(G.project(c,p).x-q.x);});assert.ok(Math.max(...ds)/Math.min(...ds)<1.15);});
+test('radial curve and small input precision',()=>{assert.deepEqual(A.shape(.1,.1),[0,0]);assert.ok(Math.hypot(...A.shape(1,1))<=1+1e-12);assert.ok(A.shape(.25,0,.18,2)[0]<A.shape(.25,0,.18,1.6)[0]);});
+test('analytic acceleration and frame-rate-independent release',()=>{const run=dt=>{const c=camera(4),m=A.create('cinematographer');for(let t=0;t<1-1e-9;t+=dt)m.step(E.advance,c,input(.6),dt,b,14,null);for(let t=0;t<1-1e-9;t+=dt)m.step(E.advance,c,input(),dt,b,14,null);return c.target.x;};assert.ok(Math.abs(run(1/60)-run(1/120))<.0001);});
+test('macro settles faster and stalls discard velocity',()=>{const run=z=>{const c=camera(z),m=A.create('cinematographer');for(let j=0;j<60;j++)m.step(E.advance,c,input(.8),1/60,b,14,null);let n=0;while(m.active()&&n<180){m.step(E.advance,c,input(),1/60,b,14,null);n++;}return n;};assert.ok(run(14)<run(1));const c=camera(),m=A.create();m.step(E.advance,c,input(1),.05,b,14,null);const old=c.target.x;assert.equal(m.step(E.advance,c,input(),2,b,14,null),false);assert.equal(c.target.x,old);assert.equal(m.active(),false);});
+test('explicit reset and camera identity changes clear momentum',()=>{const c=camera(),m=A.create();m.step(E.advance,c,input(1),.05,b,14,null);const d=camera();assert.equal(m.step(E.advance,d,input(),.016,b,14,null),false);m.step(E.advance,d,input(1),.05,b,14,null);m.reset();assert.equal(m.step(E.advance,d,input(),.016,b,14,null),false);});
+test('pointer plane inverse and orbit anchor',()=>{const c=camera(4);c.yaw=.3;c.pitch=.1;const p=A.pointAtPixel(c,410,280);const q=G.project(c,p);assert.ok(Math.hypot(q.x-410,q.y-280)<1e-9);const m=A.create();for(let j=0;j<60;j++)m.step(E.advance,c,input(0,{orbitX:.2,zoom:.2}),1/60,b,14,{inspectionPoint:()=>p});const end=G.project(c,p);assert.ok(Math.hypot(end.x-q.x,end.y-q.y)<1e-8);});
+test('wheel normalization and independent controls',()=>{assert.equal(A.wheelPixels({deltaY:2,deltaMode:1},800),32);assert.equal(A.wheelPixels({deltaY:2,deltaMode:0},800),2);const m=A.create('explorer',{response:1.2,inertia:.12,precision:.6});assert.equal(m.settings().response,1.2);assert.equal(m.settings().inertia,.12);assert.equal(m.settings().precision,.6);});

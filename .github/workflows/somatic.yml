@@ -1,0 +1,31 @@
+name: SOMATIC isolated laboratory
+on:
+  pull_request:
+    branches: ['feat/v15-expedition-gamepad']
+    paths: ['somatic/**','tests/somatic*','.github/workflows/somatic.yml']
+  workflow_dispatch:
+jobs:
+  somatic:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: node --check somatic/somatic.js
+      - run: node --test tests/somatic.test.mjs tests/somatic-director.test.mjs tests/somatic-capture.test.mjs tests/somatic-signal.test.mjs tests/somatic-tissue.test.mjs tests/morphology.test.mjs
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test tests/somatic.spec.mjs tests/somatic-resonance.spec.mjs tests/somatic-synesthesia.spec.mjs tests/somatic-morphology.spec.mjs tests/somatic-visceral.spec.mjs --project=desktop-chromium --retries=0
+      - name: Install independent media verification tools
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: python3 tests/somatic-verify-av.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: somatic-evidence
+          path: |
+            test-results/
+            artifacts/
