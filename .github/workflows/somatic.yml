@@ -1,0 +1,27 @@
+name: SOMATIC isolated laboratory
+on:
+  pull_request:
+    branches: ['feat/v15-expedition-gamepad']
+    paths: ['somatic/**','tests/somatic*','.github/workflows/somatic.yml']
+  workflow_dispatch:
+jobs:
+  somatic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: node --test tests/somatic.test.mjs
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test tests/somatic.spec.mjs --project=desktop-chromium --retries=0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: somatic-evidence
+          path: |
+            test-results/
+            artifacts/
