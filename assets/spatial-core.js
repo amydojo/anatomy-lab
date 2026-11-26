@@ -21,12 +21,12 @@
    const y2=dy*xc-z*xs;
    const z2=dy*xs+z*xc;
    const view={x,y:y2,z:z2};
-   const perspective=7.4/(7.4-z2);
+   const perspective=7.4/(camera.flight?-z2:7.4-z2);
    const scale=Math.min(camera.width/3.25,camera.height/(camera.frameSpan||6.65))*camera.zoom;
    return {x:camera.width*(Number.isFinite(camera.anchorX)?camera.anchorX:.50)+x*scale*perspective,
-     y:camera.height*(Number.isFinite(camera.anchorY)?camera.anchorY:.50)-(y2-.04)*scale*perspective,z:z2,world:view};
+     y:camera.height*(Number.isFinite(camera.anchorY)?camera.anchorY:.50)-(y2-(camera.flight?0:.04))*scale*perspective,z:z2,world:view};
  }
- function attachOrbit(canvas,{state,render,pick,onInteract=()=>{},onGestureEnd=()=>{},onDoubleTap=()=>{},getBounds=()=>null,minZoom=.7,maxZoom=2.5,deepZoomEnabled=()=>false,deepMaxZoom=14,adaptiveWheel=()=>false,wideMobility=()=>false,spatialOrbit=()=>false}){
+ function attachOrbit(canvas,{state,render,pick,onInteract=()=>{},onGestureEnd=()=>{},onDoubleTap=()=>{},getBounds=()=>null,minZoom=.7,maxZoom=2.5,deepZoomEnabled=()=>false,deepMaxZoom=14,adaptiveWheel=()=>false,wideMobility=()=>false,spatialOrbit=()=>false,spatialTravel=()=>false}){
    const pointers=new Map();
    let origin=null,travel=false,scheduled=0,lastTap=null,gestureStarted=false,wheelIdle=0;
    // Region extents are source-derived. Never let focal-point zoom/pan escape
@@ -77,6 +77,7 @@
      if(e.defaultPrevented)return;
      if(pointers.size>=2 && origin?.type==='dual'){
        const mid=midpoint();
+       if(state.flight){const distanceNow=Math.max(1,distance()),last=origin.lastDistance||origin.distance,lastMid=origin.lastMid||origin.mid;if(spatialTravel(Math.log(distanceNow/last)*2.5,(lastMid.x-mid.x)*.004,(lastMid.y-mid.y)*.004)){origin.lastDistance=distanceNow;origin.lastMid=mid;travel=true;schedule();return;}}
        // Slightly more responsive pinch in deep-inspection mode; V13 remains unchanged.
        const ratio=Math.max(.02,distance()/origin.distance);
        const exponent=deepZoom()?1.10+.18/(1+Math.max(0,origin.zoom-2)*.25):1;
@@ -99,6 +100,7 @@
        const dx=e.clientX-origin.x,dy=e.clientY-origin.y;
        if(Math.abs(dx)+Math.abs(dy)>4){travel=true;beginMove();}
        if(travel){
+         if(state.flight&&spatialTravel(0,-(dx-(origin.lastDX||0))*.004,-(dy-(origin.lastDY||0))*.004)){origin.lastDX=dx;origin.lastDY=dy;schedule();return;}
          const bound=canvas.getBoundingClientRect();
          const scale=Math.max(.001,Math.min(bound.width/3.25,bound.height/Math.max(.2,state.frameSpan))*origin.zoom);
          const cy=Math.cos(origin.yaw),sy=Math.sin(origin.yaw),cp=Math.cos(origin.pitch),sp=Math.sin(origin.pitch);
@@ -144,6 +146,7 @@
    }
    function wheel(e){
      if(!Number.isFinite(e.deltaY)||!e.deltaY)return;
+     if(!e.ctrlKey&&!e.metaKey&&spatialTravel(-e.deltaY*.0025,0,0)){e.preventDefault();schedule();return;}
      const adaptive=adaptiveWheel()&&window.BodyGravityAdaptive&&window.BodyGravity;
      if(adaptive){
        if(e.ctrlKey||e.metaKey||e.defaultPrevented)return;

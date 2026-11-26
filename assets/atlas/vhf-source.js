@@ -19,9 +19,9 @@ globalThis.BodyVHF=(function sourceModule(){
  let outside=63;
  for(let i=0;i<8;i++){
   const x0=(i&1?p.max[0]:p.min[0])-c.target.x,y0=(i&2?p.max[1]:p.min[1])-c.target.y,z0=(i&4?p.max[2]:p.min[2])-c.target.z;
-  const x=x0*cy+z0*sy,z=z0*cy-x0*sy,y=y0*cp-z*sp,z2=y0*sp+z*cp,w=(7.4-z2)/7.4;
-  if(!Number.isFinite(w)||w<=.10)return true; // perspective clamp: conservatively retain
-  const X=x*scale/(c.width*.5)+(ax-.5)*2*w,Y=(y-.04)*scale/(c.height*.5)-(ay-.5)*2*w,Z=-z2/15;
+  const x=x0*cy+z0*sy,z=z0*cy-x0*sy,y=y0*cp-z*sp,z2=y0*sp+z*cp,w=(c.flight?-z2:7.4-z2)/7.4;
+  if(!Number.isFinite(w)||(!c.flight&&w<=.10))return true; // perspective clamp: conservatively retain
+  const X=x*scale/(c.width*.5)+(ax-.5)*2*w,Y=(y-(c.flight?0:.04))*scale/(c.height*.5)-(ay-.5)*2*w,Z=c.flight?((250+.005)/(250-.005)*(-z2)-2*250*.005/(250-.005))/7.4:-z2/15;
   const margin=.005*Math.max(1,w);
   let mask=0;if(X < -w-margin)mask|=1;if(X>w+margin)mask|=2;if(Y< -w-margin)mask|=4;if(Y>w+margin)mask|=8;if(Z< -w-margin)mask|=16;if(Z>w+margin)mask|=32;
   outside&=mask;if(!outside)return true;
@@ -55,7 +55,7 @@ globalThis.BodyVHF=(function sourceModule(){
    if(Math.abs(det)<1e-12)continue;
    const sx=o[0]-ax,sy=o[1]-ay,sz=o[2]-az,u=(sx*hx+sy*hy+sz*hz)/det;if(u<0||u>1)continue;
    const qx=sy*uz-sz*uy,qy=sz*ux-sx*uz,qz=sx*uy-sy*ux,v=(d[0]*qx+d[1]*qy+d[2]*qz)/det;if(v<0||u+v>1)continue;
-   const t=(vx*qx+vy*qy+vz*qz)/det;if(t>0&&t<best){best=t;id=p.id;}
+   const t=(vx*qx+vy*qy+vz*qz)/det;if(t>0&&t<best&&(!c.flight||t*7.4>=.005&&t*7.4<=250)){best=t;id=p.id;}
   }
  }
  return id?{id,point:{x:world.o[0]+world.d[0]*best,y:world.o[1]+world.d[1]*best,z:world.o[2]+world.d[2]*best}}:null;
@@ -100,7 +100,7 @@ globalThis.BodyVHF=(function sourceModule(){
  const axisInventory=m=>m.structures.filter(s=>!s.source_name.startsWith('FEMUR_'));
  function axisBox(s){return {id:s.id,min:[(240-s.max[0])*.005,(s.min[2]-1000)*.005,(s.min[1]-235)*.005],max:[(240-s.min[0])*.005,(s.max[2]-1000)*.005,(s.max[1]-235)*.005]};}
  function axisWorldLayout(m){const entries=axisInventory(m);if(entries.length!==59)throw Error('Unexpected axial world inventory');const boxes=entries.map(axisBox);const landmarks=axisRegions.map((label,i)=>{const b=bounds(entries.filter(s=>axisIncludes(s,i)).map(axisBox));return {label,point:b.min.map((v,k)=>(v+b.max[k])/2)};});return {entries,boxes,bounds:bounds(boxes),landmarks};}
- function axisLocation(points,c,previous){if(c.zoom<1.5)return 'AXIAL WORLD';const distances=points.map((p,i)=>({i,d:Math.abs(p.point[1]-c.target.y)})).sort((a,b)=>a.d-b.d);const old=distances.find(x=>x.i===previous);return old&&old.d<=distances[0].d+.12?old.i:distances[0].i;}
+ function axisLocation(points,c,previous){if(!c.flight&&c.zoom<1.5)return 'AXIAL WORLD';const distances=points.map((p,i)=>({i,d:Math.abs(p.point[1]-c.target.y)})).sort((a,b)=>a.d-b.d);const old=distances.find(x=>x.i===previous);return old&&old.d<=distances[0].d+.12?old.i:distances[0].i;}
 
  // RESIDENCY: geometric correspondence certificate for display-only LOD.
  // Every source face maps to a retained triangle, edge or vertex; every retained
@@ -235,11 +235,11 @@ globalThis.BodyVHF=(function sourceModule(){
   const scale=Math.min(c.width/3.25,c.height/c.frameSpan)*c.zoom;
   const cy=Math.cos(c.yaw),sy=Math.sin(c.yaw),cp=Math.cos(c.pitch),sp=Math.sin(c.pitch);
   const inverse=(a,b,d)=>{const z=d*cp-b*sp;return [a*cy-z*sy,b*cp+d*sp,a*sy+z*cy];};
-  const o=inverse(0,.04,7.4),d=inverse((x-c.width*c.anchorX)/scale,-(y-c.height*c.anchorY)/scale,-7.4);
+  const o=c.flight?[0,0,0]:inverse(0,.04,7.4),d=inverse((x-c.width*(c.anchorX??.5))/scale,-(y-c.height*(c.anchorY??.5))/scale,-7.4);
   return {o:[o[0]+c.target.x,o[1]+c.target.y,o[2]+c.target.z],d};
  }
  function boxHit(o,d,min,max){let lo=0,hi=Infinity;for(let k=0;k<3;k++){if(Math.abs(d[k])<1e-12){if(o[k]<min[k]||o[k]>max[k])return false;continue;}let a=(min[k]-o[k])/d[k],b=(max[k]-o[k])/d[k];if(a>b)[a,b]=[b,a];lo=Math.max(lo,a);hi=Math.min(hi,b);if(hi<lo)return false;}return true;}
  function pickHit(parts,view,c,x,y){return intersect(parts,view,c,x,y,ray,boxHit,visible);}
  function pick(parts,view,c,x,y){return pickHit(parts,view,c,x,y)?.id||null;}
- return Object.freeze({load,loadWorld,loadAxis,openAxisWorld,axisWorldLayout,axisLocation,axisRegions,axisIncludes,buildLods,chooseLod,overviewFrameSpan,parse,transform,bounds,visible,pick,pickHit,inView,compact,packVertices,hash,worldHash,landmarks,neighborhood,evictionPlan});
+ return Object.freeze({load,loadWorld,loadAxis,openAxisWorld,axisWorldLayout,axisLocation,axisRegions,axisIncludes,buildLods,chooseLod,overviewFrameSpan,parse,transform,bounds,visible,pick,pickHit,ray,inView,compact,packVertices,hash,worldHash,landmarks,neighborhood,evictionPlan});
 })();

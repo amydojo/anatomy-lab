@@ -83,12 +83,12 @@ function create(canvas,onContextLost=()=>{}){
   if(!gl){status='fallback';return false;}
   const vert=[
    '#version 300 es','precision highp float;','in vec3 aPosition;','in vec3 aNormal;','in float aSkinWeight;',
-   'uniform vec2 uViewport;','uniform float uAnchorX;','uniform float uAnchorY;','uniform float uYaw;','uniform float uPitch;','uniform float uFrameSpan;','uniform float uZoom;','uniform vec3 uTarget;','uniform float uMotion;','uniform float uFlex;','uniform vec3 uPivot;','uniform mat3 uPlayRotation;','uniform vec3 uPlayTranslation;','uniform float uMotionAxis;','uniform float uSoftSkin;','uniform float uJointGraph;','uniform mat4 uOriginPose;','uniform mat4 uInsertionPose;','out vec3 vNormal;','out vec3 vViewNormal;',
+   'uniform vec2 uViewport;','uniform float uAnchorX;','uniform float uAnchorY;','uniform float uYaw;','uniform float uPitch;','uniform float uFrameSpan;','uniform float uZoom;','uniform float uFlight;','uniform vec3 uTarget;','uniform float uMotion;','uniform float uFlex;','uniform vec3 uPivot;','uniform mat3 uPlayRotation;','uniform vec3 uPlayTranslation;','uniform float uMotionAxis;','uniform float uSoftSkin;','uniform float uJointGraph;','uniform mat4 uOriginPose;','uniform mat4 uInsertionPose;','out vec3 vNormal;','out vec3 vViewNormal;',
    'void main(){','vec3 bone=aPosition;','vec3 n=aNormal;','float influence=uMotion>.5?1.:(uSoftSkin>.5?aSkinWeight:0.);','if(uJointGraph>.5){vec4 pt=vec4(aPosition,1.);bone=mix((uOriginPose*pt).xyz,(uInsertionPose*pt).xyz,aSkinWeight);n=normalize(mix(mat3(uOriginPose)*n,mat3(uInsertionPose)*n,aSkinWeight));}else if(influence>.00001){vec3 d=bone-uPivot;float ca=cos(uFlex*influence),sa=sin(uFlex*influence);bone=uPivot+(uMotionAxis>.5?vec3(d.x*ca-d.y*sa,d.x*sa+d.y*ca,d.z):vec3(d.x,d.y*ca-d.z*sa,d.y*sa+d.z*ca));n=uMotionAxis>.5?vec3(n.x*ca-n.y*sa,n.x*sa+n.y*ca,n.z):vec3(n.x,n.y*ca-n.z*sa,n.y*sa+n.z*ca);}','bone=uPlayRotation*bone+uPlayTranslation; n=uPlayRotation*n;','vec3 p=bone-uTarget;','float cy=cos(uYaw),sy=sin(uYaw),cp=cos(uPitch),sp=sin(uPitch);',
    'float x=p.x*cy+p.z*sy;','float z=p.z*cy-p.x*sy;','float y=p.y*cp-z*sp;','float z2=p.y*sp+z*cp;',
    'float scale=min(uViewport.x/3.25,uViewport.y/uFrameSpan)*uZoom;',
-   'float w=max(.10,(7.4-z2)/7.4);',
-   'gl_Position=vec4(x*scale/(uViewport.x*.5)+(uAnchorX-.5)*2.0*w,(y-.04)*scale/(uViewport.y*.5)-(uAnchorY-.5)*2.0*w,-z2/15.0,w);',
+   'float w=uFlight>.5?-z2/7.4:max(.10,(7.4-z2)/7.4);',
+   'float depth=uFlight>.5?((250.0+.005)/(250.0-.005)*(-z2)-2.0*250.0*.005/(250.0-.005))/7.4:-z2/15.0;', 'gl_Position=vec4(x*scale/(uViewport.x*.5)+(uAnchorX-.5)*2.0*w,(y-(uFlight>.5?0.0:.04))*scale/(uViewport.y*.5)-(uAnchorY-.5)*2.0*w,depth,w);',
    'vNormal=n;','float nz=n.z*cy-n.x*sy; vViewNormal=vec3(n.x*cy+n.z*sy,n.y*cp-nz*sp,n.y*sp+nz*cp);','}'
   ].join('\n');
   const frag=['#version 300 es','precision mediump float;','in vec3 vNormal;','uniform vec3 uColor;','uniform float uDim;','uniform float uAlpha;','uniform float uVisual;','uniform float uMaterial;','in vec3 vViewNormal;','out vec4 outColor;',
@@ -426,7 +426,7 @@ function create(canvas,onContextLost=()=>{}){
   gl.uniform1f(uni('uAnchorX'),Number.isFinite(camera.anchorX)?camera.anchorX:.5);
   gl.uniform1f(uni('uAnchorY'),Number.isFinite(camera.anchorY)?camera.anchorY:.5);
   gl.uniform1f(uni('uYaw'),camera.yaw);gl.uniform1f(uni('uPitch'),camera.pitch);
-  gl.uniform1f(uni('uZoom'),camera.zoom);gl.uniform1f(uni('uFrameSpan'),camera.frameSpan);
+  gl.uniform1f(uni('uFlight'),camera.flight?1:0);gl.uniform1f(uni('uZoom'),camera.zoom);gl.uniform1f(uni('uFrameSpan'),camera.frameSpan);
   gl.uniform3f(uni('uTarget'),camera.target.x,camera.target.y,camera.target.z);
   const locP=gl.getAttribLocation(program,'aPosition'),locN=gl.getAttribLocation(program,'aNormal'),locW=gl.getAttribLocation(program,'aSkinWeight');
   const M=window.BodyRegionMotion;

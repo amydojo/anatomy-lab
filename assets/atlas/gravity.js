@@ -15,8 +15,8 @@
   return {x:v.x*cy-h*sy,y:v.y*cp+v.z*sp,z:v.x*sy+h*cy};
  }
  function project(c,p){
-  const v=view(c,p),s=scale(c)*7.4/(7.4-v.z);
-  return {x:c.width*(Number.isFinite(c.anchorX)?c.anchorX:.5)+v.x*s,y:c.height*(Number.isFinite(c.anchorY)?c.anchorY:.5)-(v.y-.04)*s,z:v.z};
+  const v=view(c,p),s=scale(c)*7.4/(c.flight?-v.z:7.4-v.z);
+  return {x:c.width*(Number.isFinite(c.anchorX)?c.anchorX:.5)+v.x*s,y:c.height*(Number.isFinite(c.anchorY)?c.anchorY:.5)-(v.y-(c.flight?0:.04))*s,z:v.z};
  }
  function usable(c,p){
   if(!finitePoint(p)||!(scale(c)>0))return false;

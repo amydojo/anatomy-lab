@@ -19,7 +19,7 @@
  }
  function fromView(c,v){const {right,up,back}=basis(c);return Object.fromEntries(xyz.map(k=>[k,right[k]*v.x+up[k]*v.y+back[k]*v.z]));}
  function toView(c,v){const {right,up,back}=basis(c),dot=b=>xyz.reduce((s,k)=>s+b[k]*v[k],0);return {x:dot(right),y:dot(up),z:dot(back)};}
- function eye(c){return add(c.target,fromView(c,{x:0,y:.04,z:7.4}));}
+ function eye(c){return c.flight?{...c.target}:add(c.target,fromView(c,{x:0,y:.04,z:7.4}));}
  // Selected surface is immutable in source/display-native coordinates, not a drifting AABB center.
  // Transform is column-major rigid (the exact PLAYGROUND convention).
  function pivotCapture(id,spaceId,hit,transform){
@@ -67,6 +67,27 @@
   const t=Math.min(1,limit);
   return Object.fromEntries(xyz.map(k=>[k,delta[k]*t]));
  }
+ // Perspective flight: target is the actual eye position in this versioned pose.
+ // Lens is fixed; movement changes depth and parallax, not projection magnification.
+ const FLIGHT_NEAR=.005,FLIGHT_FAR=250;
+ function flightFit(c,b){const center=Object.fromEntries(xyz.map((k,i)=>[k,(b.min[i]+b.max[i])/2])),radius=Math.hypot(...b.max.map((x,i)=>(x-b.min[i])/2));Object.assign(c,{flight:true,yaw:0,pitch:0,zoom:1,frameSpan:3.25,anchorX:.5,anchorY:.5,target:{...center,z:center.z+Math.max(1.2,radius*6)}});return c;}
+ function flightClearance(c,boxes){const e=eye(c);let d=Infinity;for(const b of boxes||[]){if(!b?.min||!b?.max)continue;d=Math.min(d,Math.hypot(...xyz.map((k,i)=>Math.max(b.min[i]-e[k],0,e[k]-b.max[i]))));}return Number.isFinite(d)?d:2;}
+ function flightSpeed(clearance){return clamp(.035+1.6*Math.pow(Math.max(0,clearance),1.05),.035,18);}
+ function flightStep(c,motion,dt,b,p,boxes){
+  if(!finite(c.target)||!Number.isFinite(dt)||dt<=0)return false;
+  dt=Math.min(.05,dt);const start={...c,target:{...c.target}},local=finite(p)?toView(start,sub(p,start.target)):null,orbit=local&&-local.z>FLIGHT_NEAR;
+  c.yaw+=motion.orbitX*1.6*dt;c.pitch+=motion.orbitY*1.15*dt;
+  if(orbit&&(motion.orbitX||motion.orbitY))c.target=sub(p,fromView(c,local));
+  const clearance=flightClearance(c,boxes?.length?boxes:[b]),speed=flightSpeed(clearance);
+  let shift=fromView(c,{x:motion.panX*speed*dt,y:-motion.panY*speed*dt,z:0});
+  if(motion.zoom){
+   const throttle=Math.sign(motion.zoom)*Math.pow(Math.min(1,Math.abs(motion.zoom)),1.25);
+   if(orbit){const delta=sub(p,c.target),d=Math.hypot(delta.x,delta.y,delta.z),limit=Math.max(0,d-.025),travel=throttle>0?Math.min(speed*dt*throttle,limit):speed*dt*throttle; if(d>1e-8)shift=add(shift,Object.fromEntries(xyz.map(k=>[k,delta[k]/d*travel])));}
+   else shift=add(shift,fromView(c,{x:0,y:0,z:-speed*dt*throttle}));
+  }
+  c.target=add(c.target,radialDelta(c.target,shift,b,c,true));c.zoom=1;
+  return c.yaw!==start.yaw||c.pitch!==start.pitch||xyz.some(k=>c.target[k]!==start.target[k]);
+ }
  function spatialStep(base,c,motion,dt,b,maxZoom,p,orthographic=false,wide=false){
   if(!finite(c.target)||!Number.isFinite(c.zoom)||c.zoom<=0)return false;
   const start={...c,target:{...c.target}},previousEye=eye(start);
@@ -105,14 +126,14 @@
    const dt=Math.min(.05,seconds),i=intent(raw),G=root.BodyGravity;
    const legacy=world?.legacyOrbit===true;
    let p=null,pivotKey=null;try{if(world?.orbitPivot&&!legacy){const ref=world.orbitPivot(c);p=ref?.point||null;pivotKey=ref?.key||null;}else p=world?.inspectionPoint?.(c)||null;}catch{}
-   if(p&&!world?.orthographic){const q=G.project(c,p);if(!(q.z<6.4&&q.z> -20&&(!legacy||(q.x>=0&&q.x<=c.width&&q.y>=0&&q.y<=c.height))))p=null;}
+   if(p&&!c.flight&&!world?.orthographic){const q=G.project(c,p);if(!(q.z<6.4&&q.z> -20&&(!legacy||(q.x>=0&&q.x<=c.width&&q.y>=0&&q.y<=c.height))))p=null;}
    const mode=p?'inspection':'roam';
    if(lastMode!==null&&(mode!==lastMode||pivotKey!==lastPivotKey)){v=zero();filtered=1;}
    lastMode=mode;lastPivotKey=pivotKey;
-   const u=world?.orthographic?null:units(c,p),nominal=world?.orthographic?null:units(c,null),ratio=u&&nominal?clamp(u.x/nominal.x,.2,3.5):1;
+   const u=c.flight||world?.orthographic?null:units(c,p),nominal=c.flight||world?.orthographic?null:units(c,null),ratio=u&&nominal?clamp(u.x/nominal.x,.2,3.5):1;
    filtered+=(ratio-filtered)*(-Math.expm1(-dt/.12));
    if(i.precision!==precisionState){v=zero();precisionState=i.precision;}
-   const macro=clamp((c.zoom-2)/12,0,1),prox=p&&!world?.orthographic?G.proximity(c,p):1,gain=config.response*(i.precision?.25*config.precision:1),motion=zero();
+   const macro=clamp((c.zoom-2)/12,0,1),prox=p&&!c.flight&&!world?.orthographic?G.proximity(c,p):1,gain=config.response*(i.precision?.25*config.precision:1),motion=zero();
    for(const k of fields){
     const desired=i[k]*gain*(k.startsWith('pan')?filtered*prox:1);
     const tau=Math.max(.008,desired===0?config.inertia*(1-.75*macro)*(i.precision?.4:1):config.acceleration);
@@ -123,6 +144,7 @@
     v[k]=desired===0&&end<dt?0:desired+(v[k]-desired)*decay;
     if(desired===0&&Math.abs(v[k])<=.00200000000001)v[k]=0;
    }
+   if(c.flight)return flightStep(c,motion,dt,b,p,world?.flightBoxes?.());
    if(!legacy)return spatialStep(base,c,motion,dt,b,maxZoom,p,world?.orthographic===true,world?.wideMobility===true);
    const pan=Math.abs(motion.panX)+Math.abs(motion.panY)>0,anchorPoint=!pan?(p||(motion.zoom?{...c.target}:null)):null,old=anchorPoint?G.project(c,anchorPoint):null;
    const changed=base(c,motion,dt,b,maxZoom);if(changed&&old)G.anchor(c,anchorPoint,old,b);return changed;
@@ -132,5 +154,5 @@
  function wheelPixels(e,height){return clamp((Number(e.deltaY)||0)*(e.deltaMode===1?16:e.deltaMode===2?height:1),-240,240);}
  function pointAtPixel(c,x,y,depth=0){const u=units(c,null)?.x*(7.4-depth)/7.4;if(!(u>0))return null;const a=(x-c.width*(Number.isFinite(c.anchorX)?c.anchorX:.5))*u,b=.04-(y-c.height*(Number.isFinite(c.anchorY)?c.anchorY:.5))*u,cy=Math.cos(c.yaw),sy=Math.sin(c.yaw),cp=Math.cos(c.pitch),sp=Math.sin(c.pitch),h=depth*cp-b*sp;return {x:c.target.x+a*cy-h*sy,y:c.target.y+b*cp+depth*sp,z:c.target.z+a*sy+h*cy};}
  function snapshot(c,t,spaceId){return {version:1,t,spaceId,yaw:c.yaw,pitch:c.pitch,zoom:c.zoom,target:{...c.target},frameSpan:c.frameSpan,anchorX:c.anchorX??.5,anchorY:c.anchorY??.5};}
- root.BodyGravityAdaptive=Object.freeze({version:1,spatialVersion:2,profiles,shape,intent,matrixUnits,units,create,wheelPixels,pointAtPixel,snapshot,eye,basis,toView,fromView,pivotCapture,pivotResolve,spatialStep,travelEnvelope,radialDelta,WIDE_PITCH});
+ root.BodyGravityAdaptive=Object.freeze({version:1,spatialVersion:2,profiles,shape,intent,matrixUnits,units,create,wheelPixels,pointAtPixel,snapshot,eye,basis,toView,fromView,pivotCapture,pivotResolve,spatialStep,travelEnvelope,radialDelta,WIDE_PITCH,flightFit,flightStep,flightClearance,flightSpeed,FLIGHT_NEAR,FLIGHT_FAR});
 })(globalThis);
