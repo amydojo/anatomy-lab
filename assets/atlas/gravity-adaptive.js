@@ -73,6 +73,15 @@
  function flightFit(c,b){const center=Object.fromEntries(xyz.map((k,i)=>[k,(b.min[i]+b.max[i])/2])),radius=Math.hypot(...b.max.map((x,i)=>(x-b.min[i])/2));Object.assign(c,{flight:true,yaw:0,pitch:0,zoom:1,frameSpan:3.25,anchorX:.5,anchorY:.5,target:{...center,z:center.z+Math.max(1.2,radius*6)}});return c;}
  function flightClearance(c,boxes){const e=eye(c);let d=Infinity;for(const b of boxes||[]){if(!b?.min||!b?.max)continue;d=Math.min(d,Math.hypot(...xyz.map((k,i)=>Math.max(b.min[i]-e[k],0,e[k]-b.max[i]))));}return Number.isFinite(d)?d:2;}
  function flightSpeed(clearance){return clamp(.10+.95*Math.pow(Math.max(0,clearance),.85),.10,8);}
+ // Keep a recent drawn pose with conservative box clearance. No automatic motion.
+ function createFlightRecovery(){
+  let key=null,last=null;
+  const clone=c=>({flight:true,yaw:c.yaw,pitch:c.pitch,zoom:1,frameSpan:c.frameSpan,target:{...c.target},anchorX:c.anchorX??.5,anchorY:c.anchorY??.5});
+  function observe(c,context,clearance,drawn){if(key!==context){key=context;last=null;}if(c?.flight&&finite(c.target)&&Number.isFinite(c.yaw)&&Number.isFinite(c.pitch)&&clearance>=.18&&drawn>0)last=clone(c);}
+  function available(context){return key===context&&!!last;}
+  function recover(context){return available(context)?clone(last):null;}
+  return Object.freeze({observe,available,recover});
+ }
  function flightTau(k,desired,velocity,config){const angular=k.startsWith('orbit');if(!desired)return angular?.075:.11;if(velocity*desired<0)return .075;return angular?.075:(k==='zoom'?.24:.16);}
   // Hold-to-boost is a velocity modifier, never a lens change or a separate mode.
  function boostFactor(clearance,blend){const t=clamp((clearance-.35)/2.15,0,1);return 1+.8*clamp(blend,0,1)*t*t*(3-2*t);}
@@ -169,5 +178,5 @@
  function wheelPixels(e,height){return clamp((Number(e.deltaY)||0)*(e.deltaMode===1?16:e.deltaMode===2?height:1),-240,240);}
  function pointAtPixel(c,x,y,depth=0){const u=units(c,null)?.x*(7.4-depth)/7.4;if(!(u>0))return null;const a=(x-c.width*(Number.isFinite(c.anchorX)?c.anchorX:.5))*u,b=.04-(y-c.height*(Number.isFinite(c.anchorY)?c.anchorY:.5))*u,cy=Math.cos(c.yaw),sy=Math.sin(c.yaw),cp=Math.cos(c.pitch),sp=Math.sin(c.pitch),h=depth*cp-b*sp;return {x:c.target.x+a*cy-h*sy,y:c.target.y+b*cp+depth*sp,z:c.target.z+a*sy+h*cy};}
  function snapshot(c,t,spaceId){return {version:1,t,spaceId,yaw:c.yaw,pitch:c.pitch,zoom:c.zoom,target:{...c.target},frameSpan:c.frameSpan,anchorX:c.anchorX??.5,anchorY:c.anchorY??.5};}
- root.BodyGravityAdaptive=Object.freeze({version:1,spatialVersion:2,profiles,shape,intent,matrixUnits,units,create,wheelPixels,pointAtPixel,snapshot,eye,basis,toView,fromView,pivotCapture,pivotResolve,spatialStep,travelEnvelope,radialDelta,WIDE_PITCH,flightFit,flightStep,flightClearance,flightSpeed,flightTau,boostFactor,surfaceSlide,FLIGHT_NEAR,FLIGHT_FAR});
+ root.BodyGravityAdaptive=Object.freeze({version:1,spatialVersion:2,profiles,shape,intent,matrixUnits,units,create,wheelPixels,pointAtPixel,snapshot,eye,basis,toView,fromView,pivotCapture,pivotResolve,spatialStep,travelEnvelope,radialDelta,WIDE_PITCH,flightFit,flightStep,flightClearance,flightSpeed,flightTau,boostFactor,surfaceSlide,createFlightRecovery,FLIGHT_NEAR,FLIGHT_FAR});
 })(globalThis);

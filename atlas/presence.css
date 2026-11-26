@@ -52,3 +52,5 @@
 
 /* Quiet peripheral proximity cue. No movement, flashing or camera shake. */
 #flight-proximity{position:absolute;inset:0;pointer-events:none;opacity:0;box-shadow:inset 0 0 46px 3px #cdb48d28;transition:opacity .24s ease}#presence-hud[data-proximity=near] #flight-proximity{opacity:.65}#presence-hud[data-proximity=glide] #flight-proximity{opacity:1;box-shadow:inset 0 0 46px 3px #9fbca53a}@media(prefers-reduced-motion:reduce){#flight-proximity{transition:none}}
+
+#flight-orientation{position:absolute;left:50%;top:calc(50% - 38px);transform:translate(-50%,-100%);font:11px/1.3 system-ui,sans-serif;color:#eee6d9;background:#181613a8;padding:5px 9px;border-radius:4px;white-space:nowrap;pointer-events:none;text-shadow:0 1px 3px #000}#atlas-app[data-essence=immersion] #flight-orientation{opacity:.75}
