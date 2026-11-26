@@ -33,5 +33,8 @@ return {...base,front,rear,frontPod:pose(front,0,-.0008*deploy+compression*.65),
 }return {update,reset};}
 function transform(id,board){if(id.includes('_front_pod'))return board.frontPod||board.front||board;if(id.includes('_rear_pod'))return board.rearPod||board.rear||board;if(id.includes('_front_'))return board.front||board;if(id.includes('_rear_'))return board.rear||board;return board;}
 function intensity(id,board){const s=board.vehicle;if(!s)return 1;if(id.endsWith('_pod'))return .86+.36*s.energy+.22*s.deploy+.15*s.capture;if(id.endsWith('_hardware')&&s.grind)return 1.16;return 1;}
-root.BodyMarrowBoard=Object.freeze({geometry,motion,transform,intensity,palettes});
+// Inspection is a pure camera presentation of the actual current vehicle.
+function inspectionCamera(board,c,view={}){const yaw=view.yaw??.55,pitch=clamp(view.pitch??.60,-1.45,1.45),zoom=clamp(view.zoom??1,.65,2.2),r=board.r.slice(0,3),u=board.r.slice(3,6),f=board.r.slice(6,9),combine=(x,y,z)=>r.map((v,k)=>v*x+u[k]*y+f[k]*z),cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch),right=combine(cy,0,sy),vertical=combine(-sy*sp,cp,cy*sp),back=combine(sy*cp,sp,-cy*cp),D=.16/zoom,span=Math.max(.001,Math.min(c.width/3.25,c.height/c.frameSpan)),lens=Math.min(c.width,c.height)*.88;
+return {...c,target:{x:board.t[0],y:board.t[1],z:board.t[2]},marrowBasis:[...right,...vertical,...back],marrowDistance:D,anchorX:.5,anchorY:.48,zoom:lens/(D*span)};}
+root.BodyMarrowBoard=Object.freeze({geometry,motion,transform,intensity,palettes,inspectionCamera});
 })(globalThis);
