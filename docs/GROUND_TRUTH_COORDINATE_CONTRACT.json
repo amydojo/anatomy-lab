@@ -1,8 +1,8 @@
 {
   "schema": "body-live-coordinate-contract-1",
-  "version": "15.9.2",
+  "version": "15.9.2-B",
   "baseline": "6d51fc01364afdb647064bf9ddc0fae36c17cdbf",
-  "decision": "QUALIFIED_NATIVE_GEOMETRY_ONLY",
+  "decision": "NATIVE_LPS_CORRESPONDENCE_SUPPORTED_NONCLINICAL_ONLY",
   "physicalCoordinateVerified": false,
   "clinicalValidation": false,
   "canonical": {
@@ -77,7 +77,118 @@
         1
       ]
     ],
-    "displayPurpose": "existing dimensionless display transform, not physical calibration"
+    "displayPurpose": "existing dimensionless display transform, not physical calibration",
+    "derivedImageFrame": {
+      "name": "BoneHub aligned CT LPS",
+      "units": "mm",
+      "dimensions": [
+        673,
+        670,
+        1727
+      ],
+      "voxelSpacingMm": [
+        0.7226560115814209,
+        0.7226560115814209,
+        1
+      ],
+      "voxelToLps": [
+        [
+          0.7226560115814209,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0.7226560115814209,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "niftiVoxelToRas": [
+        [
+          -0.7226560115814209,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          -0.7226560115814209,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "qformCode": 1,
+      "sformCode": 1,
+      "qformSformMaxDifference": 0,
+      "ctFullHashVerified": false,
+      "ctHeaderArtifactId": 15079087018,
+      "originalDicomVerified": false
+    },
+    "nativeMeshToDerivedImageLps": {
+      "matrix": [
+        [
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "status": "supported by actual mask surface correspondence for all 143 labels, nominal derived-image millimeters only",
+      "notClinicalCalibration": true
+    },
+    "archivePreservation": {
+      "draftReleaseId": 458843798,
+      "assetId": 793883988,
+      "headerAssetId": 793887093,
+      "tag": "archive-unity-53bd624-1d7f8d54",
+      "url": "https://github.com/amydojo/anatomy-lab/releases/tag/untagged-f2d190776217ecdca599",
+      "sha256VerifiedAfterReadback": true,
+      "doNotPublish": true
+    }
   },
   "conventions": {
     "matrixLayout": "row-major arrays; column homogeneous vectors; target = matrix @ source",
@@ -250,21 +361,97 @@
       ],
       "decision": "unregistered separate space; sacral validation fails; no clinical review"
     },
-    "historicalFitReexecuted": false
+    "historicalFitReexecuted": false,
+    "independentReplay": {
+      "workflowRun": 45737178649,
+      "artifactId": 15078709453,
+      "artifactSha256": "3be07621a8292fd0a9c99b1448f4f4b72c4b08514aa8463e890404a819f71654",
+      "seed": 1592,
+      "samplesPerStructure": 35000,
+      "iterations": 40,
+      "trim": 0.85,
+      "thresholds": [
+        3,
+        8,
+        5
+      ],
+      "metricOrder": [
+        "median",
+        "p95",
+        "centroidDelta"
+      ],
+      "units": "source units; Denver physical registration not certified",
+      "matrix": [
+        [
+          -0.9990116716598167,
+          -0.03822465348820732,
+          -0.022683821396956787,
+          805.2776604743143
+        ],
+        [
+          0.038526437886901584,
+          -0.9991727629704517,
+          -0.013019344136226206,
+          683.5469034785879
+        ],
+        [
+          -0.02216739658167389,
+          -0.013880403585535082,
+          0.9996579119504297,
+          6.881229144065248
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "metrics": {
+        "femur_left": [
+          1.257409833356751,
+          3.104439602969851,
+          1.0724095457307872
+        ],
+        "femur_right": [
+          1.3795280982515212,
+          3.813577991861862,
+          0.4009340765005192
+        ],
+        "hip_left": [
+          1.9251773546876194,
+          4.095554693951275,
+          4.517734683458378
+        ],
+        "hip_right": [
+          1.746398881289478,
+          4.074555769557323,
+          4.342495067970604
+        ],
+        "sacrum_coccyx": [
+          3.3618836242877124,
+          7.380033510571924,
+          5.378847233880282
+        ]
+      },
+      "failedStructures": [
+        "sacrum_coccyx"
+      ],
+      "rawDenverComparisonPerformed": false,
+      "allowed": false
+    }
   },
   "consumers": {
-    "NANITE": "Preserve original position space and per-mesh source/derivative hashes; no unit-derived tolerances",
-    "UNITY_WORLD": "One native geometry frame permitted for nonclinical exploration; no per-bone correction or Denver overlay",
-    "STRATA": "Use stable source IDs and bounds; no millimeter distance, physical joint contact or validated anatomical point claims"
+    "NANITE": "Preserve native coordinates and immutable source IDs. Derived-image LPS identity is supported; do not silently rescale or move structures. No clinical tolerance claims.",
+    "UNITY_WORLD": "May use native coordinates as nominal derived-image LPS mm for nonclinical exploration; existing display transform remains display-only. No Denver fusion, individual bone correction or clinical measurements.",
+    "STRATA": "Use stable region/name/layer/value IDs and derived-image correspondence; grouped labels, disconnected islands and segmentation gaps remain explicit. No validated soft-tissue attachment/contact or clinical claims."
   },
   "blocked": [
-    "CT original DICOM slice geometry and FrameOfReferenceUID",
-    "pinned NIfTI qform/sform",
-    "pinned segmentation NRRD origins/directions/labels",
-    "STL header and export-space confirmation",
-    "mesh-to-mask surface residuals",
-    "independent anatomical landmark TRE and joint contact",
-    "full Denver registration rerun and raw versus final comparison"
+    "Original DICOM slice geometry and FrameOfReferenceUID; full CT hash",
+    "Original STL export metadata; exact point-to-triangle and sampling-convergence audit",
+    "Independent anatomically annotated landmark TRE and signed joint contact",
+    "Raw versus final Denver reconstruction comparison; sacrococcygeal gates remain failed",
+    "Clinical calibration or patient-specific use"
   ],
   "limitations": [
     "Grouped phalanges, skull, sternum and sacrum/coccyx",
@@ -279,5 +466,63 @@
     "https://doi.org/10.1038/s41597-022-01905-2",
     "https://slicer.readthedocs.io/en/latest/user_guide/data_loading_and_saving.html",
     "https://nifti.nimh.nih.gov/nifti-1/documentation/nifti1fields/nifti1fields_pages/qsform.html/document_view.html"
-  ]
+  ],
+  "imageMeshCorrespondence": {
+    "workflowRun": 45737181447,
+    "artifactId": 15078764520,
+    "artifactSha256": "33855aaa86183e070dca55b2769387b46636e3f875990e262c92bb6b865e0547",
+    "headerArtifactId": 15079087018,
+    "headerArtifactSha256": "ac3b87c981cfeba43953c9e1f6eaba9d6c27ebbbb0065c3405b0128d7b0d215a",
+    "fullVolumeCount": 11,
+    "fullVolumeHashesVerified": 11,
+    "compressedVolumeBytes": 15777045,
+    "uniqueLabels": 143,
+    "nonzeroLayerLabels": 29,
+    "withinRegionRepeatedLabelValuesBeyondUnique": 28,
+    "voxelMemberships": 10770271,
+    "metric": "bidirectional sampled surface nearest-neighbor; 35000 area-weighted samples per surface, not exact triangle distance",
+    "seed": 159202,
+    "medianOfStructureMediansMm": 0.24387420160902312,
+    "medianOfStructureP95Mm": 0.444422993689905,
+    "maxStructureP95Mm": 2.2105192415938952,
+    "structureP95AtMost1Mm": 135,
+    "structureP95AtMost2Mm": 142,
+    "nativeIdentityPreferred": 143,
+    "rasSignFlipMedianOfStructureMediansMm": 670.0574158341938,
+    "multiComponentMasks": 6,
+    "boundsOutliers": [
+      {
+        "name": "METATARSAL_5_RIGHT",
+        "maxAxisBoundsDifferenceMm": 16.68265522
+      },
+      {
+        "name": "METATARSAL_2_LEFT",
+        "maxAxisBoundsDifferenceMm": 11.613
+      }
+    ],
+    "jointProxyWarnings": [
+      {
+        "pair": [
+          "HUMERUS_RIGHT",
+          "ULNA_RIGHT"
+        ],
+        "minimumSampledDistanceMm": 65.93056264829043
+      },
+      {
+        "pair": [
+          "HUMERUS_RIGHT",
+          "RADIUS_RIGHT"
+        ],
+        "minimumSampledDistanceMm": 26.095035846271717
+      }
+    ],
+    "limitations": [
+      "Sample density differs by structure; large surfaces can have higher sampled NN residuals",
+      "All mask components retained; small disconnected islands can affect bounds and extreme distances; causation not proven",
+      "Grouped anatomical labels are not separately validated bones",
+      "Joint proximity is not contact, signed penetration or anatomical landmark TRE",
+      "Original DICOM frame and full CT image hash are unverified",
+      "Clinical and cross-source registration are not approved"
+    ]
+  }
 }
