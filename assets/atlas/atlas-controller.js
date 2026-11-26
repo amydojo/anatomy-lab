@@ -667,7 +667,7 @@ function setupExpedition(){
  function restoreSelection(v){if(!pendingNexusSelection||!sameAxis(v))return false;const p=v.parts.find(p=>p.id===pendingNexusSelection);if(!p)return false;v.selected=p.id;v.surface=null;pendingNexusSelection=null;return true;}
  if(nexusParams.get('nexus')==='1')window.__NEXUS_ATLAS__=Object.freeze({
   profile:()=>motion?{active:true,version:1,settings:motion.settings()}: {active:false},
-  capture:()=>{const v=vhfView;if(!sameAxis(v))return null;cancelAxisFlight();motion?.reset();const c=v.camera;
+  capture:()=>{const v=vhfView;if(!sameAxis(v)||!v.parts.length)return null;cancelAxisFlight();motion?.reset();const c=v.camera;
    const idx=window.BodyVHF.axisLocation(v.landmarks,c,v.axisRegion);
    const region=typeof idx==='number'?['hip','thorax','neck','skull'][idx]:null;
    let thumbnail=null;try{render();const canvas=$('atlas-canvas'),out=document.createElement('canvas');out.width=320;out.height=180;const ctx=out.getContext('2d',{willReadFrequently:true});ctx.fillStyle='#141310';ctx.fillRect(0,0,320,180);const ratio=Math.min(320/canvas.width,180/canvas.height),w=canvas.width*ratio,h=canvas.height*ratio;ctx.drawImage(canvas,(320-w)/2,(180-h)/2,w,h);const data=ctx.getImageData(0,0,320,180).data;let min=255,max=0;for(let i=0;i<data.length;i+=16){const l=(data[i]+data[i+1]+data[i+2])/3;min=Math.min(min,l);max=Math.max(max,l);}if(max-min>18){const jpeg=out.toDataURL('image/jpeg',.72);if(jpeg.length<70000)thumbnail=jpeg;}}catch{}
