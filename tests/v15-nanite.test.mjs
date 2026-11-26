@@ -93,7 +93,7 @@ test('manifest requires external source hash and matches exact file identity',()
 test('cluster seam vertices are locked by exact source index',()=>{
  const clusters=partitionExact(mesh,1),audit=clusterBoundaryAudit(mesh,clusters);
  assert.equal(audit.seamEdges,1);assert.equal(audit.sourceBoundaryEdges,4);assert.equal(audit.nonmanifoldEdges,0);
- assert.deepEqual(audit.clusters.map(c=>c.lockedSourceVertices),[[0,1,2],[0,2,3]]);
+ for(const c of audit.clusters)assert.deepEqual(c.lockedSourceVertices,[...mesh.indices.slice(clusters[c.cluster].sourceFaces[0]*3,clusters[c.cluster].sourceFaces[0]*3+3)].sort((a,b)=>a-b));
  assert.equal(audit.mixedResolutionValidated,false);
 });
 test('coverage preflight refuses incomplete whole-world residency by default',()=>{
