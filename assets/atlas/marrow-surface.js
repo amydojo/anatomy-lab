@@ -87,16 +87,25 @@ function rig(s,world){let mode=0,yaw=0,pitch=.72,sensitivity=1,close=false,recen
  // Bounded tracking lag: avoid losing the board on a dropped frame. No angular
  // obstruction correction, no view-basis or input change from collision.
  const lag=sub(target,s.p);if(len(lag)>.075){target=add(s.p,mul(unit(lag),.075));targetV=[0,0,0];}
- const want=(close?.24:.36)+(mode===1?Math.min(.10,speed*.24):0),hit=world.ray(target,back,want+.012),safe=hit?Math.max(.007,hit.distance-.010):want;
+ const want=(close?.24:.36)+(mode===1?Math.min(.10,speed*.24):0);
+ // Test the sightline from the actual board, not a lagging target that may be
+ // inside a curved bone. Try bounded positional shifts only, never rotate the
+ // view or change the control yaw. Keep all candidates within the fixed FOV.
+ const lagOffset=sub(target,s.p);
+ function clearance(x,y){const off=add(lagOffset,add(mul(right,x),mul(vertical,y))),eye=add(off,mul(back,want)),length=len(eye),dir=unit(eye,back),hit=world.ray(s.p,dir,length+.012),factor=hit?clamp((hit.distance-.008)/Math.max(.001,length),.018/want,1):1;return {hit,off,factor,score:factor*want-Math.hypot(x,y)*.42};}
+ let best=clearance(0,0);if(best.factor<.78){const offset=Math.min(.075,want*.20);for(const [x,y] of [[offset,0],[-offset,0],[0,offset],[0,-offset],[offset*.7,offset*.7],[-offset*.7,offset*.7]]){const q=clearance(x,y);if(q.score>best.score+.012)best=q;}}
+ const hit=best.hit,safe=Math.max(.007,want*best.factor);
  if(hit){blockedFor+=rawDt;recovery=0;}else{if(obstructedLast)recovery=0;else recovery+=rawDt;blockedFor=0;}
- // Safety may shorten the camera instantly; outward recovery is damped.
  [distance,distanceV]=spring([distance],[distanceV],[safe],trackDt,9).map(v=>v[0]);if(distance>safe){distance=safe;distanceV=0;}distance=Math.max(.007,distance);obstructedLast=!!hit;
+ // Retain the same direction from the board to eye while dollying. This
+ // prevents near-plane tunneling as the tracking spring crosses the mesh.
+ const viewTarget=add(s.p,mul(best.off,distance/want));
  const span=Math.max(.001,Math.min(c.width/3.25,c.height/c.frameSpan)),lens=c.height*.5/Math.tan(FOV*.5);
- c.marrowBasis=[...right,...vertical,...back];c.target={x:target[0],y:target[1],z:target[2]};c.marrowDistance=distance;c.anchorX=.5;c.anchorY=.53;c.zoom=lens/(distance*span);c.yaw=Math.atan2(-back[0],-back[2]);c.pitch=Math.asin(clamp(back[1],-1,1));
- const offsets=[];for(const x of [-.018,.018])for(const y of [-.009,.012])for(const z of [-.038,.038]){const q=sub(add(s.p,add(mul(unit(cross(s.f,s.n)),x),add(mul(s.n,y),mul(s.f,z)))),target),depth=distance-dot(q,back);offsets.push({x:dot(q,right),y:dot(q,vertical),depth});}
+ c.marrowBasis=[...right,...vertical,...back];c.target={x:viewTarget[0],y:viewTarget[1],z:viewTarget[2]};c.marrowDistance=distance;c.anchorX=.5;c.anchorY=.53;c.zoom=lens/(distance*span);c.yaw=Math.atan2(-back[0],-back[2]);c.pitch=Math.asin(clamp(back[1],-1,1));
+ const offsets=[];for(const x of [-.018,.018])for(const y of [-.009,.012])for(const z of [-.038,.038]){const q=sub(add(s.p,add(mul(unit(cross(s.f,s.n)),x),add(mul(s.n,y),mul(s.f,z)))),viewTarget),depth=distance-dot(q,back);offsets.push({x:dot(q,right),y:dot(q,vertical),depth});}
  const framed=offsets.every(q=>q.depth>.004&&Math.abs(q.x*lens/q.depth)<c.width*.47&&Math.abs(q.y*lens/q.depth)<c.height*.43);
  angular=h>0?rotationAngle(old,orient)/h:0;const angularAcceleration=h>0?Math.abs(angular-oldAngular)/h:0;lastMode=MODES[mode];
- return {mode:lastMode,yaw:c.yaw,pitch:c.pitch,distance,target:target.slice(),framed,obstructed:!!hit,basis:c.marrowBasis.slice(),fovDegrees:52,controlYaw:yaw,angularVelocity:angular,angularAcceleration,trackingError:len(sub(target,s.p)),horizonRoll:Math.asin(clamp(right[1],-1,1)),blockedSeconds:blockedFor,recoverySeconds:recovery,cameraDt:h,transition};
+ return {mode:lastMode,yaw:c.yaw,pitch:c.pitch,distance,target:viewTarget.slice(),framed,obstructed:!!hit,basis:c.marrowBasis.slice(),fovDegrees:52,controlYaw:yaw,angularVelocity:angular,angularAcceleration,trackingError:len(sub(target,s.p)),horizonRoll:Math.asin(clamp(right[1],-1,1)),blockedSeconds:blockedFor,recoverySeconds:recovery,cameraDt:h,transition};
  }};return api;}
 root.BodyMarrowSurface=Object.freeze({create,rig,legacyRig,contact,transport,STEP});
 })(globalThis);
