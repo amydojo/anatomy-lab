@@ -34,16 +34,17 @@ function handleNexus(command){if(command==='cancel'){closeMenu();return;}if(['up
 
 
 // ESSENCE is a presentation adapter over the existing command functions.
-const essence=nexusQ.get('essence')==='1'&&!!nexusReturn;
+const essence=nexusQ.get('essence')==='1'&&!!nexusReturn;const presence=essence&&nexusQ.get('presence')==='1';
 let essenceTool='Tools',essenceIndex=0,essenceAdvanced=false,essenceMoved=[];
 function essenceState(state){if(essence)stage.dataset.essence=state;}
 function essenceRestoreFields(){for(const [node,marker] of essenceMoved){marker.replaceWith(node);}essenceMoved=[];}
 function essenceMove(node,root){if(!node)return;const marker=document.createComment('essence field');node.before(marker);root.append(node);essenceMoved.push([node,marker]);}
-function essenceOpen(tool='Tools'){closeMenu();guide(false);essenceTool=tool;essenceIndex=0;essenceAdvanced=false;
+function essenceOpen(tool=presence?'Perform':'Tools'){closeMenu();guide(false);essenceTool=tool;essenceIndex=0;essenceAdvanced=false;
  if(tool==='Sound'){openMenu('audio');return;}if(tool==='Tissues'){openMenu('tissue');return;}
  if(tool==='Studio'){essenceState('studio');menu='essence-studio';menuUntil=Infinity;drawEssence();return;}
  menu='essence';menuUntil=Infinity;essenceState('contextual');drawEssence();}
 function essenceRows(){const group=name=>director.find(x=>x[0]===name)[1];
+ if(essenceTool==='Perform'){const done=(label,fn)=>()=>{fn();closeMenu();feedback(label);};return [['Next look',done('Look changed',()=>preset(look+1)),()=>p.name],['Tissue composition',()=>openMenu('composition')],['Audio response',done('Response changed',()=>setReaction(reaction+1)),()=>reactionNames[reaction]],['Typography',done('Typography changed',()=>{p.type=p.type>.01?0:1;sync();}),()=>p.type>.01?'On':'Off'],['Record / stop take',()=>{record();closeMenu();}],['Record / stop video',()=>{toggleVideo();closeMenu();}],['Sound',()=>essenceOpen('Sound')],['All tools',()=>essenceOpen('Tools')],['Experiences',()=>openNexus()]];}
  if(essenceTool==='Tools')return [['Sound',()=>essenceOpen('Sound')],['Tissues',()=>essenceOpen('Tissues')],['Time',()=>essenceOpen('Time')],['Looks',()=>essenceOpen('Looks')],['Typography',()=>essenceOpen('Typography')],['Capture',()=>essenceOpen('Capture')],['Experiences',()=>openNexus()],['Specimens',()=>openMenu('specimen')],['Studio',()=>essenceOpen('Studio')],['Immersion',()=>{closeMenu();if(!stage.classList.contains('clean'))clean();}]];
  if(essenceTool==='Time')return [...group('Motion'),...audioActions.filter(x=>['Response mode','Manual pulse','Tap tempo'].includes(x[0]))];
  if(essenceTool==='Looks')return [...group('Color'),...group('Lighting'),...group('Material')];
@@ -58,7 +59,7 @@ function drawEssence(){essenceRestoreFields();const root=$('director-menu');root
  $('director-help').textContent='↑ ↓ Select · ← → Adjust · × Confirm · ○ Close';rows.children[essenceIndex]?.scrollIntoView({block:'nearest'});
 }
 function essenceHandle(command,delta=0){if(command==='cancel'){closeMenu();return;}const list=essenceRows();if(command==='up'||command==='down')essenceIndex=wrap(essenceIndex+(command==='up'?-1:1),list.length);else if(command==='confirm'||command==='left'||command==='right'||delta){const fn=list[essenceIndex][1];if(command==='confirm'||fn.length)fn(delta||(command==='left'?-.05:.05));}if(menu==='essence'||menu==='essence-studio')drawEssence();}
-function essenceInit(){if(!essence)return;essenceState('ambient');const playback=document.createElement('span');playback.id='essence-playback';playback.hidden=true;playback.setAttribute('role','status');stage.append(playback);$('mark').querySelector('strong').textContent='Create';const b=document.createElement('button');b.id='essence-tools';b.textContent='Tools · SHARE';b.onclick=()=>essenceOpen();stage.append(b);const matrix=$('matrix');matrix.open=false;
+function essenceInit(){if(!essence)return;essenceState('ambient');const playback=document.createElement('span');playback.id='essence-playback';playback.hidden=true;playback.setAttribute('role','status');stage.append(playback);$('mark').querySelector('strong').textContent='Create';const b=document.createElement('button');b.id='essence-tools';b.textContent=presence?'Perform · SHARE':'Tools · SHARE';b.onclick=()=>essenceOpen();stage.append(b);const matrix=$('matrix');matrix.open=false;
  const close=document.createElement('button');close.type='button';close.textContent='Close Studio';close.id='essence-studio-close';close.onclick=()=>{delete $('desk').dataset.essenceDesk;closeMenu();};$('desk').prepend(close);
  // Canonical transport remains in Audio Deck; the Studio desk retains legacy controls.
  $('controller-guide').querySelectorAll('p').forEach(e=>{if(e.textContent.includes('SHARE'))e.lastChild.textContent=' Tools / experiences';});
