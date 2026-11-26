@@ -120,7 +120,7 @@
   function reset(){v=zero();filtered=1;lastCamera=null;precisionState=false;lastMode=null;lastPivotKey=null;boostBlend=0;}
   function configure(name,over={}){config={...profiles[name]||profiles.explorer};for(const [k,lo,hi] of [['response',.2,2],['precision',.15,1.5],['inertia',.01,.4]])if(over[k]!=null&&Number.isFinite(Number(over[k])))config[k]=clamp(Number(over[k]),lo,hi);reset();}
   configure(profile,overrides);
-  function active(){return fields.some(k=>Math.abs(v[k])>0);}
+  function active(){return boostBlend>0||fields.some(k=>Math.abs(v[k])>0);}
   function read(pad,base){const i=base(pad),a=pad.axes||[];[i.panX,i.panY]=shape(a[0],a[1],.18,config.curve);[i.orbitX,i.orbitY]=shape(a[2],a[3],.18,config.curve);return i;}
   function step(base,c,raw,seconds,b,maxZoom,world){
    if(c!==lastCamera){reset();lastCamera=c;}
@@ -147,7 +147,7 @@
     v[k]=desired===0&&end<dt?0:desired+(v[k]-desired)*decay;
     if(desired===0&&Math.abs(v[k])<=.00200000000001)v[k]=0;
    }
-   if(c.flight){const desiredBoost=i.boost&&!i.precision&&!selected&&(i.zoom>0||Math.abs(i.panX)+Math.abs(i.panY)>0)?1:0;const oldBoost=boostBlend;boostBlend=i.precision||selected?0:desiredBoost+(boostBlend-desiredBoost)*Math.exp(-dt/(desiredBoost?.4:.18));if(!desiredBoost&&boostBlend<.002)boostBlend=0;let changed=false;const boxes=world?.flightBoxes?.(),n=Math.max(1,Math.ceil(dt/.025));for(let j=0;j<n;j++)changed=flightStep(c,motion,dt/n,b,p,boxes,selected,oldBoost+(boostBlend-oldBoost)*(j+1)/n*(i.precision||selected?0:1))||changed;return changed;}
+   if(c.flight){const desiredBoost=i.boost&&!i.precision&&!selected&&(i.zoom>0||Math.abs(i.panX)+Math.abs(i.panY)>0)?1:0;const oldBoost=boostBlend;boostBlend=i.precision||selected?0:desiredBoost+(boostBlend-desiredBoost)*Math.exp(-dt/(desiredBoost?.4:.18));if(!desiredBoost&&boostBlend<.002)boostBlend=0;let changed=false;const boxes=world?.flightBoxes?.(),n=Math.max(1,Math.ceil(dt/.025));for(let j=0;j<n;j++)changed=flightStep(c,motion,dt/n,b,p,boxes,selected,i.precision||selected?0:oldBoost+(boostBlend-oldBoost)*(j+1)/n)||changed;return changed;}
    if(!legacy)return spatialStep(base,c,motion,dt,b,maxZoom,p,world?.orthographic===true,world?.wideMobility===true);
    const pan=Math.abs(motion.panX)+Math.abs(motion.panY)>0,anchorPoint=!pan?(p||(motion.zoom?{...c.target}:null)):null,old=anchorPoint?G.project(c,anchorPoint):null;
    const changed=base(c,motion,dt,b,maxZoom);if(changed&&old)G.anchor(c,anchorPoint,old,b);return changed;
