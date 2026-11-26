@@ -80,15 +80,21 @@ for(const e of source.structures){
  const begin=performance.now(),bytes=readFileSync(join(root,e.file));
  if(bytes.length!==e.bytes||sha(bytes)!==e.sha256)throw Error('Exact GLB integrity '+e.id);
  const exact=V.parse(arrayBuffer(bytes),{structures:[{...e,tissue:'Bone'}]},true,true)[0],levels=[],rejected=[];
- const candidates=V.buildLods(exact,12);let sourceTree;
- for(const lod of candidates){
-  sourceTree??=tree(exact);const targetTree=tree(lod);
-  const forward=summarize(samples(exact,512).map(p=>nearest(lod,targetTree,p))),reverse=summarize(samples(lod,512).map(p=>nearest(exact,sourceTree,p)));
-  const upper=lod.certificate.maxSurfaceDistanceUpperBound;
-  if(Math.max(forward.maximum,reverse.maximum)>upper+1e-6){rejected.push({level:lod.lodLevel,reason:'independent distance exceeds bound',forward,reverse,upper});continue;}
-  levels.push(publish(e.id,lod.lodLevel,lod,lod.certificate,{sourceToLod:forward,lodToSource:reverse}));
+ // A longer collapse sequence can invalidate the final certificate even if a
+ // shorter one qualified. Keep both trials; never discard a qualified tier merely
+ // because a more aggressive trial failed.
+ const trials=[12,4].map(rounds=>({rounds,lods:V.buildLods(exact,rounds)}));let sourceTree;
+ for(const level of ['overview','regional']){
+  const candidates=trials.flatMap(t=>t.lods.filter(l=>l.lodLevel===level).map(l=>({lod:l,rounds:t.rounds}))).sort((a,b)=>gpuBytes(a.lod.positions.length/3,a.lod.indices.length,a.lod.indices.BYTES_PER_ELEMENT)-gpuBytes(b.lod.positions.length/3,b.lod.indices.length,b.lod.indices.BYTES_PER_ELEMENT));
+  for(const t of trials)if(!t.lods.some(l=>l.lodLevel===level))rejected.push({level,rounds:t.rounds,reason:'existing topology/correspondence/reduction gate returned no candidate'});
+  for(const {lod,rounds} of candidates){
+   sourceTree??=tree(exact);const targetTree=tree(lod);
+   const forward=summarize(samples(exact,512).map(p=>nearest(lod,targetTree,p))),reverse=summarize(samples(lod,512).map(p=>nearest(exact,sourceTree,p)));
+   const upper=lod.certificate.maxSurfaceDistanceUpperBound;
+   if(Math.max(forward.maximum,reverse.maximum)>upper+1e-6){rejected.push({level,rounds,reason:'independent distance exceeds bound',forward,reverse,upper});continue;}
+   levels.push({...publish(e.id,level,lod,lod.certificate,{sourceToLod:forward,lodToSource:reverse}),rounds});break;
+  }
  }
- for(const level of ['overview','regional'])if(!candidates.some(c=>c.lodLevel===level))rejected.push({level,reason:'existing topology/correspondence/reduction gate returned no candidate'});
  // An exact-display fallback is always lossless to transformed float32 source arrays.
  levels.push(publish(e.id,'exact-display',exact));
  const overview=levels.find(l=>l.level==='overview')||levels.find(l=>l.level==='regional')||levels.at(-1);
