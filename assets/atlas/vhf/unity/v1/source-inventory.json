@@ -1,0 +1,1003 @@
+[
+  {
+    "name": "CALCANEUS_LEFT",
+    "folder": "FOOT_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/CALCANEUS_LEFT.stl",
+    "source_sha256": "d8f4e87cacbe730d6781276ac5764cd98bbc2bab417aec8afdf117088dff29f0",
+    "source_bytes": 2437884
+  },
+  {
+    "name": "CUBOID_LEFT",
+    "folder": "FOOT_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/CUBOID_LEFT.stl",
+    "source_sha256": "1bee132ccad71702e67f1aa3f2ced7072f213ebfc07caf37673618f95abad588",
+    "source_bytes": 676284
+  },
+  {
+    "name": "INTERMEDIATE_CUNEIFORM_LEFT",
+    "folder": "FOOT_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/INTERMEDIATE_CUNEIFORM_LEFT.stl",
+    "source_sha256": "0dc72aef34712e6c03baf4bd65ca6ffdf7336b6ee2eedc777c7ada9ae16ac03b",
+    "source_bytes": 335684
+  },
+  {
+    "name": "LATERAL_CUNEIFORM_LEFT",
+    "folder": "FOOT_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/LATERAL_CUNEIFORM_LEFT.stl",
+    "source_sha256": "dbe2a54045901d29e0ee80c4dda6dbbf6723333ed45272301978a228afa3cc36",
+    "source_bytes": 376484
+  },
+  {
+    "name": "MEDIAL_CUNEIFORM_LEFT",
+    "folder": "FOOT_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/MEDIAL_CUNEIFORM_LEFT.stl",
+    "source_sha256": "ac6d1f74c563d444add24641c8b9f891d5d108db8053162c6f51e59ed2695b6b",
+    "source_bytes": 563884
+  },
+  {
+    "name": "METATARSAL_1_LEFT",
+    "folder": "FOOT_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/METATARSAL_1_LEFT.stl",
+    "source_sha256": "b96c941ca94248d4dba7296594e6b123884600d594bc64ac86371024c491390f",
+    "source_bytes": 1011484
+  },
+  {
+    "name": "METATARSAL_2_LEFT",
+    "folder": "FOOT_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/METATARSAL_2_LEFT.stl",
+    "source_sha256": "473f809aceadba23b20038843e80a499c7fedd5f7c50d3bb64fa27408a52f581",
+    "source_bytes": 683084
+  },
+  {
+    "name": "METATARSAL_3_LEFT",
+    "folder": "FOOT_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/METATARSAL_3_LEFT.stl",
+    "source_sha256": "936aaef4b99b208a18c04c30790beb6bd2d216b6da01ad043c94521c520978df",
+    "source_bytes": 623484
+  },
+  {
+    "name": "METATARSAL_4_LEFT",
+    "folder": "FOOT_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/METATARSAL_4_LEFT.stl",
+    "source_sha256": "a2c3081a98002bdbf9809c3dbaa191c698099da4c87a18bfa50a2a2e8ba1f127",
+    "source_bytes": 592084
+  },
+  {
+    "name": "METATARSAL_5_LEFT",
+    "folder": "FOOT_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/METATARSAL_5_LEFT.stl",
+    "source_sha256": "cbd729841b33f86aa5cb21387d3d86b90927b2878343643352143789fe81b73f",
+    "source_bytes": 628884
+  },
+  {
+    "name": "NAVICULAR_LEFT",
+    "folder": "FOOT_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/NAVICULAR_LEFT.stl",
+    "source_sha256": "1e545c541717bc8f171660e592a2ceca8f5db7c1a03127d82fc729002486cec3",
+    "source_bytes": 649484
+  },
+  {
+    "name": "PHALANGE_FOOT_1_LEFT",
+    "folder": "FOOT_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/PHALANGE_FOOT_1_LEFT.stl",
+    "source_sha256": "d7a2cef3b66bd76fd439baa3147207cf984ef049f3bbc9499e9493c3329f0e1c",
+    "source_bytes": 777284
+  },
+  {
+    "name": "PHALANGE_FOOT_2_LEFT",
+    "folder": "FOOT_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/PHALANGE_FOOT_2_LEFT.stl",
+    "source_sha256": "4b13f5c0b28477b90fbcce9c82081a2ab48af887f3555ac64123b35cd194bbc5",
+    "source_bytes": 372284
+  },
+  {
+    "name": "PHALANGE_FOOT_3_LEFT",
+    "folder": "FOOT_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/PHALANGE_FOOT_3_LEFT.stl",
+    "source_sha256": "596760092ae9942320e44e202c553e72a757145fce6e978b3e7719356d267103",
+    "source_bytes": 297284
+  },
+  {
+    "name": "PHALANGE_FOOT_4_LEFT",
+    "folder": "FOOT_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/PHALANGE_FOOT_4_LEFT.stl",
+    "source_sha256": "0401e0822104e30b30e88fb3a58137aed896a2290c2829ef6cb7ae8de9f94780",
+    "source_bytes": 261284
+  },
+  {
+    "name": "PHALANGE_FOOT_5_LEFT",
+    "folder": "FOOT_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/PHALANGE_FOOT_5_LEFT.stl",
+    "source_sha256": "5657f1058836081739352d974eb1b59291b3d1a2413e349d594c66e665a7888c",
+    "source_bytes": 266884
+  },
+  {
+    "name": "TALUS_LEFT",
+    "folder": "FOOT_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/TALUS_LEFT.stl",
+    "source_sha256": "071a39d23b0f06f9c833f1cdcf1e04b0017fc27984e97fc286e4fb21ea11f517",
+    "source_bytes": 1568684
+  },
+  {
+    "name": "CALCANEUS_RIGHT",
+    "folder": "FOOT_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/CALCANEUS_RIGHT.stl",
+    "source_sha256": "5025e56aaf95725eddd0457c7fbddcaf2e2838ae2000824f2a53ba23f5cc134f",
+    "source_bytes": 2492884
+  },
+  {
+    "name": "CUBOID_RIGHT",
+    "folder": "FOOT_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/CUBOID_RIGHT.stl",
+    "source_sha256": "244e2360c98bfb0a804878385c27cb69f31886861e59a54f9df88c65dd868ffb",
+    "source_bytes": 677684
+  },
+  {
+    "name": "INTERMEDIATE_CUNEIFORM_RIGHT",
+    "folder": "FOOT_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/INTERMEDIATE_CUNEIFORM_RIGHT.stl",
+    "source_sha256": "32a58c4e8937e2313f82c410e0a3e3092793888cc9f007a4b5a7e10507e16a3e",
+    "source_bytes": 310484
+  },
+  {
+    "name": "LATERAL_CUNEIFORM_RIGHT",
+    "folder": "FOOT_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/LATERAL_CUNEIFORM_RIGHT.stl",
+    "source_sha256": "ccec497d41628a41169b23dbaf11a1ae21bb17c7bbcecdf251da136be03723bb",
+    "source_bytes": 379884
+  },
+  {
+    "name": "MEDIAL_CUNEIFORM_RIGHT",
+    "folder": "FOOT_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/MEDIAL_CUNEIFORM_RIGHT.stl",
+    "source_sha256": "6ed390259f9f344b4cca5e73a94c10bd6c6aaf98a274adb891804ea875c1e480",
+    "source_bytes": 569684
+  },
+  {
+    "name": "METATARSAL_1_RIGHT",
+    "folder": "FOOT_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/METATARSAL_1_RIGHT.stl",
+    "source_sha256": "98fe8fe69c819c43e3b544032ffd5f453aabdca283e4c567c27f17c64aed64d4",
+    "source_bytes": 1092084
+  },
+  {
+    "name": "METATARSAL_2_RIGHT",
+    "folder": "FOOT_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/METATARSAL_2_RIGHT.stl",
+    "source_sha256": "8bd7597bee4c77ce3faf9c87f1018767c5c01b4050c4a50ab7df65ed979c950f",
+    "source_bytes": 656484
+  },
+  {
+    "name": "METATARSAL_3_RIGHT",
+    "folder": "FOOT_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/METATARSAL_3_RIGHT.stl",
+    "source_sha256": "c2bdc99bd9368ce73ea3bff17b3882c7047eed6829927f6fc2b2f09aa034382e",
+    "source_bytes": 627284
+  },
+  {
+    "name": "METATARSAL_4_RIGHT",
+    "folder": "FOOT_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/METATARSAL_4_RIGHT.stl",
+    "source_sha256": "8b11986294bb5cd4aaeba49b690692e6107b744c461e6cf3f337594e270be3d1",
+    "source_bytes": 587684
+  },
+  {
+    "name": "METATARSAL_5_RIGHT",
+    "folder": "FOOT_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/METATARSAL_5_RIGHT.stl",
+    "source_sha256": "9f34d485f232dded318a9527276237d90c053f40691be797134223ecf6caeb45",
+    "source_bytes": 615484
+  },
+  {
+    "name": "NAVICULAR_RIGHT",
+    "folder": "FOOT_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/NAVICULAR_RIGHT.stl",
+    "source_sha256": "194986d734d0ba88de86d926c5e3431d564bfce3d35db5bdc2ee44c27d841e75",
+    "source_bytes": 619484
+  },
+  {
+    "name": "PHALANGE_FOOT_1_RIGHT",
+    "folder": "FOOT_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/PHALANGE_FOOT_1_RIGHT.stl",
+    "source_sha256": "2155ff663f284dbb96b813c90f8ec8fac5e234bc6a23d9522baa3c805e5319e2",
+    "source_bytes": 722684
+  },
+  {
+    "name": "PHALANGE_FOOT_2_RIGHT",
+    "folder": "FOOT_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/PHALANGE_FOOT_2_RIGHT.stl",
+    "source_sha256": "7c1cf42661e43c839a0e91ebc925ae100730121ce891a08efa95f5e00a5de992",
+    "source_bytes": 352884
+  },
+  {
+    "name": "PHALANGE_FOOT_3_RIGHT",
+    "folder": "FOOT_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/PHALANGE_FOOT_3_RIGHT.stl",
+    "source_sha256": "08baaa749b1af4321e888041bbcb3b648f522e958a7a4a90259672ce7fed178d",
+    "source_bytes": 327484
+  },
+  {
+    "name": "PHALANGE_FOOT_4_RIGHT",
+    "folder": "FOOT_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/PHALANGE_FOOT_4_RIGHT.stl",
+    "source_sha256": "9102816cb3ca6b25b2d567ea31b893510c9b9ed8f729ae0417798d03300fbb6f",
+    "source_bytes": 286684
+  },
+  {
+    "name": "PHALANGE_FOOT_5_RIGHT",
+    "folder": "FOOT_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/PHALANGE_FOOT_5_RIGHT.stl",
+    "source_sha256": "d97a1340f3f6a8db106dae2653c69a237fdea206eed49d4e330b67c098017c2e",
+    "source_bytes": 248484
+  },
+  {
+    "name": "TALUS_RIGHT",
+    "folder": "FOOT_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/TALUS_RIGHT.stl",
+    "source_sha256": "6459e0c89cadf29e4bf84db35e4294e467088b29347f10f34a099426ceb6a0de",
+    "source_bytes": 1568284
+  },
+  {
+    "name": "CAPITATE_LEFT",
+    "folder": "HAND_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/CAPITATE_LEFT.stl",
+    "source_sha256": "8e865e51508b5e62130003b894d2bb171e7abb96a95deb6e66266a199b632d58",
+    "source_bytes": 294084
+  },
+  {
+    "name": "HAMATE_LEFT",
+    "folder": "HAND_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/HAMATE_LEFT.stl",
+    "source_sha256": "fd62a8dfe9f41aec68ddd9ecf94cf7bf206feef95a01e77db38cf17e9c3c044e",
+    "source_bytes": 234284
+  },
+  {
+    "name": "LUNATE_LEFT",
+    "folder": "HAND_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/LUNATE_LEFT.stl",
+    "source_sha256": "e84b476f5613c91abe052150c17e90a402a3b1f05ddf05f281dea4cbfd567057",
+    "source_bytes": 201684
+  },
+  {
+    "name": "METACARPAL_1_LEFT",
+    "folder": "HAND_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/METACARPAL_1_LEFT.stl",
+    "source_sha256": "0e5fb56f97071708a84d5872617a5046b51293bc37e4b48ac4f8c5eecd6a7b80",
+    "source_bytes": 478284
+  },
+  {
+    "name": "METACARPAL_2_LEFT",
+    "folder": "HAND_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/METACARPAL_2_LEFT.stl",
+    "source_sha256": "9c9bb77ed4dc9b7769eec1d86e2308300666a2e6d6f738a0abb850e0bb039169",
+    "source_bytes": 616884
+  },
+  {
+    "name": "METACARPAL_3_LEFT",
+    "folder": "HAND_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/METACARPAL_3_LEFT.stl",
+    "source_sha256": "2af57e256fe76d1d77bd4391accc30aec91b722d4dd74ec70f4db3c926a7cb06",
+    "source_bytes": 616484
+  },
+  {
+    "name": "METACARPAL_4_LEFT",
+    "folder": "HAND_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/METACARPAL_4_LEFT.stl",
+    "source_sha256": "20b677851876d12bdaa84ad58ff1b1f9eb57d7c6a9af2644901ab5871a11136b",
+    "source_bytes": 415484
+  },
+  {
+    "name": "METACARPAL_5_LEFT",
+    "folder": "HAND_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/METACARPAL_5_LEFT.stl",
+    "source_sha256": "6959d814461115907199e325724b5aa317d931d295afda1b82d65414615758b5",
+    "source_bytes": 397084
+  },
+  {
+    "name": "PHALANGE_HAND_1_LEFT",
+    "folder": "HAND_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/PHALANGE_HAND_1_LEFT.stl",
+    "source_sha256": "4b93015b5c03f80b5a80a3bc3f020b7304fed3b768966a8db3a7d85597b65339",
+    "source_bytes": 430484
+  },
+  {
+    "name": "PHALANGE_HAND_2_LEFT",
+    "folder": "HAND_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/PHALANGE_HAND_2_LEFT.stl",
+    "source_sha256": "21a967832273bd5709f9e9a37dd1c4c29bea50b7c297051dc4ef58b10b8a882a",
+    "source_bytes": 639084
+  },
+  {
+    "name": "PHALANGE_HAND_3_LEFT",
+    "folder": "HAND_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/PHALANGE_HAND_3_LEFT.stl",
+    "source_sha256": "e53ec471e9b5a0f3ecc39880e339e2ffab04e4f974328e88d12e916b96b35f51",
+    "source_bytes": 748084
+  },
+  {
+    "name": "PHALANGE_HAND_4_LEFT",
+    "folder": "HAND_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/PHALANGE_HAND_4_LEFT.stl",
+    "source_sha256": "a36702992e2dbd3e12f9b9070afcd1ad4b032eb5847850acd6f79df61e950ef9",
+    "source_bytes": 662884
+  },
+  {
+    "name": "PHALANGE_HAND_5_LEFT",
+    "folder": "HAND_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/PHALANGE_HAND_5_LEFT.stl",
+    "source_sha256": "355f9a44bbac69fd47328cd4f605df74a3b57ba3957645733816683528e06213",
+    "source_bytes": 457084
+  },
+  {
+    "name": "PISIFORM_LEFT",
+    "folder": "HAND_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/PISIFORM_LEFT.stl",
+    "source_sha256": "c7001aa3db28cd26789bfbe9653852775316ab65277a672c935d181af53c17be",
+    "source_bytes": 101884
+  },
+  {
+    "name": "SCAPHOID_LEFT",
+    "folder": "HAND_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/SCAPHOID_LEFT.stl",
+    "source_sha256": "6a9a1532f8a064b39a29821532400569c66b1f1522cb17dd377e57bdc265d802",
+    "source_bytes": 274684
+  },
+  {
+    "name": "TRAPEZIUM_LEFT",
+    "folder": "HAND_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/TRAPEZIUM_LEFT.stl",
+    "source_sha256": "45bce5f01d29fdc069657e9f3cfd9ee65b0ca374e3385901eaa1997aad11193e",
+    "source_bytes": 228284
+  },
+  {
+    "name": "TRAPEZOID_LEFT",
+    "folder": "HAND_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/TRAPEZOID_LEFT.stl",
+    "source_sha256": "e2a77561fa3254b17c7961963b1ae2e5a63f8d23bad67cd1135de1a0179fcfa1",
+    "source_bytes": 92484
+  },
+  {
+    "name": "TRIQUETRUM_LEFT",
+    "folder": "HAND_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/TRIQUETRUM_LEFT.stl",
+    "source_sha256": "f7bc7c1169350c65f75a4cacabed6819d4270393379b94ec66e3a45aaae929cd",
+    "source_bytes": 158684
+  },
+  {
+    "name": "CAPITATE_RIGHT",
+    "folder": "HAND_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/CAPITATE_RIGHT.stl",
+    "source_sha256": "0a958406f2f598dbfbc42b6aa6125ac017acea668307a7216d052bf4e370d9f3",
+    "source_bytes": 280084
+  },
+  {
+    "name": "HAMATE_RIGHT",
+    "folder": "HAND_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/HAMATE_RIGHT.stl",
+    "source_sha256": "7519293b5d0480bd0065ad1f019f546ab73f09392a89061f5f4e490d1f1a9bb2",
+    "source_bytes": 232684
+  },
+  {
+    "name": "LUNATE_RIGHT",
+    "folder": "HAND_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/LUNATE_RIGHT.stl",
+    "source_sha256": "e2375935354c7884cc315388eab5dec3e39167557fd6cfbc7070638a21505597",
+    "source_bytes": 200484
+  },
+  {
+    "name": "METACARPAL_1_RIGHT",
+    "folder": "HAND_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/METACARPAL_1_RIGHT.stl",
+    "source_sha256": "67ca5ef967a33049ef60b313b27994ff22d4ee4cb9c2c8e025af83519b960564",
+    "source_bytes": 482284
+  },
+  {
+    "name": "METACARPAL_2_RIGHT",
+    "folder": "HAND_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/METACARPAL_2_RIGHT.stl",
+    "source_sha256": "c06c8aa9f75911cc6e5dc308e8b07df58652d729f068d1ae07f12e8934813750",
+    "source_bytes": 615684
+  },
+  {
+    "name": "METACARPAL_3_RIGHT",
+    "folder": "HAND_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/METACARPAL_3_RIGHT.stl",
+    "source_sha256": "1e92cb430fd916644592da8156420676d72bfcc79b8d4ef9055ddab6598db7a3",
+    "source_bytes": 596684
+  },
+  {
+    "name": "METACARPAL_4_RIGHT",
+    "folder": "HAND_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/METACARPAL_4_RIGHT.stl",
+    "source_sha256": "d7049b8da5307748aa7a1717019cea74a58378e83b4f0a60d8b7bd78e3dacca9",
+    "source_bytes": 406484
+  },
+  {
+    "name": "METACARPAL_5_RIGHT",
+    "folder": "HAND_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/METACARPAL_5_RIGHT.stl",
+    "source_sha256": "aaa0310a1693b668aa03ad462eb3ca42a6d4ef6fa89f3c2bcbd5d8a0e20b25e4",
+    "source_bytes": 386684
+  },
+  {
+    "name": "PHALANGE_HAND_1_RIGHT",
+    "folder": "HAND_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/PHALANGE_HAND_1_RIGHT.stl",
+    "source_sha256": "23d3f110985d9415e63bd5d2b85d867cdd40066657a0f036ea3d90f2bc885e1d",
+    "source_bytes": 408684
+  },
+  {
+    "name": "PHALANGE_HAND_2_RIGHT",
+    "folder": "HAND_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/PHALANGE_HAND_2_RIGHT.stl",
+    "source_sha256": "17ac08da697a31acd0df93ccdee1e565f2cf27e041a72337e372bd4acde069a8",
+    "source_bytes": 652284
+  },
+  {
+    "name": "PHALANGE_HAND_3_RIGHT",
+    "folder": "HAND_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/PHALANGE_HAND_3_RIGHT.stl",
+    "source_sha256": "32bb8a3bb9053aa9f24032d34969bdb47936712213456932dcd43f23c669cf77",
+    "source_bytes": 711884
+  },
+  {
+    "name": "PHALANGE_HAND_4_RIGHT",
+    "folder": "HAND_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/PHALANGE_HAND_4_RIGHT.stl",
+    "source_sha256": "816c405e42048c029f7678ed04a5ba9c8bb795fc3ffcac518f274735d48cef52",
+    "source_bytes": 615284
+  },
+  {
+    "name": "PHALANGE_HAND_5_RIGHT",
+    "folder": "HAND_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/PHALANGE_HAND_5_RIGHT.stl",
+    "source_sha256": "0974c747c7e099761d3419a182516503c89d7f4d471d92a17705d300af23574b",
+    "source_bytes": 451084
+  },
+  {
+    "name": "PISIFORM_RIGHT",
+    "folder": "HAND_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/PISIFORM_RIGHT.stl",
+    "source_sha256": "5fbf889b042eadf0f7f12f308ef1eeaa50e317e5fc0c94f5937d78f82baac6d4",
+    "source_bytes": 109684
+  },
+  {
+    "name": "SCAPHOID_RIGHT",
+    "folder": "HAND_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/SCAPHOID_RIGHT.stl",
+    "source_sha256": "8a89150b11f09513e40778545f56492b1b164232737f391ffbf6459cbdb783d0",
+    "source_bytes": 265284
+  },
+  {
+    "name": "TRAPEZIUM_RIGHT",
+    "folder": "HAND_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/TRAPEZIUM_RIGHT.stl",
+    "source_sha256": "5e4428d0864f064f67b1f7de5cd782a40cff59f594db4f9ea55371873743e9e2",
+    "source_bytes": 200484
+  },
+  {
+    "name": "TRAPEZOID_RIGHT",
+    "folder": "HAND_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/TRAPEZOID_RIGHT.stl",
+    "source_sha256": "65f0d1bb89a43ef750fad8a318bb7744fbc20fb741db8ed930ec286a869f3fce",
+    "source_bytes": 132684
+  },
+  {
+    "name": "TRIQUETRUM_RIGHT",
+    "folder": "HAND_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/TRIQUETRUM_RIGHT.stl",
+    "source_sha256": "855c06b9279e4ce7b12191534224bf20108fcdad6ba4b4b2aa9dab1109419c89",
+    "source_bytes": 160084
+  },
+  {
+    "name": "FEMUR_LEFT",
+    "folder": "LOWER_EXTREMITY_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/LOWER_EXTREMITY_LEFT/FEMUR_LEFT.stl",
+    "source_sha256": "5881c6585151527f1d584ed705c0ebabe0117ff7edc79fbeecd80a036812cdbb",
+    "source_bytes": 12512884
+  },
+  {
+    "name": "FIBULA_LEFT",
+    "folder": "LOWER_EXTREMITY_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/LOWER_EXTREMITY_LEFT/FIBULA_LEFT.stl",
+    "source_sha256": "12c091d23e0c17b36730112d14087e56f270d38b0d1c73b792b3622e2e6fc67b",
+    "source_bytes": 3044284
+  },
+  {
+    "name": "HIP_LEFT",
+    "folder": "LOWER_EXTREMITY_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/LOWER_EXTREMITY_LEFT/HIP_LEFT.stl",
+    "source_sha256": "3cbe60c7f7e1c1ccfa4413a7961f77e18f0f387d1af677d75906fcb4d988155c",
+    "source_bytes": 14247084
+  },
+  {
+    "name": "PATELLA_LEFT",
+    "folder": "LOWER_EXTREMITY_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/LOWER_EXTREMITY_LEFT/PATELLA_LEFT.stl",
+    "source_sha256": "15289d078c8c9cd009cdcbcf8d38e99d8d5752d77710bfffeadbfe10ca0e7898",
+    "source_bytes": 995884
+  },
+  {
+    "name": "TIBIA_LEFT",
+    "folder": "LOWER_EXTREMITY_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/LOWER_EXTREMITY_LEFT/TIBIA_LEFT.stl",
+    "source_sha256": "e9a1d2d03e38f243b02842dca44ae3262f05df8f263bbdb79f73210381adc8d6",
+    "source_bytes": 8185284
+  },
+  {
+    "name": "FEMUR_RIGHT",
+    "folder": "LOWER_EXTREMITY_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/LOWER_EXTREMITY_RIGHT/FEMUR_RIGHT.stl",
+    "source_sha256": "a930a914cbca23ccb7b3b50e5fa8f34fa287b3b94475a130f30f875301d2243a",
+    "source_bytes": 12554884
+  },
+  {
+    "name": "FIBULA_RIGHT",
+    "folder": "LOWER_EXTREMITY_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/LOWER_EXTREMITY_RIGHT/FIBULA_RIGHT.stl",
+    "source_sha256": "492810f8ad4c9212d6947f688107b71bc18de92dab92ca2c2cb6d710a11cea00",
+    "source_bytes": 3059684
+  },
+  {
+    "name": "HIP_RIGHT",
+    "folder": "LOWER_EXTREMITY_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/LOWER_EXTREMITY_RIGHT/HIP_RIGHT.stl",
+    "source_sha256": "d944c7eb45ce939ace9564242411aa171710834893568960cd6324d67c3a5dfa",
+    "source_bytes": 14075284
+  },
+  {
+    "name": "PATELLA_RIGHT",
+    "folder": "LOWER_EXTREMITY_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/LOWER_EXTREMITY_RIGHT/PATELLA_RIGHT.stl",
+    "source_sha256": "dc84c0ccaa2bc912001b8b233f1b1305ec4c93adb616313c02d8421d3c000773",
+    "source_bytes": 1020684
+  },
+  {
+    "name": "TIBIA_RIGHT",
+    "folder": "LOWER_EXTREMITY_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/LOWER_EXTREMITY_RIGHT/TIBIA_RIGHT.stl",
+    "source_sha256": "ed904c2986ce86ec55b284dd950e40ab870810ccbf109fc06c6c40f53c0fb9e8",
+    "source_bytes": 8255684
+  },
+  {
+    "name": "SKULL_CRANIAL_MAXILLA",
+    "folder": "SKULL",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SKULL/SKULL_CRANIAL_MAXILLA.stl",
+    "source_sha256": "45062e731484a25ce2811dc0a9dd54a7daf15af2a78d2e0573516b8d71d3d647",
+    "source_bytes": 41478484
+  },
+  {
+    "name": "SKULL_MANDIBLE",
+    "folder": "SKULL",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SKULL/SKULL_MANDIBLE.stl",
+    "source_sha256": "97288a0372c82f3d88e417a31dbdf998265ca838924d7b5683e19bd7858e3bc4",
+    "source_bytes": 3785484
+  },
+  {
+    "name": "SACRUM",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/SACRUM.stl",
+    "source_sha256": "0c6faeb1ded299835d8279714aa936e1b075c97bc38b2b6b03856a610ee83b2a",
+    "source_bytes": 9572284
+  },
+  {
+    "name": "VERTEBRA_C1",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_C1.stl",
+    "source_sha256": "7dd9cdb6e968510bbacd7b876751060f1a89d6c5b8b6d52807a011736003daec",
+    "source_bytes": 1585684
+  },
+  {
+    "name": "VERTEBRA_C2",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_C2.stl",
+    "source_sha256": "76fa75851e0cd789f53ca1d36de4572f489c5b5e3966ed257af6ae2851f48712",
+    "source_bytes": 1409284
+  },
+  {
+    "name": "VERTEBRA_C3",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_C3.stl",
+    "source_sha256": "a4addfe285c809ea1a08a2fa473e54178f4de42d36e0676af8ec01e204c5fc8f",
+    "source_bytes": 1047884
+  },
+  {
+    "name": "VERTEBRA_C4",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_C4.stl",
+    "source_sha256": "2bef47d456ed8b650acde6a3d95e3a819e4f01e50e73948f43e62c8c2b5754f2",
+    "source_bytes": 1062484
+  },
+  {
+    "name": "VERTEBRA_C5",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_C5.stl",
+    "source_sha256": "635420f4f320c1acb45b1e19a84a405d113798055b2e577324f59f50acd93be1",
+    "source_bytes": 1215484
+  },
+  {
+    "name": "VERTEBRA_C6",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_C6.stl",
+    "source_sha256": "4f0453371c3accad17b6634e2e942c3bb250693a0f8b50c54f08c68b56c28c2f",
+    "source_bytes": 1266884
+  },
+  {
+    "name": "VERTEBRA_C7",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_C7.stl",
+    "source_sha256": "809752ad70503618b7a8edf7d123e4ae3ffdaa59ff0a9f4a2d5bf417eefe326f",
+    "source_bytes": 1459684
+  },
+  {
+    "name": "VERTEBRA_L1",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_L1.stl",
+    "source_sha256": "21bbe40bfad300e6c819334a882309d5a3bfff5e8a3af33042ab75db6e41486d",
+    "source_bytes": 2637884
+  },
+  {
+    "name": "VERTEBRA_L2",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_L2.stl",
+    "source_sha256": "3706737038f054b0aa1e0243d6dc36533ba01b96d0cea21dcd8545c094b3d8c8",
+    "source_bytes": 3041284
+  },
+  {
+    "name": "VERTEBRA_L3",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_L3.stl",
+    "source_sha256": "bac37952a1cd18e71e0bdf9a2ff3e468e1757665a851a251a276155921bbe4be",
+    "source_bytes": 3448284
+  },
+  {
+    "name": "VERTEBRA_L4",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_L4.stl",
+    "source_sha256": "786dca033144262d49b0ac7277efbc281c76218d3af4212360530da585caf978",
+    "source_bytes": 3515684
+  },
+  {
+    "name": "VERTEBRA_L5",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_L5.stl",
+    "source_sha256": "b9b534f154495d030ec154cadcda54c29f3dbe68316956d6ccec472dae6495d3",
+    "source_bytes": 3395884
+  },
+  {
+    "name": "VERTEBRA_L6",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_L6.stl",
+    "source_sha256": "d202836faa4d31a6eae98ee0c2bfb400c4fc9744dd14375377455ddbc29436c9",
+    "source_bytes": 3560484
+  },
+  {
+    "name": "VERTEBRA_T1",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T1.stl",
+    "source_sha256": "6c84e7ecc0aa7cc560b8045a9cc5e6584a6249824f1b63c667175441555ed6c0",
+    "source_bytes": 1607684
+  },
+  {
+    "name": "VERTEBRA_T10",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T10.stl",
+    "source_sha256": "b8aec8ccee959236ad505ac9247859972643d5265f9cc522bf19e912dc68d95f",
+    "source_bytes": 2078684
+  },
+  {
+    "name": "VERTEBRA_T11",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T11.stl",
+    "source_sha256": "2096e81a0887dd3af24d1b6b3ae5cf093697207277600103dc76425a75ede1c4",
+    "source_bytes": 2146684
+  },
+  {
+    "name": "VERTEBRA_T12",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T12.stl",
+    "source_sha256": "660cf2c8373b11f93708bc926664234d777f00e64cbf13d67bae166428b9c022",
+    "source_bytes": 2285684
+  },
+  {
+    "name": "VERTEBRA_T2",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T2.stl",
+    "source_sha256": "3e12da74c6e41cb6a42dd3c57972c276c8932c624c8035b1572e8f8f05e5ba2e",
+    "source_bytes": 1657884
+  },
+  {
+    "name": "VERTEBRA_T3",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T3.stl",
+    "source_sha256": "237f6d35ac319818d082f48ae1ab8f06c31d10e8c82d6b1bfd3b8735ec12301a",
+    "source_bytes": 1684484
+  },
+  {
+    "name": "VERTEBRA_T4",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T4.stl",
+    "source_sha256": "d1ad318a49b24ee8b4b219c53ae05672c47f4dd8a934a4d0e58ecffa84dad34e",
+    "source_bytes": 1662084
+  },
+  {
+    "name": "VERTEBRA_T5",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T5.stl",
+    "source_sha256": "541125f7ee27550cf3a8a7a4d70a941e04d1371067dc868ee2fa8b37314fe14d",
+    "source_bytes": 1659884
+  },
+  {
+    "name": "VERTEBRA_T6",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T6.stl",
+    "source_sha256": "a1483acf7dd6f9a05e63ff7be0476c94e8402af8e0641d09a394f82cc7826b66",
+    "source_bytes": 1711284
+  },
+  {
+    "name": "VERTEBRA_T7",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T7.stl",
+    "source_sha256": "a02439f29810d3f5b95140634c6899d5de0e64fc0c066e3e150b101fa5fbb88c",
+    "source_bytes": 1784884
+  },
+  {
+    "name": "VERTEBRA_T8",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T8.stl",
+    "source_sha256": "4ec528beb311b6f08c8abf056a2e5bffd1e0a7926d791b47f40a6b51dddf1dd5",
+    "source_bytes": 1868484
+  },
+  {
+    "name": "VERTEBRA_T9",
+    "folder": "SPINAL_COLUMN",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T9.stl",
+    "source_sha256": "cc79491d970c0ab0d16bfddb9a195b49f2818998ee7351ab518f2591a48f46c8",
+    "source_bytes": 1879884
+  },
+  {
+    "name": "RIB_10_LEFT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_10_LEFT.stl",
+    "source_sha256": "5db524edd7af95f957ea891297d1fb4d685edd1752e3bfa17f72ce72c6293fe9",
+    "source_bytes": 1646684
+  },
+  {
+    "name": "RIB_10_RIGHT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_10_RIGHT.stl",
+    "source_sha256": "b5aa1da8bfd29a80dcea8ac4e01decbdef0f956ff8e6adf7a6512f693e9a8cd4",
+    "source_bytes": 1469284
+  },
+  {
+    "name": "RIB_11_LEFT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_11_LEFT.stl",
+    "source_sha256": "ffd148b9753656c1ba784e350a0431937776d2f4c4195d20da09f3da82e815bd",
+    "source_bytes": 1213884
+  },
+  {
+    "name": "RIB_11_RIGHT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_11_RIGHT.stl",
+    "source_sha256": "fa6d52d81c3a72bc6176786bba9ff252c6bf5fcd79b373fe9d73a3f382dbb341",
+    "source_bytes": 1272084
+  },
+  {
+    "name": "RIB_12_LEFT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_12_LEFT.stl",
+    "source_sha256": "38d8c08a691779f86e35c2a9c560ddc9ada094833fab7c41c9834d5472334463",
+    "source_bytes": 724484
+  },
+  {
+    "name": "RIB_12_RIGHT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_12_RIGHT.stl",
+    "source_sha256": "93ec54ad3005d23746dc6e96ba582c19ddb3c432f3221f4576ac5b784218da2c",
+    "source_bytes": 912484
+  },
+  {
+    "name": "RIB_1_LEFT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_1_LEFT.stl",
+    "source_sha256": "241d337a9e7d1108b160311818070d7f9d2dd7889f5a16c3f4f0710eb052b76f",
+    "source_bytes": 1321884
+  },
+  {
+    "name": "RIB_1_RIGHT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_1_RIGHT.stl",
+    "source_sha256": "0af506a41bf460ea989b5750f473c342efb5cff81e5ebed105af9bb37985e066",
+    "source_bytes": 1438084
+  },
+  {
+    "name": "RIB_2_LEFT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_2_LEFT.stl",
+    "source_sha256": "600067946dbd938a0117c1511382b9e9c7e28ef1c054dc1dc8f83de94a283353",
+    "source_bytes": 1626884
+  },
+  {
+    "name": "RIB_2_RIGHT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_2_RIGHT.stl",
+    "source_sha256": "9034bdb3887b546106fdd3efc5d85d614680fe3f6246b0f8aa82a2eafa3a80e4",
+    "source_bytes": 1532884
+  },
+  {
+    "name": "RIB_3_LEFT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_3_LEFT.stl",
+    "source_sha256": "ff91fb78e9d944438b82c54719cf4a9203dad1b4b47a87c6458de67f6cf0d2b6",
+    "source_bytes": 1771084
+  },
+  {
+    "name": "RIB_3_RIGHT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_3_RIGHT.stl",
+    "source_sha256": "9143bf522b2cdeba6472a87fb31227ff48e118394d7a00012c8743a9c24327de",
+    "source_bytes": 1699484
+  },
+  {
+    "name": "RIB_4_LEFT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_4_LEFT.stl",
+    "source_sha256": "d8842820d232088d64c12f59892ef97cc610d946ee03ec339f5b841cdec805e1",
+    "source_bytes": 1864084
+  },
+  {
+    "name": "RIB_4_RIGHT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_4_RIGHT.stl",
+    "source_sha256": "cc68509513533558b282cef9966e8eaf83c6af59c44c7081fb5fb1af0fc5a4fb",
+    "source_bytes": 1818684
+  },
+  {
+    "name": "RIB_5_LEFT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_5_LEFT.stl",
+    "source_sha256": "61c0defc7771f70c64f5f0f4542870272b76d0d28b41d8a8032c3c45ed0ba123",
+    "source_bytes": 1969684
+  },
+  {
+    "name": "RIB_5_RIGHT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_5_RIGHT.stl",
+    "source_sha256": "c455926565d3805fb14950e6d3b2f37aa58a40f8a0aa9f5312dc3d16c5fa6028",
+    "source_bytes": 1937684
+  },
+  {
+    "name": "RIB_6_LEFT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_6_LEFT.stl",
+    "source_sha256": "e91844eb898265bb24224ef0427c593a65a521fc6a20fe830004efa72cadc8be",
+    "source_bytes": 1959884
+  },
+  {
+    "name": "RIB_6_RIGHT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_6_RIGHT.stl",
+    "source_sha256": "19deb834142eb48ddf09547ffdbc4e2262d6cb8eea74e6e599a167179651bacf",
+    "source_bytes": 2003484
+  },
+  {
+    "name": "RIB_7_LEFT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_7_LEFT.stl",
+    "source_sha256": "1056370d172c8c7b02381524d63919f7835b2a776ab5b420b249ed3a5790c0e3",
+    "source_bytes": 2115084
+  },
+  {
+    "name": "RIB_7_RIGHT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_7_RIGHT.stl",
+    "source_sha256": "a80a66e61a86bd44cad1e242fd9825432c49807e39b83c021c7bbba55bc7fa8c",
+    "source_bytes": 2141284
+  },
+  {
+    "name": "RIB_8_LEFT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_8_LEFT.stl",
+    "source_sha256": "7a4b97117d392871c81201bbb4a23865a8cfeee4d4cad4c29280917fdac77d10",
+    "source_bytes": 2048884
+  },
+  {
+    "name": "RIB_8_RIGHT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_8_RIGHT.stl",
+    "source_sha256": "48a6db4d7a6ee66c890ff085f3e054033f928924548ae5027ae2141cba2d6d1c",
+    "source_bytes": 1997684
+  },
+  {
+    "name": "RIB_9_LEFT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_9_LEFT.stl",
+    "source_sha256": "7d0c1d088c728fa39de8c80c6fbf50a90c83c757009065db8fdb7edfcdfd7e81",
+    "source_bytes": 1869284
+  },
+  {
+    "name": "RIB_9_RIGHT",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_9_RIGHT.stl",
+    "source_sha256": "feb3c1ed2ad3b96b756e44a264c1e8b3db94d33bbf6b1297f199275bd001d7f9",
+    "source_bytes": 1884084
+  },
+  {
+    "name": "STERNUM",
+    "folder": "THORAX",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/THORAX/STERNUM.stl",
+    "source_sha256": "896732557208adaa75e569ac9d976223dda0db60ab8a16951277118483acc2ad",
+    "source_bytes": 3089284
+  },
+  {
+    "name": "CLAVICLE_LEFT",
+    "folder": "UPPER_EXTREMITY_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/UPPER_EXTREMITY_LEFT/CLAVICLE_LEFT.stl",
+    "source_sha256": "c2fa2f35a11035d40d2d2eaa60f6fffb3851d7890a46c5c8ff92429d7615fa35",
+    "source_bytes": 1879284
+  },
+  {
+    "name": "HUMERUS_LEFT",
+    "folder": "UPPER_EXTREMITY_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/UPPER_EXTREMITY_LEFT/HUMERUS_LEFT.stl",
+    "source_sha256": "9431e76d848093fc3966e3b805d9a52ac13a349e8076811beac275f8f92432d5",
+    "source_bytes": 5721884
+  },
+  {
+    "name": "RADIUS_LEFT",
+    "folder": "UPPER_EXTREMITY_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/UPPER_EXTREMITY_LEFT/RADIUS_LEFT.stl",
+    "source_sha256": "5f8c1007fa5f431fd56fa95408646e76043f2ac94467cc5f8c7d127393ab6baf",
+    "source_bytes": 2573884
+  },
+  {
+    "name": "SCAPULA_LEFT",
+    "folder": "UPPER_EXTREMITY_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/UPPER_EXTREMITY_LEFT/SCAPULA_LEFT.stl",
+    "source_sha256": "6a3808a243deca0c1dbca12775d8c41f33188f736d196efc138df86867bb6268",
+    "source_bytes": 7382684
+  },
+  {
+    "name": "ULNA_LEFT",
+    "folder": "UPPER_EXTREMITY_LEFT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/UPPER_EXTREMITY_LEFT/ULNA_LEFT.stl",
+    "source_sha256": "f1ad7953a1e693d6a275bbf31b24cc7087085435d64de87edd4b336daffd09ae",
+    "source_bytes": 2850084
+  },
+  {
+    "name": "CLAVICLE_RIGHT",
+    "folder": "UPPER_EXTREMITY_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/UPPER_EXTREMITY_RIGHT/CLAVICLE_RIGHT.stl",
+    "source_sha256": "4780e63652063450a50f84dd8b668683e30068cbccbec83e3b72495be1f3280c",
+    "source_bytes": 1988484
+  },
+  {
+    "name": "HUMERUS_RIGHT",
+    "folder": "UPPER_EXTREMITY_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/UPPER_EXTREMITY_RIGHT/HUMERUS_RIGHT.stl",
+    "source_sha256": "475acd35ae0d5b8925ad6b47672d6cda6d71e6947e8c05ca4735f85c7897d3dd",
+    "source_bytes": 5154284
+  },
+  {
+    "name": "RADIUS_RIGHT",
+    "folder": "UPPER_EXTREMITY_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/UPPER_EXTREMITY_RIGHT/RADIUS_RIGHT.stl",
+    "source_sha256": "2f2370fcb1cf556f93873c1c2c80014f86bead8acf6bfb563d0beb5c4692f565",
+    "source_bytes": 2190084
+  },
+  {
+    "name": "SCAPULA_RIGHT",
+    "folder": "UPPER_EXTREMITY_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/UPPER_EXTREMITY_RIGHT/SCAPULA_RIGHT.stl",
+    "source_sha256": "837f3725a315bd443f0945fc8bf58f72397efb4c762171ae1fc6a301be33c274",
+    "source_bytes": 7354684
+  },
+  {
+    "name": "ULNA_RIGHT",
+    "folder": "UPPER_EXTREMITY_RIGHT",
+    "path": "visible_human_3d_models/CT/Mesh/02_Female/UPPER_EXTREMITY_RIGHT/ULNA_RIGHT.stl",
+    "source_sha256": "291810ccbc225e3264a8fc91ec024784b29750297a3707a02063f23a90e7ffda",
+    "source_bytes": 1431484
+  }
+]

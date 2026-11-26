@@ -1,0 +1,3603 @@
+{
+  "schema": "body-live-unity-source-1",
+  "source": "BoneHub/visible-human-3d-models",
+  "revision": "53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10",
+  "subject": "02_Female",
+  "license": "CC BY 4.0",
+  "citation_dois": [
+    "10.57967/hf/10464",
+    "10.1038/s41597-022-01905-2"
+  ],
+  "coordinate_space": "Unmodified shared BoneHub CT mesh source coordinates; physical units/header validation pending",
+  "registration": "Denver fusion blocked",
+  "structureCount": 143,
+  "bounds": {
+    "min": [
+      6.372609615325928,
+      91.30207061767578,
+      6.428065299987793
+    ],
+    "max": [
+      481.7980651855469,
+      341.2975769042969,
+      1723.7093505859375
+    ]
+  },
+  "structures": [
+    {
+      "id": "bonehub-vhf-calcaneus_left",
+      "source_name": "CALCANEUS_LEFT",
+      "region": "FOOT_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/CALCANEUS_LEFT.stl",
+      "source_sha256": "d8f4e87cacbe730d6781276ac5764cd98bbc2bab417aec8afdf117088dff29f0",
+      "source_bytes": 2437884,
+      "file": "bonehub-vhf-calcaneus_left.glb",
+      "sha256": "93b974643705942ad5189c8b8962c42e6286fe149b8001b67bdf21c969cd8fcf",
+      "bytes": 878360,
+      "reused": false,
+      "vertices": 24380,
+      "triangles": 48756,
+      "min": [
+        246.38272094726562,
+        245.44834899902344,
+        102.32816314697266
+      ],
+      "max": [
+        297.1883544921875,
+        328.4858093261719,
+        153.6521453857422
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-cuboid_left",
+      "source_name": "CUBOID_LEFT",
+      "region": "FOOT_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/CUBOID_LEFT.stl",
+      "source_sha256": "1bee132ccad71702e67f1aa3f2ced7072f213ebfc07caf37673618f95abad588",
+      "source_bytes": 676284,
+      "file": "bonehub-vhf-cuboid_left.glb",
+      "sha256": "c6ab68ec57ff759330778d6d33df6b42efeb27ac3982a7c2e6c9ed92003cfe64",
+      "bytes": 244176,
+      "reused": false,
+      "vertices": 6764,
+      "triangles": 13524,
+      "min": [
+        266.9771423339844,
+        233.18057250976562,
+        84.41788482666016
+      ],
+      "max": [
+        298.9865417480469,
+        263.82196044921875,
+        117.44975280761719
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-intermediate_cuneiform_left",
+      "source_name": "INTERMEDIATE_CUNEIFORM_LEFT",
+      "region": "FOOT_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/INTERMEDIATE_CUNEIFORM_LEFT.stl",
+      "source_sha256": "0dc72aef34712e6c03baf4bd65ca6ffdf7336b6ee2eedc777c7ada9ae16ac03b",
+      "source_bytes": 335684,
+      "file": "bonehub-vhf-intermediate_cuneiform_left.glb",
+      "sha256": "253831071c665d467303178c202b2a5686a2f7df9a7ada67f3cac25c72497e55",
+      "bytes": 121576,
+      "reused": false,
+      "vertices": 3358,
+      "triangles": 6712,
+      "min": [
+        264.9450988769531,
+        209.98858642578125,
+        94.02350616455078
+      ],
+      "max": [
+        284.2091064453125,
+        235.46755981445312,
+        118.19889068603516
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-lateral_cuneiform_left",
+      "source_name": "LATERAL_CUNEIFORM_LEFT",
+      "region": "FOOT_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/LATERAL_CUNEIFORM_LEFT.stl",
+      "source_sha256": "dbe2a54045901d29e0ee80c4dda6dbbf6723333ed45272301978a228afa3cc36",
+      "source_bytes": 376484,
+      "file": "bonehub-vhf-lateral_cuneiform_left.glb",
+      "sha256": "fd6017b89d88a92ac9232b0bef7ec397ff2d728b0c345d8b896b5ed59771f0b8",
+      "bytes": 136260,
+      "reused": false,
+      "vertices": 3766,
+      "triangles": 7528,
+      "min": [
+        269.0707702636719,
+        217.71282958984375,
+        89.83204650878906
+      ],
+      "max": [
+        291.7077941894531,
+        241.08071899414062,
+        113.53205871582031
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-medial_cuneiform_left",
+      "source_name": "MEDIAL_CUNEIFORM_LEFT",
+      "region": "FOOT_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/MEDIAL_CUNEIFORM_LEFT.stl",
+      "source_sha256": "ac6d1f74c563d444add24641c8b9f891d5d108db8053162c6f51e59ed2695b6b",
+      "source_bytes": 563884,
+      "file": "bonehub-vhf-medial_cuneiform_left.glb",
+      "sha256": "36cea96c00bc630e5f1042f5cb392882738a8fcf34c7a125de5f76f743efffeb",
+      "bytes": 203720,
+      "reused": false,
+      "vertices": 5640,
+      "triangles": 11276,
+      "min": [
+        246.1676483154297,
+        203.12603759765625,
+        87.12004089355469
+      ],
+      "max": [
+        271.2769775390625,
+        239.6339569091797,
+        116.35427856445312
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-metatarsal_1_left",
+      "source_name": "METATARSAL_1_LEFT",
+      "region": "FOOT_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/METATARSAL_1_LEFT.stl",
+      "source_sha256": "b96c941ca94248d4dba7296594e6b123884600d594bc64ac86371024c491390f",
+      "source_bytes": 1011484,
+      "file": "bonehub-vhf-metatarsal_1_left.glb",
+      "sha256": "136a2a192ec9602dcc8e26adf5537aab887bccac1d68ca1ce89f8151308d9594",
+      "bytes": 364860,
+      "reused": false,
+      "vertices": 10116,
+      "triangles": 20228,
+      "min": [
+        232.9071502685547,
+        169.2049102783203,
+        50.481964111328125
+      ],
+      "max": [
+        268.22088623046875,
+        225.01632690429688,
+        100.15347290039062
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-metatarsal_2_left",
+      "source_name": "METATARSAL_2_LEFT",
+      "region": "FOOT_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/METATARSAL_2_LEFT.stl",
+      "source_sha256": "473f809aceadba23b20038843e80a499c7fedd5f7c50d3bb64fa27408a52f581",
+      "source_bytes": 683084,
+      "file": "bonehub-vhf-metatarsal_2_left.glb",
+      "sha256": "9e3c5f1e8f4e5a6d4f8870ad7d73a213a120982370c32d7de56c4bc0042cfd91",
+      "bytes": 246628,
+      "reused": false,
+      "vertices": 6832,
+      "triangles": 13660,
+      "min": [
+        252.43116760253906,
+        175.2946014404297,
+        38.68772506713867
+      ],
+      "max": [
+        284.58447265625,
+        225.43638610839844,
+        103.50973510742188
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-metatarsal_3_left",
+      "source_name": "METATARSAL_3_LEFT",
+      "region": "FOOT_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/METATARSAL_3_LEFT.stl",
+      "source_sha256": "936aaef4b99b208a18c04c30790beb6bd2d216b6da01ad043c94521c520978df",
+      "source_bytes": 623484,
+      "file": "bonehub-vhf-metatarsal_3_left.glb",
+      "sha256": "72df44f4dc97c129b6db7be2daab9fe06b9fd16622940f0d472a400a00e88811",
+      "bytes": 225172,
+      "reused": false,
+      "vertices": 6236,
+      "triangles": 12468,
+      "min": [
+        262.8347473144531,
+        182.0205535888672,
+        36.363582611083984
+      ],
+      "max": [
+        291.5534362792969,
+        231.87451171875,
+        94.04218292236328
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-metatarsal_4_left",
+      "source_name": "METATARSAL_4_LEFT",
+      "region": "FOOT_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/METATARSAL_4_LEFT.stl",
+      "source_sha256": "a2c3081a98002bdbf9809c3dbaa191c698099da4c87a18bfa50a2a2e8ba1f127",
+      "source_bytes": 592084,
+      "file": "bonehub-vhf-metatarsal_4_left.glb",
+      "sha256": "245022135e91e5b8f321c0ff42a01022f204a2c29d45bf771a3f7c566c85874e",
+      "bytes": 213868,
+      "reused": false,
+      "vertices": 5922,
+      "triangles": 11840,
+      "min": [
+        270.3525085449219,
+        193.30712890625,
+        33.38951873779297
+      ],
+      "max": [
+        296.3773193359375,
+        239.30764770507812,
+        89.23700714111328
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-metatarsal_5_left",
+      "source_name": "METATARSAL_5_LEFT",
+      "region": "FOOT_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/METATARSAL_5_LEFT.stl",
+      "source_sha256": "cbd729841b33f86aa5cb21387d3d86b90927b2878343643352143789fe81b73f",
+      "source_bytes": 628884,
+      "file": "bonehub-vhf-metatarsal_5_left.glb",
+      "sha256": "f3d7688c5077234477ee988428a44f3831be2c0331fa9efa9f79e6117a372f93",
+      "bytes": 227116,
+      "reused": false,
+      "vertices": 6290,
+      "triangles": 12576,
+      "min": [
+        284.5057678222656,
+        201.50509643554688,
+        34.57722854614258
+      ],
+      "max": [
+        300.9769592285156,
+        259.0210266113281,
+        86.34693908691406
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-navicular_left",
+      "source_name": "NAVICULAR_LEFT",
+      "region": "FOOT_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/NAVICULAR_LEFT.stl",
+      "source_sha256": "1e545c541717bc8f171660e592a2ceca8f5db7c1a03127d82fc729002486cec3",
+      "source_bytes": 649484,
+      "file": "bonehub-vhf-navicular_left.glb",
+      "sha256": "8dfd1f388272d0f4b61ab47bfc2bb96067c8e4540c4cdcdc5981e5ab52bc3863",
+      "bytes": 234532,
+      "reused": false,
+      "vertices": 6496,
+      "triangles": 12988,
+      "min": [
+        247.8522491455078,
+        220.80416870117188,
+        109.34168243408203
+      ],
+      "max": [
+        287.2887878417969,
+        248.21917724609375,
+        131.29702758789062
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-phalange_foot_1_left",
+      "source_name": "PHALANGE_FOOT_1_LEFT",
+      "region": "FOOT_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/PHALANGE_FOOT_1_LEFT.stl",
+      "source_sha256": "d7a2cef3b66bd76fd439baa3147207cf984ef049f3bbc9499e9493c3329f0e1c",
+      "source_bytes": 777284,
+      "file": "bonehub-vhf-phalange_foot_1_left.glb",
+      "sha256": "ac49e1db049878023c242940a40261b3f1bf45ce3389c64580e8deb819eaf822",
+      "bytes": 280544,
+      "reused": false,
+      "vertices": 7774,
+      "triangles": 15544,
+      "min": [
+        229.3974151611328,
+        130.48406982421875,
+        14.384990692138672
+      ],
+      "max": [
+        254.4921112060547,
+        181.93087768554688,
+        59.31999206542969
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-phalange_foot_2_left",
+      "source_name": "PHALANGE_FOOT_2_LEFT",
+      "region": "FOOT_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/PHALANGE_FOOT_2_LEFT.stl",
+      "source_sha256": "4b13f5c0b28477b90fbcce9c82081a2ab48af887f3555ac64123b35cd194bbc5",
+      "source_bytes": 372284,
+      "file": "bonehub-vhf-phalange_foot_2_left.glb",
+      "sha256": "d0fc275b279dd02f4e0aaca5bf41a32515c703ac35837da96c5f405791bdc546",
+      "bytes": 134740,
+      "reused": false,
+      "vertices": 3724,
+      "triangles": 7444,
+      "min": [
+        253.9716796875,
+        130.6750030517578,
+        14.846969604492188
+      ],
+      "max": [
+        272.0121154785156,
+        178.02146911621094,
+        47.458011627197266
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-phalange_foot_3_left",
+      "source_name": "PHALANGE_FOOT_3_LEFT",
+      "region": "FOOT_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/PHALANGE_FOOT_3_LEFT.stl",
+      "source_sha256": "596760092ae9942320e44e202c553e72a757145fce6e978b3e7719356d267103",
+      "source_bytes": 297284,
+      "file": "bonehub-vhf-phalange_foot_3_left.glb",
+      "sha256": "37cca720ab7acf1cdf82154f6480cd88e5423a6b585306c582bfd68166ad127d",
+      "bytes": 107744,
+      "reused": false,
+      "vertices": 2974,
+      "triangles": 5944,
+      "min": [
+        266.17181396484375,
+        145.1292266845703,
+        15.451030731201172
+      ],
+      "max": [
+        284.1700439453125,
+        184.44454956054688,
+        45.1962776184082
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-phalange_foot_4_left",
+      "source_name": "PHALANGE_FOOT_4_LEFT",
+      "region": "FOOT_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/PHALANGE_FOOT_4_LEFT.stl",
+      "source_sha256": "0401e0822104e30b30e88fb3a58137aed896a2290c2829ef6cb7ae8de9f94780",
+      "source_bytes": 261284,
+      "file": "bonehub-vhf-phalange_foot_4_left.glb",
+      "sha256": "abc8bfaba6ef208d05ac689963008ed337034cbbab9f28aed9670ab191a5a58d",
+      "bytes": 94784,
+      "reused": false,
+      "vertices": 2614,
+      "triangles": 5224,
+      "min": [
+        274.9179382324219,
+        156.90737915039062,
+        21.291988372802734
+      ],
+      "max": [
+        293.43646240234375,
+        195.38209533691406,
+        42.528690338134766
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-phalange_foot_5_left",
+      "source_name": "PHALANGE_FOOT_5_LEFT",
+      "region": "FOOT_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/PHALANGE_FOOT_5_LEFT.stl",
+      "source_sha256": "5657f1058836081739352d974eb1b59291b3d1a2413e349d594c66e665a7888c",
+      "source_bytes": 266884,
+      "file": "bonehub-vhf-phalange_foot_5_left.glb",
+      "sha256": "daa6b807fd33d1c252fa029404c6334e8025a9329f2f6eab66b4c91a951f3f14",
+      "bytes": 96800,
+      "reused": false,
+      "vertices": 2670,
+      "triangles": 5336,
+      "min": [
+        286.0401611328125,
+        169.56381225585938,
+        17.47488021850586
+      ],
+      "max": [
+        300.7152404785156,
+        204.66053771972656,
+        41.669219970703125
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-talus_left",
+      "source_name": "TALUS_LEFT",
+      "region": "FOOT_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_LEFT/TALUS_LEFT.stl",
+      "source_sha256": "071a39d23b0f06f9c833f1cdcf1e04b0017fc27984e97fc286e4fb21ea11f517",
+      "source_bytes": 1568684,
+      "file": "bonehub-vhf-talus_left.glb",
+      "sha256": "b67c3e36a8c2b856f836c2259a95c4ec5b3bc894aa3e76b165d615bae3feac2b",
+      "bytes": 565440,
+      "reused": false,
+      "vertices": 15688,
+      "triangles": 31372,
+      "min": [
+        256.09765625,
+        228.95924377441406,
+        121.54630279541016
+      ],
+      "max": [
+        298.8463439941406,
+        287.69158935546875,
+        168.51744079589844
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-calcaneus_right",
+      "source_name": "CALCANEUS_RIGHT",
+      "region": "FOOT_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/CALCANEUS_RIGHT.stl",
+      "source_sha256": "5025e56aaf95725eddd0457c7fbddcaf2e2838ae2000824f2a53ba23f5cc134f",
+      "source_bytes": 2492884,
+      "file": "bonehub-vhf-calcaneus_right.glb",
+      "sha256": "2da1ce638e1cebed3c3fc8ed6dee96031c71a45e74ff90b2661a1509e008b7dd",
+      "bytes": 898160,
+      "reused": false,
+      "vertices": 24930,
+      "triangles": 49856,
+      "min": [
+        178.0269012451172,
+        259.2016296386719,
+        93.44646453857422
+      ],
+      "max": [
+        236.6876220703125,
+        339.3224792480469,
+        145.59536743164062
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-cuboid_right",
+      "source_name": "CUBOID_RIGHT",
+      "region": "FOOT_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/CUBOID_RIGHT.stl",
+      "source_sha256": "244e2360c98bfb0a804878385c27cb69f31886861e59a54f9df88c65dd868ffb",
+      "source_bytes": 677684,
+      "file": "bonehub-vhf-cuboid_right.glb",
+      "sha256": "a186dd3cddcc064d50af733ccf27ce1a405639580e157661a368f7a467bb36bc",
+      "bytes": 244676,
+      "reused": false,
+      "vertices": 6778,
+      "triangles": 13552,
+      "min": [
+        171.07717895507812,
+        249.05833435058594,
+        77.48046875
+      ],
+      "max": [
+        205.4584197998047,
+        278.5530090332031,
+        110.04174041748047
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-intermediate_cuneiform_right",
+      "source_name": "INTERMEDIATE_CUNEIFORM_RIGHT",
+      "region": "FOOT_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/INTERMEDIATE_CUNEIFORM_RIGHT.stl",
+      "source_sha256": "32a58c4e8937e2313f82c410e0a3e3092793888cc9f007a4b5a7e10507e16a3e",
+      "source_bytes": 310484,
+      "file": "bonehub-vhf-intermediate_cuneiform_right.glb",
+      "sha256": "e448447caa9b09d201b82c1ca05911be92bb1cb617c3bf36d76c8fbd9515eee7",
+      "bytes": 112504,
+      "reused": false,
+      "vertices": 3106,
+      "triangles": 6208,
+      "min": [
+        181.15748596191406,
+        223.7947540283203,
+        87.40391540527344
+      ],
+      "max": [
+        202.4351806640625,
+        247.1476287841797,
+        110.22179412841797
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-lateral_cuneiform_right",
+      "source_name": "LATERAL_CUNEIFORM_RIGHT",
+      "region": "FOOT_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/LATERAL_CUNEIFORM_RIGHT.stl",
+      "source_sha256": "ccec497d41628a41169b23dbaf11a1ae21bb17c7bbcecdf251da136be03723bb",
+      "source_bytes": 379884,
+      "file": "bonehub-vhf-lateral_cuneiform_right.glb",
+      "sha256": "4dc7933b0a849edec0bd0228e9f6cc8033ceb0f2aa0dbc3347bdc98ad37339e9",
+      "bytes": 137484,
+      "reused": false,
+      "vertices": 3800,
+      "triangles": 7596,
+      "min": [
+        173.94479370117188,
+        232.48397827148438,
+        81.61958312988281
+      ],
+      "max": [
+        198.6976776123047,
+        253.3633575439453,
+        106.26238250732422
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-medial_cuneiform_right",
+      "source_name": "MEDIAL_CUNEIFORM_RIGHT",
+      "region": "FOOT_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/MEDIAL_CUNEIFORM_RIGHT.stl",
+      "source_sha256": "6ed390259f9f344b4cca5e73a94c10bd6c6aaf98a274adb891804ea875c1e480",
+      "source_bytes": 569684,
+      "file": "bonehub-vhf-medial_cuneiform_right.glb",
+      "sha256": "9c4dc198550d292e4a51adcc95e09fb5ccc6b073d3ee567c0d0bc3916e45dacc",
+      "bytes": 205812,
+      "reused": false,
+      "vertices": 5698,
+      "triangles": 11392,
+      "min": [
+        191.33547973632812,
+        216.04673767089844,
+        78.34127807617188
+      ],
+      "max": [
+        218.94857788085938,
+        250.26101684570312,
+        107.45692443847656
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-metatarsal_1_right",
+      "source_name": "METATARSAL_1_RIGHT",
+      "region": "FOOT_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/METATARSAL_1_RIGHT.stl",
+      "source_sha256": "98fe8fe69c819c43e3b544032ffd5f453aabdca283e4c567c27f17c64aed64d4",
+      "source_bytes": 1092084,
+      "file": "bonehub-vhf-metatarsal_1_right.glb",
+      "sha256": "453b662b0dfb6f827cf535ec2d1efc4baf8a900599521d1217e370a8bbeff5b3",
+      "bytes": 393872,
+      "reused": false,
+      "vertices": 10922,
+      "triangles": 21840,
+      "min": [
+        194.10891723632812,
+        179.9251708984375,
+        35.75341796875
+      ],
+      "max": [
+        227.9700927734375,
+        239.18592834472656,
+        89.56051635742188
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-metatarsal_2_right",
+      "source_name": "METATARSAL_2_RIGHT",
+      "region": "FOOT_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/METATARSAL_2_RIGHT.stl",
+      "source_sha256": "8bd7597bee4c77ce3faf9c87f1018767c5c01b4050c4a50ab7df65ed979c950f",
+      "source_bytes": 656484,
+      "file": "bonehub-vhf-metatarsal_2_right.glb",
+      "sha256": "00f3b787171d287a88da80f918bf95ff34b8960a1b52985280df1e9ceaddae52",
+      "bytes": 237056,
+      "reused": false,
+      "vertices": 6566,
+      "triangles": 13128,
+      "min": [
+        180.86154174804688,
+        191.42410278320312,
+        28.572376251220703
+      ],
+      "max": [
+        204.94680786132812,
+        238.7063751220703,
+        95.133544921875
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-metatarsal_3_right",
+      "source_name": "METATARSAL_3_RIGHT",
+      "region": "FOOT_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/METATARSAL_3_RIGHT.stl",
+      "source_sha256": "c2bdc99bd9368ce73ea3bff17b3882c7047eed6829927f6fc2b2f09aa034382e",
+      "source_bytes": 627284,
+      "file": "bonehub-vhf-metatarsal_3_right.glb",
+      "sha256": "14f5acd4effee860e807a04f8108040bc8154a56eb40a360c60a730170a87ca8",
+      "bytes": 226544,
+      "reused": false,
+      "vertices": 6274,
+      "triangles": 12544,
+      "min": [
+        173.86566162109375,
+        199.03494262695312,
+        25.57852554321289
+      ],
+      "max": [
+        195.77975463867188,
+        245.33978271484375,
+        85.64636993408203
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-metatarsal_4_right",
+      "source_name": "METATARSAL_4_RIGHT",
+      "region": "FOOT_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/METATARSAL_4_RIGHT.stl",
+      "source_sha256": "8b11986294bb5cd4aaeba49b690692e6107b744c461e6cf3f337594e270be3d1",
+      "source_bytes": 587684,
+      "file": "bonehub-vhf-metatarsal_4_right.glb",
+      "sha256": "70dfd4a6fca90420edc6483a40e4bc4de5f0fd6bedd366a18e4ccdcad596184c",
+      "bytes": 212288,
+      "reused": false,
+      "vertices": 5878,
+      "triangles": 11752,
+      "min": [
+        172.433349609375,
+        212.80450439453125,
+        23.384601593017578
+      ],
+      "max": [
+        191.6914520263672,
+        255.93499755859375,
+        82.30658721923828
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-metatarsal_5_right",
+      "source_name": "METATARSAL_5_RIGHT",
+      "region": "FOOT_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/METATARSAL_5_RIGHT.stl",
+      "source_sha256": "9f34d485f232dded318a9527276237d90c053f40691be797134223ecf6caeb45",
+      "source_bytes": 615484,
+      "file": "bonehub-vhf-metatarsal_5_right.glb",
+      "sha256": "c86fbd404fe1729165c9b9f86974e2166b8f42431b56c4289c67bd886b78f46d",
+      "bytes": 222288,
+      "reused": false,
+      "vertices": 6156,
+      "triangles": 12308,
+      "min": [
+        167.40213012695312,
+        224.44625854492188,
+        24.49234390258789
+      ],
+      "max": [
+        185.2417755126953,
+        277.52734375,
+        79.37744140625
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-navicular_right",
+      "source_name": "NAVICULAR_RIGHT",
+      "region": "FOOT_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/NAVICULAR_RIGHT.stl",
+      "source_sha256": "194986d734d0ba88de86d926c5e3431d564bfce3d35db5bdc2ee44c27d841e75",
+      "source_bytes": 619484,
+      "file": "bonehub-vhf-navicular_right.glb",
+      "sha256": "29d06d15f87c7e68db84c070cd2308963d9446201c234c6a41c1e513b59d4f48",
+      "bytes": 223736,
+      "reused": false,
+      "vertices": 6196,
+      "triangles": 12388,
+      "min": [
+        181.33030700683594,
+        233.24530029296875,
+        101.66853332519531
+      ],
+      "max": [
+        220.9296417236328,
+        259.04949951171875,
+        125.26981353759766
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-phalange_foot_1_right",
+      "source_name": "PHALANGE_FOOT_1_RIGHT",
+      "region": "FOOT_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/PHALANGE_FOOT_1_RIGHT.stl",
+      "source_sha256": "2155ff663f284dbb96b813c90f8ec8fac5e234bc6a23d9522baa3c805e5319e2",
+      "source_bytes": 722684,
+      "file": "bonehub-vhf-phalange_foot_1_right.glb",
+      "sha256": "0b5656edb8bfa3d99556d9f860ed92e8a29a9941547b95aeb341c5697bafcf98",
+      "bytes": 260888,
+      "reused": false,
+      "vertices": 7228,
+      "triangles": 14452,
+      "min": [
+        189.9224090576172,
+        144.2625732421875,
+        6.432373046875
+      ],
+      "max": [
+        227.31106567382812,
+        192.9596710205078,
+        44.519737243652344
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-phalange_foot_2_right",
+      "source_name": "PHALANGE_FOOT_2_RIGHT",
+      "region": "FOOT_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/PHALANGE_FOOT_2_RIGHT.stl",
+      "source_sha256": "7c1cf42661e43c839a0e91ebc925ae100730121ce891a08efa95f5e00a5de992",
+      "source_bytes": 352884,
+      "file": "bonehub-vhf-phalange_foot_2_right.glb",
+      "sha256": "e64b1744f27f657bb1196e24be8405a9c836b3da4c509f37e895a0cc94dcc9e6",
+      "bytes": 127764,
+      "reused": false,
+      "vertices": 3530,
+      "triangles": 7056,
+      "min": [
+        174.73782348632812,
+        151.79171752929688,
+        7.743368148803711
+      ],
+      "max": [
+        200.65829467773438,
+        195.13754272460938,
+        37.403411865234375
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-phalange_foot_3_right",
+      "source_name": "PHALANGE_FOOT_3_RIGHT",
+      "region": "FOOT_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/PHALANGE_FOOT_3_RIGHT.stl",
+      "source_sha256": "08baaa749b1af4321e888041bbcb3b648f522e958a7a4a90259672ce7fed178d",
+      "source_bytes": 327484,
+      "file": "bonehub-vhf-phalange_foot_3_right.glb",
+      "sha256": "2deca2d6437f08600d33039449dfeca025b47c4abfe16836430b0f3bc86f5d16",
+      "bytes": 118616,
+      "reused": false,
+      "vertices": 3276,
+      "triangles": 6548,
+      "min": [
+        162.42050170898438,
+        161.27093505859375,
+        6.428065299987793
+      ],
+      "max": [
+        190.23468017578125,
+        202.5615234375,
+        34.37553024291992
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-phalange_foot_4_right",
+      "source_name": "PHALANGE_FOOT_4_RIGHT",
+      "region": "FOOT_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/PHALANGE_FOOT_4_RIGHT.stl",
+      "source_sha256": "9102816cb3ca6b25b2d567ea31b893510c9b9ed8f729ae0417798d03300fbb6f",
+      "source_bytes": 286684,
+      "file": "bonehub-vhf-phalange_foot_4_right.glb",
+      "sha256": "ea5c63a3d7110685040ccc05dd2dfaa296388506be9285c663a9ae03cb0c34f8",
+      "bytes": 103928,
+      "reused": false,
+      "vertices": 2868,
+      "triangles": 5732,
+      "min": [
+        159.08364868164062,
+        176.41555786132812,
+        11.63985824584961
+      ],
+      "max": [
+        184.6768341064453,
+        216.1832275390625,
+        32.73860549926758
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-phalange_foot_5_right",
+      "source_name": "PHALANGE_FOOT_5_RIGHT",
+      "region": "FOOT_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/PHALANGE_FOOT_5_RIGHT.stl",
+      "source_sha256": "d97a1340f3f6a8db106dae2653c69a237fdea206eed49d4e330b67c098017c2e",
+      "source_bytes": 248484,
+      "file": "bonehub-vhf-phalange_foot_5_right.glb",
+      "sha256": "d6f4b8d7880a9c34c27214e79e451724731283ef2fba7b9f8ecc0e7b75b640d1",
+      "bytes": 90176,
+      "reused": false,
+      "vertices": 2486,
+      "triangles": 4968,
+      "min": [
+        160.34634399414062,
+        193.535888671875,
+        8.726555824279785
+      ],
+      "max": [
+        176.55728149414062,
+        227.98963928222656,
+        31.598857879638672
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-talus_right",
+      "source_name": "TALUS_RIGHT",
+      "region": "FOOT_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/FOOT_RIGHT/TALUS_RIGHT.stl",
+      "source_sha256": "6459e0c89cadf29e4bf84db35e4294e467088b29347f10f34a099426ceb6a0de",
+      "source_bytes": 1568284,
+      "file": "bonehub-vhf-talus_right.glb",
+      "sha256": "bb653d3f100883b332d7cd7fa792d8915d3d512974d377bbcd158d08ac6cacb2",
+      "bytes": 565300,
+      "reused": false,
+      "vertices": 15684,
+      "triangles": 31364,
+      "min": [
+        175.46893310546875,
+        242.72421264648438,
+        112.95758056640625
+      ],
+      "max": [
+        221.4570770263672,
+        299.51153564453125,
+        159.6956329345703
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-capitate_left",
+      "source_name": "CAPITATE_LEFT",
+      "region": "HAND_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/CAPITATE_LEFT.stl",
+      "source_sha256": "8e865e51508b5e62130003b894d2bb171e7abb96a95deb6e66266a199b632d58",
+      "source_bytes": 294084,
+      "file": "bonehub-vhf-capitate_left.glb",
+      "sha256": "acab0be2edda9b5f992c3a0d51435fa12b090ef935ba838ce0431b10f017bb5a",
+      "bytes": 106588,
+      "reused": false,
+      "vertices": 2942,
+      "triangles": 5880,
+      "min": [
+        403.6517333984375,
+        142.15988159179688,
+        1018.4308471679688
+      ],
+      "max": [
+        422.6834716796875,
+        164.07046508789062,
+        1042.1885986328125
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-hamate_left",
+      "source_name": "HAMATE_LEFT",
+      "region": "HAND_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/HAMATE_LEFT.stl",
+      "source_sha256": "fd62a8dfe9f41aec68ddd9ecf94cf7bf206feef95a01e77db38cf17e9c3c044e",
+      "source_bytes": 234284,
+      "file": "bonehub-vhf-hamate_left.glb",
+      "sha256": "bce84685c3361b8f77a8301ae8ac84cc0b59d69a7c910fe861e3f4ea9e7726b1",
+      "bytes": 85056,
+      "reused": false,
+      "vertices": 2344,
+      "triangles": 4684,
+      "min": [
+        403.14630126953125,
+        153.8028106689453,
+        1012.6367797851562
+      ],
+      "max": [
+        424.7200622558594,
+        167.32098388671875,
+        1032.4378662109375
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-lunate_left",
+      "source_name": "LUNATE_LEFT",
+      "region": "HAND_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/LUNATE_LEFT.stl",
+      "source_sha256": "e84b476f5613c91abe052150c17e90a402a3b1f05ddf05f281dea4cbfd567057",
+      "source_bytes": 201684,
+      "file": "bonehub-vhf-lunate_left.glb",
+      "sha256": "841b05ea0ccf0c08a628fa413a987163f973dd50119c9a5dbba59fa410c5139a",
+      "bytes": 73320,
+      "reused": false,
+      "vertices": 2018,
+      "triangles": 4032,
+      "min": [
+        407.18121337890625,
+        156.65882873535156,
+        1036.3497314453125
+      ],
+      "max": [
+        426.5670166015625,
+        175.90420532226562,
+        1048.8848876953125
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-metacarpal_1_left",
+      "source_name": "METACARPAL_1_LEFT",
+      "region": "HAND_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/METACARPAL_1_LEFT.stl",
+      "source_sha256": "0e5fb56f97071708a84d5872617a5046b51293bc37e4b48ac4f8c5eecd6a7b80",
+      "source_bytes": 478284,
+      "file": "bonehub-vhf-metacarpal_1_left.glb",
+      "sha256": "0ddf219810f94f3b60847f119bc8d47874a5afe30401e325042c33a1dab2c932",
+      "bytes": 172904,
+      "reused": false,
+      "vertices": 4784,
+      "triangles": 9564,
+      "min": [
+        358.02349853515625,
+        110.94715881347656,
+        1009.3514404296875
+      ],
+      "max": [
+        395.0519104003906,
+        141.96096801757812,
+        1040.646728515625
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-metacarpal_2_left",
+      "source_name": "METACARPAL_2_LEFT",
+      "region": "HAND_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/METACARPAL_2_LEFT.stl",
+      "source_sha256": "9c9bb77ed4dc9b7769eec1d86e2308300666a2e6d6f738a0abb850e0bb039169",
+      "source_bytes": 616884,
+      "file": "bonehub-vhf-metacarpal_2_left.glb",
+      "sha256": "e6486220d392c453231a562b99c251606cfa5008ab29ce8cef6af53fdb4f22c3",
+      "bytes": 222792,
+      "reused": false,
+      "vertices": 6170,
+      "triangles": 12336,
+      "min": [
+        382.0504150390625,
+        98.75234985351562,
+        978.8423461914062
+      ],
+      "max": [
+        414.0649108886719,
+        142.8435516357422,
+        1034.9501953125
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-metacarpal_3_left",
+      "source_name": "METACARPAL_3_LEFT",
+      "region": "HAND_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/METACARPAL_3_LEFT.stl",
+      "source_sha256": "2af57e256fe76d1d77bd4391accc30aec91b722d4dd74ec70f4db3c926a7cb06",
+      "source_bytes": 616484,
+      "file": "bonehub-vhf-metacarpal_3_left.glb",
+      "sha256": "41448d96fc5f302a0e27f9455160b2bbfe3800a30b86e80274e132c44c64633c",
+      "bytes": 222652,
+      "reused": false,
+      "vertices": 6166,
+      "triangles": 12328,
+      "min": [
+        390.8877868652344,
+        113.6487808227539,
+        967.5097045898438
+      ],
+      "max": [
+        420.9116516113281,
+        149.95623779296875,
+        1027.4967041015625
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-metacarpal_4_left",
+      "source_name": "METACARPAL_4_LEFT",
+      "region": "HAND_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/METACARPAL_4_LEFT.stl",
+      "source_sha256": "20b677851876d12bdaa84ad58ff1b1f9eb57d7c6a9af2644901ab5871a11136b",
+      "source_bytes": 415484,
+      "file": "bonehub-vhf-metacarpal_4_left.glb",
+      "sha256": "fb3e748f70e02015ee388ab0d25c70ccfeeb2b04318898efd02153b92771c8b3",
+      "bytes": 150292,
+      "reused": false,
+      "vertices": 4156,
+      "triangles": 8308,
+      "min": [
+        394.2896728515625,
+        130.59922790527344,
+        965.3216552734375
+      ],
+      "max": [
+        422.3578186035156,
+        156.56288146972656,
+        1016.6207275390625
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-metacarpal_5_left",
+      "source_name": "METACARPAL_5_LEFT",
+      "region": "HAND_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/METACARPAL_5_LEFT.stl",
+      "source_sha256": "6959d814461115907199e325724b5aa317d931d295afda1b82d65414615758b5",
+      "source_bytes": 397084,
+      "file": "bonehub-vhf-metacarpal_5_left.glb",
+      "sha256": "452d4fc12cabe827b38c2228977d2db525923ed3357692d0a7397f9accea7580",
+      "bytes": 143668,
+      "reused": false,
+      "vertices": 3972,
+      "triangles": 7940,
+      "min": [
+        396.2598571777344,
+        146.4216766357422,
+        964.781005859375
+      ],
+      "max": [
+        421.560791015625,
+        169.35447692871094,
+        1013.6927490234375
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-phalange_hand_1_left",
+      "source_name": "PHALANGE_HAND_1_LEFT",
+      "region": "HAND_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/PHALANGE_HAND_1_LEFT.stl",
+      "source_sha256": "4b93015b5c03f80b5a80a3bc3f020b7304fed3b768966a8db3a7d85597b65339",
+      "source_bytes": 430484,
+      "file": "bonehub-vhf-phalange_hand_1_left.glb",
+      "sha256": "579f6f41dc3e296f2fa0d8505f2240edbe9209843863f82082c45e5d8e9b6720",
+      "bytes": 155696,
+      "reused": false,
+      "vertices": 4306,
+      "triangles": 8608,
+      "min": [
+        335.438720703125,
+        109.9145278930664,
+        964.3697509765625
+      ],
+      "max": [
+        367.47454833984375,
+        124.40023040771484,
+        1012.6538696289062
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-phalange_hand_2_left",
+      "source_name": "PHALANGE_HAND_2_LEFT",
+      "region": "HAND_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/PHALANGE_HAND_2_LEFT.stl",
+      "source_sha256": "21a967832273bd5709f9e9a37dd1c4c29bea50b7c297051dc4ef58b10b8a882a",
+      "source_bytes": 639084,
+      "file": "bonehub-vhf-phalange_hand_2_left.glb",
+      "sha256": "a3cbadaacb2d201663a6656d147fc96de4ba1159d764a40468065aaee614778a",
+      "bytes": 230788,
+      "reused": false,
+      "vertices": 6392,
+      "triangles": 12780,
+      "min": [
+        323.6287536621094,
+        91.30207061767578,
+        928.8153076171875
+      ],
+      "max": [
+        388.2119140625,
+        110.70398712158203,
+        984.6692504882812
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-phalange_hand_3_left",
+      "source_name": "PHALANGE_HAND_3_LEFT",
+      "region": "HAND_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/PHALANGE_HAND_3_LEFT.stl",
+      "source_sha256": "e53ec471e9b5a0f3ecc39880e339e2ffab04e4f974328e88d12e916b96b35f51",
+      "source_bytes": 748084,
+      "file": "bonehub-vhf-phalange_hand_3_left.glb",
+      "sha256": "b1a6cd7cd0aaf8f5b99b1db76f95823a9282089a5328a6ae510b4aabca08f0dc",
+      "bytes": 270032,
+      "reused": false,
+      "vertices": 7482,
+      "triangles": 14960,
+      "min": [
+        323.03057861328125,
+        104.5796890258789,
+        912.8056640625
+      ],
+      "max": [
+        397.62408447265625,
+        126.59156799316406,
+        973.7463989257812
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-phalange_hand_4_left",
+      "source_name": "PHALANGE_HAND_4_LEFT",
+      "region": "HAND_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/PHALANGE_HAND_4_LEFT.stl",
+      "source_sha256": "a36702992e2dbd3e12f9b9070afcd1ad4b032eb5847850acd6f79df61e950ef9",
+      "source_bytes": 662884,
+      "file": "bonehub-vhf-phalange_hand_4_left.glb",
+      "sha256": "52aac112aa818a9305c9d24414de774af6ce4edb22311a0ded97074a46caafe6",
+      "bytes": 239360,
+      "reused": false,
+      "vertices": 6630,
+      "triangles": 13256,
+      "min": [
+        329.2314758300781,
+        122.83332824707031,
+        915.620361328125
+      ],
+      "max": [
+        401.4328918457031,
+        143.43789672851562,
+        969.6287231445312
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-phalange_hand_5_left",
+      "source_name": "PHALANGE_HAND_5_LEFT",
+      "region": "HAND_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/PHALANGE_HAND_5_LEFT.stl",
+      "source_sha256": "355f9a44bbac69fd47328cd4f605df74a3b57ba3957645733816683528e06213",
+      "source_bytes": 457084,
+      "file": "bonehub-vhf-phalange_hand_5_left.glb",
+      "sha256": "a6b292a24c33f3b6874fdca31b7fe228ee076bb0d5d396bea3126363dad2e0de",
+      "bytes": 165272,
+      "reused": false,
+      "vertices": 4572,
+      "triangles": 9140,
+      "min": [
+        339.4560241699219,
+        132.81094360351562,
+        937.571044921875
+      ],
+      "max": [
+        401.2878723144531,
+        160.01852416992188,
+        968.168701171875
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-pisiform_left",
+      "source_name": "PISIFORM_LEFT",
+      "region": "HAND_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/PISIFORM_LEFT.stl",
+      "source_sha256": "c7001aa3db28cd26789bfbe9653852775316ab65277a672c935d181af53c17be",
+      "source_bytes": 101884,
+      "file": "bonehub-vhf-pisiform_left.glb",
+      "sha256": "e71f1d2328c33bb93aebbe1c9af101535b865c7477f8424c5dd8469c6e5f91fe",
+      "bytes": 37392,
+      "reused": false,
+      "vertices": 1020,
+      "triangles": 2036,
+      "min": [
+        405.86114501953125,
+        169.36334228515625,
+        1019.4191284179688
+      ],
+      "max": [
+        418.1398620605469,
+        180.7685089111328,
+        1030.6949462890625
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-scaphoid_left",
+      "source_name": "SCAPHOID_LEFT",
+      "region": "HAND_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/SCAPHOID_LEFT.stl",
+      "source_sha256": "6a9a1532f8a064b39a29821532400569c66b1f1522cb17dd377e57bdc265d802",
+      "source_bytes": 274684,
+      "file": "bonehub-vhf-scaphoid_left.glb",
+      "sha256": "87e076266a52245d60e45677b9dfc0d34e71d4cf202346038e37f1e154be3bab",
+      "bytes": 99592,
+      "reused": false,
+      "vertices": 2748,
+      "triangles": 5492,
+      "min": [
+        394.2825927734375,
+        145.73043823242188,
+        1033.806396484375
+      ],
+      "max": [
+        422.162109375,
+        162.86929321289062,
+        1052.6337890625
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-trapezium_left",
+      "source_name": "TRAPEZIUM_LEFT",
+      "region": "HAND_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/TRAPEZIUM_LEFT.stl",
+      "source_sha256": "45bce5f01d29fdc069657e9f3cfd9ee65b0ca374e3385901eaa1997aad11193e",
+      "source_bytes": 228284,
+      "file": "bonehub-vhf-trapezium_left.glb",
+      "sha256": "39cc287f9e02595671e171fe9ea720702a5e571662abc85b584cf830a3e1782e",
+      "bytes": 82896,
+      "reused": false,
+      "vertices": 2284,
+      "triangles": 4564,
+      "min": [
+        385.7557678222656,
+        133.2829132080078,
+        1027.6468505859375
+      ],
+      "max": [
+        402.8385009765625,
+        154.93081665039062,
+        1045.567626953125
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-trapezoid_left",
+      "source_name": "TRAPEZOID_LEFT",
+      "region": "HAND_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/TRAPEZOID_LEFT.stl",
+      "source_sha256": "e2a77561fa3254b17c7961963b1ae2e5a63f8d23bad67cd1135de1a0179fcfa1",
+      "source_bytes": 92484,
+      "file": "bonehub-vhf-trapezoid_left.glb",
+      "sha256": "33c57fe30b88f852e86edaea67b7744bde209ca6ae8a7edf02c160ef481fa027",
+      "bytes": 34004,
+      "reused": false,
+      "vertices": 926,
+      "triangles": 1848,
+      "min": [
+        401.6192626953125,
+        136.3656768798828,
+        1028.8157958984375
+      ],
+      "max": [
+        413.4521789550781,
+        146.84800720214844,
+        1040.23828125
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-triquetrum_left",
+      "source_name": "TRIQUETRUM_LEFT",
+      "region": "HAND_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_LEFT/TRIQUETRUM_LEFT.stl",
+      "source_sha256": "f7bc7c1169350c65f75a4cacabed6819d4270393379b94ec66e3a45aaae929cd",
+      "source_bytes": 158684,
+      "file": "bonehub-vhf-triquetrum_left.glb",
+      "sha256": "8ff4b6114da3efe36b11209c4830c7a40f2b3f433426f7ba7df242c9fa7b8609",
+      "bytes": 57840,
+      "reused": false,
+      "vertices": 1588,
+      "triangles": 3172,
+      "min": [
+        413.425048828125,
+        163.5420684814453,
+        1020.4069213867188
+      ],
+      "max": [
+        427.9832458496094,
+        176.00750732421875,
+        1038.4354248046875
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-capitate_right",
+      "source_name": "CAPITATE_RIGHT",
+      "region": "HAND_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/CAPITATE_RIGHT.stl",
+      "source_sha256": "0a958406f2f598dbfbc42b6aa6125ac017acea668307a7216d052bf4e370d9f3",
+      "source_bytes": 280084,
+      "file": "bonehub-vhf-capitate_right.glb",
+      "sha256": "63b2f73251a9467e654cce91a3a8ca3da2c4f24e7c29ca95815b894e772e01d0",
+      "bytes": 101544,
+      "reused": false,
+      "vertices": 2802,
+      "triangles": 5600,
+      "min": [
+        46.49886703491211,
+        155.2455596923828,
+        990.6077880859375
+      ],
+      "max": [
+        65.42314147949219,
+        175.7569580078125,
+        1012.137451171875
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-hamate_right",
+      "source_name": "HAMATE_RIGHT",
+      "region": "HAND_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/HAMATE_RIGHT.stl",
+      "source_sha256": "7519293b5d0480bd0065ad1f019f546ab73f09392a89061f5f4e490d1f1a9bb2",
+      "source_bytes": 232684,
+      "file": "bonehub-vhf-hamate_right.glb",
+      "sha256": "1e082626707fd72deecd1f1db717443f896a86bbf8cbd7bc7baebec222e4c8ec",
+      "bytes": 84480,
+      "reused": false,
+      "vertices": 2328,
+      "triangles": 4652,
+      "min": [
+        43.22048568725586,
+        165.74075317382812,
+        982.5088500976562
+      ],
+      "max": [
+        64.45619201660156,
+        179.54299926757812,
+        1004.3499145507812
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-lunate_right",
+      "source_name": "LUNATE_RIGHT",
+      "region": "HAND_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/LUNATE_RIGHT.stl",
+      "source_sha256": "e2375935354c7884cc315388eab5dec3e39167557fd6cfbc7070638a21505597",
+      "source_bytes": 200484,
+      "file": "bonehub-vhf-lunate_right.glb",
+      "sha256": "d7c7951c8e71b06dffe46ea242b922b5a10cfa599f0aa6b99ccb30356b52466c",
+      "bytes": 72888,
+      "reused": false,
+      "vertices": 2006,
+      "triangles": 4008,
+      "min": [
+        45.95435333251953,
+        168.25860595703125,
+        1006.3714599609375
+      ],
+      "max": [
+        64.08135223388672,
+        187.45327758789062,
+        1019.59033203125
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-metacarpal_1_right",
+      "source_name": "METACARPAL_1_RIGHT",
+      "region": "HAND_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/METACARPAL_1_RIGHT.stl",
+      "source_sha256": "67ca5ef967a33049ef60b313b27994ff22d4ee4cb9c2c8e025af83519b960564",
+      "source_bytes": 482284,
+      "file": "bonehub-vhf-metacarpal_1_right.glb",
+      "sha256": "8552221eb61a5f4c780506b50a48f481895d775c384a629493778fc85e41dbc1",
+      "bytes": 174344,
+      "reused": false,
+      "vertices": 4824,
+      "triangles": 9644,
+      "min": [
+        75.38802337646484,
+        123.67311096191406,
+        971.8577270507812
+      ],
+      "max": [
+        108.7400131225586,
+        155.1222686767578,
+        1007.2936401367188
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-metacarpal_2_right",
+      "source_name": "METACARPAL_2_RIGHT",
+      "region": "HAND_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/METACARPAL_2_RIGHT.stl",
+      "source_sha256": "c06c8aa9f75911cc6e5dc308e8b07df58652d729f068d1ae07f12e8934813750",
+      "source_bytes": 615684,
+      "file": "bonehub-vhf-metacarpal_2_right.glb",
+      "sha256": "84f480fce552b0b8dde61bfcdaf0dd29ee3c8dc572227c702a2fddeaa26944eb",
+      "bytes": 222368,
+      "reused": false,
+      "vertices": 6158,
+      "triangles": 12312,
+      "min": [
+        54.75093460083008,
+        113.98217010498047,
+        944.3038330078125
+      ],
+      "max": [
+        82.3651123046875,
+        157.70596313476562,
+        1001.4906005859375
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-metacarpal_3_right",
+      "source_name": "METACARPAL_3_RIGHT",
+      "region": "HAND_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/METACARPAL_3_RIGHT.stl",
+      "source_sha256": "1e92cb430fd916644592da8156420676d72bfcc79b8d4ef9055ddab6598db7a3",
+      "source_bytes": 596684,
+      "file": "bonehub-vhf-metacarpal_3_right.glb",
+      "sha256": "3a126dddee0921b859ec6fef4cd213a667db5b64cbce4c79876e3f5bca2055b4",
+      "bytes": 215524,
+      "reused": false,
+      "vertices": 5968,
+      "triangles": 11932,
+      "min": [
+        47.47892379760742,
+        128.50601196289062,
+        935.4019775390625
+      ],
+      "max": [
+        71.2972640991211,
+        162.54632568359375,
+        997.778076171875
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-metacarpal_4_right",
+      "source_name": "METACARPAL_4_RIGHT",
+      "region": "HAND_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/METACARPAL_4_RIGHT.stl",
+      "source_sha256": "d7049b8da5307748aa7a1717019cea74a58378e83b4f0a60d8b7bd78e3dacca9",
+      "source_bytes": 406484,
+      "file": "bonehub-vhf-metacarpal_4_right.glb",
+      "sha256": "871d72931f25ddbe01d6b9525ff8a8cea18dc030a945c5c46d62a913763ca1a7",
+      "bytes": 147052,
+      "reused": false,
+      "vertices": 4066,
+      "triangles": 8128,
+      "min": [
+        44.26231384277344,
+        145.682861328125,
+        933.6900634765625
+      ],
+      "max": [
+        66.40625762939453,
+        170.42489624023438,
+        988.2649536132812
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-metacarpal_5_right",
+      "source_name": "METACARPAL_5_RIGHT",
+      "region": "HAND_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/METACARPAL_5_RIGHT.stl",
+      "source_sha256": "aaa0310a1693b668aa03ad462eb3ca42a6d4ef6fa89f3c2bcbd5d8a0e20b25e4",
+      "source_bytes": 386684,
+      "file": "bonehub-vhf-metacarpal_5_right.glb",
+      "sha256": "0bf93b3559419b21dbccd9b91e5018257a46eadb296dcaf769c5302113f4b543",
+      "bytes": 139924,
+      "reused": false,
+      "vertices": 3868,
+      "triangles": 7732,
+      "min": [
+        44.452816009521484,
+        160.79879760742188,
+        933.481201171875
+      ],
+      "max": [
+        62.460731506347656,
+        180.8953857421875,
+        984.8193359375
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-phalange_hand_1_right",
+      "source_name": "PHALANGE_HAND_1_RIGHT",
+      "region": "HAND_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/PHALANGE_HAND_1_RIGHT.stl",
+      "source_sha256": "23d3f110985d9415e63bd5d2b85d867cdd40066657a0f036ea3d90f2bc885e1d",
+      "source_bytes": 408684,
+      "file": "bonehub-vhf-phalange_hand_1_right.glb",
+      "sha256": "cf55638e9e91491dff252370e05ce4773d8c4ea12b0e92d4ef1ec01dc24fd2d3",
+      "bytes": 147844,
+      "reused": false,
+      "vertices": 4088,
+      "triangles": 8172,
+      "min": [
+        96.49677276611328,
+        119.71759033203125,
+        924.7078247070312
+      ],
+      "max": [
+        121.0373764038086,
+        135.50534057617188,
+        974.9638671875
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-phalange_hand_2_right",
+      "source_name": "PHALANGE_HAND_2_RIGHT",
+      "region": "HAND_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/PHALANGE_HAND_2_RIGHT.stl",
+      "source_sha256": "17ac08da697a31acd0df93ccdee1e565f2cf27e041a72337e372bd4acde069a8",
+      "source_bytes": 652284,
+      "file": "bonehub-vhf-phalange_hand_2_right.glb",
+      "sha256": "3777f00af8b84482fd600e9f670ed81d2a9c1944f389a25c362bae7ba2163c6c",
+      "bytes": 235544,
+      "reused": false,
+      "vertices": 6524,
+      "triangles": 13044,
+      "min": [
+        73.45597076416016,
+        108.96420288085938,
+        899.5587158203125
+      ],
+      "max": [
+        134.7379150390625,
+        137.559326171875,
+        947.6686401367188
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-phalange_hand_3_right",
+      "source_name": "PHALANGE_HAND_3_RIGHT",
+      "region": "HAND_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/PHALANGE_HAND_3_RIGHT.stl",
+      "source_sha256": "32bb8a3bb9053aa9f24032d34969bdb47936712213456932dcd43f23c669cf77",
+      "source_bytes": 711884,
+      "file": "bonehub-vhf-phalange_hand_3_right.glb",
+      "sha256": "1a62c323606a3873a7c0379631be87ba2059abdb235d9925ae56206f8584ce41",
+      "bytes": 257000,
+      "reused": false,
+      "vertices": 7120,
+      "triangles": 14236,
+      "min": [
+        62.53239440917969,
+        122.61710357666016,
+        890.8209838867188
+      ],
+      "max": [
+        130.2985076904297,
+        151.99810791015625,
+        939.703369140625
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-phalange_hand_4_right",
+      "source_name": "PHALANGE_HAND_4_RIGHT",
+      "region": "HAND_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/PHALANGE_HAND_4_RIGHT.stl",
+      "source_sha256": "816c405e42048c029f7678ed04a5ba9c8bb795fc3ffcac518f274735d48cef52",
+      "source_bytes": 615284,
+      "file": "bonehub-vhf-phalange_hand_4_right.glb",
+      "sha256": "e9d798ef4f76849eaf280fe0579b6073d211bb550080f1537cf3fda0bf1422e3",
+      "bytes": 222228,
+      "reused": false,
+      "vertices": 6154,
+      "triangles": 12304,
+      "min": [
+        55.99258041381836,
+        139.12330627441406,
+        886.3433227539062
+      ],
+      "max": [
+        116.60812377929688,
+        160.56573486328125,
+        935.7346801757812
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-phalange_hand_5_right",
+      "source_name": "PHALANGE_HAND_5_RIGHT",
+      "region": "HAND_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/PHALANGE_HAND_5_RIGHT.stl",
+      "source_sha256": "0974c747c7e099761d3419a182516503c89d7f4d471d92a17705d300af23574b",
+      "source_bytes": 451084,
+      "file": "bonehub-vhf-phalange_hand_5_right.glb",
+      "sha256": "75c9f0a365f35948c01f793e4ce0c5181efc00cf082cea301e79a1aeaeadfbc9",
+      "bytes": 163112,
+      "reused": false,
+      "vertices": 4512,
+      "triangles": 9020,
+      "min": [
+        52.60090637207031,
+        156.51602172851562,
+        891.2807006835938
+      ],
+      "max": [
+        99.15486145019531,
+        175.15151977539062,
+        934.8007202148438
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-pisiform_right",
+      "source_name": "PISIFORM_RIGHT",
+      "region": "HAND_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/PISIFORM_RIGHT.stl",
+      "source_sha256": "5fbf889b042eadf0f7f12f308ef1eeaa50e317e5fc0c94f5937d78f82baac6d4",
+      "source_bytes": 109684,
+      "file": "bonehub-vhf-pisiform_right.glb",
+      "sha256": "80fff4a8dd000a1e928781068207aa10a70941a1371bde9d5af040d9de0fbb7a",
+      "bytes": 40196,
+      "reused": false,
+      "vertices": 1098,
+      "triangles": 2192,
+      "min": [
+        49.18821334838867,
+        181.8331756591797,
+        989.4010620117188
+      ],
+      "max": [
+        62.5002555847168,
+        193.87808227539062,
+        1001.497314453125
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-scaphoid_right",
+      "source_name": "SCAPHOID_RIGHT",
+      "region": "HAND_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/SCAPHOID_RIGHT.stl",
+      "source_sha256": "8a89150b11f09513e40778545f56492b1b164232737f391ffbf6459cbdb783d0",
+      "source_bytes": 265284,
+      "file": "bonehub-vhf-scaphoid_right.glb",
+      "sha256": "94b1f18b4858eac2ab6e1337a7f6cccc36683a98bb7d98efc7ab55ec8595e1fe",
+      "bytes": 96220,
+      "reused": false,
+      "vertices": 2654,
+      "triangles": 5304,
+      "min": [
+        51.033477783203125,
+        158.1578826904297,
+        1002.4491577148438
+      ],
+      "max": [
+        76.96749877929688,
+        174.29429626464844,
+        1021.6576538085938
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-trapezium_right",
+      "source_name": "TRAPEZIUM_RIGHT",
+      "region": "HAND_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/TRAPEZIUM_RIGHT.stl",
+      "source_sha256": "5e4428d0864f064f67b1f7de5cd782a40cff59f594db4f9ea55371873743e9e2",
+      "source_bytes": 200484,
+      "file": "bonehub-vhf-trapezium_right.glb",
+      "sha256": "e9feff703a4f4a9e837c88a111c9aedca368ea8841dab87ba5f601b430bd611a",
+      "bytes": 72888,
+      "reused": false,
+      "vertices": 2006,
+      "triangles": 4008,
+      "min": [
+        67.9560775756836,
+        146.36610412597656,
+        996.3560180664062
+      ],
+      "max": [
+        84.65548706054688,
+        166.3126220703125,
+        1012.1578369140625
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-trapezoid_right",
+      "source_name": "TRAPEZOID_RIGHT",
+      "region": "HAND_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/TRAPEZOID_RIGHT.stl",
+      "source_sha256": "65f0d1bb89a43ef750fad8a318bb7744fbc20fb741db8ed930ec286a869f3fce",
+      "source_bytes": 132684,
+      "file": "bonehub-vhf-trapezoid_right.glb",
+      "sha256": "156559d1aeb058c6825fd6dd86c2cf323a302489da3377345d64db1cf8e9ad12",
+      "bytes": 48480,
+      "reused": false,
+      "vertices": 1328,
+      "triangles": 2652,
+      "min": [
+        54.17694854736328,
+        147.12954711914062,
+        996.488037109375
+      ],
+      "max": [
+        69.58513641357422,
+        159.44918823242188,
+        1009.3517456054688
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-triquetrum_right",
+      "source_name": "TRIQUETRUM_RIGHT",
+      "region": "HAND_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/HAND_RIGHT/TRIQUETRUM_RIGHT.stl",
+      "source_sha256": "855c06b9279e4ce7b12191534224bf20108fcdad6ba4b4b2aa9dab1109419c89",
+      "source_bytes": 160084,
+      "file": "bonehub-vhf-triquetrum_right.glb",
+      "sha256": "b784286abc0a85f496bb74b81dcc0206dbb0fb1a03e78b52a30c1fb2b6166e98",
+      "bytes": 58348,
+      "reused": false,
+      "vertices": 1602,
+      "triangles": 3200,
+      "min": [
+        42.21405792236328,
+        175.86732482910156,
+        991.9227294921875
+      ],
+      "max": [
+        56.597110748291016,
+        188.89138793945312,
+        1010.2816162109375
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-femur_left",
+      "source_name": "FEMUR_LEFT",
+      "region": "LOWER_EXTREMITY_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/LOWER_EXTREMITY_LEFT/FEMUR_LEFT.stl",
+      "source_sha256": "5881c6585151527f1d584ed705c0ebabe0117ff7edc79fbeecd80a036812cdbb",
+      "source_bytes": 12512884,
+      "file": "bonehub-vhf-femur_left.glb",
+      "sha256": "be373efdb5a4e24d608ca6992fa5ee9af5fbb17882992c396ecf623486e5e59e",
+      "bytes": 4505360,
+      "vertices": 125130,
+      "triangles": 250256,
+      "min": [
+        268.3651428222656,
+        201.1621551513672,
+        491.33001708984375
+      ],
+      "max": [
+        401.99237060546875,
+        270.3458251953125,
+        906.6547241210938
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-fibula_left",
+      "source_name": "FIBULA_LEFT",
+      "region": "LOWER_EXTREMITY_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/LOWER_EXTREMITY_LEFT/FIBULA_LEFT.stl",
+      "source_sha256": "12c091d23e0c17b36730112d14087e56f270d38b0d1c73b792b3622e2e6fc67b",
+      "source_bytes": 3044284,
+      "file": "bonehub-vhf-fibula_left.glb",
+      "sha256": "9ded38ebdedd8f76f13d0994f8c36440f8a7eedca474a8bf9a94c0794fc3f210",
+      "bytes": 1096656,
+      "reused": false,
+      "vertices": 30444,
+      "triangles": 60884,
+      "min": [
+        287.8554992675781,
+        262.0138244628906,
+        140.6275634765625
+      ],
+      "max": [
+        355.7734069824219,
+        290.480224609375,
+        476.3265686035156
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-hip_left",
+      "source_name": "HIP_LEFT",
+      "region": "LOWER_EXTREMITY_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/LOWER_EXTREMITY_LEFT/HIP_LEFT.stl",
+      "source_sha256": "3cbe60c7f7e1c1ccfa4413a7961f77e18f0f387d1af677d75906fcb4d988155c",
+      "source_bytes": 14247084,
+      "file": "bonehub-vhf-hip_left.glb",
+      "sha256": "1bd8baf0935010a97462dd5576d8c8bba2d0e4281887259635671a3316c545dc",
+      "bytes": 5129644,
+      "vertices": 142470,
+      "triangles": 284940,
+      "min": [
+        238.19277954101562,
+        169.338134765625,
+        817.7811279296875
+      ],
+      "max": [
+        387.4036560058594,
+        323.9894104003906,
+        1028.61572265625
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-patella_left",
+      "source_name": "PATELLA_LEFT",
+      "region": "LOWER_EXTREMITY_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/LOWER_EXTREMITY_LEFT/PATELLA_LEFT.stl",
+      "source_sha256": "15289d078c8c9cd009cdcbcf8d38e99d8d5752d77710bfffeadbfe10ca0e7898",
+      "source_bytes": 995884,
+      "file": "bonehub-vhf-patella_left.glb",
+      "sha256": "b0711d45bfd15763f93fec377204b6d6c62cb129a36d8feb2b96c40437c1dd36",
+      "bytes": 359232,
+      "reused": false,
+      "vertices": 9960,
+      "triangles": 19916,
+      "min": [
+        300.114501953125,
+        182.1339874267578,
+        493.7977294921875
+      ],
+      "max": [
+        343.5725402832031,
+        207.17393493652344,
+        541.679931640625
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-tibia_left",
+      "source_name": "TIBIA_LEFT",
+      "region": "LOWER_EXTREMITY_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/LOWER_EXTREMITY_LEFT/TIBIA_LEFT.stl",
+      "source_sha256": "e9a1d2d03e38f243b02842dca44ae3262f05df8f263bbdb79f73210381adc8d6",
+      "source_bytes": 8185284,
+      "file": "bonehub-vhf-tibia_left.glb",
+      "sha256": "1d69f4684b6a31fe6e10ef92a4e1730ed8060c00acec050f3c251a425fa94602",
+      "bytes": 2947420,
+      "reused": false,
+      "vertices": 81854,
+      "triangles": 163704,
+      "min": [
+        253.63365173339844,
+        217.35720825195312,
+        156.8590087890625
+      ],
+      "max": [
+        348.5669860839844,
+        284.8955383300781,
+        498.9678955078125
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-femur_right",
+      "source_name": "FEMUR_RIGHT",
+      "region": "LOWER_EXTREMITY_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/LOWER_EXTREMITY_RIGHT/FEMUR_RIGHT.stl",
+      "source_sha256": "a930a914cbca23ccb7b3b50e5fa8f34fa287b3b94475a130f30f875301d2243a",
+      "source_bytes": 12554884,
+      "file": "bonehub-vhf-femur_right.glb",
+      "sha256": "6600c8bc82ecbaea615f0e6948bd19c4d538572669fa79ec56a7daf499812a4e",
+      "bytes": 4520476,
+      "vertices": 125550,
+      "triangles": 251096,
+      "min": [
+        75.5564193725586,
+        203.555908203125,
+        487.3475036621094
+      ],
+      "max": [
+        207.1332244873047,
+        285.1079406738281,
+        904.9011840820312
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-fibula_right",
+      "source_name": "FIBULA_RIGHT",
+      "region": "LOWER_EXTREMITY_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/LOWER_EXTREMITY_RIGHT/FIBULA_RIGHT.stl",
+      "source_sha256": "492810f8ad4c9212d6947f688107b71bc18de92dab92ca2c2cb6d710a11cea00",
+      "source_bytes": 3059684,
+      "file": "bonehub-vhf-fibula_right.glb",
+      "sha256": "6d951c3b4f4c08227c77e719b9b528ea582f69fc72b3ea42c5b0dbae8ccb1fde",
+      "bytes": 1102204,
+      "reused": false,
+      "vertices": 30598,
+      "triangles": 61192,
+      "min": [
+        124.54840087890625,
+        279.18438720703125,
+        131.7654266357422
+      ],
+      "max": [
+        191.9745330810547,
+        307.504150390625,
+        473.03009033203125
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-hip_right",
+      "source_name": "HIP_RIGHT",
+      "region": "LOWER_EXTREMITY_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/LOWER_EXTREMITY_RIGHT/HIP_RIGHT.stl",
+      "source_sha256": "d944c7eb45ce939ace9564242411aa171710834893568960cd6324d67c3a5dfa",
+      "source_bytes": 14075284,
+      "file": "bonehub-vhf-hip_right.glb",
+      "sha256": "4cb2afb67718e71b94103edada271490fe0669fb8aaaf78179998a0b2a15152a",
+      "bytes": 5067796,
+      "vertices": 140752,
+      "triangles": 281504,
+      "min": [
+        90.73796844482422,
+        172.3607940673828,
+        816.3521728515625
+      ],
+      "max": [
+        238.2562713623047,
+        324.23480224609375,
+        1029.66357421875
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-patella_right",
+      "source_name": "PATELLA_RIGHT",
+      "region": "LOWER_EXTREMITY_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/LOWER_EXTREMITY_RIGHT/PATELLA_RIGHT.stl",
+      "source_sha256": "dc84c0ccaa2bc912001b8b233f1b1305ec4c93adb616313c02d8421d3c000773",
+      "source_bytes": 1020684,
+      "file": "bonehub-vhf-patella_right.glb",
+      "sha256": "7c253b787150505f63d96c961008dbd3dc710c906b396dcd54c677c16c91866f",
+      "bytes": 368164,
+      "reused": false,
+      "vertices": 10208,
+      "triangles": 20412,
+      "min": [
+        125.45853424072266,
+        192.8881072998047,
+        489.5650939941406
+      ],
+      "max": [
+        168.05523681640625,
+        221.3949432373047,
+        536.4230346679688
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-tibia_right",
+      "source_name": "TIBIA_RIGHT",
+      "region": "LOWER_EXTREMITY_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/LOWER_EXTREMITY_RIGHT/TIBIA_RIGHT.stl",
+      "source_sha256": "ed904c2986ce86ec55b284dd950e40ab870810ccbf109fc06c6c40f53c0fb9e8",
+      "source_bytes": 8255684,
+      "file": "bonehub-vhf-tibia_right.glb",
+      "sha256": "3755edf156027701a3face2ab6897cffdc3d96ca3bbfcfe06671734dd1b39c55",
+      "bytes": 2972768,
+      "reused": false,
+      "vertices": 82558,
+      "triangles": 165112,
+      "min": [
+        127.49640655517578,
+        228.9808807373047,
+        147.63595581054688
+      ],
+      "max": [
+        220.19171142578125,
+        298.8106689453125,
+        494.6680603027344
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-skull_cranial_maxilla",
+      "source_name": "SKULL_CRANIAL_MAXILLA",
+      "region": "SKULL",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SKULL/SKULL_CRANIAL_MAXILLA.stl",
+      "source_sha256": "45062e731484a25ce2811dc0a9dd54a7daf15af2a78d2e0573516b8d71d3d647",
+      "source_bytes": 41478484,
+      "file": "bonehub-vhf-skull_cranial_maxilla.glb",
+      "sha256": "9e7ce356a6d9a84b722eb0255b1748137e8e7c7b183c58adc712cb8a2e5412b0",
+      "bytes": 14932436,
+      "vertices": 414740,
+      "triangles": 829568,
+      "min": [
+        166.47909545898438,
+        126.41311645507812,
+        1562.6531982421875
+      ],
+      "max": [
+        307.37353515625,
+        316.2377014160156,
+        1723.7093505859375
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-skull_mandible",
+      "source_name": "SKULL_MANDIBLE",
+      "region": "SKULL",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SKULL/SKULL_MANDIBLE.stl",
+      "source_sha256": "97288a0372c82f3d88e417a31dbdf998265ca838924d7b5683e19bd7858e3bc4",
+      "source_bytes": 3785484,
+      "file": "bonehub-vhf-skull_mandible.glb",
+      "sha256": "663d575507307d9306338a94c374916a510d8b8ce1f534f6a702f7c49dc390aa",
+      "bytes": 1363060,
+      "vertices": 37820,
+      "triangles": 75708,
+      "min": [
+        178.78208923339844,
+        134.14498901367188,
+        1515.3995361328125
+      ],
+      "max": [
+        298.79638671875,
+        224.0627899169922,
+        1596.66064453125
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-sacrum",
+      "source_name": "SACRUM",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/SACRUM.stl",
+      "source_sha256": "0c6faeb1ded299835d8279714aa936e1b075c97bc38b2b6b03856a610ee83b2a",
+      "source_bytes": 9572284,
+      "file": "bonehub-vhf-sacrum.glb",
+      "sha256": "52eb0613be8cdc2d75c886d4fe83ea54efbc38cc4a68faf7b8b69f5c3205494a",
+      "bytes": 3446476,
+      "vertices": 95702,
+      "triangles": 191444,
+      "min": [
+        178.8276824951172,
+        241.93560791015625,
+        884.1405639648438
+      ],
+      "max": [
+        299.1800842285156,
+        341.2975769042969,
+        1008.2132568359375
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_c1",
+      "source_name": "VERTEBRA_C1",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_C1.stl",
+      "source_sha256": "7dd9cdb6e968510bbacd7b876751060f1a89d6c5b8b6d52807a011736003daec",
+      "source_bytes": 1585684,
+      "file": "bonehub-vhf-vertebra_c1.glb",
+      "sha256": "c32c9bf10e85df16552a475139acd721e027be0d365fbdf8f500f08033949ec7",
+      "bytes": 571492,
+      "vertices": 15852,
+      "triangles": 31712,
+      "min": [
+        195.64491271972656,
+        210.8543701171875,
+        1551.6973876953125
+      ],
+      "max": [
+        275.6413879394531,
+        257.5925598144531,
+        1581.2288818359375
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_c2",
+      "source_name": "VERTEBRA_C2",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_C2.stl",
+      "source_sha256": "76fa75851e0cd789f53ca1d36de4572f489c5b5e3966ed257af6ae2851f48712",
+      "source_bytes": 1409284,
+      "file": "bonehub-vhf-vertebra_c2.glb",
+      "sha256": "099376ae8f5ef10a0075dfb8eedd8f0af3a0a4c62b82ff6c0f07ee33849f4c10",
+      "bytes": 507988,
+      "vertices": 14088,
+      "triangles": 28184,
+      "min": [
+        206.41561889648438,
+        213.47421264648438,
+        1532.02783203125
+      ],
+      "max": [
+        260.3978271484375,
+        264.02825927734375,
+        1576.0601806640625
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_c3",
+      "source_name": "VERTEBRA_C3",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_C3.stl",
+      "source_sha256": "a4addfe285c809ea1a08a2fa473e54178f4de42d36e0676af8ec01e204c5fc8f",
+      "source_bytes": 1047884,
+      "file": "bonehub-vhf-vertebra_c3.glb",
+      "sha256": "bfd2c63a2e4e3e4dd4d29532ec6fa2b513b02eb1db0bb30a018a4ab1442026e7",
+      "bytes": 377884,
+      "vertices": 10474,
+      "triangles": 20956,
+      "min": [
+        207.26104736328125,
+        216.40966796875,
+        1517.6927490234375
+      ],
+      "max": [
+        261.67254638671875,
+        259.5628662109375,
+        1539.3404541015625
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_c4",
+      "source_name": "VERTEBRA_C4",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_C4.stl",
+      "source_sha256": "2bef47d456ed8b650acde6a3d95e3a819e4f01e50e73948f43e62c8c2b5754f2",
+      "source_bytes": 1062484,
+      "file": "bonehub-vhf-vertebra_c4.glb",
+      "sha256": "7c707cb076f7eb534fdf413da8cba70086f263f3df36b06ed2997ad727b98403",
+      "bytes": 383140,
+      "vertices": 10620,
+      "triangles": 21248,
+      "min": [
+        206.69534301757812,
+        220.0364227294922,
+        1502.5201416015625
+      ],
+      "max": [
+        263.10504150390625,
+        259.6060485839844,
+        1525.5137939453125
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_c5",
+      "source_name": "VERTEBRA_C5",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_C5.stl",
+      "source_sha256": "635420f4f320c1acb45b1e19a84a405d113798055b2e577324f59f50acd93be1",
+      "source_bytes": 1215484,
+      "file": "bonehub-vhf-vertebra_c5.glb",
+      "sha256": "62985d1dcc79a6d145f5c28624fd8e0813817170938329dbda88b2aca726d76c",
+      "bytes": 438216,
+      "vertices": 12150,
+      "triangles": 24308,
+      "min": [
+        207.3062286376953,
+        223.08802795410156,
+        1488.425048828125
+      ],
+      "max": [
+        264.62103271484375,
+        264.5926208496094,
+        1513.55078125
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_c6",
+      "source_name": "VERTEBRA_C6",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_C6.stl",
+      "source_sha256": "4f0453371c3accad17b6634e2e942c3bb250693a0f8b50c54f08c68b56c28c2f",
+      "source_bytes": 1266884,
+      "file": "bonehub-vhf-vertebra_c6.glb",
+      "sha256": "1b5e025eed2b88244cb16a79d327ec5904f0eb9f142d3d7855106f4dd61e39a5",
+      "bytes": 456720,
+      "vertices": 12664,
+      "triangles": 25336,
+      "min": [
+        207.76901245117188,
+        229.10800170898438,
+        1473.646484375
+      ],
+      "max": [
+        263.93634033203125,
+        276.006591796875,
+        1500.51318359375
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_c7",
+      "source_name": "VERTEBRA_C7",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_C7.stl",
+      "source_sha256": "809752ad70503618b7a8edf7d123e4ae3ffdaa59ff0a9f4a2d5bf417eefe326f",
+      "source_bytes": 1459684,
+      "file": "bonehub-vhf-vertebra_c7.glb",
+      "sha256": "0f1b9d1373f3a0cad31595b89477bc9f6ac1558b8648b9c460fe3e85effc36d3",
+      "bytes": 526148,
+      "vertices": 14594,
+      "triangles": 29192,
+      "min": [
+        204.1807403564453,
+        234.8739471435547,
+        1455.8828125
+      ],
+      "max": [
+        271.38702392578125,
+        293.73443603515625,
+        1487.068603515625
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_l1",
+      "source_name": "VERTEBRA_L1",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_L1.stl",
+      "source_sha256": "21bbe40bfad300e6c819334a882309d5a3bfff5e8a3af33042ab75db6e41486d",
+      "source_bytes": 2637884,
+      "file": "bonehub-vhf-vertebra_l1.glb",
+      "sha256": "bb7f313dfda946794b5a20d8feb542cf205bb64cdcb18b9f9e7c5b3b46d1a77c",
+      "bytes": 950332,
+      "vertices": 26378,
+      "triangles": 52756,
+      "min": [
+        200.64845275878906,
+        254.39971923828125,
+        1147.4417724609375
+      ],
+      "max": [
+        273.74591064453125,
+        331.1436767578125,
+        1195.212890625
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_l2",
+      "source_name": "VERTEBRA_L2",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_L2.stl",
+      "source_sha256": "3706737038f054b0aa1e0243d6dc36533ba01b96d0cea21dcd8545c094b3d8c8",
+      "source_bytes": 3041284,
+      "file": "bonehub-vhf-vertebra_l2.glb",
+      "sha256": "4c5fac5659a52d221b6b5a8e132f4d3d7c93a94511aa58325ec326f9eddc0acd",
+      "bytes": 1095556,
+      "vertices": 30412,
+      "triangles": 60824,
+      "min": [
+        204.8907928466797,
+        243.1411590576172,
+        1110.5743408203125
+      ],
+      "max": [
+        280.6652526855469,
+        329.9201354980469,
+        1162.7569580078125
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_l3",
+      "source_name": "VERTEBRA_L3",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_L3.stl",
+      "source_sha256": "bac37952a1cd18e71e0bdf9a2ff3e468e1757665a851a251a276155921bbe4be",
+      "source_bytes": 3448284,
+      "file": "bonehub-vhf-vertebra_l3.glb",
+      "sha256": "6ae8738f169e47a31db46bff0db4cbe26d13d9d6acb0261ba2d0afb5e443a7d3",
+      "bytes": 1242080,
+      "vertices": 34482,
+      "triangles": 68964,
+      "min": [
+        197.67807006835938,
+        239.13839721679688,
+        1071.0040283203125
+      ],
+      "max": [
+        285.16632080078125,
+        328.30474853515625,
+        1126.97314453125
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_l4",
+      "source_name": "VERTEBRA_L4",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_L4.stl",
+      "source_sha256": "786dca033144262d49b0ac7277efbc281c76218d3af4212360530da585caf978",
+      "source_bytes": 3515684,
+      "file": "bonehub-vhf-vertebra_l4.glb",
+      "sha256": "bbe40234efa879498189ef60b2d683681d00e402ec07ada3505ef628a794398b",
+      "bytes": 1266340,
+      "vertices": 35156,
+      "triangles": 70312,
+      "min": [
+        195.77919006347656,
+        234.9435272216797,
+        1041.462646484375
+      ],
+      "max": [
+        287.9449462890625,
+        322.5679626464844,
+        1095.1590576171875
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_l5",
+      "source_name": "VERTEBRA_L5",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_L5.stl",
+      "source_sha256": "b9b534f154495d030ec154cadcda54c29f3dbe68316956d6ccec472dae6495d3",
+      "source_bytes": 3395884,
+      "file": "bonehub-vhf-vertebra_l5.glb",
+      "sha256": "7adbdcf7896fec140e74f8610f99a8288b892cdf288f4ea1544864fbcccbcba1",
+      "bytes": 1223208,
+      "vertices": 33958,
+      "triangles": 67916,
+      "min": [
+        195.81825256347656,
+        231.88671875,
+        1012.7133178710938
+      ],
+      "max": [
+        287.1500244140625,
+        318.16448974609375,
+        1064.0106201171875
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_l6",
+      "source_name": "VERTEBRA_L6",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_L6.stl",
+      "source_sha256": "d202836faa4d31a6eae98ee0c2bfb400c4fc9744dd14375377455ddbc29436c9",
+      "source_bytes": 3560484,
+      "file": "bonehub-vhf-vertebra_l6.glb",
+      "sha256": "5d04bdba320367fb21a20d0ef357834035e0247bf80253886e39a3c937001695",
+      "bytes": 1282472,
+      "vertices": 35604,
+      "triangles": 71208,
+      "min": [
+        188.37722778320312,
+        233.35060119628906,
+        986.8264770507812
+      ],
+      "max": [
+        287.70538330078125,
+        314.81732177734375,
+        1033.132080078125
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_t1",
+      "source_name": "VERTEBRA_T1",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T1.stl",
+      "source_sha256": "6c84e7ecc0aa7cc560b8045a9cc5e6584a6249824f1b63c667175441555ed6c0",
+      "source_bytes": 1607684,
+      "file": "bonehub-vhf-vertebra_t1.glb",
+      "sha256": "179d057f22d25205bd7125c033346eede5080e18037197f75477b9a4f1d4b4ec",
+      "bytes": 579456,
+      "vertices": 16076,
+      "triangles": 32152,
+      "min": [
+        200.42254638671875,
+        241.82611083984375,
+        1438.43359375
+      ],
+      "max": [
+        275.0017395019531,
+        305.5821533203125,
+        1472.1177978515625
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_t10",
+      "source_name": "VERTEBRA_T10",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T10.stl",
+      "source_sha256": "b8aec8ccee959236ad505ac9247859972643d5265f9cc522bf19e912dc68d95f",
+      "source_bytes": 2078684,
+      "file": "bonehub-vhf-vertebra_t10.glb",
+      "sha256": "bb738baa5caf52ff9da58bd54b82ebe122604e6bcaee2ea6c8fbad420c245eb9",
+      "bytes": 749020,
+      "vertices": 20786,
+      "triangles": 41572,
+      "min": [
+        209.45938110351562,
+        260.998779296875,
+        1235.704833984375
+      ],
+      "max": [
+        272.8609619140625,
+        334.8460998535156,
+        1277.411865234375
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_t11",
+      "source_name": "VERTEBRA_T11",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T11.stl",
+      "source_sha256": "2096e81a0887dd3af24d1b6b3ae5cf093697207277600103dc76425a75ede1c4",
+      "source_bytes": 2146684,
+      "file": "bonehub-vhf-vertebra_t11.glb",
+      "sha256": "6d7665962dc4e1bd973189e415e834ce6f2fa203eea1df28d0614f9dc8a51b80",
+      "bytes": 773496,
+      "vertices": 21466,
+      "triangles": 42932,
+      "min": [
+        213.8436279296875,
+        261.443603515625,
+        1211.9158935546875
+      ],
+      "max": [
+        269.61865234375,
+        332.82830810546875,
+        1252.4619140625
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_t12",
+      "source_name": "VERTEBRA_T12",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T12.stl",
+      "source_sha256": "660cf2c8373b11f93708bc926664234d777f00e64cbf13d67bae166428b9c022",
+      "source_bytes": 2285684,
+      "file": "bonehub-vhf-vertebra_t12.glb",
+      "sha256": "2ab42d8395b5d5ecc02537c4427186f66aeecf9e4d51463de0c7bb499372c96b",
+      "bytes": 823540,
+      "vertices": 22856,
+      "triangles": 45712,
+      "min": [
+        215.9362030029297,
+        259.0899353027344,
+        1183.418212890625
+      ],
+      "max": [
+        266.8129577636719,
+        330.80670166015625,
+        1228.299072265625
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_t2",
+      "source_name": "VERTEBRA_T2",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T2.stl",
+      "source_sha256": "3e12da74c6e41cb6a42dd3c57972c276c8932c624c8035b1572e8f8f05e5ba2e",
+      "source_bytes": 1657884,
+      "file": "bonehub-vhf-vertebra_t2.glb",
+      "sha256": "196c3001c269cfe59386606cef4992a5d4a45fb5c3d53d783d115c76db07fb20",
+      "bytes": 597532,
+      "vertices": 16578,
+      "triangles": 33156,
+      "min": [
+        205.06466674804688,
+        249.01901245117188,
+        1416.7347412109375
+      ],
+      "max": [
+        272.6360168457031,
+        313.3072509765625,
+        1456.614990234375
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_t3",
+      "source_name": "VERTEBRA_T3",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T3.stl",
+      "source_sha256": "237f6d35ac319818d082f48ae1ab8f06c31d10e8c82d6b1bfd3b8735ec12301a",
+      "source_bytes": 1684484,
+      "file": "bonehub-vhf-vertebra_t3.glb",
+      "sha256": "9444f1e1f4bef003e7dde615d69752bcdb6a7581b1005798e9cb0f96bff29144",
+      "bytes": 607108,
+      "vertices": 16844,
+      "triangles": 33688,
+      "min": [
+        207.80618286132812,
+        252.9880828857422,
+        1396.0181884765625
+      ],
+      "max": [
+        270.3061218261719,
+        321.44659423828125,
+        1435.2288818359375
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_t4",
+      "source_name": "VERTEBRA_T4",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T4.stl",
+      "source_sha256": "d1ad318a49b24ee8b4b219c53ae05672c47f4dd8a934a4d0e58ecffa84dad34e",
+      "source_bytes": 1662084,
+      "file": "bonehub-vhf-vertebra_t4.glb",
+      "sha256": "c38839a828d331d7800d72aa6098f84c4233607ef7bbfb0119f53f437f7c39e4",
+      "bytes": 599044,
+      "vertices": 16620,
+      "triangles": 33240,
+      "min": [
+        209.30226135253906,
+        255.17098999023438,
+        1370.75048828125
+      ],
+      "max": [
+        270.3752746582031,
+        329.6130676269531,
+        1414.6446533203125
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_t5",
+      "source_name": "VERTEBRA_T5",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T5.stl",
+      "source_sha256": "541125f7ee27550cf3a8a7a4d70a941e04d1371067dc868ee2fa8b37314fe14d",
+      "source_bytes": 1659884,
+      "file": "bonehub-vhf-vertebra_t5.glb",
+      "sha256": "58523c15d8f993aaf9740e482630d5d8908120d9387f6cc5059ab61ac6ae979a",
+      "bytes": 598244,
+      "vertices": 16598,
+      "triangles": 33196,
+      "min": [
+        209.30838012695312,
+        261.48272705078125,
+        1347.8140869140625
+      ],
+      "max": [
+        270.9822998046875,
+        331.923828125,
+        1393.0986328125
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_t6",
+      "source_name": "VERTEBRA_T6",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T6.stl",
+      "source_sha256": "a1483acf7dd6f9a05e63ff7be0476c94e8402af8e0641d09a394f82cc7826b66",
+      "source_bytes": 1711284,
+      "file": "bonehub-vhf-vertebra_t6.glb",
+      "sha256": "d5f495879016bb6226426319a7c00c5dc7a657caf01829ce2e9761bec3e5a6cb",
+      "bytes": 616756,
+      "vertices": 17112,
+      "triangles": 34224,
+      "min": [
+        208.73709106445312,
+        260.98748779296875,
+        1324.3316650390625
+      ],
+      "max": [
+        269.1206970214844,
+        333.7255859375,
+        1370.4195556640625
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_t7",
+      "source_name": "VERTEBRA_T7",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T7.stl",
+      "source_sha256": "a02439f29810d3f5b95140634c6899d5de0e64fc0c066e3e150b101fa5fbb88c",
+      "source_bytes": 1784884,
+      "file": "bonehub-vhf-vertebra_t7.glb",
+      "sha256": "8f51252da8aeca229cc86bb8557ce560340afac8901ed1790e6ea1506003d226",
+      "bytes": 643248,
+      "vertices": 17848,
+      "triangles": 35696,
+      "min": [
+        208.0650177001953,
+        265.9726867675781,
+        1297.9974365234375
+      ],
+      "max": [
+        271.1976623535156,
+        334.0439758300781,
+        1347.45751953125
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_t8",
+      "source_name": "VERTEBRA_T8",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T8.stl",
+      "source_sha256": "4ec528beb311b6f08c8abf056a2e5bffd1e0a7926d791b47f40a6b51dddf1dd5",
+      "source_bytes": 1868484,
+      "file": "bonehub-vhf-vertebra_t8.glb",
+      "sha256": "e2c3f37d5f51fe5bf888ac608fd95fa902e0366d78a48bd2b8e565e60d05e01e",
+      "bytes": 673344,
+      "vertices": 18684,
+      "triangles": 37368,
+      "min": [
+        209.57472229003906,
+        265.8681640625,
+        1275.8817138671875
+      ],
+      "max": [
+        271.4375915527344,
+        334.7501220703125,
+        1324.3167724609375
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-vertebra_t9",
+      "source_name": "VERTEBRA_T9",
+      "region": "SPINAL_COLUMN",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/SPINAL_COLUMN/VERTEBRA_T9.stl",
+      "source_sha256": "cc79491d970c0ab0d16bfddb9a195b49f2818998ee7351ab518f2591a48f46c8",
+      "source_bytes": 1879884,
+      "file": "bonehub-vhf-vertebra_t9.glb",
+      "sha256": "4f2cd82b15dfc96fb279a1cefa61b421a59a8df5de6de836d466a59f9728bd2b",
+      "bytes": 677452,
+      "vertices": 18798,
+      "triangles": 37596,
+      "min": [
+        210.2652587890625,
+        264.2911376953125,
+        1256.732666015625
+      ],
+      "max": [
+        275.0522155761719,
+        334.0079650878906,
+        1300.5101318359375
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_10_left",
+      "source_name": "RIB_10_LEFT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_10_LEFT.stl",
+      "source_sha256": "5db524edd7af95f957ea891297d1fb4d685edd1752e3bfa17f72ce72c6293fe9",
+      "source_bytes": 1646684,
+      "file": "bonehub-vhf-rib_10_left.glb",
+      "sha256": "2c371b27d1e3d6c81a585e348f10b5d16dda49df48eb1343c4f830fd0ccf7523",
+      "bytes": 593524,
+      "vertices": 16468,
+      "triangles": 32932,
+      "min": [
+        263.8343811035156,
+        226.72767639160156,
+        1140.6893310546875
+      ],
+      "max": [
+        376.28875732421875,
+        322.5132141113281,
+        1278.0247802734375
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_10_right",
+      "source_name": "RIB_10_RIGHT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_10_RIGHT.stl",
+      "source_sha256": "b5aa1da8bfd29a80dcea8ac4e01decbdef0f956ff8e6adf7a6512f693e9a8cd4",
+      "source_bytes": 1469284,
+      "file": "bonehub-vhf-rib_10_right.glb",
+      "sha256": "5311822e2b692e22f594677cab3cd163c4884b196aafa57fa0d03ca62358baf2",
+      "bytes": 529660,
+      "vertices": 14694,
+      "triangles": 29384,
+      "min": [
+        105.12633514404297,
+        219.7550811767578,
+        1134.5054931640625
+      ],
+      "max": [
+        207.33004760742188,
+        321.9278564453125,
+        1272.2470703125
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_11_left",
+      "source_name": "RIB_11_LEFT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_11_LEFT.stl",
+      "source_sha256": "ffd148b9753656c1ba784e350a0431937776d2f4c4195d20da09f3da82e815bd",
+      "source_bytes": 1213884,
+      "file": "bonehub-vhf-rib_11_left.glb",
+      "sha256": "2aaa2122bdcaf1145f90b6797838d5502ec22d355e30f9c2d96f602d73c34c7f",
+      "bytes": 437716,
+      "vertices": 12140,
+      "triangles": 24276,
+      "min": [
+        274.2469787597656,
+        247.8287353515625,
+        1120.605224609375
+      ],
+      "max": [
+        371.16082763671875,
+        322.3692626953125,
+        1244.5140380859375
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_11_right",
+      "source_name": "RIB_11_RIGHT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_11_RIGHT.stl",
+      "source_sha256": "fa6d52d81c3a72bc6176786bba9ff252c6bf5fcd79b373fe9d73a3f382dbb341",
+      "source_bytes": 1272084,
+      "file": "bonehub-vhf-rib_11_right.glb",
+      "sha256": "ae8badaf6c9ca4bac8edd5ddc464f3d4b561a77f86f4370df2ad9d625571fb02",
+      "bytes": 458672,
+      "vertices": 12722,
+      "triangles": 25440,
+      "min": [
+        113.01619720458984,
+        246.51075744628906,
+        1114.2362060546875
+      ],
+      "max": [
+        211.73223876953125,
+        321.3405456542969,
+        1243.5408935546875
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_12_left",
+      "source_name": "RIB_12_LEFT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_12_LEFT.stl",
+      "source_sha256": "38d8c08a691779f86e35c2a9c560ddc9ada094833fab7c41c9834d5472334463",
+      "source_bytes": 724484,
+      "file": "bonehub-vhf-rib_12_left.glb",
+      "sha256": "beb247369ef3adc5c6ef7d5677b19d1f18c23eb21f48ada26f20dd82acff165c",
+      "bytes": 261528,
+      "vertices": 7246,
+      "triangles": 14488,
+      "min": [
+        273.85711669921875,
+        284.5257873535156,
+        1116.550537109375
+      ],
+      "max": [
+        349.97784423828125,
+        314.8294677734375,
+        1209.260986328125
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_12_right",
+      "source_name": "RIB_12_RIGHT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_12_RIGHT.stl",
+      "source_sha256": "93ec54ad3005d23746dc6e96ba582c19ddb3c432f3221f4576ac5b784218da2c",
+      "source_bytes": 912484,
+      "file": "bonehub-vhf-rib_12_right.glb",
+      "sha256": "62830da4f246e961768d04258e5f7c51be55db72021bc38cf7ee073787217fe3",
+      "bytes": 329212,
+      "vertices": 9126,
+      "triangles": 18248,
+      "min": [
+        132.94415283203125,
+        278.2906799316406,
+        1103.8638916015625
+      ],
+      "max": [
+        216.44012451171875,
+        313.9151611328125,
+        1213.2462158203125
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_1_left",
+      "source_name": "RIB_1_LEFT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_1_LEFT.stl",
+      "source_sha256": "241d337a9e7d1108b160311818070d7f9d2dd7889f5a16c3f4f0710eb052b76f",
+      "source_bytes": 1321884,
+      "file": "bonehub-vhf-rib_1_left.glb",
+      "sha256": "37067d554ed9cc2845d41f2cfbaefdb9eae7cff46f7bf0309e9e515980c043e4",
+      "bytes": 476592,
+      "vertices": 13220,
+      "triangles": 26436,
+      "min": [
+        264.5089416503906,
+        189.90786743164062,
+        1398.4620361328125
+      ],
+      "max": [
+        316.0130310058594,
+        267.0111083984375,
+        1469.326904296875
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_1_right",
+      "source_name": "RIB_1_RIGHT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_1_RIGHT.stl",
+      "source_sha256": "0af506a41bf460ea989b5750f473c342efb5cff81e5ebed105af9bb37985e066",
+      "source_bytes": 1438084,
+      "file": "bonehub-vhf-rib_1_right.glb",
+      "sha256": "861e18342d1f2b86259780e53ff152e7f63be32717d6ebbf559fa90208ec2555",
+      "bytes": 518428,
+      "vertices": 14382,
+      "triangles": 28760,
+      "min": [
+        163.79815673828125,
+        189.70101928710938,
+        1393.8675537109375
+      ],
+      "max": [
+        215.17481994628906,
+        264.7776184082031,
+        1464.6820068359375
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_2_left",
+      "source_name": "RIB_2_LEFT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_2_LEFT.stl",
+      "source_sha256": "600067946dbd938a0117c1511382b9e9c7e28ef1c054dc1dc8f83de94a283353",
+      "source_bytes": 1626884,
+      "file": "bonehub-vhf-rib_2_left.glb",
+      "sha256": "29b994dcb72f8c6962559c1f08ff5659202277888390cd73a90fe7f139c78de2",
+      "bytes": 586392,
+      "vertices": 16270,
+      "triangles": 32536,
+      "min": [
+        264.1302795410156,
+        179.68695068359375,
+        1373.532470703125
+      ],
+      "max": [
+        344.9961853027344,
+        287.0680236816406,
+        1455.601318359375
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_2_right",
+      "source_name": "RIB_2_RIGHT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_2_RIGHT.stl",
+      "source_sha256": "9034bdb3887b546106fdd3efc5d85d614680fe3f6246b0f8aa82a2eafa3a80e4",
+      "source_bytes": 1532884,
+      "file": "bonehub-vhf-rib_2_right.glb",
+      "sha256": "fedf21df1a97584c4201d5b33c9ef94f9d50be41990f8e1006281ce95869d8a7",
+      "bytes": 552552,
+      "vertices": 15330,
+      "triangles": 30656,
+      "min": [
+        135.44261169433594,
+        182.5838165283203,
+        1369.39208984375
+      ],
+      "max": [
+        212.37911987304688,
+        283.9718933105469,
+        1450.2158203125
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_3_left",
+      "source_name": "RIB_3_LEFT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_3_LEFT.stl",
+      "source_sha256": "ff91fb78e9d944438b82c54719cf4a9203dad1b4b47a87c6458de67f6cf0d2b6",
+      "source_bytes": 1771084,
+      "file": "bonehub-vhf-rib_3_left.glb",
+      "sha256": "eff7d41a1e686e8f15ff2bca909fc2ba00c65f920b6d090116eff2d8686e3cd6",
+      "bytes": 638308,
+      "vertices": 17712,
+      "triangles": 35420,
+      "min": [
+        267.23150634765625,
+        174.66876220703125,
+        1349.83837890625
+      ],
+      "max": [
+        362.80181884765625,
+        303.6530456542969,
+        1437.5330810546875
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_3_right",
+      "source_name": "RIB_3_RIGHT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_3_RIGHT.stl",
+      "source_sha256": "9143bf522b2cdeba6472a87fb31227ff48e118394d7a00012c8743a9c24327de",
+      "source_bytes": 1699484,
+      "file": "bonehub-vhf-rib_3_right.glb",
+      "sha256": "f9224d78c5126408a1d50d0d6c2f199ebd2d94d97a3b448a0cc5d1a5c28ad236",
+      "bytes": 612532,
+      "vertices": 16996,
+      "triangles": 33988,
+      "min": [
+        121.84391784667969,
+        179.19911193847656,
+        1337.358642578125
+      ],
+      "max": [
+        213.1678924560547,
+        298.6429443359375,
+        1430.6895751953125
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_4_left",
+      "source_name": "RIB_4_LEFT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_4_LEFT.stl",
+      "source_sha256": "d8842820d232088d64c12f59892ef97cc610d946ee03ec339f5b841cdec805e1",
+      "source_bytes": 1864084,
+      "file": "bonehub-vhf-rib_4_left.glb",
+      "sha256": "7fe20c6217d196c0b81bf819c38b105aadc043756b97cfa3bc0244e98f94ee68",
+      "bytes": 671788,
+      "vertices": 18642,
+      "triangles": 37280,
+      "min": [
+        269.6883239746094,
+        168.2823486328125,
+        1321.4586181640625
+      ],
+      "max": [
+        368.04083251953125,
+        313.6502380371094,
+        1419.542236328125
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_4_right",
+      "source_name": "RIB_4_RIGHT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_4_RIGHT.stl",
+      "source_sha256": "cc68509513533558b282cef9966e8eaf83c6af59c44c7081fb5fb1af0fc5a4fb",
+      "source_bytes": 1818684,
+      "file": "bonehub-vhf-rib_4_right.glb",
+      "sha256": "099312d331b3f90b319726b4066160168b44a8dd38b283ef0848e7a45e4b3ca2",
+      "bytes": 655444,
+      "vertices": 18188,
+      "triangles": 36372,
+      "min": [
+        116.00220489501953,
+        174.44046020507812,
+        1305.5030517578125
+      ],
+      "max": [
+        213.90174865722656,
+        308.2424621582031,
+        1411.651611328125
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_5_left",
+      "source_name": "RIB_5_LEFT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_5_LEFT.stl",
+      "source_sha256": "61c0defc7771f70c64f5f0f4542870272b76d0d28b41d8a8032c3c45ed0ba123",
+      "source_bytes": 1969684,
+      "file": "bonehub-vhf-rib_5_left.glb",
+      "sha256": "19a206e1800e3e1ab5f2c26f1de6580fcbd68771c76243887471f8713b759a39",
+      "bytes": 709800,
+      "vertices": 19698,
+      "triangles": 39392,
+      "min": [
+        265.746337890625,
+        166.67469787597656,
+        1286.4696044921875
+      ],
+      "max": [
+        369.9578552246094,
+        319.8070983886719,
+        1398.592041015625
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_5_right",
+      "source_name": "RIB_5_RIGHT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_5_RIGHT.stl",
+      "source_sha256": "c455926565d3805fb14950e6d3b2f37aa58a40f8a0aa9f5312dc3d16c5fa6028",
+      "source_bytes": 1937684,
+      "file": "bonehub-vhf-rib_5_right.glb",
+      "sha256": "6326b0baf0d387052dfe66eddb6581cb18500d949d1db3b6ee5bc2f5b13d79d4",
+      "bytes": 698284,
+      "vertices": 19378,
+      "triangles": 38752,
+      "min": [
+        113.7685775756836,
+        171.66958618164062,
+        1274.3460693359375
+      ],
+      "max": [
+        211.1062774658203,
+        313.7766418457031,
+        1392.4359130859375
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_6_left",
+      "source_name": "RIB_6_LEFT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_6_LEFT.stl",
+      "source_sha256": "e91844eb898265bb24224ef0427c593a65a521fc6a20fe830004efa72cadc8be",
+      "source_bytes": 1959884,
+      "file": "bonehub-vhf-rib_6_left.glb",
+      "sha256": "ca9a6df5f8dd2c7767b5ef03e77b9e341e09712c20029a0dc0b5179e6ef2b132",
+      "bytes": 706272,
+      "vertices": 19600,
+      "triangles": 39196,
+      "min": [
+        264.2561340332031,
+        172.80697631835938,
+        1260.3865966796875
+      ],
+      "max": [
+        373.3551330566406,
+        323.3581237792969,
+        1376.5654296875
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_6_right",
+      "source_name": "RIB_6_RIGHT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_6_RIGHT.stl",
+      "source_sha256": "19deb834142eb48ddf09547ffdbc4e2262d6cb8eea74e6e599a167179651bacf",
+      "source_bytes": 2003484,
+      "file": "bonehub-vhf-rib_6_right.glb",
+      "sha256": "f72ab88fe753e3b309c9be2b80497f767ffb4157eda75ca24dd137632717dba4",
+      "bytes": 721972,
+      "vertices": 20036,
+      "triangles": 40068,
+      "min": [
+        111.68572998046875,
+        175.5580291748047,
+        1248.205810546875
+      ],
+      "max": [
+        216.37696838378906,
+        318.4625244140625,
+        1368.647216796875
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_7_left",
+      "source_name": "RIB_7_LEFT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_7_LEFT.stl",
+      "source_sha256": "1056370d172c8c7b02381524d63919f7835b2a776ab5b420b249ed3a5790c0e3",
+      "source_bytes": 2115084,
+      "file": "bonehub-vhf-rib_7_left.glb",
+      "sha256": "08a38a871e9a3476d69b1ef5dc836233a2c47fc3bb9014f882bfced275a517fd",
+      "bytes": 762144,
+      "vertices": 21152,
+      "triangles": 42300,
+      "min": [
+        262.8204650878906,
+        177.1571502685547,
+        1220.3394775390625
+      ],
+      "max": [
+        373.2920227050781,
+        323.0382995605469,
+        1353.4990234375
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_7_right",
+      "source_name": "RIB_7_RIGHT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_7_RIGHT.stl",
+      "source_sha256": "a80a66e61a86bd44cad1e242fd9825432c49807e39b83c021c7bbba55bc7fa8c",
+      "source_bytes": 2141284,
+      "file": "bonehub-vhf-rib_7_right.glb",
+      "sha256": "2a60c66c032da2ae6e3a3e4ce77a67710b4e495ad89f7a682ac52eba1522121b",
+      "bytes": 771580,
+      "vertices": 21414,
+      "triangles": 42824,
+      "min": [
+        112.34708404541016,
+        175.38262939453125,
+        1216.3983154296875
+      ],
+      "max": [
+        215.4640350341797,
+        320.4644775390625,
+        1345.1998291015625
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_8_left",
+      "source_name": "RIB_8_LEFT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_8_LEFT.stl",
+      "source_sha256": "7a4b97117d392871c81201bbb4a23865a8cfeee4d4cad4c29280917fdac77d10",
+      "source_bytes": 2048884,
+      "file": "bonehub-vhf-rib_8_left.glb",
+      "sha256": "46971a30b8fe792c4dcd80b439ee1dd28ceb0f2d2fb8094d643f2bf89fc52984",
+      "bytes": 738312,
+      "vertices": 20490,
+      "triangles": 40976,
+      "min": [
+        264.8040466308594,
+        188.43492126464844,
+        1187.8330078125
+      ],
+      "max": [
+        376.1697082519531,
+        324.1951599121094,
+        1324.1922607421875
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_8_right",
+      "source_name": "RIB_8_RIGHT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_8_RIGHT.stl",
+      "source_sha256": "48a6db4d7a6ee66c890ff085f3e054033f928924548ae5027ae2141cba2d6d1c",
+      "source_bytes": 1997684,
+      "file": "bonehub-vhf-rib_8_right.glb",
+      "sha256": "b02f6c0b5f732eb66e21773ea78ebefec696100bd52320abaed1ba2e64a0ef61",
+      "bytes": 719884,
+      "vertices": 19978,
+      "triangles": 39952,
+      "min": [
+        111.54756927490234,
+        179.30667114257812,
+        1182.8369140625
+      ],
+      "max": [
+        215.00604248046875,
+        321.9089660644531,
+        1322.429931640625
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_9_left",
+      "source_name": "RIB_9_LEFT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_9_LEFT.stl",
+      "source_sha256": "7d0c1d088c728fa39de8c80c6fbf50a90c83c757009065db8fdb7edfcdfd7e81",
+      "source_bytes": 1869284,
+      "file": "bonehub-vhf-rib_9_left.glb",
+      "sha256": "33e5786ac1d54ebfd5964499269204762188779643ffd198dff1ce09cf6a846a",
+      "bytes": 673652,
+      "vertices": 18694,
+      "triangles": 37384,
+      "min": [
+        270.6764221191406,
+        204.40711975097656,
+        1153.728515625
+      ],
+      "max": [
+        377.6621398925781,
+        322.76904296875,
+        1300.1629638671875
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-rib_9_right",
+      "source_name": "RIB_9_RIGHT",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/RIB_9_RIGHT.stl",
+      "source_sha256": "feb3c1ed2ad3b96b756e44a264c1e8b3db94d33bbf6b1297f199275bd001d7f9",
+      "source_bytes": 1884084,
+      "file": "bonehub-vhf-rib_9_right.glb",
+      "sha256": "4802f39608fbc487c5c344495f9026376c2c5080bad76c432782c378b41c64e2",
+      "bytes": 678984,
+      "vertices": 18842,
+      "triangles": 37680,
+      "min": [
+        105.264404296875,
+        198.0452423095703,
+        1154.8070068359375
+      ],
+      "max": [
+        214.9032745361328,
+        322.7300109863281,
+        1299.49951171875
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-sternum",
+      "source_name": "STERNUM",
+      "region": "THORAX",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/THORAX/STERNUM.stl",
+      "source_sha256": "896732557208adaa75e569ac9d976223dda0db60ab8a16951277118483acc2ad",
+      "source_bytes": 3089284,
+      "file": "bonehub-vhf-sternum.glb",
+      "sha256": "8c3b15e0f1b48abc4933a758f12b52ced7e93403cd17195ebf6e77ebabe4ec03",
+      "bytes": 1112860,
+      "vertices": 30894,
+      "triangles": 61784,
+      "min": [
+        208.68890380859375,
+        160.21656799316406,
+        1244.4173583984375
+      ],
+      "max": [
+        276.24542236328125,
+        213.57017517089844,
+        1421.5765380859375
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-clavicle_left",
+      "source_name": "CLAVICLE_LEFT",
+      "region": "UPPER_EXTREMITY_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/UPPER_EXTREMITY_LEFT/CLAVICLE_LEFT.stl",
+      "source_sha256": "c2fa2f35a11035d40d2d2eaa60f6fffb3851d7890a46c5c8ff92429d7615fa35",
+      "source_bytes": 1879284,
+      "file": "bonehub-vhf-clavicle_left.glb",
+      "sha256": "2974eed90783fe7f96b76a40fe1662f0835cafe3b644d394a84dc0f37de40e88",
+      "bytes": 677260,
+      "vertices": 18794,
+      "triangles": 37584,
+      "min": [
+        255.79844665527344,
+        191.9143524169922,
+        1414.423828125
+      ],
+      "max": [
+        377.6915588378906,
+        257.62677001953125,
+        1495.6378173828125
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-humerus_left",
+      "source_name": "HUMERUS_LEFT",
+      "region": "UPPER_EXTREMITY_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/UPPER_EXTREMITY_LEFT/HUMERUS_LEFT.stl",
+      "source_sha256": "9431e76d848093fc3966e3b805d9a52ac13a349e8076811beac275f8f92432d5",
+      "source_bytes": 5721884,
+      "file": "bonehub-vhf-humerus_left.glb",
+      "sha256": "d46cd94ac4fc1f7a2eaf663dd187fa79ae9d33b0a98028ffa311044e52f71419",
+      "bytes": 2060596,
+      "reused": false,
+      "vertices": 57220,
+      "triangles": 114436,
+      "min": [
+        381.0965881347656,
+        222.4756622314453,
+        1203.2724609375
+      ],
+      "max": [
+        480.9421691894531,
+        326.8859558105469,
+        1482.6273193359375
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-radius_left",
+      "source_name": "RADIUS_LEFT",
+      "region": "UPPER_EXTREMITY_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/UPPER_EXTREMITY_LEFT/RADIUS_LEFT.stl",
+      "source_sha256": "5f8c1007fa5f431fd56fa95408646e76043f2ac94467cc5f8c7d127393ab6baf",
+      "source_bytes": 2573884,
+      "file": "bonehub-vhf-radius_left.glb",
+      "sha256": "a48b990f9fc40642b456e17922693e1a917d04c921c2e5df11dbafd0337feb87",
+      "bytes": 927316,
+      "reused": false,
+      "vertices": 25740,
+      "triangles": 51476,
+      "min": [
+        407.3711242675781,
+        147.34027099609375,
+        1044.5216064453125
+      ],
+      "max": [
+        481.7980651855469,
+        292.75665283203125,
+        1213.8948974609375
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-scapula_left",
+      "source_name": "SCAPULA_LEFT",
+      "region": "UPPER_EXTREMITY_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/UPPER_EXTREMITY_LEFT/SCAPULA_LEFT.stl",
+      "source_sha256": "6a3808a243deca0c1dbca12775d8c41f33188f736d196efc138df86867bb6268",
+      "source_bytes": 7382684,
+      "file": "bonehub-vhf-scapula_left.glb",
+      "sha256": "8253173a7714caf72f32a8c295ed08ac9b2f1ee0fd54cd56426146b08529cbd8",
+      "bytes": 2658484,
+      "vertices": 73828,
+      "triangles": 147652,
+      "min": [
+        291.0782775878906,
+        225.1164093017578,
+        1349.3702392578125
+      ],
+      "max": [
+        405.65716552734375,
+        334.8072814941406,
+        1496.61767578125
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-ulna_left",
+      "source_name": "ULNA_LEFT",
+      "region": "UPPER_EXTREMITY_LEFT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/UPPER_EXTREMITY_LEFT/ULNA_LEFT.stl",
+      "source_sha256": "f1ad7953a1e693d6a275bbf31b24cc7087085435d64de87edd4b336daffd09ae",
+      "source_bytes": 2850084,
+      "file": "bonehub-vhf-ulna_left.glb",
+      "sha256": "60162d57b1579c4c73e1ce8c92d30f0eb9ffcd7e6992044ba490cd286f04afc1",
+      "bytes": 1026748,
+      "reused": false,
+      "vertices": 28502,
+      "triangles": 57000,
+      "min": [
+        421.44818115234375,
+        174.61749267578125,
+        1035.309326171875
+      ],
+      "max": [
+        479.94586181640625,
+        328.2829895019531,
+        1223.5360107421875
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-clavicle_right",
+      "source_name": "CLAVICLE_RIGHT",
+      "region": "UPPER_EXTREMITY_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/UPPER_EXTREMITY_RIGHT/CLAVICLE_RIGHT.stl",
+      "source_sha256": "4780e63652063450a50f84dd8b668683e30068cbccbec83e3b72495be1f3280c",
+      "source_bytes": 1988484,
+      "file": "bonehub-vhf-clavicle_right.glb",
+      "sha256": "71597a44de7b9e7319a3d0b7984350ecd85b11f9ef95491b9276e4acebc29ce1",
+      "bytes": 716576,
+      "vertices": 19886,
+      "triangles": 39768,
+      "min": [
+        103.20630645751953,
+        195.15066528320312,
+        1409.937255859375
+      ],
+      "max": [
+        226.81394958496094,
+        262.6244812011719,
+        1486.398681640625
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-humerus_right",
+      "source_name": "HUMERUS_RIGHT",
+      "region": "UPPER_EXTREMITY_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/UPPER_EXTREMITY_RIGHT/HUMERUS_RIGHT.stl",
+      "source_sha256": "475acd35ae0d5b8925ad6b47672d6cda6d71e6947e8c05ca4735f85c7897d3dd",
+      "source_bytes": 5154284,
+      "file": "bonehub-vhf-humerus_right.glb",
+      "sha256": "4bf70fe62fe0af09856fd9ebd55e7210f117057dee4c38eb3236bcfad6c96544",
+      "bytes": 1856264,
+      "reused": false,
+      "vertices": 51544,
+      "triangles": 103084,
+      "min": [
+        11.277138710021973,
+        221.38050842285156,
+        1195.258056640625
+      ],
+      "max": [
+        102.36803436279297,
+        321.6619567871094,
+        1471.62158203125
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-radius_right",
+      "source_name": "RADIUS_RIGHT",
+      "region": "UPPER_EXTREMITY_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/UPPER_EXTREMITY_RIGHT/RADIUS_RIGHT.stl",
+      "source_sha256": "2f2370fcb1cf556f93873c1c2c80014f86bead8acf6bfb563d0beb5c4692f565",
+      "source_bytes": 2190084,
+      "file": "bonehub-vhf-radius_right.glb",
+      "sha256": "c44865007b9a9c88e97e9fd2dd2175d6575920266848f977e7a4fdc3cccad490",
+      "bytes": 789140,
+      "reused": false,
+      "vertices": 21902,
+      "triangles": 43800,
+      "min": [
+        6.7260518074035645,
+        159.3819580078125,
+        1015.69970703125
+      ],
+      "max": [
+        68.6031494140625,
+        274.7074890136719,
+        1180.8671875
+      ],
+      "repeated_index_triangles": 0
+    },
+    {
+      "id": "bonehub-vhf-scapula_right",
+      "source_name": "SCAPULA_RIGHT",
+      "region": "UPPER_EXTREMITY_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/UPPER_EXTREMITY_RIGHT/SCAPULA_RIGHT.stl",
+      "source_sha256": "837f3725a315bd443f0945fc8bf58f72397efb4c762171ae1fc6a301be33c274",
+      "source_bytes": 7354684,
+      "file": "bonehub-vhf-scapula_right.glb",
+      "sha256": "ef34a0e5186237dc9a1fa2ff22494ec36ada58a888c26e26f0a2b642b8cbfd83",
+      "bytes": 2648404,
+      "vertices": 73548,
+      "triangles": 147092,
+      "min": [
+        74.92940521240234,
+        225.98492431640625,
+        1332.765625
+      ],
+      "max": [
+        185.93222045898438,
+        334.5306396484375,
+        1485.5552978515625
+      ],
+      "repeated_index_triangles": 0,
+      "reused": true
+    },
+    {
+      "id": "bonehub-vhf-ulna_right",
+      "source_name": "ULNA_RIGHT",
+      "region": "UPPER_EXTREMITY_RIGHT",
+      "source_url": "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/resolve/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/02_Female/UPPER_EXTREMITY_RIGHT/ULNA_RIGHT.stl",
+      "source_sha256": "291810ccbc225e3264a8fc91ec024784b29750297a3707a02063f23a90e7ffda",
+      "source_bytes": 1431484,
+      "file": "bonehub-vhf-ulna_right.glb",
+      "sha256": "a4add1cab1b6a4c5c642acedeef04e39da11d4d27830c1ed8821f7062b41d013",
+      "bytes": 516048,
+      "reused": false,
+      "vertices": 14316,
+      "triangles": 28628,
+      "min": [
+        6.372609615325928,
+        182.442626953125,
+        1007.7531127929688
+      ],
+      "max": [
+        48.850547790527344,
+        274.6545715332031,
+        1132.82666015625
+      ],
+      "repeated_index_triangles": 0
+    }
+  ]
+}
