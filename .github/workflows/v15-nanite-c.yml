@@ -2,7 +2,7 @@ name: NANITE-C constrained research
 on:
   pull_request:
     branches: ['feat/v15-expedition-gamepad']
-    paths: ['scripts/nanite_c*.mjs','scripts/vendor/meshoptimizer-0.22/**','.github/workflows/v15-nanite-c.yml']
+    paths: ['scripts/nanite_c*.mjs','scripts/vendor/meshoptimizer-0.22/**','.github/workflows/v15-nanite-c.yml','assets/atlas/unity-nmo-codec.mjs','assets/atlas/unity-nmq-research-worker.mjs']
   workflow_dispatch:
 permissions:
   contents: read
@@ -17,8 +17,8 @@ jobs:
         with:
           node-version: '22'
       - run: npm test
-      - run: node --test scripts/nanite_c_surface.test.mjs
-      - run: node --check scripts/nanite_c_matrix.mjs
+      - run: node --test scripts/nanite_c_surface.test.mjs scripts/nanite_c_codec.test.mjs
+      - run: node --check scripts/nanite_c_matrix.mjs && node --check assets/atlas/unity-nmq-research-worker.mjs
       - if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -27,6 +27,9 @@ jobs:
             scripts/nanite_c*.mjs
             scripts/vendor/meshoptimizer-0.22/
             assets/atlas/vhf-source.js
+            assets/atlas/unity-nmo-codec.mjs
+            assets/atlas/unity-nmq-research-worker.mjs
+            assets/atlas/vendor/meshopt_decoder.js
           retention-days: 7
   matrix:
     if: github.head_ref == 'feat/unity-nanite' || github.ref == 'refs/heads/feat/unity-nanite'
