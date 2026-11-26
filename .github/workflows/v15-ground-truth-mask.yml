@@ -24,7 +24,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install --only-binary=:all: numpy==2.2.6 scipy==1.15.3 scikit-image==0.25.2 trimesh==4.6.10
+      - run: |
+          python -m pip install --only-binary=:all: numpy==2.2.6 scipy==1.15.3 scikit-image==0.25.2 trimesh==4.6.10
       - run: python scripts/ground_truth_mesh_mask.py --self-test
       - name: Retrieve exact verified input archives
         env:
