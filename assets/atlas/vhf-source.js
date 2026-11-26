@@ -192,8 +192,12 @@ globalThis.BodyVHF=(function sourceModule(){
  }
  function chooseLod(part,c,selected,current){
   const levels=part.lods||[],find=level=>levels.find(p=>p.lodLevel===level);
-  if(selected===part.id||c.zoom>=4.5||(current==='exact'&&c.zoom>3.8))return part;
-  if(c.zoom>=1.7||(current==='regional'&&c.zoom>1.4))return find('regional')||part;
+  // The same qualified LOD thresholds now use physical distance in flight.
+  // Conservative closest AABB distance: never assume a mesh surface is closer.
+  const distance=c.flight?Math.hypot(...['x','y','z'].map((k,i)=>Math.max(part.min[i]-c.target[k],0,c.target[k]-part.max[i]))):null;
+  const detail=c.flight?7.4/Math.max(.005,distance):c.zoom;
+  if(selected===part.id||detail>=4.5||(current==='exact'&&detail>3.8))return part;
+  if(detail>=1.7||(current==='regional'&&detail>1.4))return find('regional')||part;
   return find('overview')||find('regional')||part;
  }
  function overviewFrameSpan(b){return Math.max(3.25,2*(b.radius+.04)/Math.max(.1,1-b.radius/7.4)*1.12);}
