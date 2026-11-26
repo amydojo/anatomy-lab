@@ -46,7 +46,27 @@
    out[k]=clamp(origin[k]+delta[k],lower,upper)-origin[k];
   }return out;
  }
- function spatialStep(base,c,motion,dt,b,maxZoom,p,orthographic=false){
+ // Wide mobility is opt-in for the unified world. Maintain upright camera axes near the poles.
+ const WIDE_PITCH=89.5*Math.PI/180;
+ function travelEnvelope(b,c,roam=false){
+  if(!b?.min||!b?.max||!b.min.every(Number.isFinite)||!b.max.every(Number.isFinite))return null;
+  const center=Object.fromEntries(xyz.map((k,i)=>[k,(b.min[i]+b.max[i])/2]));
+  const span=Math.max(...b.max.map((x,i)=>x-b.min[i]));
+  return {center,radius:Math.max(4,span*3,Math.min(20,c.frameSpan||3.25)*3)+(roam?Math.hypot(.04,7.4):0)};
+ }
+ // Radial limit, rather than independent world-axis clamps. Keep the direction
+ // of a requested displacement and allow recovery from an existing outside pose.
+ function radialDelta(origin,delta,b,c,roam=false){
+  const envelope=travelEnvelope(b,c,roam);if(!envelope)return delta;
+  const q=sub(origin,envelope.center),d2=xyz.reduce((n,k)=>n+delta[k]*delta[k],0);
+  if(!d2)return delta;
+  const distance=Math.hypot(q.x,q.y,q.z),radius=Math.max(envelope.radius,distance);
+  const dot=xyz.reduce((n,k)=>n+q[k]*delta[k],0);
+  const limit=Math.max(0,(-dot+Math.sqrt(Math.max(0,dot*dot+d2*(radius*radius-distance*distance))))/d2);
+  const t=Math.min(1,limit);
+  return Object.fromEntries(xyz.map(k=>[k,delta[k]*t]));
+ }
+ function spatialStep(base,c,motion,dt,b,maxZoom,p,orthographic=false,wide=false){
   if(!finite(c.target)||!Number.isFinite(c.zoom)||c.zoom<=0)return false;
   const start={...c,target:{...c.target}},previousEye=eye(start);
   const local=finite(p)?toView(start,sub(p,start.target)):null;
@@ -54,6 +74,7 @@
   const inspection=local&&(orthographic||(local.z<6.4&&local.z> -20));
   const angular=Math.min(1,Math.min(c.width,c.height)*.55/(Math.max(.001,Math.min(c.width/3.25,c.height/Math.max(.2,c.frameSpan))*c.zoom)*7.4));
   base(c,{...motion,panX:0,panY:0,orbitX:motion.orbitX*(inspection?1:angular),orbitY:motion.orbitY*(inspection?1:angular)},dt,b,maxZoom);
+  if(wide)c.pitch=clamp(start.pitch+motion.orbitY*(inspection?1:angular)*1.15*dt,-WIDE_PITCH,WIDE_PITCH);
   const rotated=c.yaw!==start.yaw||c.pitch!==start.pitch,zoomed=c.zoom!==start.zoom;
   if(inspection&&(rotated||zoomed)){
    // Orbit about the same world point; zoom preserves its pixel, at constant depth.
@@ -64,7 +85,7 @@
    const scale=Math.max(.001,Math.min(c.width/3.25,c.height/Math.max(.2,c.frameSpan))*c.zoom);
    const rate=Math.min(c.width,c.height)*.55/scale;
    const shift=fromView(c,{x:motion.panX*rate*dt,y:-motion.panY*rate*dt,z:0});
-   c.target=add(c.target,boundedDelta(inspection?c.target:eye(c),shift,b,!inspection));
+   const origin=inspection?c.target:eye(c);c.target=add(c.target,wide?radialDelta(origin,shift,b,c,!inspection):boundedDelta(origin,shift,b,!inspection));
   }
   return rotated||zoomed||xyz.some(k=>start.target[k]!==c.target[k]);
  }
@@ -101,7 +122,7 @@
     v[k]=desired===0&&end<dt?0:desired+(v[k]-desired)*decay;
     if(desired===0&&Math.abs(v[k])<=.00200000000001)v[k]=0;
    }
-   if(!legacy)return spatialStep(base,c,motion,dt,b,maxZoom,p,world?.orthographic===true);
+   if(!legacy)return spatialStep(base,c,motion,dt,b,maxZoom,p,world?.orthographic===true,world?.wideMobility===true);
    const pan=Math.abs(motion.panX)+Math.abs(motion.panY)>0,anchorPoint=!pan?(p||(motion.zoom?{...c.target}:null)):null,old=anchorPoint?G.project(c,anchorPoint):null;
    const changed=base(c,motion,dt,b,maxZoom);if(changed&&old)G.anchor(c,anchorPoint,old,b);return changed;
   }
@@ -110,5 +131,5 @@
  function wheelPixels(e,height){return clamp((Number(e.deltaY)||0)*(e.deltaMode===1?16:e.deltaMode===2?height:1),-240,240);}
  function pointAtPixel(c,x,y,depth=0){const u=units(c,null)?.x*(7.4-depth)/7.4;if(!(u>0))return null;const a=(x-c.width*(Number.isFinite(c.anchorX)?c.anchorX:.5))*u,b=.04-(y-c.height*(Number.isFinite(c.anchorY)?c.anchorY:.5))*u,cy=Math.cos(c.yaw),sy=Math.sin(c.yaw),cp=Math.cos(c.pitch),sp=Math.sin(c.pitch),h=depth*cp-b*sp;return {x:c.target.x+a*cy-h*sy,y:c.target.y+b*cp+depth*sp,z:c.target.z+a*sy+h*cy};}
  function snapshot(c,t,spaceId){return {version:1,t,spaceId,yaw:c.yaw,pitch:c.pitch,zoom:c.zoom,target:{...c.target},frameSpan:c.frameSpan,anchorX:c.anchorX??.5,anchorY:c.anchorY??.5};}
- root.BodyGravityAdaptive=Object.freeze({version:1,spatialVersion:2,profiles,shape,intent,matrixUnits,units,create,wheelPixels,pointAtPixel,snapshot,eye,basis,toView,fromView,pivotCapture,pivotResolve,spatialStep});
+ root.BodyGravityAdaptive=Object.freeze({version:1,spatialVersion:2,profiles,shape,intent,matrixUnits,units,create,wheelPixels,pointAtPixel,snapshot,eye,basis,toView,fromView,pivotCapture,pivotResolve,spatialStep,travelEnvelope,radialDelta,WIDE_PITCH});
 })(globalThis);

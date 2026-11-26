@@ -26,7 +26,7 @@
    return {x:camera.width*(Number.isFinite(camera.anchorX)?camera.anchorX:.50)+x*scale*perspective,
      y:camera.height*(Number.isFinite(camera.anchorY)?camera.anchorY:.50)-(y2-.04)*scale*perspective,z:z2,world:view};
  }
- function attachOrbit(canvas,{state,render,pick,onInteract=()=>{},onGestureEnd=()=>{},onDoubleTap=()=>{},getBounds=()=>null,minZoom=.7,maxZoom=2.5,deepZoomEnabled=()=>false,deepMaxZoom=14,adaptiveWheel=()=>false}){
+ function attachOrbit(canvas,{state,render,pick,onInteract=()=>{},onGestureEnd=()=>{},onDoubleTap=()=>{},getBounds=()=>null,minZoom=.7,maxZoom=2.5,deepZoomEnabled=()=>false,deepMaxZoom=14,adaptiveWheel=()=>false,wideMobility=()=>false,spatialOrbit=()=>false}){
    const pointers=new Map();
    let origin=null,travel=false,scheduled=0,lastTap=null,gestureStarted=false,wheelIdle=0;
    // Region extents are source-derived. Never let focal-point zoom/pan escape
@@ -40,8 +40,8 @@
     const r=bounds()?.radius;
     return Math.min(maxZoom,!Number.isFinite(r)?2.1:r<.55?3.3:r<1.1?2.35:1.95);
    };
-   const constrainTarget=()=>{
-    const b=bounds();if(!b)return;
+   const constrainTarget=(previous)=>{
+    const b=bounds();if(!b)return;if(wideMobility()&&previous&&window.BodyGravityAdaptive){const delta=Object.fromEntries(['x','y','z'].map(k=>[k,state.target[k]-previous[k]]));const accepted=window.BodyGravityAdaptive.radialDelta(previous,delta,b,state);for(const k of ['x','y','z'])state.target[k]=previous[k]+accepted[k];return;}
     for(let i=0;i<3;i++){
      const k=['x','y','z'][i],span=Math.max(.35,b.max[i]-b.min[i]),margin=Math.max(.18,span*.18);
      state.target[k]=clamp(state.target[k],b.min[i]-margin,b.max[i]+margin);
@@ -94,7 +94,7 @@
        const shiftX=focalX*difference-panX,shiftY=-focalY*difference+panY;
        for(let i=0;i<3;i++)state.target[['x','y','z'][i]]=origin.target[['x','y','z'][i]]+
           right[i]*shiftX+up[i]*shiftY;
-       constrainTarget();state.zoom=zoom;travel=true;schedule();
+       constrainTarget(origin.target);state.zoom=zoom;travel=true;schedule();
       }else if(pointers.size===1 && origin?.type==='pan'){
        const dx=e.clientX-origin.x,dy=e.clientY-origin.y;
        if(Math.abs(dx)+Math.abs(dy)>4){travel=true;beginMove();}
@@ -105,14 +105,13 @@
          const right=[cy,0,sy],up=[sy*sp,cp,-cy*sp];
          for(let i=0;i<3;i++)state.target[['x','y','z'][i]]=origin.target[['x','y','z'][i]]+
            right[i]*(-dx/scale)+up[i]*(dy/scale);
-         constrainTarget();schedule();
+         constrainTarget(origin.target);schedule();
        }
      }else if(pointers.size===1 && origin?.type==='orbit'){
        const dx=e.clientX-origin.x,dy=e.clientY-origin.y;
        if(Math.abs(dx)+Math.abs(dy)>6){travel=true;beginMove();}
        if(travel){
-         state.yaw=origin.yaw+dx*.008;
-         state.pitch=clamp(origin.pitch+dy*.005,-.85,.85);
+         if(spatialOrbit(dx-(origin.lastDX||0),dy-(origin.lastDY||0))){origin.lastDX=dx;origin.lastDY=dy;}else{state.yaw=origin.yaw+dx*.008;state.pitch=clamp(origin.pitch+dy*.005,-.85,.85);}
          schedule();
        }
      }
@@ -155,9 +154,9 @@
        e.preventDefault();if(next===c.zoom)return;
        const p=window.BodyGravityAdaptive.pointAtPixel(c,e.clientX-rect.left,e.clientY-rect.top);
        const old=p?window.BodyGravity.project(c,p):null;
-       beginMove();c.zoom=next;
-       if(old)window.BodyGravity.anchor(c,p,old,bounds());
-       state.zoom=c.zoom;for(const k of ['x','y','z'])state.target[k]=c.target[k];constrainTarget();
+       const previous={...state.target};beginMove();c.zoom=next;
+       if(old)window.BodyGravity.anchor(c,p,old,wideMobility()?{min:[-100,-100,-100],max:[100,100,100]}:bounds());
+       state.zoom=c.zoom;for(const k of ['x','y','z'])state.target[k]=c.target[k];constrainTarget(previous);
        clearTimeout(wheelIdle);wheelIdle=setTimeout(()=>{if(!pointers.size&&gestureStarted){onGestureEnd();gestureStarted=false;}},190);
        schedule();return;
      }
