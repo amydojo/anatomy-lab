@@ -1,0 +1,113 @@
+{
+  "schema": "body-live-unity-contract-1",
+  "state": "qualification-only",
+  "subject": "NLM Visible Human Female",
+  "canonicalSource": {
+    "repo": "BoneHub/visible-human-3d-models",
+    "revision": "53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10",
+    "root": "visible_human_3d_models/CT/Mesh/02_Female",
+    "expectedLabels": 143,
+    "existingAssetCount": 61,
+    "license": "CC BY 4.0",
+    "doi": "10.57967/hf/10464",
+    "sourceManifestSha256": "2fdd5646e81e66ab16458091fdc9d8a45ffbbc1465f5f2bb0056f07cedc953d7",
+    "existingRegions": {
+      "SPINAL_COLUMN": 26,
+      "THORAX": 25,
+      "SKULL": 2,
+      "UPPER_EXTREMITY_LEFT": 2,
+      "LOWER_EXTREMITY_LEFT": 2,
+      "UPPER_EXTREMITY_RIGHT": 2,
+      "LOWER_EXTREMITY_RIGHT": 2
+    },
+    "displayTransform": {
+      "formula": "[(240-x)*.005,(z-1000)*.005,(y-235)*.005]",
+      "purpose": "display only; physical units pending header audit"
+    }
+  },
+  "secondarySource": {
+    "name": "University of Denver VHF final meshes",
+    "doi": "10.56902/COB.vh.2022.1",
+    "paper": "10.1038/s41597-022-01905-2",
+    "manifestSha256": "b4403e606faac7fca9525692f51a4d83db8d6a44622ab78a3b2bd07bf3e545c0",
+    "archiveSha256": "9886eda040f6087bbb65182530f8bd262be456f366b155025c12b3dc56da774e",
+    "rawToBundleTranslation": [
+      -620,
+      -430,
+      -500
+    ],
+    "registrationAllowed": false
+  },
+  "registration": {
+    "priorDecision": "unregistered separate space; sacral validation fails; no clinical review",
+    "priorMetrics": {
+      "femur_left": [
+        1.267987,
+        3.214,
+        1.9194
+      ],
+      "femur_right": [
+        1.373323,
+        3.81764,
+        1.94735
+      ],
+      "hip_left": [
+        1.951302,
+        4.143719,
+        4.653666
+      ],
+      "hip_right": [
+        1.701445,
+        4.063036,
+        4.424021
+      ],
+      "sacrum_coccyx": [
+        3.3399,
+        7.301483,
+        10.563021
+      ]
+    },
+    "priorThresholds": {
+      "median": 3,
+      "p95": 8,
+      "centroidDelta": 5
+    },
+    "units": "source units, physical mm unconfirmed",
+    "fit": [
+      "bilateral femurs"
+    ],
+    "heldOut": [
+      "bilateral hips",
+      "combined sacrum+coccyx"
+    ],
+    "additionalFitCandidates": [
+      "documented image-header transform",
+      "rigid fit on predeclared bilateral femur/tibia/hip subsets"
+    ],
+    "additionalHeldOut": [
+      "bilateral fibulae",
+      "patellae",
+      "tali",
+      "calcanei",
+      "sacrum+coccyx",
+      "independent joint landmarks"
+    ],
+    "requiredEvidence": [
+      "exact source hashes",
+      "DICOM/NIfTI/NRRD physical coordinate transforms and units",
+      "separate raw vs final Denver comparison",
+      "per-structure bidirectional surface distance and landmark TRE",
+      "joint contact and attachment audit",
+      "independent review"
+    ],
+    "decision": "BLOCKED; do not fuse Denver geometry"
+  },
+  "limitations": [
+    "source-published 143 labels are not 206 independently segmented bones",
+    "elbow CT gaps",
+    "grouped phalanges, skull, sacrum+coccyx, sternum",
+    "hyoid, most sesamoids and costal cartilage absent",
+    "source-level segmentation uncertainty",
+    "fixed specimen pose; no validated motion"
+  ]
+}
