@@ -1,0 +1,283 @@
+{
+  "schema": "body-live-coordinate-contract-1",
+  "version": "15.9.2",
+  "baseline": "6d51fc01364afdb647064bf9ddc0fae36c17cdbf",
+  "decision": "QUALIFIED_NATIVE_GEOMETRY_ONLY",
+  "physicalCoordinateVerified": false,
+  "clinicalValidation": false,
+  "canonical": {
+    "repo": "BoneHub/visible-human-3d-models",
+    "revision": "53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10",
+    "subject": "02_Female",
+    "license": "CC BY 4.0",
+    "doi": "10.57967/hf/10464",
+    "manifestSha256": "e8c22674b3f29c3db3671632cb4ba0ccfcf7168a319dc9f77fb3c3773f09273f",
+    "archiveSha256": "1d7f8d54a5c683ac6f675a2495cb32585dc1d097058fd0f683418db6808ea58e",
+    "artifactRun": 45734848736,
+    "artifactId": 15078885236,
+    "labels": 143,
+    "units": null,
+    "patientFrame": null,
+    "physicalOrigin": null,
+    "sourceToPhysical": null,
+    "relativeAxes": {
+      "positiveX": "toward named left (AABB proxy)",
+      "positiveY": "unverified",
+      "positiveZ": "toward cranium (AABB proxy)"
+    },
+    "nativeMeshToCanonical": [
+      [
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1
+      ]
+    ],
+    "nativeToExistingDisplay": [
+      [
+        -0.005,
+        0,
+        0,
+        1.2
+      ],
+      [
+        0,
+        0,
+        0.005,
+        -5
+      ],
+      [
+        0,
+        0.005,
+        0,
+        -1.175
+      ],
+      [
+        0,
+        0,
+        0,
+        1
+      ]
+    ],
+    "displayPurpose": "existing dimensionless display transform, not physical calibration"
+  },
+  "conventions": {
+    "matrixLayout": "row-major arrays; column homogeneous vectors; target = matrix @ source",
+    "LPS_to_RAS": [
+      [
+        -1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        -1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        1
+      ]
+    ],
+    "applyLPS_to_RAS": false,
+    "reason": "Conventional conversion only, original mesh export space not independently confirmed. Slicer default is not proof."
+  },
+  "audit": {
+    "execution": "local independent archive read",
+    "meshesPassed": 143,
+    "vertices": 3035302,
+    "triangles": 6070400,
+    "extentSourceUnits": [
+      475.42545557022095,
+      249.9955062866211,
+      1717.2812852859497
+    ],
+    "bounds": {
+      "min": [
+        6.372609615325928,
+        91.30207061767578,
+        6.428065299987793
+      ],
+      "max": [
+        481.7980651855469,
+        341.2975769042969,
+        1723.7093505859375
+      ]
+    },
+    "relativeLaterality": {
+      "count": 90,
+      "minimumSignedDistance": 3.2970943450927734,
+      "hipMidlineX": 238.64766883850098
+    },
+    "axialOrdering": {
+      "pairs": 26,
+      "minimumCenterGap": 12.41912841796875
+    },
+    "limbOrderChains": 6,
+    "landmarkDefinitions": {
+      "method": "midpoint of verified vertex AABB",
+      "purpose": "coarse spatial checks only",
+      "anatomicalLandmarksValidated": false
+    },
+    "historicalMatrixDeterminant": 1.0000000000000038,
+    "historicalMatrixOrthogonalityError": 9.325873406851315e-15
+  },
+  "denver": {
+    "doi": "10.56902/COB.vh.2022.1",
+    "paper": "10.1038/s41597-022-01905-2",
+    "allowed": false,
+    "rawToPacked": [
+      [
+        1,
+        0,
+        0,
+        -620
+      ],
+      [
+        0,
+        1,
+        0,
+        -430
+      ],
+      [
+        0,
+        0,
+        1,
+        -500
+      ],
+      [
+        0,
+        0,
+        0,
+        1
+      ]
+    ],
+    "historicalFit": {
+      "matrix_source_to_denver_raw": [
+        [
+          -0.9989941700784746,
+          -0.03886946184456025,
+          -0.02235649984106498,
+          805.1853554910044
+        ],
+        [
+          0.03917307506032958,
+          -0.9991438349272099,
+          -0.013306664392877008,
+          683.6409396801585
+        ],
+        [
+          -0.021820136102852286,
+          -0.014169052998035348,
+          0.99966150250852,
+          6.692825721458576
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "scale": 1,
+      "det": 1,
+      "units": "source units, physical mm unconfirmed",
+      "method": "35k area-weighted samples per reference; two femurs fit by 40 iterations 85% trimmed rigid ICP; symmetric sampled NN distances; hips and sacrum held out",
+      "thresholds": {
+        "median": 3,
+        "p95": 8,
+        "centroidDelta": 5
+      },
+      "metrics": {
+        "femur_left": [
+          1.267987,
+          3.214,
+          1.9194
+        ],
+        "femur_right": [
+          1.373323,
+          3.81764,
+          1.94735
+        ],
+        "hip_left": [
+          1.951302,
+          4.143719,
+          4.653666
+        ],
+        "hip_right": [
+          1.701445,
+          4.063036,
+          4.424021
+        ],
+        "sacrum_coccyx": [
+          3.3399,
+          7.301483,
+          10.563021
+        ]
+      },
+      "metricOrder": [
+        "median",
+        "p95",
+        "centroidDelta"
+      ],
+      "decision": "unregistered separate space; sacral validation fails; no clinical review"
+    },
+    "historicalFitReexecuted": false
+  },
+  "consumers": {
+    "NANITE": "Preserve original position space and per-mesh source/derivative hashes; no unit-derived tolerances",
+    "UNITY_WORLD": "One native geometry frame permitted for nonclinical exploration; no per-bone correction or Denver overlay",
+    "STRATA": "Use stable source IDs and bounds; no millimeter distance, physical joint contact or validated anatomical point claims"
+  },
+  "blocked": [
+    "CT original DICOM slice geometry and FrameOfReferenceUID",
+    "pinned NIfTI qform/sform",
+    "pinned segmentation NRRD origins/directions/labels",
+    "STL header and export-space confirmation",
+    "mesh-to-mask surface residuals",
+    "independent anatomical landmark TRE and joint contact",
+    "full Denver registration rerun and raw versus final comparison"
+  ],
+  "limitations": [
+    "Grouped phalanges, skull, sternum and sacrum/coccyx",
+    "Source L6 label preserved; variant not independently diagnosed",
+    "Elbow gaps and absent hyoid, most sesamoids and costal cartilage",
+    "Slicer smoothing and Rhino connected component cleanup documented; specimen-specific effects unmeasured"
+  ],
+  "references": [
+    "https://huggingface.co/datasets/BoneHub/visible-human-3d-models",
+    "https://huggingface.co/datasets/BoneHub/visible-human-3d-models/blob/53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10/visible_human_3d_models/CT/Mesh/README.md",
+    "https://digitalcommons.du.edu/visiblehuman/1/",
+    "https://doi.org/10.1038/s41597-022-01905-2",
+    "https://slicer.readthedocs.io/en/latest/user_guide/data_loading_and_saving.html",
+    "https://nifti.nimh.nih.gov/nifti-1/documentation/nifti1fields/nifti1fields_pages/qsform.html/document_view.html"
+  ]
+}
