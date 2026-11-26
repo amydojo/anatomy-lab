@@ -6,6 +6,7 @@ ROOT=Path(__file__).resolve().parents[1]
 DIR=ROOT/'assets/atlas/morphology/acquired'
 LOCK=json.loads((ROOT/'assets/atlas/morphology/source-lock.json').read_text())
 DIR.mkdir(parents=True,exist_ok=True)
+for old in DIR.glob('*.bin'):old.unlink()
 def sha(b):return hashlib.sha256(b).hexdigest()
 def gitsha(b):return hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()
 def fetch(repo,rev,path,expect=None,digest=None,size=None):
@@ -23,12 +24,17 @@ PATTERNS={
 }
 def region(p):
  name=p['name'].lower()
+ if re.search(r'extensor digitorum longus|flexor digitorum (longus|brevis)|abdominal aorta|^descending aorta$|cerebral aqueduct',name):return None
+ if 'retinaculum' in name and 'wrist' in name:return 'arms-hands'
+ if 'levator palpebrae' in name or 'intervertebral disk of axis' in name or 'tentorium cerebelli' in name:return 'head-neck'
  if re.search(r'\b(foot|toe|hallucis|pedis|tibial|fibular|femoral|plantar)\b',name):return None
  # ambiguous phalanges/interossei/lumbricals require hand-specific context.
  if re.search(r'phal(anx|anges)|interosse|lumbrical',name) and not re.search(r'hand|finger|thumb|palmar|dorsal interosse|manual',name):return None
  return next((k for k,v in PATTERNS.items() if re.search(v,name,re.I)),None)
 def tissue(p):
  n=p['name'].lower();s=p.get('system','').lower()
+ if re.search(r'intervertebral dis[ck]|tentorium cerebelli',n):return 'connective'
+ if re.search(r'\b(subscapularis|levator scapulae)\b',n):return 'muscle'
  if 'cartilage' in n:return 'cartilage'
  if 'tendon' in n:return 'tendon'
  if 'ligament' in n:return 'ligament'
@@ -69,6 +75,21 @@ def main():
   if chosen:seen.add(id);groups.setdefault((reg,t),[]).append((p,t))
  chunks={k:read_bp(f'body-{k}.bin') for k in sorted({p['chunk'] for group in groups.values() for p,t in group})}
  inputs.update({f'body-{k}.bin':sha(v) for k,v in chunks.items()})
+ # Audit source spatial extent before packing; source metres, Y superior.
+ # Bounds are screening heuristics for gross regional selection errors, not registration evidence.
+ rejected=[]
+ floors={'head-neck':1.10,'thorax-shoulder':0.85,'arms-hands':0.60}
+ for (reg,t),items in list(groups.items()):
+  keep=[]
+  for p,kind in items:
+   _,_,bounds=exact(chunks[p['chunk']],p)
+   if bounds[0][1]<floors[reg]:
+    rejected.append({'id':str(p['conceptId']).lower(),'name':p['name'],'region':reg,'reason':'outside conservative superior-axis regional floor','bounds':bounds})
+   else:keep.append((p,kind))
+  groups[(reg,t)]=keep
+ rejected_ids={x['id'] for x in rejected}
+ for row in inventory:
+  if row['id'] in rejected_ids:row['selected']=False
  for (reg,t),items in groups.items():emit('bp4-'+reg+'-'+t,items,chunks,LOCK['revision'],'CC BY 4.0','BodyParts3D © Database Center for Life Science','source metres Y-up; display=(source-[0,.9,0])*5')
  for reg in PATTERNS:
   keys=[k for k in packs if k.startswith('bp4-'+reg+'-')]
@@ -87,9 +108,9 @@ def main():
  if failures:
   head=next((s for s in specimens if s['id']=='exact-head-neck'),None)
   if head:specimens.append({'id':'exact-head-face-extension','name':'Face / neck · experimental expression overlay','region':'Face / neck','space':'bp4-upstream-registered-experimental','status':'BP4 source + separately licensed reduced BP3 facial extension; upstream similarity only; no VHF fusion','packs':head['packs']+['facial']})
- catalog={'schema':'body-live-morphology-1','specimens':specimens,'packs':packs,'inputs':inputs,'unavailable':failures,'limits':['Source derivative, not raw segmentation','No independent clinical review or anatomical depth metadata','Region selection conservative name-based subset; full source inventory retained','No cross-source fusion']}
+ catalog={'schema':'body-live-morphology-1','specimens':specimens,'packs':packs,'inputs':inputs,'unavailable':failures,'regionScreenRejected':rejected,'limits':['Source derivative, not raw segmentation','No independent clinical review or anatomical depth metadata','Region selection conservative name-based subset; full source inventory retained','No cross-source fusion']}
  (DIR/'catalog.json').write_text(json.dumps(catalog,indent=2)+'\n')
  with (DIR/'inventory.csv').open('w',newline='') as f:
   w=csv.DictWriter(f,fieldnames=list(inventory[0]));w.writeheader();w.writerows(inventory)
- print(json.dumps({'unavailable':failures,'upstreamInventory':len(inventory),'acquiredPacks':len(packs),'acquiredStructures':sum(len(p['parts']) for p in packs.values()),'triangles':sum(p['triangles'] for p in packs.values()),'bytes':sum(p['bytes'] for p in packs.values()),'specimens':[{**s,'counts':{t:sum(packs[k]['counts'].get(t,0) for k in s['packs'] if k in packs) for t in sorted({t for k in s['packs'] if k in packs for t in packs[k]['counts']})}} for s in specimens]},indent=2))
+ print(json.dumps({'unavailable':failures,'regionScreenRejected':rejected,'upstreamInventory':len(inventory),'acquiredPacks':len(packs),'acquiredStructures':sum(len(p['parts']) for p in packs.values()),'triangles':sum(p['triangles'] for p in packs.values()),'bytes':sum(p['bytes'] for p in packs.values()),'specimens':[{**s,'counts':{t:sum(packs[k]['counts'].get(t,0) for k in s['packs'] if k in packs) for t in sorted({t for k in s['packs'] if k in packs for t in packs[k]['counts']})}} for s in specimens]},indent=2))
 if __name__=='__main__':main()
