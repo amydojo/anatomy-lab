@@ -4,7 +4,7 @@ on:
     branches: ['feat/unity-ground-truth']
   pull_request:
     branches: ['feat/v15-expedition-gamepad']
-    paths: ['scripts/audit_ground_truth.py','scripts/ground_truth_headers.py','docs/GROUND_TRUTH_COORDINATE_CONTRACT.json','.github/workflows/v15-ground-truth.yml']
+    paths: ['scripts/audit_ground_truth.py','scripts/ground_truth_headers.py','scripts/reproduce_ground_truth_registration.py','docs/GROUND_TRUTH_COORDINATE_CONTRACT.json','.github/workflows/v15-ground-truth.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -40,3 +40,20 @@ jobs:
           name: ground-truth-headers
           path: ground-truth-headers.json
           if-no-files-found: error
+  registration:
+    if: github.event_name != 'pull_request' || github.head_ref == 'feat/unity-ground-truth'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m pip install numpy==2.2.6 scipy==1.15.3 trimesh==4.6.10
+      - run: python scripts/reproduce_ground_truth_registration.py --self-test
+      - name: Download exact acquisition artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api repos/amydojo/anatomy-lab/actions/artifacts/15078885236/zip > unity.zip
+      - run: python scripts/reproduce_ground_truth_registration.py --archive unity.zip --denver assets/atlas/vhf/world --output ground-truth-registration.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ground-truth-registration
+          path: ground-truth-registration.json
