@@ -27,6 +27,7 @@ function create(world,hit,opts={}){const home={...hit,point:hit.point.slice(),no
    if(d>1e-7){let h=null;const dir=unit(v),pred=add(p,mul(dir,d));h=contact(world,pred,n,dir,s.id,{old:p,dir,length:d,desired});
     const qualifies=h=>h&&len(sub(h.q,p))<=Math.max(d*2.7,.0018)&&dot(sub(h.q,p),desired)>d*.12;if(!qualifies(h))h=null;
     if(!h){for(const a of [.35,-.35,.7,-.7,1.05,-1.05]){const alt=rotate(dir,n,a),q=add(p,mul(alt,d));const c=contact(world,q,n,alt,s.id,{old:p,dir:alt,length:d,desired});if(qualifies(c)&&dot(alt,desired)>.1){h=c;break;}}}
+    if(!h){for(const fraction of [.65,.35,.15]){const short=d*fraction;for(const alt of [desired,rotate(desired,n,.35),rotate(desired,n,-.35)]){const c=contact(world,add(p,mul(alt,short)),n,alt,s.id,{old:p,dir:alt,length:short,desired});if(c){h=c;break;}}if(h)break;}}
     if(h){setContact(h);v=mul(tangent(n,transport(dir,up,n)),len(v));s.edgeBlocked=false;blocked=false;}
     if(!h){v=mul(v,Math.exp(-STEP*28));if(!blocked){s.edgeSaves++;s.contactLosses++;}blocked=true;s.edgeBlocked=true;}
    }else{s.edgeBlocked=false;blocked=false;}
