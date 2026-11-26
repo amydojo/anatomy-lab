@@ -1,0 +1,393 @@
+{
+  "schema": "body-live-vhf-source-1",
+  "source": "University of Denver Center for Orthopaedic Biomechanics, Visible Human Female, Final 3D STL Models",
+  "license": "CC BY 4.0",
+  "source_doi": "10.56902/COB.vh.2022.0",
+  "paper_doi": "10.1038/s41597-022-01905-2",
+  "processing_paper_doi": "10.48550/arXiv.2209.06948",
+  "archive_sha256": "9886eda040f6087bbb65182530f8bd262be456f366b155025c12b3dc56da774e",
+  "archive_triangle_counts": {
+    "binary": 2306858,
+    "ascii": 28532
+  },
+  "geometry_transform": {
+    "translation": [
+      -620,
+      -430,
+      -500
+    ],
+    "scale": 1,
+    "axes": "preserved source coordinates; verify orientation and physical units before runtime mapping"
+  },
+  "notes": [
+    "Exact coordinate deduplication only; source winding and relative positions preserved.",
+    "Full source structures, not knee-cropped meshes.",
+    "Synthetic tissue colors; no authentic scan textures.",
+    "No separately named meniscus or tendon meshes in archive.",
+    "Not clinically reviewed; no LOD or runtime integration."
+  ],
+  "glb": {
+    "name": "vhf-right-knee-source.glb",
+    "sha256": "2aac40404f4aee5867d0f4feb13cf6aab5db2bc2360f0585356738113c35fb7c",
+    "bytes": 6929868
+  },
+  "structures": [
+    {
+      "id": "vhf-right-bone-femur",
+      "tissue": "Bone",
+      "source_member": "Final 3D STL Models-stl/Right/VHF_Right_Bone_Femur_smooth.stl",
+      "source_sha256": "012b293cbaa2cd467ea423b96bb257c8f558ff639c8342e37972af7c6febbd25",
+      "source_format": "binary",
+      "source_bytes": 4473384,
+      "vertices": 44735,
+      "triangles": 89466,
+      "bounds_raw": [
+        577.0431518554688,
+        398.6834411621094,
+        487.313720703125,
+        700.7717895507812,
+        469.22955322265625,
+        904.2706298828125
+      ],
+      "degenerate_triangles": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0
+    },
+    {
+      "id": "vhf-right-bone-tibia",
+      "tissue": "Bone",
+      "source_member": "Final 3D STL Models-stl/Right/VHF_Right_Bone_Tibia_smooth.stl",
+      "source_sha256": "589b64fe38d602eb95a0dad900bcd1059043d3d8451d3d74c7231fccc62ffae1",
+      "source_format": "binary",
+      "source_bytes": 3018184,
+      "vertices": 30183,
+      "triangles": 60362,
+      "bounds_raw": [
+        567.7767944335938,
+        385.04547119140625,
+        147.92074584960938,
+        655.6962890625,
+        455.2113037109375,
+        490.4704284667969
+      ],
+      "degenerate_triangles": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0
+    },
+    {
+      "id": "vhf-right-bone-fibula",
+      "tissue": "Bone",
+      "source_member": "Final 3D STL Models-stl/Right/VHF_Right_Bone_Fibula_smooth.stl",
+      "source_sha256": "5e62c5c1aeedb2b0c287e4efbaf881ef9c8c721ccc546a69c74784e520581a24",
+      "source_format": "binary",
+      "source_bytes": 974084,
+      "vertices": 9742,
+      "triangles": 19480,
+      "bounds_raw": [
+        595.79931640625,
+        376.5648193359375,
+        133.6714630126953,
+        657.6326904296875,
+        402.42352294921875,
+        470.80615234375
+      ],
+      "degenerate_triangles": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0
+    },
+    {
+      "id": "vhf-right-bone-patella",
+      "tissue": "Bone",
+      "source_member": "Final 3D STL Models-stl/Right/VHF_Right_Bone_Patella_smooth.stl",
+      "source_sha256": "bca69eb33e240c0ec6ea3fafb4f782edbc8ca714203860d972c74aabc6202613",
+      "source_format": "binary",
+      "source_bytes": 329484,
+      "vertices": 3296,
+      "triangles": 6588,
+      "bounds_raw": [
+        617.14501953125,
+        462.6136169433594,
+        489.1386413574219,
+        658.9677734375,
+        489.22149658203125,
+        534.4334106445312
+      ],
+      "degenerate_triangles": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0
+    },
+    {
+      "id": "vhf-right-cartilage-femurdistal",
+      "tissue": "Cartilage",
+      "source_member": "Final 3D STL Models-stl/Right/VHF_Right_Cartilage_FemurDistal_smooth.stl",
+      "source_sha256": "52072ebb86cfc8e81396cd095fee3dbfd918d250836e0df14b04843f10d4a7c0",
+      "source_format": "binary",
+      "source_bytes": 1231484,
+      "vertices": 12316,
+      "triangles": 24628,
+      "bounds_raw": [
+        580.5406494140625,
+        397.8814697265625,
+        485.3266906738281,
+        651.2075805664062,
+        466.2279052734375,
+        527.4402465820312
+      ],
+      "degenerate_triangles": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0
+    },
+    {
+      "id": "vhf-right-cartilage-patella",
+      "tissue": "Cartilage",
+      "source_member": "Final 3D STL Models-stl/Right/VHF_Right_Cartilage_Patella_smooth.stl",
+      "source_sha256": "acf4b7a0a11ad5cadc0c3973b2ccd76bab56c31e2663129dd5283627310dbab8",
+      "source_format": "binary",
+      "source_bytes": 283384,
+      "vertices": 2835,
+      "triangles": 5666,
+      "bounds_raw": [
+        618.2847900390625,
+        460.74493408203125,
+        506.7474670410156,
+        656.076904296875,
+        479.9311218261719,
+        533.9000854492188
+      ],
+      "degenerate_triangles": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0
+    },
+    {
+      "id": "vhf-right-cartilage-tibialateral",
+      "tissue": "Cartilage",
+      "source_member": "Final 3D STL Models-stl/Right/VHF_Right_Cartilage_TibiaLateral_smooth.stl",
+      "source_sha256": "85caed0f32af79d4f7b944a43e734993de31dd7234c0c8815f9ca6037084089b",
+      "source_format": "binary",
+      "source_bytes": 255284,
+      "vertices": 2554,
+      "triangles": 5104,
+      "bounds_raw": [
+        619.8814086914062,
+        395.5001220703125,
+        479.4556884765625,
+        651.8700561523438,
+        428.47283935546875,
+        492.4906311035156
+      ],
+      "degenerate_triangles": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0
+    },
+    {
+      "id": "vhf-right-cartilage-tibiamedial",
+      "tissue": "Cartilage",
+      "source_member": "Final 3D STL Models-stl/Right/VHF_Right_Cartilage_TibiaMedial_smooth.stl",
+      "source_sha256": "2f096975aa9bc7742a041c9d2ab11cf24bfeadb1812a6f4b45adef86105662bd",
+      "source_format": "binary",
+      "source_bytes": 324784,
+      "vertices": 3249,
+      "triangles": 6494,
+      "bounds_raw": [
+        581.5836181640625,
+        410.66766357421875,
+        478.6527404785156,
+        617.1629638671875,
+        453.18182373046875,
+        488.5294189453125
+      ],
+      "degenerate_triangles": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0
+    },
+    {
+      "id": "vhf-right-ligament-acl",
+      "tissue": "Ligament",
+      "source_member": "Final 3D STL Models-stl/Right/VHF_Right_Ligament_ACL_smooth.stl",
+      "source_sha256": "b018eb5925ee8e2be58770989aee1dba64ab98b58248e2d19484c27746f5b832",
+      "source_format": "binary",
+      "source_bytes": 214884,
+      "vertices": 2150,
+      "triangles": 4296,
+      "bounds_raw": [
+        615.1106567382812,
+        409.0553894042969,
+        481.552734375,
+        634.2354736328125,
+        436.7615051269531,
+        518.9454345703125
+      ],
+      "degenerate_triangles": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0
+    },
+    {
+      "id": "vhf-right-ligament-pcl",
+      "tissue": "Ligament",
+      "source_member": "Final 3D STL Models-stl/Right/VHF_Right_Ligament_PCL_smooth.stl",
+      "source_sha256": "d793f59ecf04a087dbe57713a292561e8c89e8310f4a2d8b902b5d191773dc46",
+      "source_format": "binary",
+      "source_bytes": 180684,
+      "vertices": 1808,
+      "triangles": 3612,
+      "bounds_raw": [
+        602.455078125,
+        402.6841735839844,
+        475.7785949707031,
+        618.2322998046875,
+        429.78497314453125,
+        503.8128356933594
+      ],
+      "degenerate_triangles": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0
+    },
+    {
+      "id": "vhf-right-ligament-mcl",
+      "tissue": "Ligament",
+      "source_member": "Final 3D STL Models-stl/Right/VHF_Right_Ligament_MCL_smooth.stl",
+      "source_sha256": "41e05f732998266e8cc14396a74395f33360f7398b17d6e43711f58ce93f0c69",
+      "source_format": "binary",
+      "source_bytes": 155584,
+      "vertices": 1557,
+      "triangles": 3110,
+      "bounds_raw": [
+        576.90625,
+        434.2699279785156,
+        448.8379821777344,
+        597.9942626953125,
+        444.08758544921875,
+        516.2398071289062
+      ],
+      "degenerate_triangles": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0
+    },
+    {
+      "id": "vhf-right-ligament-lcl",
+      "tissue": "Ligament",
+      "source_member": "Final 3D STL Models-stl/Right/VHF_Right_Ligament_LCL_smooth.stl",
+      "source_sha256": "a5370fcb734c7bfa8f3cb1012258fef029195ef1626be59b8fbc513ebe7693b8",
+      "source_format": "binary",
+      "source_bytes": 101184,
+      "vertices": 1013,
+      "triangles": 2022,
+      "bounds_raw": [
+        646.3726806640625,
+        389.3479919433594,
+        465.74859619140625,
+        657.1124267578125,
+        413.7734375,
+        508.4497375488281
+      ],
+      "degenerate_triangles": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0
+    },
+    {
+      "id": "vhf-right-muscle-vastuslateralis",
+      "tissue": "Muscle",
+      "source_member": "Final 3D STL Models-stl/Right/VHF_Right_Muscle_VastusLateralis_smooth.stl",
+      "source_sha256": "857cc80dd71f99150d802c53b54f1b7c0a35a2d2c3369985ea78e806ef46a5e8",
+      "source_format": "binary",
+      "source_bytes": 2036784,
+      "vertices": 20369,
+      "triangles": 40734,
+      "bounds_raw": [
+        645.9854736328125,
+        391.7528076171875,
+        528.0117797851562,
+        705.155029296875,
+        489.8721008300781,
+        861.1619873046875
+      ],
+      "degenerate_triangles": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0
+    },
+    {
+      "id": "vhf-right-muscle-vastusmedialis",
+      "tissue": "Muscle",
+      "source_member": "Final 3D STL Models-stl/Right/VHF_Right_Muscle_VastusMedialis_smooth.stl",
+      "source_sha256": "4d26e341ff41cb02cd3e5a1128e2ab8d10c3896dbdde681d9a49419780baa0b5",
+      "source_format": "binary",
+      "source_bytes": 1217984,
+      "vertices": 12181,
+      "triangles": 24358,
+      "bounds_raw": [
+        579.6971435546875,
+        431.4315185546875,
+        519.1790771484375,
+        654.3883056640625,
+        484.98297119140625,
+        813.6566772460938
+      ],
+      "degenerate_triangles": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0
+    },
+    {
+      "id": "vhf-right-muscle-vastusintermedius",
+      "tissue": "Muscle",
+      "source_member": "Final 3D STL Models-stl/Right/VHF_Right_Muscle_VastusIntermedius_smooth.stl",
+      "source_sha256": "ac839eb106a27d3f605403509e9b506bb955b5a3b1db170f1b0212da37fe3848",
+      "source_format": "binary",
+      "source_bytes": 1783584,
+      "vertices": 17837,
+      "triangles": 35670,
+      "bounds_raw": [
+        623.0264282226562,
+        392.3308410644531,
+        529.362060546875,
+        684.143798828125,
+        474.451416015625,
+        837.8870849609375
+      ],
+      "degenerate_triangles": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0
+    },
+    {
+      "id": "vhf-right-muscle-bicepsfemorisshorthead",
+      "tissue": "Muscle",
+      "source_member": "Final 3D STL Models-stl/Right/VHF_Right_Muscle_BicepsFemorisShortHead_smooth.stl",
+      "source_sha256": "a977a28551f94921241720956ae76d6bbec0a2a540482171dbd646fd2e622d30",
+      "source_format": "ascii",
+      "source_bytes": 2918818,
+      "vertices": 5551,
+      "triangles": 11098,
+      "bounds_raw": [
+        629.842529296875,
+        380.54180908203125,
+        484.4815979003906,
+        659.8964233398438,
+        434.2644958496094,
+        697.4661865234375
+      ],
+      "degenerate_triangles": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0
+    },
+    {
+      "id": "vhf-right-muscle-popliteus",
+      "tissue": "Muscle",
+      "source_member": "Final 3D STL Models-stl/Right/VHF_Right_Muscle_Popliteus_smooth.stl",
+      "source_sha256": "98eca5dd4573fb39be01fde9a2c623dc0b0ea9a90cc7d3b101678acf20f96f19",
+      "source_format": "binary",
+      "source_bytes": 155084,
+      "vertices": 1552,
+      "triangles": 3100,
+      "bounds_raw": [
+        598.3309936523438,
+        392.5516662597656,
+        407.1728515625,
+        630.3863525390625,
+        421.43060302734375,
+        482.8459167480469
+      ],
+      "degenerate_triangles": 0,
+      "boundary_edges": 0,
+      "nonmanifold_edges": 0
+    }
+  ]
+}

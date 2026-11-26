@@ -1,0 +1,27 @@
+name: UNITY pinned whole-skeleton qualification
+on:
+  push:
+    branches: ['feat/v15-expedition-gamepad']
+    paths: ['scripts/qualify_unity.py','docs/UNITY_CONTRACT.json','.github/workflows/v15-unity-source.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: unity-source-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  qualify:
+    if: github.ref == 'refs/heads/feat/v15-expedition-gamepad'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/qualify_unity.py --self-test
+      - run: python3 scripts/qualify_unity.py --output unity-qualified
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unity-pinned-whole-skeleton
+          path: unity-qualified/
+          retention-days: 7
+          if-no-files-found: warn

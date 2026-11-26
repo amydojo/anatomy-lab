@@ -2,6 +2,8 @@
 (function(){'use strict';
 const $=id=>document.getElementById(id);
 const state=window.BodyAtlasState.create();
+const expeditionDiagnostic=new URLSearchParams(location.search).get('expeditionDiagnostics')==='1'?window.BodyExpedition.diagnostics():null;
+let vhfView=null;const sourceMode=new URLSearchParams(location.search).get('source'),axisRequested=sourceMode==='axis',continuumRequested=axisRequested&&new URLSearchParams(location.search).get('axisMode')!=='regional',worldRequested=sourceMode==='world',broadSource=worldRequested||axisRequested,boundedRequested=worldRequested&&new URLSearchParams(location.search).get('residency')==='bounded',vhfRequested=broadSource||sourceMode==='vhf';
 const loader=window.BodyAtlasLoader,model=window.BodyAtlasRenderer.create($('atlas-canvas'),reason=>fallback(reason));
 const E=window.BodyAtlasEvidence;let source=null,proof=null,hipProof=null,nerveProof=null,shoulderProof=null,kneeMuscleProof=null,extendedProof=null,overviewProof=null;
 let osteologyAsset=null;let lastFocus=null,activeFrameRoute=null,motionFrame=0,travelMixFrame=0,frameTimeout=0,entryTimer=0,exitTimer=0,seq=0,previousFocus=null,pins=[],loaded=false,overviewLoaded=false,expansionLoaded=false,facialLoaded=false,osteologyLoaded=false,pendingEntry=null,sourceSeamPending=false;
@@ -65,14 +67,23 @@ function refreshOsteologyCoverage(){
   ' conventional bones · BP3D 4.0 CC BY 4.0 · BP3D 3.0 facial CC BY-SA 2.1 Japan · Z-Anatomy CC BY-SA 4.0 · expert review pending';
 }
 function render(){
+ if(vhfView?.active){if(document.hidden)return;const canvas=$('atlas-canvas'),c=vhfView.camera;c.width=canvas.clientWidth;c.height=canvas.clientHeight;const start=performance.now();model.render(c,'vhf','clean',0,1,0,vhfView.selected,0,null,false,vhfView);const p=vhfView.parts.find(p=>p.id===vhfView.selected);if(continuumRequested){const n=window.BodyVHF.axisLocation(vhfView.landmarks,c,vhfView.axisRegion);if(typeof n==='number')vhfView.axisRegion=n;vhfView.neighborhood=typeof n==='number'?window.BodyVHF.axisRegions[n]:n;}if(worldRequested)vhfView.neighborhood=window.BodyVHF.neighborhood(vhfView.landmarks||[],c,vhfView.neighborhood);const label=(p?p.name:(axisRequested?(continuumRequested?vhfView.neighborhood:window.BodyVHF.axisRegions[vhfView.axisRegion]):worldRequested?vhfView.neighborhood:'VISIBLE HUMAN · RIGHT KNEE'))+' · '+vhfView.category,loc=$('expedition-location'),ev=$('expedition-evidence');if(loc.textContent!==label)loc.textContent=label;const note=continuumRequested?('BoneHub · '+vhfView.parts.length+'/59 loaded'+(vhfView.stream?.failures.size?' · '+vhfView.stream.failures.size+' delayed/unavailable · R3 retry':'')+(model.frameStats().gpuFailedIds?.length?' · GPU upload failed · R3 retry':'')+' · separate specimen space'):axisRequested?(vhfView.traveling?'Loading next region · BoneHub':'BoneHub VHF · separate specimen space · D-pad ↑/↓ to travel'):'VHF · CC BY 4.0 · research geometry · review pending';if(ev.textContent!==note)ev.textContent=note;expeditionDiagnostic?.sample('renderCpuMs',performance.now()-start);return;}
+ if($('atlas-app').dataset.expeditionClean==='true'){
+  const id=U.getSelected(),region=U.getRegion()||state.data.region;
+  const label=id?(model.getStructure(region,id)?.name||$('structure-chip-name').textContent||id):(LABEL[region]||'FULL BODY');
+  const el=$('expedition-location');if(el&&el.textContent!==label)el.textContent=label;
+ }
  if(document.hidden||(state.data.view==='detail'&&!U.isActive()))return;
+ const renderStart=expeditionDiagnostic?performance.now():0;
  model.render(state.data.camera,U.getRegion()||state.data.region,state.data.evidenceMode,state.data.layer,U.getReveal(),U.getMotion(),U.getSelected(),U.getSecondaryMotion(),U.getTransitionFrom(),state.data.mode==='trace'&&!window.BodyExtendedRegions?.has(U.getRegion()||state.data.region));
  window.BodyShoulderDebug?.draw(state.data.camera,
   state.data.view==='detail'&&U.getRegion()==='shoulder'?model.shoulderDiagnostics(U.getMotion()):null);
  if(studioCameraActive())window.__BODY_V14_ORIENTATION_UPDATE__?.(state.data.camera);
- if(state.data.view==='overview'&&!U.isActive())drawPins();
+ if(state.data.view==='overview'&&!U.isActive()&&$('atlas-app').dataset.expeditionClean!=='true')drawPins();
+ if(expeditionDiagnostic)expeditionDiagnostic.sample('renderCpuMs',performance.now()-renderStart);
 }
 function fallback(reason){
+ expeditionDiagnostic?.event('fallback',{reason:String(reason||'unavailable')});
  $('canvas-fallback').hidden=false;$('scene-status').textContent='SEMANTIC FALLBACK';
  $('canvas-fallback').querySelector('p').textContent=(reason||'3D unavailable')+'. Choose a region using the accessible list.';
  if(window.innerWidth<=850)setExpanded(true);
@@ -551,7 +562,7 @@ function setInspectorFrame(visible,instant=false){
  const camera=state.data.camera;
  const width=Math.max(1,$('atlas-canvas').clientWidth);
  // A 355px inspector + 90px tool rail must not hide the specimen.
- const target=(visible&&window.innerWidth>850)?Math.max(.30,.5-Math.min(152,Math.max(99,width*.101))/width):.5;
+ const target=(visible&&$('atlas-app').dataset.expeditionClean!=='true'&&window.innerWidth>850)?Math.max(.30,.5-Math.min(152,Math.max(99,width*.101))/width):.5;
  const start=Number.isFinite(camera.anchorX)?camera.anchorX:.5;
  cancelAnimationFrame(studioFramingFrame);studioFramingFrame=0;
  if(Math.abs(target-start)<.0002)return target;
@@ -595,7 +606,7 @@ let frameOwner=null;
 function setFrameOwner(owner){frameOwner=owner||null;}
 function setMobileFrame(visible,owner){
  if(frameOwner&&owner!==frameOwner)return;
- const c=state.data.camera,target=visible?.39:.5;
+ const c=state.data.camera,target=visible&&$('atlas-app').dataset.expeditionClean!=='true'?.39:.5;
  if(Math.abs((c.anchorY??.5)-target)<.001)return;
  c.anchorY=target;render();
 }
@@ -604,16 +615,96 @@ function recenter(){
  animateCamera({yaw:-.2,pitch:-.07,zoom:1.03,frameSpan:10.8,target:{x:0,y:-.12,z:0}},reduce()?0:280);
  return true;
 }
+function setupExpedition(){
+ const button=$('expedition-toggle'),hud=$('expedition-hud'),reticle=$('expedition-reticle'),status=$('expedition-status');
+ if(!button||!window.BodyExpedition)return;
+ let enabled=false,clean=false;const pointers=new Set();const app=$('atlas-app'),viewButton=$('expedition-view');
+ const evidence=hud.querySelector('.expedition-evidence');evidence.id='expedition-evidence';
+ const optical=window.BodyOptical.create(new URLSearchParams(location.search).get('optical')||'fixed');
+ const visual=document.createElement('select');visual.id='expedition-visual';visual.setAttribute('aria-label','Specimen appearance');for(const name of ['atlas','specimen','cinema','legacy']){const option=document.createElement('option');option.value=name;option.textContent=name==='legacy'?'Original':name.toUpperCase();visual.append(option);}visual.value=['atlas','specimen','cinema','legacy'].includes(new URLSearchParams(location.search).get('visual'))?new URLSearchParams(location.search).get('visual'):'specimen';visual.hidden=true;viewButton.after(visual);visual.addEventListener('change',()=>{model.setVisualMode(enabled?visual.value:'legacy');expeditionDiagnostic?.event('visual-mode',{mode:visual.value});render();});
+ const quality=$('expedition-quality');quality.value=optical.state().profile;
+ function applyQuality(change){model.setOpticalDensity(enabled&&change.profile!=='fixed'?change.density:null);expeditionDiagnostic?.event('optical-quality',{...change});return true;}
+ quality.addEventListener('change',()=>{applyQuality({...optical.set(quality.value,performance.now()),reason:'manual'});render();});
+ function setClean(next){
+  clean=!!next&&enabled;app.dataset.expeditionClean=String(clean);viewButton.setAttribute('aria-pressed',String(clean));viewButton.textContent=clean?'Show UI':'Hide UI';
+  if(clean){cancelAnimationFrame(studioFramingFrame);studioFramingFrame=0;state.data.camera.anchorX=.5;state.data.camera.anchorY=.5;}
+  resize();
+ }
+ const setStatus=message=>{if(status.textContent!==message)status.textContent=message;};
+ const finish=()=>{if(vhfView?.active)return;if(studioCameraActive()){studioNavigation?.end();window.dispatchEvent(new Event('body:camera-transaction'));}};
+ const categories=['All','Bone','Cartilage','Ligament','Muscle'];
+ const fitSource=()=>{const b=vhfView.bounds;Object.assign(vhfView.camera,{yaw:0,pitch:0,zoom:broadSource?1:2.4,frameSpan:continuumRequested?window.BodyVHF.overviewFrameSpan(b):broadSource?Math.max(3.25,b.radius*2.3):2.55,target:broadSource?{x:(b.min[0]+b.max[0])/2,y:(b.min[1]+b.max[1])/2,z:(b.min[2]+b.max[2])/2}:{x:0,y:0,z:0},anchorX:.5,anchorY:.5});};
+ let axisFlight=0,axisActivating=false;
+ const cancelAxisFlight=()=>{cancelAnimationFrame(axisFlight);axisFlight=0;};
+ function streamAxis(v){if(!v?.stream||v.stream.running)return;const ac=new AbortController();v.travelAbort=ac;let frame=0;const changed=()=>{if(!v.active||frame)return;frame=requestAnimationFrame(()=>{frame=0;if(v.active)render();});};v.stream.stream(changed,ac.signal,()=>v.camera).catch(e=>expeditionDiagnostic?.event('axis-stream-failed',{reason:e.message})).finally(()=>{if(v.travelAbort===ac)v.travelAbort=null;changed();});}
+ function continuumTravel(direction){const v=vhfView;if(!v?.active)return;cancelAxisFlight();const c=v.camera,i=window.BodyVHF.axisLocation(v.landmarks,{...c,zoom:2},v.axisRegion),next=Math.max(0,Math.min(3,i+direction)),p=v.landmarks[next].point,from={...c.target},started=performance.now();const tick=now=>{if(!v.active){axisFlight=0;return;}const t=Math.min(1,(now-started)/650),e=t*t*(3-2*t);for(let k=0;k<3;k++)c.target[['x','y','z'][k]]=from[['x','y','z'][k]]+(p[k]-from[['x','y','z'][k]])*e;render();if(t<1)axisFlight=requestAnimationFrame(tick);else{axisFlight=0;expeditionDiagnostic?.event('axis-landmark-travel',{region:next,elapsedMs:now-started});}};axisFlight=requestAnimationFrame(tick);}
+ async function axisTravel(direction){if(continuumRequested){continuumTravel(direction);return;}const v=vhfView;if(!axisRequested||!v?.active||v.traveling)return;const next=Math.max(0,Math.min(3,v.axisRegion+direction));if(next===v.axisRegion)return;v.traveling=true;const ac=new AbortController();v.travelAbort=ac;render();try{const parts=await window.BodyVHF.loadAxis(next,v.parts,ac.signal);if(ac.signal.aborted||!v.active)return;await model.loadVHF(parts,true);v.parts=parts;v.bounds=window.BodyVHF.bounds(parts);v.axisRegion=next;v.selected=null;v.surface=null;v.isolated=null;v.category='All';const b=v.bounds;Object.assign(v.camera,{target:{x:(b.min[0]+b.max[0])/2,y:(b.min[1]+b.max[1])/2,z:(b.min[2]+b.max[2])/2},frameSpan:Math.max(3.25,b.radius*2.3),zoom:1});expeditionDiagnostic?.event('axis-travel',{region:next,structures:parts.length});}catch(e){expeditionDiagnostic?.event('axis-travel-failed',{region:next,reason:e.message});setStatus('Region unavailable · current anatomy retained');}finally{v.traveling=false;v.travelAbort=null;render();}}
+ const command=index=>{
+  if(vhfView?.active){cancelAxisFlight();const v=vhfView,c=v.camera;if(axisRequested&&(index===12||index===13)){axisTravel(index===12?1:-1);return;}if(index===9){setClean(!clean);return;}if(index===0){const t=performance.now(),hit=window.BodyVHF.pickHit(v.parts,v,c,c.width/2,c.height/2);v.selected=hit?.id||null;v.surface=hit?.point||null;expeditionDiagnostic?.sample('selectionCpuMs',performance.now()-t);}if(index===1){v.isolated=null;v.selected=null;v.category='All';}if(index===2&&v.selected){v.isolated=v.isolated?null:v.selected;}if(index===3&&v.selected){const p=v.parts.find(p=>p.id===v.selected);c.target=v.surface?{...v.surface}:{x:(p.min[0]+p.max[0])/2,y:(p.min[1]+p.max[1])/2,z:(p.min[2]+p.max[2])/2};c.zoom=Math.min(14,c.zoom*1.5);}if(index===4||index===5){v.isolated=null;v.selected=null;v.category=categories[(categories.indexOf(v.category)+(index===5?1:4))%5];}if(index===11){fitSource();if(continuumRequested){model.retryVHF?.();streamAxis(v);}}render();return;}
+  const selected=U.getSelected(),studio=studioCameraActive();
+  if(index===9){setClean(!clean);return;}
+  if(index===0){const c=$('atlas-canvas');pickAt(c.clientWidth/2,c.clientHeight/2,{pointerType:'mouse'});}
+  if(index===1){if(studio&&connectiveNavAction('back'))return;if(selected){U.clearSelection();render();}else if(state.data.view==='detail')body();}
+  if(index===2&&studio&&selected){const el=document.querySelector('[data-cs-action="isolate"]:not([disabled])');el?.click();}
+  if(index===3&&studio&&selected){const el=document.querySelector('[data-cs-action="focus"]:not([disabled])');el?.click();}
+  if(index===11){if(studio){if(selected)connectiveNavAction('recenter',selected);else connectiveNavAction('fit');}else recenter();}
+  if(index===12||index===13){if(U.isActive()&&state.data.view==='detail'&&!studio){depthChange(Math.max(0,Math.min(4,state.data.layer+(index===13?1:-1))));}}
+  if((index===14||index===15)&&state.data.view==='overview'){
+   const regions=window.BodyAtlasState.regions.filter(r=>r!=='nerve');const n=regions.indexOf(state.data.region);
+   choose(regions[(n+(index===15?1:-1)+regions.length)%regions.length]);
+  }
+ };
+ const controls=window.BodyExpedition.mount({
+  camera:()=>vhfView?.active?vhfView.camera:state.data.camera,
+  bounds:()=>vhfView?.active?vhfView.bounds:model.getViewBounds(U.getRegion()||state.data.region),
+  maxZoom:()=>{if(vhfView?.active)return 14;const radius=model.getViewBounds(U.getRegion()||state.data.region)?.radius;
+   return studioCameraActive()?14:Math.min(4,!Number.isFinite(radius)?2.1:radius<.55?3.3:radius<1.1?2.35:1.95);},
+  canMove:()=>enabled&&loaded&&model.getStatus()==='ready'&&(vhfView?.active||!pendingEntry)&&state.data.view!=='focused'&&!document.hidden&&document.hasFocus()&&!pointers.size&&$('evidence-sheet').hidden&&$('seam').hidden&&!activeFrameRoute,
+  begin:()=>{if(vhfView?.active){cancelAxisFlight();return;}cancelAnimationFrame(motionFrame);motionFrame=0;U.interrupt();if(studioCameraActive())studioNavigation?.begin();},
+  end:finish,render,command,status:setStatus,diagnostic:expeditionDiagnostic,
+  onOpticalTick:(now,moving)=>{const change=optical.tick(now,moving||!!motionFrame||!!travelMixFrame);return change?applyQuality(change):false;},
+  onOpticalSuspend:()=>optical.reset(performance.now())
+ });
+ function toggle(next){if(!next){cancelAxisFlight();if(!continuumRequested)vhfView?.travelAbort?.abort();}enabled=next;if(vhfView)vhfView.active=next&&vhfView.ready;if(!next)evidence.textContent='Reference anatomy · not clinically validated';visual.hidden=!next;model.setVisualMode(next?visual.value:'legacy');expeditionDiagnostic?.event('visual-mode',{mode:next?visual.value:'legacy'});quality.hidden=!next;applyQuality({...optical.set(quality.value,performance.now()),reason:'controller-toggle'});button.setAttribute('aria-pressed',String(next));button.textContent=next?'Exit controller':'Controller mode';hud.hidden=reticle.hidden=viewButton.hidden=!next;controls.setEnabled(next);setClean(next);if(next){setStatus('Press any controller button to connect');if(continuumRequested&&vhfView?.ready)streamAxis(vhfView);}}
+ if(expeditionDiagnostic){
+  const canvas=$('atlas-canvas');
+  const report=()=>({...expeditionDiagnostic.report(),canvas:{backingWidth:canvas.width,backingHeight:canvas.height,cssWidth:canvas.clientWidth,cssHeight:canvas.clientHeight,devicePixelRatio:window.devicePixelRatio,effectiveScale:canvas.clientWidth?canvas.width/canvas.clientWidth:null},renderer:model.frameStats(),controller:{enabled,status:status.textContent},source:vhfView?{active:vhfView.active,ready:vhfView.ready,...vhfView.parts.sourceInfo,activeLOD:vhfView.stream?'adaptive-display':'source-full',streaming:vhfView.stream?{running:vhfView.stream.running,loaded:vhfView.parts.length,failed:[...vhfView.stream.failures.entries()]}:null,neighborhood:vhfView.neighborhood,category:vhfView.category,selected:vhfView.selected,triangles:vhfView.parts.reduce((n,p)=>n+p.indices.length/3,0),cpuGeometryBytes:vhfView.parts.reduce((n,p)=>n+p.positions.byteLength+p.indices.byteLength+(p.lods||[]).reduce((a,l)=>a+l.positions.byteLength+l.indices.byteLength,0),0)}:null,camera:JSON.parse(JSON.stringify(vhfView?.active?vhfView.camera:state.data.camera)),contextStatus:model.getStatus(),region:U.getRegion()||state.data.region,selectedStructure:vhfView?.active?vhfView.selected:U.getSelected(),visibilityLayer:state.data.layer,visualMode:enabled?visual.value:'legacy',qualityMode:optical.state().profile,optical:optical.state(),assetReadiness:{loaded,overviewLoaded,expansionLoaded,facialLoaded,osteologyLoaded}});
+  window.__BODY_EXPEDITION_DIAGNOSTICS__=Object.freeze({report});
+  const exportButton=document.createElement('button');exportButton.type='button';exportButton.id='expedition-diagnostics-export';exportButton.textContent='Export diagnostics';
+  exportButton.onclick=()=>{const blob=new Blob([JSON.stringify(report(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='body-live-expedition-diagnostics.json';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);};
+  button.parentElement.append(exportButton);
+  if(window.PerformanceObserver?.supportedEntryTypes?.includes('longtask')){
+   try{const observer=new PerformanceObserver(list=>{for(const entry of list.getEntries())expeditionDiagnostic.sample('longTaskMs',entry.duration);});observer.observe({type:'longtask',buffered:false});expeditionDiagnostic.setLongTasksSupported(true);}catch{}
+  }
+  canvas.addEventListener('webglcontextlost',()=>expeditionDiagnostic.event('webgl-context-lost'));
+  canvas.addEventListener('webglcontextrestored',()=>expeditionDiagnostic.event('webgl-context-restored',{status:model.getStatus()}));
+  document.addEventListener('visibilitychange',()=>expeditionDiagnostic.event('visibility',{hidden:document.hidden}));
+  window.addEventListener('gamepaddisconnected',event=>expeditionDiagnostic.event('controller-disconnected',{index:event.gamepad.index}));
+ }
+ async function activateSource(){if(!vhfRequested||!loaded||!enabled||model.getStatus()!=='ready')return;if(continuumRequested){if(axisActivating)return;axisActivating=true;try{evidence.textContent='Opening verified axial world…';let v=vhfView;if(!v){const stream=await window.BodyVHF.openAxisWorld();v={parts:stream.parts,bounds:stream.bounds,camera:{width:1,height:1,frameSpan:2.55},category:'All',selected:null,isolated:null,axisRegion:0,bounded:true,landmarks:stream.landmarks,stream};vhfView=v;v.fit=fitSource;fitSource();}await model.loadVHF([]);v.ready=true;v.active=enabled;streamAxis(v);render();}catch(e){if(vhfView){vhfView.active=false;vhfView.ready=false;}evidence.textContent='Axial world unavailable · '+e.message;expeditionDiagnostic?.event('vhf-fallback',{reason:e.message});render();}finally{axisActivating=false;}return;}try{evidence.textContent='Loading verified VHF specimen…';const parts=vhfView?.parts||await (axisRequested?window.BodyVHF.loadAxis(0):worldRequested?window.BodyVHF.loadWorld():window.BodyVHF.load());await model.loadVHF(parts);const existing=vhfView;vhfView=existing||{parts,bounds:window.BodyVHF.bounds(parts),camera:{width:1,height:1,frameSpan:2.55},category:'All',selected:null,isolated:null,axisRegion:0,bounded:boundedRequested,landmarks:worldRequested?window.BodyVHF.landmarks(parts):[]};vhfView.ready=true;vhfView.active=enabled;if(!existing)fitSource();expeditionDiagnostic?.event('vhf-ready',{triangles:parts.reduce((n,p)=>n+p.indices.length/3,0),structures:parts.length});render();}catch(e){if(vhfView){vhfView.active=false;vhfView.ready=false;}evidence.textContent='VHF unavailable · original retained: '+e.message;expeditionDiagnostic?.event('vhf-fallback',{reason:e.message});render();}}
+ if(vhfRequested){document.addEventListener('visibilitychange',()=>{if(!document.hidden&&vhfView?.active)render();});window.addEventListener('body:vhf-residency-frame',()=>{if(vhfView?.active)render();});window.addEventListener('body:vhf-base-ready',activateSource);window.addEventListener('body:webgl-restored',()=>{if(vhfView)vhfView.active=false;activateSource();});}
+ viewButton.addEventListener('click',()=>setClean(!clean));
+ button.addEventListener('click',()=>toggle(!enabled));
+ window.addEventListener('pointerdown',e=>{cancelAxisFlight();pointers.add(e.pointerId);controls.interrupt();},true);
+ const release=e=>pointers.delete(e.pointerId);window.addEventListener('pointerup',release,true);window.addEventListener('pointercancel',release,true);
+ window.addEventListener('blur',()=>pointers.clear());window.addEventListener('pagehide',()=>toggle(false));
+ if(new URLSearchParams(location.search).get('expedition')==='1')toggle(true);
+ window.addEventListener('pageshow',event=>{if(event.persisted&&new URLSearchParams(location.search).get('expedition')==='1')toggle(true);});
+}
+
 function setup(){
  const canvas=$('atlas-canvas');
- window.BodySpatialCore.attachOrbit(canvas,{state:state.data.camera,render,pick:pickAt,getBounds:()=>model.getViewBounds(U.getRegion()||state.data.region),maxZoom:4,
-  deepZoomEnabled:()=>$('atlas-app').dataset.connectiveStudio==='true'&&U.getRegion()==='knee'&&state.data.view==='detail',deepMaxZoom:14,
+ const axialCamera=()=>continuumRequested&&vhfView?.active?vhfView.camera:state.data.camera;
+ const orbitCamera=continuumRequested?new Proxy({}, {get:(_,key)=>axialCamera()[key],set:(_,key,value)=>{axialCamera()[key]=value;return true;}}):state.data.camera;
+ window.BodySpatialCore.attachOrbit(canvas,{state:orbitCamera,render,pick:(x,y,opts)=>{if(continuumRequested&&vhfView?.active){const v=vhfView,hit=window.BodyVHF.pickHit(v.parts,v,v.camera,x,y);v.selected=hit?.id||null;v.surface=hit?.point||null;render();return;}return pickAt(x,y,opts);},getBounds:()=>continuumRequested&&vhfView?.active?vhfView.bounds:model.getViewBounds(U.getRegion()||state.data.region),maxZoom:4,
+  deepZoomEnabled:()=>continuumRequested&&vhfView?.active||$('atlas-app').dataset.connectiveStudio==='true'&&U.getRegion()==='knee'&&state.data.view==='detail',deepMaxZoom:14,
   onInteract:()=>{
+   if(continuumRequested&&vhfView?.active)return;
    if(studioCameraActive()){cancelAnimationFrame(motionFrame);motionFrame=0;studioNavigation?.begin();}
    U.interrupt();
   },
-  onGestureEnd:()=>{if(studioCameraActive()){studioNavigation?.end();window.dispatchEvent(new Event('body:camera-transaction'));}},
-  onDoubleTap:recenter});
+  onGestureEnd:()=>{if(continuumRequested&&vhfView?.active)return;if(studioCameraActive()){studioNavigation?.end();window.dispatchEvent(new Event('body:camera-transaction'));}},
+  onDoubleTap:()=>{if(continuumRequested&&vhfView?.active){vhfView.fit();render();return;}recenter();}});
  window.addEventListener('resize',resize,{passive:true});
  if(typeof ResizeObserver!=='undefined')new ResizeObserver(resize).observe($('atlas-stage'));
  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(motionFrame);motionFrame=0;clearTimeout(frameTimeout);}else render();});
@@ -700,13 +791,15 @@ function setup(){
  $('joint-rest').onclick=()=>U.neutral();
  $('structure-chip-more').onclick=()=>U.showSelected();
  $('structure-chip-close').onclick=()=>{U.clearSelection();updateURL({replace:true});render();};
- buildPins();resize();
+ buildPins();resize();setupExpedition();
  Promise.all([loader.load('atlas'),loader.load('provenance')]).then(([asset,provenance])=>{
   loader.verifyAtlas(asset,provenance);
   source=asset;proof=provenance;loaded=true;
   model.load(asset);$('scene-status').textContent=model.getStatus()==='ready'?'SOURCED SKELETON · 78 STRUCTURES':'2D FALLBACK';
   if(model.getStatus()!=='ready')fallback('WebGL2 unavailable');
-  resize();
+  resize();window.dispatchEvent(new Event('body:vhf-base-ready'));
+  // Explicit world Expedition uses only the base atlas as a failure fallback. Optional legacy geometry is not requested.
+  if(broadSource&&new URLSearchParams(location.search).get('expedition')==='1')return;
   // V8 overview is a separate hashed, mobile LOD. Detailed labs still load only
   // when entered, avoiding 10MB+ of source meshes on initial mobile view.
   Promise.all([loader.load('overviewV8'),loader.load('overviewV8Proof')])

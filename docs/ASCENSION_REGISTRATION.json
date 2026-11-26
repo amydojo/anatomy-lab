@@ -1,0 +1,70 @@
+{
+  "matrix_source_to_denver_raw": [
+    [
+      -0.9989941700784746,
+      -0.03886946184456025,
+      -0.02235649984106498,
+      805.1853554910044
+    ],
+    [
+      0.03917307506032958,
+      -0.9991438349272099,
+      -0.013306664392877008,
+      683.6409396801585
+    ],
+    [
+      -0.021820136102852286,
+      -0.014169052998035348,
+      0.99966150250852,
+      6.692825721458576
+    ],
+    [
+      0,
+      0,
+      0,
+      1
+    ]
+  ],
+  "scale": 1,
+  "det": 1,
+  "units": "source units, physical mm unconfirmed",
+  "method": "35k area-weighted samples per reference; two femurs fit by 40 iterations 85% trimmed rigid ICP; symmetric sampled NN distances; hips and sacrum held out",
+  "thresholds": {
+    "median": 3,
+    "p95": 8,
+    "centroidDelta": 5
+  },
+  "metrics": {
+    "femur_left": [
+      1.267987,
+      3.214,
+      1.9194
+    ],
+    "femur_right": [
+      1.373323,
+      3.81764,
+      1.94735
+    ],
+    "hip_left": [
+      1.951302,
+      4.143719,
+      4.653666
+    ],
+    "hip_right": [
+      1.701445,
+      4.063036,
+      4.424021
+    ],
+    "sacrum_coccyx": [
+      3.3399,
+      7.301483,
+      10.563021
+    ]
+  },
+  "metricOrder": [
+    "median",
+    "p95",
+    "centroidDelta"
+  ],
+  "decision": "unregistered separate space; sacral validation fails; no clinical review"
+}

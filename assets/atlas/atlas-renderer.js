@@ -56,25 +56,51 @@ function create(canvas,onContextLost=()=>{}){
    min:[...lo],max:[...hi]};
  }
  let registry=window.BodyAtlasRegistry.create();
+ let frameStats={drawCalls:0,submittedTriangles:0};let vhfMeshes=[],vhfGeneration=0,vhfCacheFrame=0,vhfEvictions=0,vhfUploads=0,vhfUploadMs=0; const vhfFailed=new Set();let vhfStage=null,vhfUploadGate=false,vhfChunkCount=0,vhfMaxChunkMs=0,vhfFirstDrawMs=null;const VHF_CHUNK_BYTES=1024*1024;
+ // VELOCITY: upload exact worker-packed data in bounded chunks; publish only complete meshes.
+ function clearVhfStage(){if(vhfStage){disposeMesh(vhfStage.mesh);vhfStage=null;}vhfUploadGate=false;}
+ function uploadVhfChunk(p){
+  const start=performance.now();
+  if(!vhfStage){const flat=p.packed,indices=p.indices,buffer=gl.createBuffer(),indexBuffer=gl.createBuffer();if(!buffer||!indexBuffer){if(buffer)gl.deleteBuffer(buffer);if(indexBuffer)gl.deleteBuffer(indexBuffer);throw Error('Source allocation failed: '+p.id);}
+   const mesh={id:p.id,lodLevel:p.lodLevel||'exact',name:p.name,group:'vhf',color:p.color,tissue:false,category:p.category,buffer,indexBuffer,indexType:indices.BYTES_PER_ELEMENT===2?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,bufferBytes:flat.byteLength+indices.byteLength,count:indices.length,min:p.min,max:p.max,lastUse:performance.now()};
+   vhfStage={mesh,part:p,arrays:[new Uint8Array(flat.buffer,flat.byteOffset,flat.byteLength),new Uint8Array(indices.buffer,indices.byteOffset,indices.byteLength)],lane:0,offset:0};
+   gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,flat.byteLength,gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,indexBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,indices.byteLength,gl.STATIC_DRAW);if(gl.getError()!==gl.NO_ERROR)throw Error('Source GPU allocation error: '+p.id);
+  }
+  const q=vhfStage;if(q.part!==p)throw Error('Unexpected upload stage');const array=q.arrays[q.lane],target=q.lane?gl.ELEMENT_ARRAY_BUFFER:gl.ARRAY_BUFFER;
+  gl.bindBuffer(target,q.lane?q.mesh.indexBuffer:q.mesh.buffer);const end=Math.min(array.length,q.offset+VHF_CHUNK_BYTES);gl.bufferSubData(target,q.offset,array.subarray(q.offset,end));if(gl.getError()!==gl.NO_ERROR)throw Error('Source GPU upload error: '+p.id);q.offset=end;
+  if(q.offset===array.length){q.lane++;q.offset=0;}const elapsed=performance.now()-start;vhfUploadMs+=elapsed;vhfChunkCount++;vhfMaxChunkMs=Math.max(vhfMaxChunkMs,elapsed);
+  if(q.lane<2)return null;const mesh=q.mesh;vhfStage=null;delete p.packed;return mesh;
+ }
+ function sourceMesh(p){const m=makeBuffer(p,p.id,'vhf',p.color,p.category==='Muscle');m.category=p.category;m.lodLevel=p.lodLevel||'exact';if(p.category==='Ligament'||p.category==='Cartilage'){m.connective=true;m.connectiveKind=p.category.toLowerCase();}m.lastUse=performance.now();return m;}
+ async function loadVHF(parts,atomic=false){const generation=++vhfGeneration;clearVhfStage();vhfFailed.clear();vhfEvictions=vhfUploads=vhfUploadMs=vhfChunkCount=vhfMaxChunkMs=0;vhfFirstDrawMs=null;if(!atomic){for(const m of vhfMeshes)disposeMesh(m);vhfMeshes=[];}const staged=[];try{for(const p of parts){await new Promise(resolve=>requestAnimationFrame(resolve));if(generation!==vhfGeneration||status!=='ready'||gl.isContextLost())throw Error('Source upload interrupted');const started=performance.now(),m=sourceMesh(p);vhfUploadMs+=performance.now()-started;vhfUploads++;staged.push(m);}if(atomic)for(const m of vhfMeshes)disposeMesh(m);vhfMeshes=staged;return true;}catch(e){if(generation===vhfGeneration&&!gl.isContextLost())for(const m of staged)disposeMesh(m);throw e;}}
+
  const detail=new Map(),detailData=new Map();let shoulderPivot=[-1.1,1.9,0],shoulderGraph=null;let destroyed=false,rebuilding=false,recoveryScheduled=false;let uniformCache=new Map();const boundsCache=new Map();
- function cleanup(){if(gl){for(const item of [...buffers,...overviewBones,...overviewMuscles,...expansionBones,...expansionMuscles,...expansionConnective,...[...connectiveDetail.values()].flat(),...(facialOverview?[facialOverview]:[]),...facialDetail,...osteologyOverview,...[...expansionDetail.values()].flat(),...[...osteologyDetail.values()].flat(),...[...detail.values()].flat()])gl.deleteBuffer(item.buffer);if(program)gl.deleteProgram(program);}buffers=[];overviewBones=[];overviewMuscles=[];expansionBones=[];expansionMuscles=[];expansionConnective=[];connectiveDetail.clear();facialOverview=null;facialDetail=[];osteologyOverview=[];osteologyDetail.clear();expansionDetail.clear();detail.clear();program=null;uniformCache.clear();boundsCache.clear();}
+ function disposeMesh(item){gl.deleteBuffer(item.buffer);if(item.indexBuffer)gl.deleteBuffer(item.indexBuffer);}
+ function cleanup(){clearVhfStage();vhfGeneration++;if(vhfCacheFrame)cancelAnimationFrame(vhfCacheFrame);vhfCacheFrame=0;if(gl){for(const m of vhfMeshes)disposeMesh(m);}vhfMeshes=[];if(gl){for(const item of [...buffers,...overviewBones,...overviewMuscles,...expansionBones,...expansionMuscles,...expansionConnective,...[...connectiveDetail.values()].flat(),...(facialOverview?[facialOverview]:[]),...facialDetail,...osteologyOverview,...[...expansionDetail.values()].flat(),...[...osteologyDetail.values()].flat(),...[...detail.values()].flat()])disposeMesh(item);if(program)gl.deleteProgram(program);}buffers=[];overviewBones=[];overviewMuscles=[];expansionBones=[];expansionMuscles=[];expansionConnective=[];connectiveDetail.clear();facialOverview=null;facialDetail=[];osteologyOverview=[];osteologyDetail.clear();expansionDetail.clear();detail.clear();program=null;uniformCache.clear();boundsCache.clear();}
  function compile(type,source){const sh=gl.createShader(type);gl.shaderSource(sh,source);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(sh));return sh;}
  function setup(){
   gl=canvas.getContext('webgl2',{alpha:true,antialias:true,depth:true,premultipliedAlpha:false,powerPreference:'low-power'});
   if(!gl){status='fallback';return false;}
   const vert=[
    '#version 300 es','precision highp float;','in vec3 aPosition;','in vec3 aNormal;','in float aSkinWeight;',
-   'uniform vec2 uViewport;','uniform float uAnchorX;','uniform float uAnchorY;','uniform float uYaw;','uniform float uPitch;','uniform float uFrameSpan;','uniform float uZoom;','uniform vec3 uTarget;','uniform float uMotion;','uniform float uFlex;','uniform vec3 uPivot;','uniform float uMotionAxis;','uniform float uSoftSkin;','uniform float uJointGraph;','uniform mat4 uOriginPose;','uniform mat4 uInsertionPose;','out vec3 vNormal;',
+   'uniform vec2 uViewport;','uniform float uAnchorX;','uniform float uAnchorY;','uniform float uYaw;','uniform float uPitch;','uniform float uFrameSpan;','uniform float uZoom;','uniform vec3 uTarget;','uniform float uMotion;','uniform float uFlex;','uniform vec3 uPivot;','uniform float uMotionAxis;','uniform float uSoftSkin;','uniform float uJointGraph;','uniform mat4 uOriginPose;','uniform mat4 uInsertionPose;','out vec3 vNormal;','out vec3 vViewNormal;',
    'void main(){','vec3 bone=aPosition;','vec3 n=aNormal;','float influence=uMotion>.5?1.:(uSoftSkin>.5?aSkinWeight:0.);','if(uJointGraph>.5){vec4 pt=vec4(aPosition,1.);bone=mix((uOriginPose*pt).xyz,(uInsertionPose*pt).xyz,aSkinWeight);n=normalize(mix(mat3(uOriginPose)*n,mat3(uInsertionPose)*n,aSkinWeight));}else if(influence>.00001){vec3 d=bone-uPivot;float ca=cos(uFlex*influence),sa=sin(uFlex*influence);bone=uPivot+(uMotionAxis>.5?vec3(d.x*ca-d.y*sa,d.x*sa+d.y*ca,d.z):vec3(d.x,d.y*ca-d.z*sa,d.y*sa+d.z*ca));n=uMotionAxis>.5?vec3(n.x*ca-n.y*sa,n.x*sa+n.y*ca,n.z):vec3(n.x,n.y*ca-n.z*sa,n.y*sa+n.z*ca);}','vec3 p=bone-uTarget;','float cy=cos(uYaw),sy=sin(uYaw),cp=cos(uPitch),sp=sin(uPitch);',
    'float x=p.x*cy+p.z*sy;','float z=p.z*cy-p.x*sy;','float y=p.y*cp-z*sp;','float z2=p.y*sp+z*cp;',
    'float scale=min(uViewport.x/3.25,uViewport.y/uFrameSpan)*uZoom;',
    'float w=max(.10,(7.4-z2)/7.4);',
    'gl_Position=vec4(x*scale/(uViewport.x*.5)+(uAnchorX-.5)*2.0*w,(y-.04)*scale/(uViewport.y*.5)-(uAnchorY-.5)*2.0*w,-z2/15.0,w);',
-   'vNormal=n;','}'
+   'vNormal=n;','float nz=n.z*cy-n.x*sy; vViewNormal=vec3(n.x*cy+n.z*sy,n.y*cp-nz*sp,n.y*sp+nz*cp);','}'
   ].join('\n');
-  const frag=['#version 300 es','precision mediump float;','in vec3 vNormal;','uniform vec3 uColor;','uniform float uDim;','uniform float uAlpha;','out vec4 outColor;',
+  const frag=['#version 300 es','precision mediump float;','in vec3 vNormal;','uniform vec3 uColor;','uniform float uDim;','uniform float uAlpha;','uniform float uVisual;','uniform float uMaterial;','in vec3 vViewNormal;','out vec4 outColor;',
     'void main(){','float light=.60+.40*abs(dot(normalize(vNormal),normalize(vec3(.42,.70,.65))));',
-    'outColor=vec4(uColor*light*uDim,uAlpha);','}'].join('\n');
+    'if(uVisual<.5){outColor=vec4(uColor*light*uDim,uAlpha);return;}',
+    'vec3 n=normalize(vViewNormal); if(n.z<0.)n=-n;',
+    'float key=max(0.,dot(n,vec3(-.48,.64,.60))); float fill=max(0.,dot(n,vec3(.75,.12,.65))); float rim=1.-abs(n.z);',
+    'float ambient=uVisual<1.5?.55:uVisual<2.5?.34:.22; float strength=uVisual<1.5?.40:uVisual<2.5?.65:.78;',
+    'vec3 base=uColor; float sheen=.025; if(uMaterial<.5){base=mix(base,vec3(.86,.80,.68),.28);sheen=.025;}else if(uMaterial<1.5){base=mix(base,vec3(.64,.26,.22),.35);sheen=.018;}else if(uMaterial<2.5){base=mix(base,vec3(.83,.75,.59),.42);sheen=.055;}else if(uMaterial<3.5){base=mix(base,vec3(.57,.68,.68),.35);sheen=.045;}',
+    'float shade=ambient+strength*key+.12*fill; float edge=rim*rim*(uVisual<1.5?.035:uVisual<2.5?.09:.17);',
+    'vec3 color=base*shade+vec3(.90,.85,.76)*(edge+sheen*key*key*key);',
+    'outColor=vec4(clamp(color*uDim,0.,1.),uAlpha);','}'].join('\n');
   const vs=compile(gl.VERTEX_SHADER,vert),fs=compile(gl.FRAGMENT_SHADER,frag);
   program=gl.createProgram();gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);
   gl.deleteShader(vs);gl.deleteShader(fs);
@@ -94,6 +120,8 @@ function create(canvas,onContextLost=()=>{}){
  }catch(e){status='fallback';onContextLost(e.message);}});
  try{setup();}catch(e){status='fallback';onContextLost(e.message);}
  function makeBuffer(part,id,group,color,tissue=false){
+  if(part.positions&&part.indices){const flat=part.packed||window.BodyVHF.packVertices(part.positions,part.indices),indices=part.indices,buffer=gl.createBuffer(),indexBuffer=gl.createBuffer();if(!buffer||!indexBuffer){if(buffer)gl.deleteBuffer(buffer);if(indexBuffer)gl.deleteBuffer(indexBuffer);throw Error('Source allocation failed: '+id);}gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,flat,gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,indexBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,indices,gl.STATIC_DRAW);return {id,name:part.name,group,color,tissue,buffer,indexBuffer,indexType:indices.BYTES_PER_ELEMENT===2?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,bufferBytes:flat.byteLength+indices.byteLength,count:indices.length,min:part.min,max:part.max};}
+
   if(!Array.isArray(part.vertices)||!Array.isArray(part.faces)||part.vertices.length<50||part.faces.length<50)throw Error('Incomplete sourced mesh: '+id);
   const vs=part.vertices,normal=new Float32Array(vs.length*3);
   for(const tri of part.faces){
@@ -112,18 +140,17 @@ function create(canvas,onContextLost=()=>{}){
   }
   const weights=part.skinWeights||null;
   if(weights&&(weights.length!==vs.length||weights.some(w=>!Number.isFinite(w)||w<0||w>1)))throw Error('Invalid anatomical skin weights: '+id);
-  const flat=new Float32Array(part.faces.length*21);let cursor=0;
-  for(const tri of part.faces){
-   for(const i of tri){
-    flat.set(vs[i],cursor);
-    flat.set(normal.subarray(i*3,i*3+3),cursor+3);
-    flat[cursor+6]=weights?weights[i]:0;
-    cursor+=7;
-   }
+  const flat=new Float32Array(vs.length*7);
+  for(let i=0;i<vs.length;i++){
+   flat.set(vs[i],i*7);flat.set(normal.subarray(i*3,i*3+3),i*7+3);flat[i*7+6]=weights?weights[i]:0;
   }
-  const buffer=gl.createBuffer();
+  const indices=vs.length<=65536?new Uint16Array(part.faces.length*3):new Uint32Array(part.faces.length*3);
+  for(let i=0;i<part.faces.length;i++)indices.set(part.faces[i],i*3);
+  const buffer=gl.createBuffer(),indexBuffer=gl.createBuffer();
+  if(!buffer||!indexBuffer){if(buffer)gl.deleteBuffer(buffer);if(indexBuffer)gl.deleteBuffer(indexBuffer);throw Error('Geometry allocation failed: '+id);}
   gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,flat,gl.STATIC_DRAW);
-  return {id,name:part.name||id,fma:part.fma||null,group,color,tissue,buffer,verts:part.vertices,faces:part.faces,skinWeights:weights,rig:part.rig||null,count:part.faces.length*3};
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,indexBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,indices,gl.STATIC_DRAW);
+  return {id,name:part.name||id,fma:part.fma||null,group,color,tissue,buffer,indexBuffer,indexType:indices.BYTES_PER_ELEMENT===2?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,bufferBytes:flat.byteLength+indices.byteLength,verts:part.vertices,faces:part.faces,skinWeights:weights,rig:part.rig||null,count:indices.length};
  }
  function load(asset){
   if(asset.schema!=='body-live/atlas-skeleton-v1')throw Error('Unexpected skeleton schema');
@@ -154,8 +181,8 @@ function create(canvas,onContextLost=()=>{}){
     const mesh=makeBuffer(part,id,part.group,EXTENDED_MUSCLE_COLORS[part.region]||[.8,.49,.4],true);
     muscles.push(mesh);newlyAdded.push(mesh);
    }
-  }catch(err){for(const mesh of newlyAdded)gl.deleteBuffer(mesh.buffer);throw err;}
-  for(const old of [...overviewBones,...overviewMuscles])gl.deleteBuffer(old.buffer);
+  }catch(err){for(const mesh of newlyAdded)disposeMesh(mesh);throw err;}
+  for(const old of [...overviewBones,...overviewMuscles])disposeMesh(old);
   overviewBones=bones;overviewMuscles=muscles;overviewData=asset;
   registry.overview(asset);boundsCache.delete('__body__');
   return true;
@@ -188,8 +215,8 @@ function create(canvas,onContextLost=()=>{}){
      parts[kind].push(gpu);created.push(gpu);
     }
    }
-  }catch(e){for(const p of created)gl.deleteBuffer(p.buffer);throw e;}
-  for(const old of [...expansionBones,...expansionMuscles,...expansionConnective])gl.deleteBuffer(old.buffer);
+  }catch(e){for(const p of created)disposeMesh(p);throw e;}
+  for(const old of [...expansionBones,...expansionMuscles,...expansionConnective])disposeMesh(old);
   expansionBones=parts.bones;expansionMuscles=parts.muscles;expansionConnective=parts.connective;
   const additions=new Map();
   for(const region of ['skull','wrist','ankle']){
@@ -204,7 +231,7 @@ function create(canvas,onContextLost=()=>{}){
     return mesh;
    }));
   }
-  for(const m of expansionDetail.values())for(const p of m)gl.deleteBuffer(p.buffer);
+  for(const m of expansionDetail.values())for(const p of m)disposeMesh(p);
   expansionDetail=additions;
   expansionData=asset;registry.expansion(asset);
   return true;
@@ -226,8 +253,8 @@ function create(canvas,onContextLost=()=>{}){
     mesh.license='CC BY-SA 2.1 Japan';
     details.push(mesh);
    }
-  }catch(e){for(const x of [...(overview?[overview]:[]),...details])gl.deleteBuffer(x.buffer);throw e;}
-  for(const old of [...(facialOverview?[facialOverview]:[]),...facialDetail])gl.deleteBuffer(old.buffer);
+  }catch(e){for(const x of [...(overview?[overview]:[]),...details])disposeMesh(x);throw e;}
+  for(const old of [...(facialOverview?[facialOverview]:[]),...facialDetail])disposeMesh(old);
   facialData=asset;facialOverview=overview;facialDetail=details;
   registry.facial(asset);
   return true;
@@ -246,8 +273,8 @@ function create(canvas,onContextLost=()=>{}){
     built.push(mesh);
    }
    if(built.length!==7)throw Error('Missing the seven source bone references');
-  }catch(err){for(const m of built)gl.deleteBuffer(m.buffer);throw err;}
-  for(const m of osteologyOverview)gl.deleteBuffer(m.buffer);
+  }catch(err){for(const m of built)disposeMesh(m);throw err;}
+  for(const m of osteologyOverview)disposeMesh(m);
   osteologyOverview=built;
   osteologyDetail=new Map([
     ['skull',built.filter(m=>m.id!=='z-v11-coccyx')],
@@ -312,8 +339,8 @@ function create(canvas,onContextLost=()=>{}){
     next.push(makeBuffer(converted,id,tissue?'tissue':extended?window.BodyExtendedRegions.config[region].group:'lower',color,tissue));
    }
    if(next.filter(p=>!p.tissue).length!==(extended?Object.keys(asset.parts).length:hip||shoulder?3:4))throw Error('Incomplete detailed bone registration');
-  }catch(error){for(const p of next)gl.deleteBuffer(p.buffer);throw error;}
-  for(const old of detail.get(region)||[])gl.deleteBuffer(old.buffer);
+  }catch(error){for(const p of next)disposeMesh(p);throw error;}
+  for(const old of detail.get(region)||[])disposeMesh(old);
   if(shoulder){
     if(!window.BodyShoulderKinematics)throw Error('Shoulder kinematic graph missing');
     shoulderGraph=window.BodyShoulderKinematics.create(asset.parts);
@@ -330,7 +357,7 @@ function create(canvas,onContextLost=()=>{}){
   while(detail.size>3){
    const expired=detail.keys().next().value;
    const meshes=detail.get(expired)||[];
-   for(const part of meshes)gl.deleteBuffer(part.buffer);
+   for(const part of meshes)disposeMesh(part);
    detail.delete(expired);detailData.delete(expired);
   }
   if(extended)registry.detail(region,asset);
@@ -348,7 +375,7 @@ function create(canvas,onContextLost=()=>{}){
     const mesh=makeBuffer(part,id,'connective',palette[part.system],true);
     mesh.connective=true;mesh.connectiveKind=part.system;mesh.illustrative=true;
     result.push(mesh);
-  }}catch(e){for(const m of result)gl.deleteBuffer(m.buffer);throw e;}
+  }}catch(e){for(const m of result)disposeMesh(m);throw e;}
   connectiveDetail.set(region,result);return true;
  }
  function setConnectiveState(next){
@@ -358,13 +385,21 @@ function create(canvas,onContextLost=()=>{}){
   connectiveState={enabled:next?.enabled===true,visible,isolated:typeof next?.isolated==='string'?next.isolated:null};
   return true;
  }
+ let visualMode=0;
+ function setVisualMode(mode){visualMode=({legacy:0,atlas:1,specimen:2,cinema:3})[mode]??0;}
+ let opticalDensity=null,limitContext=null,limits=null;
+ function setOpticalDensity(value){opticalDensity=Number.isFinite(value)?value:null;}
  function resize(){
-  const dpr=Math.min(window.devicePixelRatio||1,2),w=Math.max(1,canvas.getBoundingClientRect().width),h=Math.max(1,canvas.getBoundingClientRect().height);
-  const width=Math.ceil(w*dpr),height=Math.ceil(h*dpr);
+  const rect=canvas.getBoundingClientRect(),w=Math.max(1,rect.width),h=Math.max(1,rect.height),native=window.devicePixelRatio||1;
+  let dpr=Math.min(native,2),width=Math.ceil(w*dpr),height=Math.ceil(h*dpr);
+  if(opticalDensity!==null&&gl&&status==='ready'&&window.BodyOptical){
+   if(limitContext!==gl||!limits){const viewport=gl.getParameter(gl.MAX_VIEWPORT_DIMS),size=gl.getParameter(gl.MAX_RENDERBUFFER_SIZE);limits=[Math.min(viewport[0],size),Math.min(viewport[1],size)];limitContext=gl;}
+   const dims=window.BodyOptical.dimensions(w,h,native,opticalDensity,limits[0],limits[1]);({width,height}=dims);dpr=dims.scale;
+  }
   if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
   return {width:w,height:h,dpr};
  }
- function render(camera,selected,mode='clean',layer=0,reveal=0,flex=0,highlight=null,secondary=0,transitionFrom=null,tissueFocus=false){
+ function render(camera,selected,mode='clean',layer=0,reveal=0,flex=0,highlight=null,secondary=0,transitionFrom=null,tissueFocus=false,sourceView=null){
   if(destroyed)return {width:canvas.clientWidth,height:canvas.clientHeight,dpr:1};
   const size=resize();
   if(!gl||status!=='ready'||gl.isContextLost?.())return size;
@@ -382,9 +417,11 @@ function create(canvas,onContextLost=()=>{}){
    }
    return size;
   }
+  let drawCalls=0,submittedTriangles=0;
   gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(0,0,0,0);gl.clearDepth(1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
   gl.useProgram(program);
   const uni=name=>{if(!uniformCache.has(name))uniformCache.set(name,gl.getUniformLocation(program,name));return uniformCache.get(name);};
+  gl.uniform1f(uni('uVisual'),visualMode);
   gl.uniform2f(uni('uViewport'),size.width,size.height);
   gl.uniform1f(uni('uAnchorX'),Number.isFinite(camera.anchorX)?camera.anchorX:.5);
   gl.uniform1f(uni('uAnchorY'),Number.isFinite(camera.anchorY)?camera.anchorY:.5);
@@ -399,8 +436,8 @@ function create(canvas,onContextLost=()=>{}){
    ?M.poseExtended(selected,detailData.get(selected),flex,secondary):null;
   const jointPose=shoulderPose||lowerPose||extendedPose;
   const draw=(item,dim=1,alpha=1,unposed=false)=>{
-  if(!allowed(item))return;
-  if(connectiveIsolated&&!connectiveIsolated.has(item.id)){
+  if(!sourceView&&!allowed(item))return;
+  if(!sourceView&&connectiveIsolated&&!connectiveIsolated.has(item.id)){
    if(!connectiveGhost)return;
    // Existing real meshes remain subordinate, with nearby landmarks readable.
    // These are presentation weights, NOT a geometry-registration assertion.
@@ -422,13 +459,55 @@ function create(canvas,onContextLost=()=>{}){
    gl.uniform1f(uni('uMotion'),unposed?0:moving?1:0);gl.uniform1f(uni('uSoftSkin'),item.skinWeights?1:0);gl.uniform1f(uni('uMotionAxis'),selected==='shoulder'?1:0);
    gl.uniform1f(uni('uFlex'),(selected==='shoulder'?-1:1)*Number(flex)*Math.PI/180);
    gl.uniform3fv(uni('uPivot'),pivot);
+   const kind=item.connectiveKind;gl.uniform1f(uni('uMaterial'),item.id===highlight?4:kind==='fibrocartilage'||kind==='cartilage'?3:kind==='tendon'||kind==='ligament'?2:item.connective||item.group==='connective'?4:item.tissue?1:0);
    gl.uniform3fv(uni('uColor'),item.id===highlight?[1,.81,.48]:item.color);gl.uniform1f(uni('uDim'),dim);gl.uniform1f(uni('uAlpha'),alpha);
    gl.bindBuffer(gl.ARRAY_BUFFER,item.buffer);
    gl.enableVertexAttribArray(locP);gl.vertexAttribPointer(locP,3,gl.FLOAT,false,28,0);
    gl.enableVertexAttribArray(locN);gl.vertexAttribPointer(locN,3,gl.FLOAT,false,28,12);
    gl.enableVertexAttribArray(locW);gl.vertexAttribPointer(locW,1,gl.FLOAT,false,28,24);
-   gl.drawArrays(gl.TRIANGLES,0,item.count);
+   if(item.indexBuffer){gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,item.indexBuffer);gl.drawElements(gl.TRIANGLES,item.count,item.indexType,0);}else gl.drawArrays(gl.TRIANGLES,0,item.count);drawCalls++;submittedTriangles+=item.count/3;
   };
+  if(sourceView){
+   gl.depthMask(true);
+   const V=window.BodyVHF,now=performance.now(),cam={...camera,width:size.width,height:size.height},bounded=!!sourceView.bounded,parts=sourceView.parts,axial=!!sourceView.stream,legacy=parts.sourceInfo?.processing==='legacy';
+   let eligibleStructures=0,culledStructures=0,culledTriangles=0,eligibleTriangles=0,pending=0;
+   const wanted=new Set(),drawn=new Set(),resident=new Map(vhfMeshes.map(m=>[m.id,m])),desired=new Map();
+   const level=p=>p.lodLevel||'exact',key=p=>p.id+':'+level(p);
+   for(const p of parts){if(!V.visible(p,sourceView))continue;eligibleStructures++;eligibleTriangles+=p.indices.length/3;
+    if(!V.inView(p,cam)){culledStructures++;culledTriangles+=p.indices.length/3;continue;}wanted.add(p.id);}
+   if(sourceView.selected)wanted.add(sourceView.selected);
+   for(const p of parts)if(wanted.has(p.id))desired.set(p.id,axial&&!legacy?V.chooseLod(p,cam,sourceView.selected,resident.get(p.id)?.lodLevel):p);
+   if(bounded){
+    const plan=V.evictionPlan(vhfMeshes.map(m=>({id:m.id,bytes:m.bufferBytes,lastUse:m.lastUse})),wanted,now,32*1024*1024);
+    if(plan.evict.length){const evicted=new Set(plan.evict);vhfMeshes=vhfMeshes.filter(m=>{if(!evicted.has(m.id))return true;disposeMesh(m);resident.delete(m.id);vhfEvictions++;return false;});}
+    // Do not abandon a base mesh for an upgrade; publish the replacement atomically.
+    if(vhfStage&&desired.get(vhfStage.part.id)!==vhfStage.part)clearVhfStage();
+    const queue=[...desired.values()].filter(p=>resident.get(p.id)?.lodLevel!==level(p)&&!vhfFailed.has(key(p)));
+    queue.sort((a,b)=>Number(resident.has(a.id))-Number(resident.has(b.id))||Number(b.id===sourceView.selected)-Number(a.id===sourceView.selected));
+    if(vhfStage){const p=vhfStage.part,i=queue.indexOf(p);if(i>=0){queue.splice(i,1);queue.unshift(p);}}
+    let uploads=0;
+    for(const p of queue){
+     const chunked=axial&&!legacy;
+     if(uploads>=1||(chunked&&vhfUploadGate)){pending++;continue;}
+     try{
+      let m;
+      if(chunked){vhfUploadGate=true;uploads++;if(!p.packed&&!vhfStage)p.packed=V.packVertices(p.positions,p.indices);m=uploadVhfChunk(p);if(!m){pending++;continue;}}
+      else{const t=performance.now();m=sourceMesh(p);vhfUploadMs+=performance.now()-t;uploads++;}
+      const old=resident.get(p.id);if(old){vhfMeshes=vhfMeshes.filter(x=>x!==old);disposeMesh(old);}
+      vhfUploads++;vhfMeshes.push(m);resident.set(p.id,m);
+     }catch(e){clearVhfStage();vhfFailed.add(key(p));console.warn('BODY / LIVE GPU residency:',key(p),e.message);}
+    }
+    // Re-arm even after the final chunk: subsequent streamed assets must never inherit a closed gate.
+    if((pending||vhfUploadGate)&&!vhfCacheFrame){const generation=vhfGeneration;vhfCacheFrame=requestAnimationFrame(()=>{vhfCacheFrame=0;vhfUploadGate=false;if(generation===vhfGeneration&&!document.hidden)window.dispatchEvent(new Event('body:vhf-residency-frame'));});}
+   }
+   for(const m of vhfMeshes){if(!wanted.has(m.id)||!V.visible(m,sourceView)||!V.inView(m,cam))continue;m.lastUse=now;draw(m,1,1,true);drawn.add(m.id);}
+   sourceView.renderedIds=bounded?drawn:null;
+   if(drawn.size&&vhfFirstDrawMs===null)vhfFirstDrawMs=performance.now()-(parts.sourceInfo?.streamStartedAt??now);
+   const bytes=vhfMeshes.reduce((n,m)=>n+m.bufferBytes,0);
+   const lodCounts={overview:0,regional:0,exact:0};for(const m of vhfMeshes)lodCounts[m.lodLevel||'exact']++;
+   frameStats={drawCalls,submittedTriangles,...(axial?{drawnSourceIds:[...drawn],residentSourceIds:vhfMeshes.map(m=>m.id),firstDrawMs:vhfFirstDrawMs,uploadChunks:vhfChunkCount,maxUploadChunkCpuMs:vhfMaxChunkMs,stagedGpuBufferBytes:vhfStage?.mesh.bufferBytes||0,preparedCpuBytes:parts.reduce((n,p)=>n+(p.packed?.byteLength||0)+(p.lods||[]).reduce((a,l)=>a+(l.packed?.byteLength||0),0),0),lodCounts,gpuFailedIds:[...vhfFailed]}:{}),eligibleStructures,eligibleTriangles,culledStructures,culledTriangles,residentStructures:vhfMeshes.length,residentTriangles:vhfMeshes.reduce((n,m)=>n+m.count/3,0),estimatedSourceGpuBufferBytes:bytes,residency:bounded?{targetBytes:32*1024*1024,overTarget:bytes>32*1024*1024,pending,failed:vhfFailed.size,evictions:vhfEvictions,uploads:vhfUploads,uploadCpuMs:vhfUploadMs}:null};
+   return size;
+  }
   const region=detail.has(selected)?selected:null;
   const from=transitionFrom&&transitionFrom!==region&&detail.has(transitionFrom)?transitionFrom:null;
   const r=clamp(Number(reveal)||0,0,1);
@@ -561,7 +640,7 @@ function create(canvas,onContextLost=()=>{}){
     gl.depthMask(true);
    }
   }
-  return size;
+  frameStats={drawCalls,submittedTriangles};return size;
  }
  function touchDetail(region){
   if(!detail.has(region))return false;
@@ -748,7 +827,7 @@ function create(canvas,onContextLost=()=>{}){
   }finally{rebuilding=false;}
  }
  function dispose(){destroyed=true;status='disposed';cleanup();model=null;overviewData=null;expansionData=null;facialData=null;osteologyData=null;shoulderGraph=null;detailData.clear();}
- return Object.freeze({load,loadOverview,loadExpansion,loadFacial,loadOsteology,setOsteologyFocus,setOverviewSystem,getOverviewSystem:()=>overviewSystem,registry:()=>registry,loadDetail,loadConnectiveIllustrations,setConnectiveState,touchDetail,hasDetail:region=>detail.has(region),render,hitTest,touchCandidates,shoulderDiagnostics,resize,getStatus:()=>status,getViewBounds:viewBounds,getStructure,getStructureBounds,setConnectiveFilter,restore,dispose,stats:()=>({connectiveGhosted:connectiveGhost,connectiveContextLandmarks:[...(connectiveLandmarks||[])],connectiveIsolatedIds:[...(connectiveIsolated||[])],connectiveMeshes:[...connectiveDetail.values()].reduce((n,p)=>n+p.length,0),connectiveEnabled:connectiveState.enabled,partCount:buffers.length,overviewBones:overviewBones.length,overviewMuscles:overviewMuscles.length,expansionBones:expansionData?Object.keys(expansionData.bones).length:0,expansionMuscles:expansionData?Object.keys(expansionData.muscles).length:0,expansionConnective:expansionData?Object.keys(expansionData.connective).length:0,facialMuscles:facialData?Object.keys(facialData.parts).length:0,facialDetailMeshes:facialDetail.length,osteologyBones:osteologyData?Object.keys(osteologyData.bones).length:0,osteologyFocus,overviewSystem,registry:registry.stats(),triangles:[...buffers,...overviewBones,...overviewMuscles].reduce((n,b)=>n+b.count/3,0),webgl:status==='ready',detailRegions:[...detail.keys()],detailMeshes:[...detail.values()].reduce((n,items)=>n+items.length,0),riggedShoulderMuscles:(detail.get('shoulder')||[]).filter(p=>p.skinWeights).length,riggedHipMuscles:(detail.get('hip')||[]).filter(p=>p.skinWeights).length,riggedKneeMuscles:(detail.get('knee')||[]).filter(p=>p.skinWeights).length,coordinatedShoulder:!!shoulderGraph,expandedRegions:[...detail.keys()].filter(id=>window.BodyExtendedRegions?.has(id)),expandedMeshes:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>!x.tissue).length,0),expandedMuscles:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>x.tissue).length,0)})});
+ return Object.freeze({load,loadOverview,loadExpansion,loadFacial,loadOsteology,setOsteologyFocus,setOverviewSystem,getOverviewSystem:()=>overviewSystem,registry:()=>registry,loadDetail,loadConnectiveIllustrations,setConnectiveState,touchDetail,hasDetail:region=>detail.has(region),render,loadVHF,retryVHF:()=>{vhfFailed.clear();},setVisualMode,setOpticalDensity,frameStats:()=>({...frameStats}),hitTest,touchCandidates,shoulderDiagnostics,resize,getStatus:()=>status,getViewBounds:viewBounds,getStructure,getStructureBounds,setConnectiveFilter,restore,dispose,stats:()=>({connectiveGhosted:connectiveGhost,connectiveContextLandmarks:[...(connectiveLandmarks||[])],connectiveIsolatedIds:[...(connectiveIsolated||[])],connectiveMeshes:[...connectiveDetail.values()].reduce((n,p)=>n+p.length,0),connectiveEnabled:connectiveState.enabled,partCount:buffers.length,overviewBones:overviewBones.length,overviewMuscles:overviewMuscles.length,expansionBones:expansionData?Object.keys(expansionData.bones).length:0,expansionMuscles:expansionData?Object.keys(expansionData.muscles).length:0,expansionConnective:expansionData?Object.keys(expansionData.connective).length:0,facialMuscles:facialData?Object.keys(facialData.parts).length:0,facialDetailMeshes:facialDetail.length,osteologyBones:osteologyData?Object.keys(osteologyData.bones).length:0,osteologyFocus,overviewSystem,registry:registry.stats(),triangles:[...buffers,...overviewBones,...overviewMuscles].reduce((n,b)=>n+b.count/3,0),webgl:status==='ready',detailRegions:[...detail.keys()],detailMeshes:[...detail.values()].reduce((n,items)=>n+items.length,0),riggedShoulderMuscles:(detail.get('shoulder')||[]).filter(p=>p.skinWeights).length,riggedHipMuscles:(detail.get('hip')||[]).filter(p=>p.skinWeights).length,riggedKneeMuscles:(detail.get('knee')||[]).filter(p=>p.skinWeights).length,coordinatedShoulder:!!shoulderGraph,expandedRegions:[...detail.keys()].filter(id=>window.BodyExtendedRegions?.has(id)),expandedMeshes:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>!x.tissue).length,0),expandedMuscles:[...detail.entries()].filter(([id])=>window.BodyExtendedRegions?.has(id)).reduce((n,[,meshes])=>n+meshes.filter(x=>x.tissue).length,0)})});
 }
 window.BodyAtlasRenderer=Object.freeze({create});
 })();

@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import '../assets/atlas/vhf-source.js';
+const V=globalThis.BodyVHF;
+test('GPU eviction protects active and recently used resources',()=>{const entries=[{id:'visible',bytes:20,lastUse:0},{id:'old',bytes:20,lastUse:0},{id:'recent',bytes:20,lastUse:9500}];assert.deepEqual(V.evictionPlan(entries,new Set(['visible']),10000,32),{evict:['old'],bytes:40,overBudget:true});});
+test('GPU eviction is least recently used and avoids needless eviction',()=>{const entries=[{id:'a',bytes:10,lastUse:100},{id:'b',bytes:10,lastUse:0}];assert.deepEqual(V.evictionPlan(entries,new Set(),10000,10).evict,['b']);assert.equal(V.evictionPlan(entries,new Set(),10000,20).evict.length,0);});
+test('region awareness is broad when zoomed out or distant',()=>{const points=[{label:'LEFT KNEE',point:[0,0,0]},{label:'LEFT THIGH',point:[0,1,0]}];assert.equal(V.neighborhood(points,{zoom:1,target:{x:0,y:0,z:0}}),'LOWER BODY');assert.equal(V.neighborhood(points,{zoom:5,target:{x:0,y:.1,z:0}}),'LEFT KNEE');assert.equal(V.neighborhood(points,{zoom:5,target:{x:5,y:0,z:0}}),'LOWER BODY');});
+test('source identities are distinct',()=>assert.notEqual(V.hash,V.worldHash));
