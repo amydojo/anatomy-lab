@@ -46,8 +46,9 @@
    out[k]=clamp(origin[k]+delta[k],lower,upper)-origin[k];
   }return out;
  }
- // Wide mobility is opt-in for the unified world. Maintain upright camera axes near the poles.
- const WIDE_PITCH=89.5*Math.PI/180;
+ // Unified orbit supports continuous yaw and pitch. Preserve the camera-local
+ // right/up basis through the poles, with no automatic upright correction.
+ const WIDE_PITCH=1e4; // serialization guard, not a motion limit
  function travelEnvelope(b,c,roam=false){
   if(!b?.min||!b?.max||!b.min.every(Number.isFinite)||!b.max.every(Number.isFinite))return null;
   const center=Object.fromEntries(xyz.map((k,i)=>[k,(b.min[i]+b.max[i])/2]));
@@ -74,7 +75,7 @@
   const inspection=local&&(orthographic||(local.z<6.4&&local.z> -20));
   const angular=Math.min(1,Math.min(c.width,c.height)*.55/(Math.max(.001,Math.min(c.width/3.25,c.height/Math.max(.2,c.frameSpan))*c.zoom)*7.4));
   base(c,{...motion,panX:0,panY:0,orbitX:motion.orbitX*(inspection?1:angular),orbitY:motion.orbitY*(inspection?1:angular)},dt,b,maxZoom);
-  if(wide)c.pitch=clamp(start.pitch+motion.orbitY*(inspection?1:angular)*1.15*dt,-WIDE_PITCH,WIDE_PITCH);
+  if(wide)c.pitch=start.pitch+motion.orbitY*(inspection?1:angular)*1.15*dt;
   const rotated=c.yaw!==start.yaw||c.pitch!==start.pitch,zoomed=c.zoom!==start.zoom;
   if(inspection&&(rotated||zoomed)){
    // Orbit about the same world point; zoom preserves its pixel, at constant depth.
