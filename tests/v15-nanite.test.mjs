@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {gpuBytes,projectedError,chooseLevel,decodeBLD,packCompact,Residency,partitionExact,validateManifest} from '../assets/atlas/unity-geometry.mjs';
+import {gpuBytes,projectedError,chooseLevel,decodeBLD,packCompact,Residency,partitionExact,validateManifest,clusterBoundaryAudit} from '../assets/atlas/unity-geometry.mjs';
+import {overviewPreflight,UnityGeometrySession,uploadGeometry} from '../assets/atlas/unity-residency.mjs';
 const mesh={positions:new Float32Array([0,0,0,1,0,0,1,1,0,0,1,0]),indices:new Uint16Array([0,1,2,0,2,3])};
 const bounds={min:[0,0,0],max:[1,1,1]};
 const camera={width:320,height:640,frameSpan:8,zoom:1,yaw:0,pitch:0,target:{x:0,y:0,z:0}};
@@ -87,4 +88,36 @@ test('manifest requires external source hash and matches exact file identity',()
  assert.throws(()=>validateManifest(manifest,source,hashA));assert.throws(()=>validateManifest(manifest,source));
  manifest.structures[0].exact.sha256=hashB;assert.throws(()=>validateManifest(manifest,source,hashB));
  manifest.structures[0].exact.sha256=hashA;manifest.structures[0].overviewLevel='overview';assert.throws(()=>validateManifest(manifest,source,hashB));
+});
+
+test('cluster seam vertices are locked by exact source index',()=>{
+ const clusters=partitionExact(mesh,1),audit=clusterBoundaryAudit(mesh,clusters);
+ assert.equal(audit.seamEdges,1);assert.equal(audit.sourceBoundaryEdges,4);assert.equal(audit.nonmanifoldEdges,0);
+ assert.deepEqual(audit.clusters.map(c=>c.lockedSourceVertices),[[0,1,2],[0,2,3]]);
+ assert.equal(audit.mixedResolutionValidated,false);
+});
+test('coverage preflight refuses incomplete whole-world residency by default',()=>{
+ const {source,manifest}=fixture(),budget=10000,headroom=1000;
+ const p=overviewPreflight(manifest,budget,headroom);
+ assert.equal(p.overviewGpuBytes,143*76);assert.equal(p.coverageFits,false);
+ const args={gl:{},manifest,source,sourceHash:hashB,prepare:()=>{},budget,headroom};
+ assert.throws(()=>new UnityGeometrySession(args));
+ const diagnostic=new UnityGeometrySession({...args,allowPartialDiagnostic:true});
+ assert.equal(diagnostic.diagnostics().preflight.coverageFits,false);diagnostic.dispose();
+});
+function fakeGL(){
+ let serial=0;const sizes=new Map(),bindings=new Map(),deleted=[];
+ return {ARRAY_BUFFER:1,ELEMENT_ARRAY_BUFFER:2,STATIC_DRAW:3,BUFFER_SIZE:4,UNSIGNED_SHORT:5,UNSIGNED_INT:6,NO_ERROR:0,deleted,sizes,
+ createBuffer(){return ++serial;},deleteBuffer(h){deleted.push(h);sizes.delete(h);},
+ bindBuffer(t,h){bindings.set(t,h);},bufferData(t,n){sizes.set(bindings.get(t),n);},
+ getBufferParameter(t){return sizes.get(bindings.get(t));},bufferSubData(t,o,data){assert.ok(o+data.byteLength<=sizes.get(bindings.get(t)));},
+ getError(){return 0;},isContextLost(){return false;}};
+}
+test('chunked upload validates real allocation API and cancellation deletes staged handles',async()=>{
+ const gl=fakeGL(),packed=packCompact(mesh);let yields=0;
+ const h=await uploadGeometry(gl,packed,{chunkBytes:16,yieldFrame:async()=>{yields++;}});
+ assert.equal(h.bytes,76);assert.equal(gl.sizes.size,2);assert.ok(yields>0);
+ const abort=new AbortController(),other=fakeGL();
+ await assert.rejects(uploadGeometry(other,packed,{chunkBytes:16,signal:abort.signal,yieldFrame:async()=>abort.abort()}));
+ assert.equal(other.sizes.size,0);assert.equal(other.deleted.length,2);
 });
