@@ -1,0 +1,40 @@
+name: STRATA independent lab gate
+on:
+  pull_request:
+    branches: ['feat/v15-expedition-gamepad']
+    paths: ['assets/atlas/strata/**','atlas/strata/**','tests/v16-strata.test.mjs','tests/v16-strata.spec.mjs','.github/workflows/v16-strata.yml']
+permissions:
+  contents: read
+jobs:
+  strata:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check assets/atlas/strata/lab.mjs
+      - run: node --test tests/v16-strata.test.mjs
+      - run: node --test tests/v15-expedition.test.mjs tests/v15-world-engine.test.mjs tests/v15-axis.test.mjs
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop-chromium, chromium-mobile]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: npm run test:e2e -- --project=${{ matrix.project }} tests/v16-strata.spec.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: strata-browser-${{ matrix.project }}
+          path: test-results/
+          if-no-files-found: warn

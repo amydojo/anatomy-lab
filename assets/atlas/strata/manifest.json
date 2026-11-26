@@ -1,0 +1,259 @@
+{
+  "schema": "body-live-strata-1",
+  "version": 1,
+  "baseline": "6d51fc01364afdb647064bf9ddc0fae36c17cdbf",
+  "canonical": {
+    "source": "BoneHub VHF CT",
+    "revision": "53bd62452ae3fc34ba0fa6188517cd8ca9bf4a10",
+    "tissueAdmission": "blocked"
+  },
+  "denver": {
+    "sourceManifest": "/assets/atlas/vhf/world/lower-body-manifest.json",
+    "sha256": "b4403e606faac7fca9525692f51a4d83db8d6a44622ab78a3b2bd07bf3e545c0",
+    "archiveSha256": "9886eda040f6087bbb65182530f8bd262be456f366b155025c12b3dc56da774e",
+    "doi": "10.56902/COB.vh.2022.0",
+    "license": "CC BY 4.0",
+    "coordinateSpace": "denver-bundle-native",
+    "rawToBundleTranslation": [
+      -620,
+      -430,
+      -500
+    ],
+    "physicalUnits": "unconfirmed",
+    "qualification": "source-native-only"
+  },
+  "layers": [
+    {
+      "file": "vhf-left-bone.glb",
+      "sha256": "9899825389e52d26d7b7938ad4c8691cb66aad156f304f10e2231b9ee8b2c565",
+      "bytes": 8245308,
+      "side": "Left",
+      "tissue": "Bone",
+      "structures": 15,
+      "vertices": 205849,
+      "triangles": 411646,
+      "id": "left-bone",
+      "space": "denver-bundle-native",
+      "qualification": "source-native-only",
+      "lodLevels": [
+        "exact"
+      ],
+      "anatomicalDepth": null
+    },
+    {
+      "file": "vhf-left-cartilage.glb",
+      "sha256": "d09841a92fd0ab7e818470af3c965e71dfd9f6bee9b28ade761a48e6def0aea3",
+      "bytes": 2996932,
+      "side": "Left",
+      "tissue": "Cartilage",
+      "structures": 8,
+      "vertices": 74772,
+      "triangles": 149500,
+      "id": "left-cartilage",
+      "space": "denver-bundle-native",
+      "qualification": "source-native-only",
+      "lodLevels": [
+        "exact"
+      ],
+      "anatomicalDepth": null
+    },
+    {
+      "file": "vhf-left-ligament.glb",
+      "sha256": "f601f48c12715b8ca9fdb175aec1b8d0fd6a6b45c200bb667a805b2ebeb48ac6",
+      "bytes": 278520,
+      "side": "Left",
+      "tissue": "Ligament",
+      "structures": 4,
+      "vertices": 6885,
+      "triangles": 13754,
+      "id": "left-ligament",
+      "space": "denver-bundle-native",
+      "qualification": "source-native-only",
+      "lodLevels": [
+        "exact"
+      ],
+      "anatomicalDepth": null
+    },
+    {
+      "file": "vhf-left-muscle.glb",
+      "sha256": "d61ccae9a069c7bb370959ce2025f39b36f05e2b4da2a0e069bc69fe6438f526",
+      "bytes": 12874804,
+      "side": "Left",
+      "tissue": "Muscle",
+      "structures": 38,
+      "vertices": 321154,
+      "triangles": 642156,
+      "id": "left-muscle",
+      "space": "denver-bundle-native",
+      "qualification": "source-native-only",
+      "lodLevels": [
+        "exact"
+      ],
+      "anatomicalDepth": null
+    },
+    {
+      "file": "vhf-right-bone.glb",
+      "sha256": "aa3ee03f7ac030a421e073f587a8451b1e8beaf327247764fd1dab2b0a094045",
+      "bytes": 7163644,
+      "side": "Right",
+      "tissue": "Bone",
+      "structures": 13,
+      "vertices": 178842,
+      "triangles": 357648,
+      "id": "right-bone",
+      "space": "denver-bundle-native",
+      "qualification": "source-native-only",
+      "lodLevels": [
+        "exact"
+      ],
+      "anatomicalDepth": null
+    },
+    {
+      "file": "vhf-right-cartilage.glb",
+      "sha256": "bc27951775596fbc9b157bbc246ef065a3b0e2961b591dfe91863f3309f91d4e",
+      "bytes": 1722032,
+      "side": "Right",
+      "tissue": "Cartilage",
+      "structures": 8,
+      "vertices": 42896,
+      "triangles": 85760,
+      "id": "right-cartilage",
+      "space": "denver-bundle-native",
+      "qualification": "source-native-only",
+      "lodLevels": [
+        "exact"
+      ],
+      "anatomicalDepth": null
+    },
+    {
+      "file": "vhf-right-ligament.glb",
+      "sha256": "70cac5ed82f315184c2f007dbeb5b3f930d98224115793b9be0b68d216e914a1",
+      "bytes": 264220,
+      "side": "Right",
+      "tissue": "Ligament",
+      "structures": 4,
+      "vertices": 6528,
+      "triangles": 13040,
+      "id": "right-ligament",
+      "space": "denver-bundle-native",
+      "qualification": "source-native-only",
+      "lodLevels": [
+        "exact"
+      ],
+      "anatomicalDepth": null
+    },
+    {
+      "file": "vhf-right-muscle.glb",
+      "sha256": "bc15c71dcdb6ba36bfde91a2e68aef37108fc90d816bf7b5bb2d09d201a915c4",
+      "bytes": 13269352,
+      "side": "Right",
+      "tissue": "Muscle",
+      "structures": 38,
+      "vertices": 331019,
+      "triangles": 661886,
+      "id": "right-muscle",
+      "space": "denver-bundle-native",
+      "qualification": "source-native-only",
+      "lodLevels": [
+        "exact"
+      ],
+      "anatomicalDepth": null
+    }
+  ],
+  "landmarkPlan": {
+    "fit": [
+      "bilateral femur head centers",
+      "bilateral distal femur condylar landmarks",
+      "bilateral tibial plateau landmarks"
+    ],
+    "holdout": [
+      "sacral promontory",
+      "bilateral sacral auricular surface landmarks",
+      "bilateral patellar apex",
+      "bilateral fibular head",
+      "bilateral talar dome",
+      "bilateral calcaneal tuberosity"
+    ],
+    "status": "proposed anatomical definitions only; no annotated coordinates",
+    "required": [
+      "image-header mapping and physical units",
+      "independent landmark annotations",
+      "raw versus final surface residuals",
+      "signed contact and penetration with topology checks",
+      "origin/insertion annotations with uncertainty",
+      "independent review",
+      "GROUND TRUTH acceptance",
+      "UNITY WORLD acceptance"
+    ]
+  },
+  "historical": {
+    "matrix_source_to_denver_raw": [
+      [
+        -0.9989941700784746,
+        -0.03886946184456025,
+        -0.02235649984106498,
+        805.1853554910044
+      ],
+      [
+        0.03917307506032958,
+        -0.9991438349272099,
+        -0.013306664392877008,
+        683.6409396801585
+      ],
+      [
+        -0.021820136102852286,
+        -0.014169052998035348,
+        0.99966150250852,
+        6.692825721458576
+      ],
+      [
+        0,
+        0,
+        0,
+        1
+      ]
+    ],
+    "scale": 1,
+    "det": 1,
+    "units": "source units, physical mm unconfirmed",
+    "method": "35k area-weighted samples per reference; two femurs fit by 40 iterations 85% trimmed rigid ICP; symmetric sampled NN distances; hips and sacrum held out",
+    "thresholds": {
+      "median": 3,
+      "p95": 8,
+      "centroidDelta": 5
+    },
+    "metrics": {
+      "femur_left": [
+        1.267987,
+        3.214,
+        1.9194
+      ],
+      "femur_right": [
+        1.373323,
+        3.81764,
+        1.94735
+      ],
+      "hip_left": [
+        1.951302,
+        4.143719,
+        4.653666
+      ],
+      "hip_right": [
+        1.701445,
+        4.063036,
+        4.424021
+      ],
+      "sacrum_coccyx": [
+        3.3399,
+        7.301483,
+        10.563021
+      ]
+    },
+    "metricOrder": [
+      "median",
+      "p95",
+      "centroidDelta"
+    ],
+    "decision": "unregistered separate space; sacral validation fails; no clinical review"
+  }
+}
