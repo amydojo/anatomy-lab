@@ -15,7 +15,7 @@ const route=(source,dest,amount,attack=.05,release=.23)=>({source,dest,amount,at
 // One route graph for global and tissue parameters. Toward routes interpolate from the immutable base.
 const toward=(source,dest,target,attack=.045,release=.24)=>({...route(source,dest,target,attack,release),mode:'toward',min:.04,max:.64,curve:.65});
 const crossfade=()=>[toward('impact','tissue:Muscle:opacity',.12),toward('impact','tissue:Bone:opacity',1)];
-const vesselRoutes=()=>[toward('impact','tissue:Artery:opacity',1),toward('impact','tissue:Vein:opacity',1),route('mid','tissue:Artery:hue',.23),route('high','tissue:Vein:hue',.32)];
+const vesselRoutes=()=>[toward('impact','tissue:Artery:opacity',1),toward('impact','tissue:Vein:opacity',1),route('mid','tissue:Artery:hue',.23),route('high','tissue:Vein:hue',.32),toward('impact','tissue:Artery:light',.92),toward('impact','tissue:Vein:light',.88)];
 export const reactionNames=['OFF','SUBTLE','EXPRESSIVE','EXTREME'];
 export const reactionGains=[0,.42,1.25,1.75];
 export const patches=[
@@ -56,4 +56,4 @@ export function patchValues(base,signal,routes,intensity,reduced=false,bypass=fa
 
 export const routeSources=['impact','energy','bass','mid','high','onset','transient','flux','beat','manual','lfo'];
 export const routeDestinations=['hue','saturation','backgroundHue','light','rim','contrast','opacity','reveal','trail','type','typeScale','typeX','typeY','grain','drift'];
-export function validateRoutes(input){if(!Array.isArray(input)||input.length>12)return null;const out=[];for(const r of input){if(!r||!routeSources.includes(r.source)||!(routeDestinations.includes(r.dest)||/^tissue:[A-Z][a-z]{1,25}:(opacity|hue)$/.test(r.dest))||!['add','multiply','toward'].includes(r.mode)||typeof r.enabled!=='boolean'||typeof r.invert!=='boolean')return null;for(const [k,lo,hi] of [['amount',r.mode==='toward'?0:-.8,r.mode==='toward'?1:.8],['attack',.03,2],['release',.08,3],['min',0,1],['max',0,1],['curve',.25,4]])if(!Number.isFinite(r[k])||r[k]<lo||r[k]>hi)return null;if(r.min>r.max)return null;out.push({...r});}return out;}
+export function validateRoutes(input){if(!Array.isArray(input)||input.length>12)return null;const out=[];for(const r of input){if(!r||!routeSources.includes(r.source)||!(routeDestinations.includes(r.dest)||/^tissue:[A-Z][a-z]{1,25}:(opacity|hue|light)$/.test(r.dest))||!['add','multiply','toward'].includes(r.mode)||typeof r.enabled!=='boolean'||typeof r.invert!=='boolean')return null;for(const [k,lo,hi] of [['amount',r.mode==='toward'?0:-.8,r.mode==='toward'?1:.8],['attack',.03,2],['release',.08,3],['min',0,1],['max',0,1],['curve',.25,4]])if(!Number.isFinite(r[k])||r[k]<lo||r[k]>hi)return null;if(r.min>r.max)return null;out.push({...r});}return out;}
