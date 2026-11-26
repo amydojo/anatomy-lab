@@ -8,3 +8,5 @@ At exact hit (controller Cross and pointer selectAt/pick), store ref=BodyGravity
 Renderer-independent semantic input v1 unchanged; spatialVersion=2 exposes basis, eye, pivotCapture/Resolve, spatialStep for Atlas camera convention only. For other projections implement equivalent eye/pivot reconstruction using actual view matrix; keep existing renderer and recorder. Record accepted camera pose, optional resolved pivot identity/space, mode and timestamps, not raw inputs. No direct adoption on other branches in this PR.
 ## Evidence
 75 yaw/pitch/zoom combinations each for free look, simultaneous free pan+look and inspection pan+orbit. Pinned NEXUS PLAYGROUND 5a532bd567ba284af0818df174fb9fd7901a22f2 actual module replayed independently, fixtures retain source transform outputs for deconstruct/grasp/undo/reset. Synthetic parts, not source-rendered anatomy. Hardware re-test and NEXUS consumer adoption pending.
+
+Browser gate: simulated two-stick selection/release and fixed-eye orientation; source-rendered regional AXIS free-look case with before/after screenshots and diagnostics. These are automated simulated gamepad tests, not hardware acceptance.

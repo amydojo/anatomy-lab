@@ -106,3 +106,42 @@ test('adaptive simulated standard gamepad coasts then settles; renders compariso
  });
  await page.screenshot({path:info.outputPath('gravity-projection-comparison.png')});
 });
+
+test('simulated two-stick controller transitions between fixed-eye roam and inspection without recenter',async({page},info)=>{
+ await page.goto('/atlas/');
+ const m=await page.evaluate(async()=>{
+  const E=BodyExpedition,A=BodyGravityAdaptive,G=BodyGravity,policy=A.create('microsurgeon');
+  const c={yaw:.7,pitch:.35,zoom:8,width:800,height:600,frameSpan:3,target:{x:0,y:0,z:0}},b={min:[-100,-100,-100],max:[100,100,100]},p={x:.03,y:.04,z:.06};
+  let selection=null;const axes=[0,0,0,0],buttons=Array.from({length:17},()=>({pressed:false,value:0})),world={orbitPivot:()=>selection?{key:'fixture',point:p}:null};
+  const mount=E.mount({camera:()=>c,bounds:()=>b,maxZoom:()=>14,canMove:()=>true,begin(){},end(){},render(){},command(i){if(i===0)selection=p;if(i===1)selection=null;},status(){},getPads:()=>[{connected:true,index:0,mapping:'standard',buttons,axes}],readInput:p=>policy.read(p,E.read),navigate:(c,i,d,b,m)=>policy.step(E.advance,c,i,d,b,m,world),hasMotion:policy.active,resetMotion:policy.reset});
+  const frame=()=>new Promise(r=>requestAnimationFrame(r)),frames=async n=>{for(let j=0;j<n;j++)await frame();},set=async(a,n=24)=>{axes.splice(0,4,...a);await frames(n);axes.fill(0);await frames(30);};
+  const press=async i=>{buttons[i]={pressed:true,value:1};await frames(3);buttons[i]={pressed:false,value:0};await frames(3);};
+  const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z);
+  try{mount.setEnabled(true);await frames(6);const eye0=A.eye(c),yaw0=c.yaw;await set([0,0,.65,.25]);const freeEyeError=dist(A.eye(c),eye0),freeYaw=c.yaw-yaw0;
+   const before=JSON.stringify(c);await press(0);const selectStable=before===JSON.stringify(c)&&!!selection;
+   const pivot0=G.project(c,p);await set([.5,-.3,.65,.25]);const pan=dist(G.project(c,p),pivot0);
+   const postPan=G.project(c,p);await set([0,0,.65,-.2]);const orbitError=dist(G.project(c,p),postPan);
+   const selected=JSON.stringify(c);await press(1);const clearStable=selected===JSON.stringify(c)&&!selection;
+   return {freeEyeError,freeYaw,selectStable,pan,orbitError,clearStable};
+  }finally{mount.setEnabled(false);}
+ });
+ writeFileSync(info.outputPath('gravity-dual-stick.json'),JSON.stringify(m,null,2));
+ expect(m.freeYaw).toBeGreaterThan(0);expect(m.freeEyeError).toBeLessThan(1e-8);expect(m.selectStable).toBe(true);expect(m.pan).toBeGreaterThan(1);expect(m.orbitError).toBeLessThan(1e-8);expect(m.clearStable).toBe(true);
+});
+
+test('source-rendered AXIS free look preserves eye under actual browser gamepad loop',async({page},info)=>{
+ test.setTimeout(120000);
+ await page.addInitScript(()=>{window.__gravityAxes=[0,0,0,0];Object.defineProperty(navigator,'getGamepads',{configurable:true,value:()=>[{connected:true,index:0,mapping:'standard',axes:window.__gravityAxes,buttons:Array.from({length:17},()=>({pressed:false,value:0}))}]});});
+ await page.goto('/atlas/?source=axis&axisMode=regional&expedition=1&gravity=1&gravityProfile=microsurgeon&optical=tv&expeditionDiagnostics=1');
+ await page.bringToFront();
+ const report=()=>page.evaluate(()=>window.__BODY_EXPEDITION_DIAGNOSTICS__?.report());
+ await expect.poll(async()=>{const q=await report();return !!(q?.source?.active&&q.renderer?.drawCalls>0&&q.controller?.status==='Controller ready');},{timeout:90000}).toBe(true);
+ const before=await report();expect(before.gravity.mode).toBe('roam');
+ await page.screenshot({path:info.outputPath('gravity-source-before.png')});
+ await page.evaluate(()=>window.__gravityAxes=[0,0,.75,.2]);
+ await expect.poll(async()=>Math.abs((await report()).camera.yaw-before.camera.yaw),{timeout:15000}).toBeGreaterThan(.003);
+ await page.evaluate(()=>window.__gravityAxes=[0,0,0,0]);await page.waitForTimeout(600);
+ const after=await report(),err=Math.hypot(...['x','y','z'].map(k=>after.gravity.eye[k]-before.gravity.eye[k]));
+ expect(err).toBeLessThan(1e-8);expect(after.renderer.drawCalls).toBeGreaterThan(0);
+ await page.screenshot({path:info.outputPath('gravity-source-after.png')});writeFileSync(info.outputPath('gravity-source-free-look.json'),JSON.stringify({before,after,eyeError:err},null,2));
+});

@@ -81,8 +81,8 @@
    if(!Number.isFinite(seconds)||seconds<=0)return false;
    if(seconds>.15){reset();lastCamera=c;return false;}
    const dt=Math.min(.05,seconds),i=intent(raw),G=root.BodyGravity;
-   let p=null,pivotKey=null;try{if(world?.orbitPivot){const ref=world.orbitPivot(c);p=ref?.point||null;pivotKey=ref?.key||null;}else p=world?.inspectionPoint?.(c)||null;}catch{}
    const legacy=world?.legacyOrbit===true;
+   let p=null,pivotKey=null;try{if(world?.orbitPivot&&!legacy){const ref=world.orbitPivot(c);p=ref?.point||null;pivotKey=ref?.key||null;}else p=world?.inspectionPoint?.(c)||null;}catch{}
    if(p){const q=G.project(c,p);if(!(q.z<6.4&&q.z> -20&&(!legacy||(q.x>=0&&q.x<=c.width&&q.y>=0&&q.y<=c.height))))p=null;}
    const mode=p?'inspection':'roam';
    if(lastMode!==null&&(mode!==lastMode||pivotKey!==lastPivotKey)){v=zero();filtered=1;}
