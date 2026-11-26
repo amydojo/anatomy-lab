@@ -148,3 +148,23 @@ export async function openVerifiedManifests({sourceUrl,derivativeUrl,sourceHash,
  const [source,manifest]=await Promise.all([read(sourceUrl,sourceHash),read(derivativeUrl,derivativeHash)]);
  validateManifest(manifest,source,sourceHash);return {source,manifest,sourceHash,derivativeHash};
 }
+
+// Boundary lock inventory for an eventual hierarchical simplifier. Identify
+// original open/nonmanifold edges and inter-cluster edges by exact source indices.
+// This is an analysis only; no mixed-resolution geometry is emitted.
+export function clusterBoundaryAudit(mesh,clusters){
+ const {indices}=mesh,owner=new Int32Array(indices.length/3);owner.fill(-1);
+ const vertexOwners=new Map(),edges=new Map(),locks=clusters.map(()=>new Set());
+ for(let c=0;c<clusters.length;c++)for(const f of clusters[c].sourceFaces){
+  require(Number.isInteger(f)&&f>=0&&f<owner.length&&owner[f]===-1,'cluster face ownership');owner[f]=c;
+  for(let j=0;j<3;j++){const a=indices[f*3+j],b=indices[f*3+(j+1)%3];if(!vertexOwners.has(a))vertexOwners.set(a,new Set());vertexOwners.get(a).add(c);
+   const key=Math.min(a,b)+':'+Math.max(a,b);if(!edges.has(key))edges.set(key,{a,b,owners:new Set(),incidence:0});const e=edges.get(key);e.owners.add(c);e.incidence++;}
+ }
+ require(owner.every(c=>c>=0),'cluster coverage');
+ let seamEdges=0,sourceBoundaryEdges=0,nonmanifoldEdges=0;
+ for(const e of edges.values()){if(e.owners.size>1)seamEdges++;if(e.incidence===1)sourceBoundaryEdges++;if(e.incidence>2)nonmanifoldEdges++;
+  if(e.owners.size>1||e.incidence!==2)for(const c of e.owners){locks[c].add(e.a);locks[c].add(e.b);}
+ }
+ for(const [v,owners] of vertexOwners)if(owners.size>1)for(const c of owners)locks[c].add(v);
+ return {seamEdges,sourceBoundaryEdges,nonmanifoldEdges,clusters:locks.map((locked,i)=>({cluster:i,lockedSourceVertices:[...locked].sort((a,b)=>a-b),vertices:clusters[i].positions.length/3})),mixedResolutionValidated:false};
+}
