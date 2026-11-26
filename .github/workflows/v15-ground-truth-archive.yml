@@ -1,0 +1,47 @@
+name: GROUND TRUTH archive preservation
+on:
+  push:
+    branches: ['feat/unity-ground-truth']
+    paths: ['.github/workflows/v15-ground-truth-archive.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: ground-truth-source-archive
+  cancel-in-progress: false
+jobs:
+  preserve:
+    if: github.ref == 'refs/heads/feat/unity-ground-truth'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: amydojo/anatomy-lab
+      TAG: archive-unity-53bd624-1d7f8d54
+    steps:
+      - name: Verify exact archive and retain in unpublished draft release
+        run: |
+          set -euo pipefail
+          file=unity-source-53bd624-1d7f8d54.zip
+          gh api repos/amydojo/anatomy-lab/actions/artifacts/15078885236/zip > "$file"
+          echo "1d7f8d54a5c683ac6f675a2495cb32585dc1d097058fd0f683418db6808ea58e  $file" | sha256sum -c
+          if gh release view "$TAG" --json isDraft > existing.json 2>/dev/null; then
+            test "$(jq -r .isDraft existing.json)" = true
+          else
+            gh release create "$TAG" --draft --target 6d51fc01364afdb647064bf9ddc0fae36c17cdbf --title "Scientific source archive 53bd624 (not an application release)" --notes "Immutable acquisition archive; CC BY 4.0; BoneHub DOI 10.57967/hf/10464; Denver DOI 10.1038/s41597-022-01905-2. Do not publish as app release. Source artifact 15078885236. SHA256 1d7f8d54a5c683ac6f675a2495cb32585dc1d097058fd0f683418db6808ea58e."
+          fi
+          if ! gh release download "$TAG" --pattern "$file" --output preserved.zip 2>/dev/null; then
+            gh release upload "$TAG" "$file"
+            gh release download "$TAG" --pattern "$file" --output preserved.zip
+          fi
+          echo "1d7f8d54a5c683ac6f675a2495cb32585dc1d097058fd0f683418db6808ea58e  preserved.zip" | sha256sum -c
+          header=ground-truth-headers-53bd624-ac3b87c9.zip
+          gh api repos/amydojo/anatomy-lab/actions/artifacts/15079087018/zip > "$header"
+          echo "ac3b87c981cfeba43953c9e1f6eaba9d6c27ebbbb0065c3405b0128d7b0d215a  $header" | sha256sum -c
+          if ! gh release download "$TAG" --pattern "$header" --output preserved-headers.zip 2>/dev/null; then
+            gh release upload "$TAG" "$header"
+            gh release download "$TAG" --pattern "$header" --output preserved-headers.zip
+          fi
+          echo "ac3b87c981cfeba43953c9e1f6eaba9d6c27ebbbb0065c3405b0128d7b0d215a  preserved-headers.zip" | sha256sum -c
+          gh release view "$TAG" --json isDraft,url,assets
