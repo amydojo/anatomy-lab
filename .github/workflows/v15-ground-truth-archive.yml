@@ -36,4 +36,12 @@ jobs:
             gh release download "$TAG" --pattern "$file" --output preserved.zip
           fi
           echo "1d7f8d54a5c683ac6f675a2495cb32585dc1d097058fd0f683418db6808ea58e  preserved.zip" | sha256sum -c
+          header=ground-truth-headers-53bd624-ac3b87c9.zip
+          gh api repos/amydojo/anatomy-lab/actions/artifacts/15079087018/zip > "$header"
+          echo "ac3b87c981cfeba43953c9e1f6eaba9d6c27ebbbb0065c3405b0128d7b0d215a  $header" | sha256sum -c
+          if ! gh release download "$TAG" --pattern "$header" --output preserved-headers.zip 2>/dev/null; then
+            gh release upload "$TAG" "$header"
+            gh release download "$TAG" --pattern "$header" --output preserved-headers.zip
+          fi
+          echo "ac3b87c981cfeba43953c9e1f6eaba9d6c27ebbbb0065c3405b0128d7b0d215a  preserved-headers.zip" | sha256sum -c
           gh release view "$TAG" --json isDraft,url,assets
