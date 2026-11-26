@@ -633,7 +633,7 @@ function setupExpedition(){
  const setStatus=message=>{if(status.textContent!==message)status.textContent=message;};
  const finish=()=>{if(vhfView?.active)return;if(studioCameraActive()){studioNavigation?.end();window.dispatchEvent(new Event('body:camera-transaction'));}};
  const categories=['All','Bone','Cartilage','Ligament','Muscle'];
- const fitSource=()=>{const b=vhfView.bounds;Object.assign(vhfView.camera,{yaw:0,pitch:0,zoom:broadSource?1:2.4,frameSpan:continuumRequested?window.BodyVHF.overviewFrameSpan(b):broadSource?Math.max(3.25,b.radius*2.3):2.55,target:broadSource?{x:(b.min[0]+b.max[0])/2,y:(b.min[1]+b.max[1])/2,z:(b.min[2]+b.max[2])/2}:{x:0,y:0,z:0},anchorX:.5,anchorY:.5});};
+ const fitSource=()=>{const b=vhfView.bounds;Object.assign(vhfView.camera,{yaw:0,pitch:0,zoom:broadSource?1:2.4,frameSpan:unityRequested?window.BodyUnity.fitFrameSpan(b):continuumRequested?window.BodyVHF.overviewFrameSpan(b):broadSource?Math.max(3.25,b.radius*2.3):2.55,target:broadSource?{x:(b.min[0]+b.max[0])/2,y:(b.min[1]+b.max[1])/2,z:(b.min[2]+b.max[2])/2}:{x:0,y:0,z:0},anchorX:.5,anchorY:.5});};
  let axisFlight=0,axisActivating=false;
  const cancelAxisFlight=()=>{cancelAnimationFrame(axisFlight);axisFlight=0;};
  function streamAxis(v){if(!v?.stream||v.stream.running)return;const ac=new AbortController();v.travelAbort=ac;let frame=0;const changed=()=>{if(!v.active||frame)return;frame=requestAnimationFrame(()=>{frame=0;if(v.active)render();});};v.stream.stream(changed,ac.signal,()=>v.camera).catch(e=>expeditionDiagnostic?.event('axis-stream-failed',{reason:e.message})).finally(()=>{if(v.travelAbort===ac)v.travelAbort=null;changed();});}

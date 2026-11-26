@@ -39,4 +39,12 @@ def verify(path,publish=False):
     if not s['reused']:(out/s['file']).write_bytes(z.read(s['file']))
    for f in ('manifest.json','qualification.json','registration-metadata.json','source-inventory.json'):(out/f).write_bytes(z.read(f))
  print('Verified 143 GLBs, 6070400 triangles, 3035302 vertices; exact pinned archive and manifest.')
-if __name__=='__main__':verify(pathlib.Path(sys.argv[1]),'--publish' in sys.argv[2:])
+def verify_published():
+ root=ROOT/'assets/atlas/vhf';mb=(root/'unity/v1/manifest.json').read_bytes();require(sha(mb)==MANIFEST,'published manifest hash')
+ m=json.loads(mb);ss=m['structures'];require(len(ss)==143 and len({s['id'] for s in ss})==143 and sum(s['triangles'] for s in ss)==6070400,'published inventory')
+ for s in ss:
+  f=root/('axis/v1' if s['reused'] else 'unity/v1')/s['file'];b=f.read_bytes();require(len(b)==s['bytes'] and sha(b)==s['sha256'],'published mesh integrity '+s['id'])
+ print('Verified all 143 published mesh digests; no acquisition artifact required.')
+if __name__=='__main__':
+ if sys.argv[1]=='--published':verify_published()
+ else:verify(pathlib.Path(sys.argv[1]),'--publish' in sys.argv[2:])

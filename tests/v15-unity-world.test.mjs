@@ -10,3 +10,5 @@ test('qualified registry retains all source identities and spatial bounds',()=>{
 test('rejects duplicate and incomplete inventories',()=>{const a=m();a.structures[0]=a.structures[1];assert.throws(()=>U.registry(a));const b=m();b.structures.pop();assert.throws(()=>U.registry(b));});
 test('navigation targets source landmarks without changing camera',()=>{const r=U.registry(m()),p=r.landmarks[0].point,c={zoom:2,target:{x:p[0],y:p[1],z:p[2]},yaw:.2};const before=JSON.stringify(c);assert.equal(U.navigation.next(r.landmarks,c,0,1),1);assert.equal(JSON.stringify(c),before);assert.equal(U.navigation.location(r.landmarks,{...c,zoom:1},0),'UNITY WORLD');});
 test('geometry provider retains existing paths without duplicate publication',()=>{const r=U.registry(m());for(const s of r.entries)assert.equal(U.geometry.url('/a/',s),'/a/'+(s.reused?'axis/v1/':'unity/v1/')+s.file);});
+
+test('UNITY overview is fitted to the native full-world bounds with a yaw envelope',()=>{const r=U.registry(m()),span=U.fitFrameSpan(r.bounds);assert.ok(span>10&&span<13);const b=r.bounds,h=b.max.map((v,k)=>(v-b.min[k])/2);assert.ok((h[1]+.04)/(span/2)/(1-Math.hypot(h[0],h[2])/7.4)<1);});

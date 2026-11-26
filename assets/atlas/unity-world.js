@@ -23,10 +23,12 @@
   const index=Object.freeze({get:id=>entities.get(id),query:(min,max)=>boxes.filter(b=>b.min.every((v,k)=>v<=max[k]&&b.max[k]>=min[k])).map(b=>b.id),size:entities.size});
   return {entries,boxes,bounds,landmarks,index,coordinateProvider,limitations};
  }
+ // Overview: conservative yaw envelope at neutral pitch, rather than a full bounding sphere.
+ function fitFrameSpan(b){const half=b.max.map((v,k)=>(v-b.min[k])/2),depth=Math.hypot(half[0],half[2]);return Math.max(3.25,2*(half[1]+.04)/Math.max(.1,1-depth/7.4)*1.12);}
  function location(points,c,previous){if(c.zoom<1.5)return 'UNITY WORLD';const ranked=points.map((p,i)=>({i,d:Math.hypot(p.point[0]-c.target.x,p.point[1]-c.target.y,p.point[2]-c.target.z)})).sort((a,b)=>a.d-b.d);const old=ranked.find(x=>x.i===previous);return old&&old.d<=ranked[0].d+.12?old.i:ranked[0].i;}
  // Navigation-provider boundary: replace with qualified GRAVITY adapter at integration, not another camera engine.
  const navigation=Object.freeze({location,next:(points,c,previous,direction)=>Math.max(0,Math.min(points.length-1,location(points,{...c,zoom:2},previous)+direction))});
  // Geometry-provider boundary: exact pinned bytes; NANITE can supply qualified levels without changing source IDs.
  const geometry=Object.freeze({id:'unity-exact-source-v1',url:(root,s)=>s.reused?root+'axis/v1/'+s.file:root+'unity/v1/'+s.file,integrity:s=>({bytes:s.bytes,sha256:s.sha256})});
- root.BodyUnity=Object.freeze({manifestHash,revision,regionCounts,coordinates,geometry,navigation,registry,limitations});
+ root.BodyUnity=Object.freeze({manifestHash,revision,regionCounts,coordinates,geometry,navigation,registry,fitFrameSpan,limitations});
 })(globalThis);

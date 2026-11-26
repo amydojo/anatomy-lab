@@ -31,6 +31,7 @@ jobs:
             gh api repos/amydojo/anatomy-lab/actions/artifacts/15078885236/zip > /tmp/unity.zip
             python3 scripts/verify_unity_world.py /tmp/unity.zip --publish
           fi
+          python3 scripts/verify_unity_world.py --published
       - id: commit
         run: |
           test "$(git branch --show-current)" = feat/unity-world
