@@ -28,6 +28,31 @@ globalThis.BodyVHF=(function sourceModule(){
  }
  return outside===0;
 }
+ // Bounded, sampled source-surface probe for optional flight assistance.
+ // This is not an exact clearance or collision query: skipped triangles can be closer.
+ const surfaceSamples=new WeakMap(),dot3=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],sub3=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],along=(a,b,t)=>[a[0]+b[0]*t,a[1]+b[1]*t,a[2]+b[2]*t];
+ function closestTriangle(p,a,b,c){
+  const ab=sub3(b,a),ac=sub3(c,a),ap=sub3(p,a),d1=dot3(ab,ap),d2=dot3(ac,ap);if(d1<=0&&d2<=0)return a;
+  const bp=sub3(p,b),d3=dot3(ab,bp),d4=dot3(ac,bp);if(d3>=0&&d4<=d3)return b;
+  const vc=d1*d4-d3*d2;if(vc<=0&&d1>=0&&d3<=0&&d1-d3>0)return along(a,ab,d1/(d1-d3));
+  const cp=sub3(p,c),d5=dot3(ab,cp),d6=dot3(ac,cp);if(d6>=0&&d5<=d6)return c;
+  const vb=d5*d2-d1*d6;if(vb<=0&&d2>=0&&d6<=0&&d2-d6>0)return along(a,ac,d2/(d2-d6));
+  const va=d3*d6-d5*d4;if(va<=0&&d4-d3>=0&&d5-d6>=0&&d4-d3+d5-d6>0)return along(b,sub3(c,b),(d4-d3)/(d4-d3+d5-d6));
+  const sum=va+vb+vc;return Math.abs(sum)>1e-20?along(along(a,ab,vb/sum),ac,vc/sum):a;
+ }
+ function surfaceProbe(parts,view,eye,radius=.22){
+  if(!eye||!['x','y','z'].every(k=>Number.isFinite(eye[k])))return null;
+  const p=[eye.x,eye.y,eye.z],gap=b=>Math.hypot(...p.map((x,i)=>Math.max(b.min[i]-x,0,x-b.max[i])));
+  const nearby=parts.filter(q=>q.positions&&q.indices?.length&&visible(q,view)&&(!view.renderedIds||view.renderedIds.has(q.id))).map(q=>({q,d:gap(view.playground?.bounds(q)||q)})).filter(x=>x.d<=radius).sort((a,b)=>a.d-b.d).slice(0,4);
+  let best=radius,hit=null;
+  for(const {q} of nearby){
+   const transform=view.playground?.transform(q.id),local=transform?globalThis.BodyPlayground.ray(transform,p,[0,0,0]).o:p;
+   let ids=surfaceSamples.get(q);if(!ids){const count=q.indices.length/3,n=Math.min(384,count);ids=Array.from({length:n},(_,i)=>Math.min(count-1,Math.floor((i+.5)*count/n)));surfaceSamples.set(q,ids);}
+   const vertex=i=>{const k=q.indices[i]*3;return [q.positions[k],q.positions[k+1],q.positions[k+2]];};
+   for(const i of ids){const near=closestTriangle(local,vertex(i*3),vertex(i*3+1),vertex(i*3+2)),delta=sub3(local,near),d=Math.hypot(...delta);if(d>=best||d<1e-8)continue;best=d;const world=transform?globalThis.BodyPlayground.point(transform,near):near;hit={id:q.id,distance:d,point:{x:world[0],y:world[1],z:world[2]},sampled:true};}
+  }
+  return hit;
+ }
  function packVertices(positions,indices){
  const n=positions.length/3,flat=new Float32Array(n*7);
  for(let i=0;i<n;i++){flat[i*7]=positions[i*3];flat[i*7+1]=positions[i*3+1];flat[i*7+2]=positions[i*3+2];}
@@ -245,5 +270,5 @@ globalThis.BodyVHF=(function sourceModule(){
  function boxHit(o,d,min,max){let lo=0,hi=Infinity;for(let k=0;k<3;k++){if(Math.abs(d[k])<1e-12){if(o[k]<min[k]||o[k]>max[k])return false;continue;}let a=(min[k]-o[k])/d[k],b=(max[k]-o[k])/d[k];if(a>b)[a,b]=[b,a];lo=Math.max(lo,a);hi=Math.min(hi,b);if(hi<lo)return false;}return true;}
  function pickHit(parts,view,c,x,y){return intersect(parts,view,c,x,y,ray,boxHit,visible);}
  function pick(parts,view,c,x,y){return pickHit(parts,view,c,x,y)?.id||null;}
- return Object.freeze({load,loadWorld,loadAxis,openAxisWorld,axisWorldLayout,axisLocation,axisRegions,axisIncludes,buildLods,chooseLod,overviewFrameSpan,parse,transform,bounds,visible,pick,pickHit,ray,inView,compact,packVertices,hash,worldHash,landmarks,neighborhood,evictionPlan});
+ return Object.freeze({load,loadWorld,loadAxis,openAxisWorld,axisWorldLayout,axisLocation,axisRegions,axisIncludes,buildLods,chooseLod,overviewFrameSpan,parse,transform,bounds,visible,pick,pickHit,ray,surfaceProbe,inView,compact,packVertices,hash,worldHash,landmarks,neighborhood,evictionPlan});
 })();
