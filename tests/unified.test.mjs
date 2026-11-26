@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import '../assets/atlas/expedition.js';
+import '../assets/atlas/gravity.js';
+import '../assets/atlas/gravity-adaptive.js';
+import {routes,unifiedMapping} from '../nexus/contract.mjs';
+import {creativeURL,creativeReceipt} from '../nexus/continuity.mjs';
+import {returnURL} from '../somatic/nexus-bridge.mjs';
+import {manifest,space,validateSession} from '../nexus/presence-contract.mjs';
+test('one origin for creative navigation; archived origins are not trusted as canonical receipts',()=>{const origin='https://anatomy-unified.example',href=routes.find(r=>r.id==='create').href,u=new URL(creativeURL(href,origin,'neck'));assert.equal(u.origin,origin);assert.equal(u.pathname,'/somatic/');assert.equal(u.searchParams.get('unified'),'1');assert.equal(u.searchParams.get('nexusSpecimen'),'2');assert.equal(returnURL(u.searchParams.get('nexusReturn'),origin),origin+'/nexus/');assert.equal(returnURL('https://evil.example/nexus/',origin),null);assert.equal(creativeReceipt('#creative-saved=2',origin+'/else/',href,origin),null);assert.equal(creativeReceipt('#creative-saved=2',origin+'/somatic/',href,origin).sourceKey,'2');assert.equal(unifiedMapping.common.share,'Tools');});
+test('native session keeps a compatible local pivot only',()=>{const s={version:1,manifest,space,region:2,selection:'a',isolation:null,camera:{yaw:0,pitch:0,zoom:1,frameSpan:3,target:{x:0,y:0,z:0}},pivot:{version:1,id:'a',spaceId:manifest+':2',local:[.1,.2,.3]}};assert.deepEqual(validateSession(s).pivot,s.pivot);assert.equal(validateSession({...s,pivot:{...s.pivot,id:'b'}}).pivot,null);assert.equal(validateSession({...s,pivot:{...s.pivot,local:[NaN,0,0]}}).pivot,null);});
+test('orthographic creative camera preserves specimen pivot through pan then orbit and magnification',()=>{const E=BodyExpedition,A=BodyGravityAdaptive,b={min:[-100,-100,-100],max:[100,100,100]},p={x:.2,y:.4,z:.1};const project=c=>{const v=A.toView(c,{x:p.x-c.target.x,y:p.y-c.target.y,z:p.z-c.target.z});return [v.x*c.zoom,v.y*c.zoom];};for(const yaw of [-2,0,2])for(const zoom of [1,4,14]){const c={yaw,pitch:.2,zoom,width:800,height:600,frameSpan:3,target:{x:0,y:0,z:0}};A.spatialStep(E.advance,c,{panX:.3,panY:-.2,orbitX:.5,orbitY:.2,zoom:0},.03,b,14,p,true);const q=project(c);for(let i=0;i<30;i++)A.spatialStep(E.advance,c,{panX:0,panY:0,orbitX:.4,orbitY:-.1,zoom:.2},.02,b,14,p,true);assert.ok(Math.hypot(...q.map((x,i)=>x-project(c)[i]))<1e-9);}});

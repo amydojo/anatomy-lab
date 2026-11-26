@@ -7,6 +7,7 @@ export const routes=Object.freeze([
  {id:'unity-world',name:'Whole skeleton (experimental)',href:'https://anatomy-iv6o2iw9f-amy-dos-projects.vercel.app/atlas/?source=unity&expedition=1&expeditionDiagnostics=1',status:'Experimental · 143 labels offline; runtime unqualified',source:'20f471860199cbde10821b4caac5ee809671dbe2',external:true},
  {id:'morphology',name:'Upper-body tissues',href:'https://anatomy-pviacubpt-amy-dos-projects.vercel.app/atlas/morphology/',status:'Separate preview · acquired tissue packs',source:'3b9c111aebdad00d115ebd689f4f124fdb27697d',external:true},
  ...['skull','thorax','shoulder','hip','knee','ankle'].map(region=>({id:'region-'+region,name:region[0].toUpperCase()+region.slice(1),href:'/atlas/?nexus=1&region='+region,status:'Atlas region'})),
+ {id:'archive-create',name:'Earlier creative sessions (archive)',href:'https://anatomy-iwo0scp5f-amy-dos-projects.vercel.app/somatic/',status:'Old browser origin; previous local drafts stay there',external:true},
  {id:'axis-continuum',name:'Continuous axial preview',href:'/atlas/?source=axis&expedition=1&nexus=1',status:'Experimental · stream and zoom gates unresolved'},
  ...['hip','knee','shoulder'].map(region=>({id:'lab-'+region,name:region[0].toUpperCase()+region.slice(1)+' lab',href:'/'+region+'/',status:'Educational joint lab'})),
  {id:'lab-dissection',name:'Hip dissection',href:'/hip/dissection/',status:'Classic educational lab'},
