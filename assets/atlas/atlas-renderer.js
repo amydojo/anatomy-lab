@@ -76,23 +76,40 @@ function create(canvas,onContextLost=()=>{}){
 
  const detail=new Map(),detailData=new Map();let shoulderPivot=[-1.1,1.9,0],shoulderGraph=null;let destroyed=false,rebuilding=false,recoveryScheduled=false;let uniformCache=new Map();const boundsCache=new Map();
  function disposeMesh(item){gl.deleteBuffer(item.buffer);if(item.indexBuffer)gl.deleteBuffer(item.indexBuffer);}
- function cleanup(){clearVhfStage();vhfGeneration++;if(vhfCacheFrame)cancelAnimationFrame(vhfCacheFrame);vhfCacheFrame=0;if(gl){for(const m of vhfMeshes)disposeMesh(m);}vhfMeshes=[];if(gl){for(const item of [...buffers,...overviewBones,...overviewMuscles,...expansionBones,...expansionMuscles,...expansionConnective,...[...connectiveDetail.values()].flat(),...(facialOverview?[facialOverview]:[]),...facialDetail,...osteologyOverview,...[...expansionDetail.values()].flat(),...[...osteologyDetail.values()].flat(),...[...detail.values()].flat()])disposeMesh(item);if(program)gl.deleteProgram(program);}buffers=[];overviewBones=[];overviewMuscles=[];expansionBones=[];expansionMuscles=[];expansionConnective=[];connectiveDetail.clear();facialOverview=null;facialDetail=[];osteologyOverview=[];osteologyDetail.clear();expansionDetail.clear();detail.clear();program=null;uniformCache.clear();boundsCache.clear();}
+ let marrowMesh=null;const marrowDisplay=new Map();function clearMarrowDisplay(){if(gl)for(const q of marrowDisplay.values())gl.deleteBuffer(q.mesh.indexBuffer);marrowDisplay.clear();}
+ function cleanup(){clearMarrowDisplay();if(marrowMesh&&gl)for(const m of marrowMesh)disposeMesh(m);marrowMesh=null;clearVhfStage();vhfGeneration++;if(vhfCacheFrame)cancelAnimationFrame(vhfCacheFrame);vhfCacheFrame=0;if(gl){for(const m of vhfMeshes)disposeMesh(m);}vhfMeshes=[];if(gl){for(const item of [...buffers,...overviewBones,...overviewMuscles,...expansionBones,...expansionMuscles,...expansionConnective,...[...connectiveDetail.values()].flat(),...(facialOverview?[facialOverview]:[]),...facialDetail,...osteologyOverview,...[...expansionDetail.values()].flat(),...[...osteologyDetail.values()].flat(),...[...detail.values()].flat()])disposeMesh(item);if(program)gl.deleteProgram(program);}buffers=[];overviewBones=[];overviewMuscles=[];expansionBones=[];expansionMuscles=[];expansionConnective=[];connectiveDetail.clear();facialOverview=null;facialDetail=[];osteologyOverview=[];osteologyDetail.clear();expansionDetail.clear();detail.clear();program=null;uniformCache.clear();boundsCache.clear();}
  function compile(type,source){const sh=gl.createShader(type);gl.shaderSource(sh,source);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(sh));return sh;}
  function setup(){
   gl=canvas.getContext('webgl2',{alpha:true,antialias:true,depth:true,premultipliedAlpha:false,powerPreference:'low-power'});
   if(!gl){status='fallback';return false;}
   const vert=[
    '#version 300 es','precision highp float;','in vec3 aPosition;','in vec3 aNormal;','in float aSkinWeight;',
-   'uniform vec2 uViewport;','uniform float uAnchorX;','uniform float uAnchorY;','uniform float uYaw;','uniform float uPitch;','uniform float uFrameSpan;','uniform float uZoom;','uniform vec3 uTarget;','uniform float uMotion;','uniform float uFlex;','uniform vec3 uPivot;','uniform mat3 uPlayRotation;','uniform vec3 uPlayTranslation;','uniform float uMotionAxis;','uniform float uSoftSkin;','uniform float uJointGraph;','uniform mat4 uOriginPose;','uniform mat4 uInsertionPose;','out vec3 vNormal;','out vec3 vViewNormal;',
+   'uniform vec2 uViewport;','uniform float uAnchorX;','uniform float uAnchorY;','uniform float uYaw;','uniform float uPitch;','uniform float uFrameSpan;','uniform float uZoom;','uniform float uMarrowDistance;','uniform float uMarrowLocal;','uniform mat3 uMarrowBasis;','uniform vec3 uTarget;','uniform float uMotion;','uniform float uFlex;','uniform vec3 uPivot;','uniform mat3 uPlayRotation;','uniform vec3 uPlayTranslation;','uniform float uMotionAxis;','uniform float uSoftSkin;','uniform float uJointGraph;','uniform mat4 uOriginPose;','uniform mat4 uInsertionPose;','out vec3 vNormal;','out vec3 vViewNormal;','out highp vec3 vVehicleLocal;','out highp vec3 vVehicleView;',
    'void main(){','vec3 bone=aPosition;','vec3 n=aNormal;','float influence=uMotion>.5?1.:(uSoftSkin>.5?aSkinWeight:0.);','if(uJointGraph>.5){vec4 pt=vec4(aPosition,1.);bone=mix((uOriginPose*pt).xyz,(uInsertionPose*pt).xyz,aSkinWeight);n=normalize(mix(mat3(uOriginPose)*n,mat3(uInsertionPose)*n,aSkinWeight));}else if(influence>.00001){vec3 d=bone-uPivot;float ca=cos(uFlex*influence),sa=sin(uFlex*influence);bone=uPivot+(uMotionAxis>.5?vec3(d.x*ca-d.y*sa,d.x*sa+d.y*ca,d.z):vec3(d.x,d.y*ca-d.z*sa,d.y*sa+d.z*ca));n=uMotionAxis>.5?vec3(n.x*ca-n.y*sa,n.x*sa+n.y*ca,n.z):vec3(n.x,n.y*ca-n.z*sa,n.y*sa+n.z*ca);}','bone=uPlayRotation*bone+uPlayTranslation; n=uPlayRotation*n;','vec3 p=bone-uTarget;','float cy=cos(uYaw),sy=sin(uYaw),cp=cos(uPitch),sp=sin(uPitch);',
-   'float x=p.x*cy+p.z*sy;','float z=p.z*cy-p.x*sy;','float y=p.y*cp-z*sp;','float z2=p.y*sp+z*cp;',
+   'float x=p.x*cy+p.z*sy;','float z=p.z*cy-p.x*sy;','float y=p.y*cp-z*sp;','float z2=p.y*sp+z*cp;','if(uMarrowLocal>.5){x=dot(p,uMarrowBasis[0]);y=dot(p,uMarrowBasis[1]);z2=dot(p,uMarrowBasis[2]);}',
    'float scale=min(uViewport.x/3.25,uViewport.y/uFrameSpan)*uZoom;',
    'float w=max(.10,(7.4-z2)/7.4);',
-   'gl_Position=vec4(x*scale/(uViewport.x*.5)+(uAnchorX-.5)*2.0*w,(y-.04)*scale/(uViewport.y*.5)-(uAnchorY-.5)*2.0*w,-z2/15.0,w);',
-   'vNormal=n;','float nz=n.z*cy-n.x*sy; vViewNormal=vec3(n.x*cy+n.z*sy,n.y*cp-nz*sp,n.y*sp+nz*cp);','}'
+   'if(uMarrowDistance>0.0){float D=uMarrowDistance; float depth=D-z2; float near=.004; float far=20.0; w=depth/D; float clipZ=((far+near)/(far-near)*depth-2.0*far*near/(far-near))/D; gl_Position=vec4(x*scale/(uViewport.x*.5)+(uAnchorX-.5)*2.0*w,y*scale/(uViewport.y*.5)-(uAnchorY-.5)*2.0*w,clipZ,w);}else{gl_Position=vec4(x*scale/(uViewport.x*.5)+(uAnchorX-.5)*2.0*w,(y-.04)*scale/(uViewport.y*.5)-(uAnchorY-.5)*2.0*w,-z2/15.0,w);}',
+   'vNormal=n; vVehicleLocal=aPosition; vVehicleView=vec3(x,y,z2);','float nz=n.z*cy-n.x*sy; vViewNormal=uMarrowLocal>.5?vec3(dot(n,uMarrowBasis[0]),dot(n,uMarrowBasis[1]),dot(n,uMarrowBasis[2])):vec3(n.x*cy+n.z*sy,n.y*cp-nz*sp,n.y*sp+nz*cp);','}'
   ].join('\n');
-  const frag=['#version 300 es','precision mediump float;','in vec3 vNormal;','uniform vec3 uColor;','uniform float uDim;','uniform float uAlpha;','uniform float uVisual;','uniform float uMaterial;','in vec3 vViewNormal;','out vec4 outColor;',
+  const frag=['#version 300 es','precision mediump float;','in vec3 vNormal;','uniform vec3 uColor;','uniform float uDim;','uniform float uAlpha;','uniform float uVisual;','uniform float uMaterial;','uniform float uVehicle;','uniform vec4 uVehicleMaterial;','uniform float uVehicleDetail;','uniform float uVehicleEnergy;','uniform float uVehicleGrind;','uniform highp float uMarrowDistance;','in highp vec3 vVehicleLocal;','in highp vec3 vVehicleView;','in vec3 vViewNormal;','out vec4 outColor;',
     'void main(){','float light=.60+.40*abs(dot(normalize(vNormal),normalize(vec3(.42,.70,.65))));',
+    // Dedicated vehicle branch precedes the unchanged anatomy shader.
+    'if(uVehicle>.5){',
+    'vec3 N=normalize(vViewNormal); vec3 V=normalize(vec3(-vVehicleView.xy,uMarrowDistance-vVehicleView.z)); if(dot(N,V)<0.)N=-N;',
+    'float rough=uVehicleMaterial.x, spec=uVehicleMaterial.y, metal=uVehicleMaterial.z, emission=uVehicleMaterial.w;',
+    'vec3 base=pow(max(uColor,vec3(.001)),vec3(2.2)); vec3 P=vVehicleLocal*1000.;',
+    'float detail=uVehicleDetail; float aa=max(length(fwidth(P)),.001);',
+    'if(detail>1.5&&detail<2.5){vec2 g=P.xz*1.75; float tread=(.5+.5*cos(g.x*6.283))* (.5+.5*cos(g.y*6.283)); base*=1.-.22*tread*(1.-smoothstep(.12,.8,aa)); rough=min(1.,rough+.05*tread);}',
+    'if(detail>2.5&&detail<3.5){float brush=.5+.5*sin(P.z*21.); base*=1.-.09*brush*(1.-smoothstep(.07,.5,aa)); float wear=smoothstep(3.7,5.,-P.y); base=mix(base,base*.63,wear*.26); emission+=uVehicleGrind*wear*.07;}',
+    'if(detail>.5&&detail<1.5){float satin=.5+.5*sin(P.z*3.2+sin(P.x*1.8)); rough+=.035*satin*(1.-smoothstep(.08,.65,aa));}',
+    'if(detail>3.5){float radius=length(vec2(P.x,abs(P.z)-22.)); float core=1.-smoothstep(3.0,4.6,radius); base*=mix(.45,1.,core); emission*=.45+core*1.3; emission+=.12*uVehicleEnergy;}',
+    'vec3 L=normalize(vec3(-.55,.72,.56)), R=normalize(vec3(.78,-.25,.56)), H=normalize(L+V), H2=normalize(R+V); float nv=max(.001,dot(N,V));',
+    'float power=mix(110.,4.,rough*rough); vec3 f0=mix(vec3(.035+.055*spec),base,metal); vec3 F=f0+(1.-f0)*pow(1.-nv,5.);',
+    'float key=max(0.,dot(N,L)), fill=max(0.,dot(N,R)); float shine=pow(max(0.,dot(N,H)),power)*spec; float strip=pow(max(0.,dot(N,H2)),power*.48)*spec;',
+    'vec3 diffuse=base*(1.-metal*.78)*(.22+.72*key+.26*fill); vec3 reflection=F*(.28+.35*max(N.y,0.)+.48*shine+.27*strip);',
+    'float rim=pow(1.-nv,2.); vec3 color=diffuse+reflection+vec3(.19,.22,.30)*rim*(.10+spec*.13)+base*emission*uVehicleEnergy;',
+    'outColor=vec4(pow(clamp(color*uDim,0.,1.),vec3(1./2.2)),uAlpha);return;}',
     'if(uVisual<.5){outColor=vec4(uColor*light*uDim,uAlpha);return;}',
     'vec3 n=normalize(vViewNormal); if(n.z<0.)n=-n;',
     'float key=max(0.,dot(n,vec3(-.48,.64,.60))); float fill=max(0.,dot(n,vec3(.75,.12,.65))); float rim=1.-abs(n.z);',
@@ -120,7 +137,7 @@ function create(canvas,onContextLost=()=>{}){
  }catch(e){status='fallback';onContextLost(e.message);}});
  try{setup();}catch(e){status='fallback';onContextLost(e.message);}
  function makeBuffer(part,id,group,color,tissue=false){
-  if(part.positions&&part.indices){const flat=part.packed||window.BodyVHF.packVertices(part.positions,part.indices),indices=part.indices,buffer=gl.createBuffer(),indexBuffer=gl.createBuffer();if(!buffer||!indexBuffer){if(buffer)gl.deleteBuffer(buffer);if(indexBuffer)gl.deleteBuffer(indexBuffer);throw Error('Source allocation failed: '+id);}gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,flat,gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,indexBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,indices,gl.STATIC_DRAW);return {id,name:part.name,group,color,tissue,buffer,indexBuffer,indexType:indices.BYTES_PER_ELEMENT===2?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,bufferBytes:flat.byteLength+indices.byteLength,count:indices.length,min:part.min,max:part.max};}
+  if(part.positions&&part.indices){const flat=part.packed||window.BodyVHF.packVertices(part.positions,part.indices),indices=part.indices,buffer=gl.createBuffer(),indexBuffer=gl.createBuffer();if(!buffer||!indexBuffer){if(buffer)gl.deleteBuffer(buffer);if(indexBuffer)gl.deleteBuffer(indexBuffer);throw Error('Source allocation failed: '+id);}gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,flat,gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,indexBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,indices,gl.STATIC_DRAW);return {id,name:part.name,group,color,tissue,buffer,indexBuffer,indexType:indices.BYTES_PER_ELEMENT===2?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT,bufferBytes:flat.byteLength+indices.byteLength,count:indices.length,min:part.min,max:part.max,vehicleMaterial:part.material};}
 
   if(!Array.isArray(part.vertices)||!Array.isArray(part.faces)||part.vertices.length<50||part.faces.length<50)throw Error('Incomplete sourced mesh: '+id);
   const vs=part.vertices,normal=new Float32Array(vs.length*3);
@@ -389,19 +406,20 @@ function create(canvas,onContextLost=()=>{}){
  function setVisualMode(mode){visualMode=({legacy:0,atlas:1,specimen:2,cinema:3})[mode]??0;}
  let opticalDensity=null,limitContext=null,limits=null;
  function setOpticalDensity(value){opticalDensity=Number.isFinite(value)?value:null;}
- function resize(){
+ function resize(marrow=false,inspect=false,sharp=false){
   const rect=canvas.getBoundingClientRect(),w=Math.max(1,rect.width),h=Math.max(1,rect.height),native=window.devicePixelRatio||1;
   let dpr=Math.min(native,2),width=Math.ceil(w*dpr),height=Math.ceil(h*dpr);
   if(opticalDensity!==null&&gl&&status==='ready'&&window.BodyOptical){
    if(limitContext!==gl||!limits){const viewport=gl.getParameter(gl.MAX_VIEWPORT_DIMS),size=gl.getParameter(gl.MAX_RENDERBUFFER_SIZE);limits=[Math.min(viewport[0],size),Math.min(viewport[1],size)];limitContext=gl;}
    const dims=window.BodyOptical.dimensions(w,h,native,opticalDensity,limits[0],limits[1]);({width,height}=dims);dpr=dims.scale;
   }
+  if(marrow){const cap=Math.min(inspect?Math.min(native,2):sharp?Math.min(native,1.5):1,Math.sqrt((inspect?2800000:sharp?1500000:450000)/(w*h)));width=Math.max(1,Math.ceil(w*cap));height=Math.max(1,Math.ceil(h*cap));dpr=cap;}
   if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
   return {width:w,height:h,dpr};
  }
  function render(camera,selected,mode='clean',layer=0,reveal=0,flex=0,highlight=null,secondary=0,transitionFrom=null,tissueFocus=false,sourceView=null){
   if(destroyed)return {width:canvas.clientWidth,height:canvas.clientHeight,dpr:1};
-  const size=resize();
+  const board=sourceView?.marrowBoard,inspection=board?.inspection;const size=resize(!!board,!!inspection,board?.sharp);if(inspection)camera=window.BodyMarrowBoard.inspectionCamera(board,{...camera,width:size.width,height:size.height},inspection);
   if(!gl||status!=='ready'||gl.isContextLost?.())return size;
   // Resizing can invalidate a GPU context; never query locations from a stale program.
   if(!program||!gl.isProgram(program)){
@@ -426,7 +444,7 @@ function create(canvas,onContextLost=()=>{}){
   gl.uniform1f(uni('uAnchorX'),Number.isFinite(camera.anchorX)?camera.anchorX:.5);
   gl.uniform1f(uni('uAnchorY'),Number.isFinite(camera.anchorY)?camera.anchorY:.5);
   gl.uniform1f(uni('uYaw'),camera.yaw);gl.uniform1f(uni('uPitch'),camera.pitch);
-  gl.uniform1f(uni('uZoom'),camera.zoom);gl.uniform1f(uni('uFrameSpan'),camera.frameSpan);
+  gl.uniform1f(uni('uZoom'),camera.zoom);gl.uniform1f(uni('uFrameSpan'),camera.frameSpan);gl.uniform1f(uni('uMarrowDistance'),Number.isFinite(camera.marrowDistance)?camera.marrowDistance:0);gl.uniform1f(uni('uMarrowLocal'),camera.marrowBasis?1:0);gl.uniformMatrix3fv(uni('uMarrowBasis'),false,camera.marrowBasis||[1,0,0,0,1,0,0,0,1]);
   gl.uniform3f(uni('uTarget'),camera.target.x,camera.target.y,camera.target.z);
   const locP=gl.getAttribLocation(program,'aPosition'),locN=gl.getAttribLocation(program,'aNormal'),locW=gl.getAttribLocation(program,'aSkinWeight');
   const M=window.BodyRegionMotion;
@@ -435,7 +453,7 @@ function create(canvas,onContextLost=()=>{}){
   const extendedPose=window.BodyExtendedRegions?.has(selected)&&detailData.has(selected)
    ?M.poseExtended(selected,detailData.get(selected),flex,secondary):null;
   const jointPose=shoulderPose||lowerPose||extendedPose;
-  const draw=(item,dim=1,alpha=1,unposed=false)=>{
+  const draw=(item,dim=1,alpha=1,unposed=false,ranges=null)=>{
   if(!sourceView&&!allowed(item))return;
   if(!sourceView&&connectiveIsolated&&!connectiveIsolated.has(item.id)){
    if(!connectiveGhost)return;
@@ -459,15 +477,16 @@ function create(canvas,onContextLost=()=>{}){
    gl.uniform1f(uni('uMotion'),unposed?0:moving?1:0);gl.uniform1f(uni('uSoftSkin'),item.skinWeights?1:0);gl.uniform1f(uni('uMotionAxis'),selected==='shoulder'?1:0);
    gl.uniform1f(uni('uFlex'),(selected==='shoulder'?-1:1)*Number(flex)*Math.PI/180);
    gl.uniform3fv(uni('uPivot'),pivot);
-   const play=sourceView?.playground?.transform(item.id);gl.uniformMatrix3fv(uni('uPlayRotation'),false,play?.r||identityRotation);gl.uniform3fv(uni('uPlayTranslation'),play?.t||identityTranslation);
-   const kind=item.connectiveKind;gl.uniform1f(uni('uMaterial'),item.id===highlight?4:kind==='fibrocartilage'||kind==='cartilage'?3:kind==='tendon'||kind==='ligament'?2:item.connective||item.group==='connective'?4:item.tissue?1:0);
+   const play=item.id.startsWith('__marrow_')?window.BodyMarrowBoard.transform(item.id,sourceView.marrowBoard):sourceView?.playground?.transform(item.id);gl.uniformMatrix3fv(uni('uPlayRotation'),false,play?.r||identityRotation);gl.uniform3fv(uni('uPlayTranslation'),play?.t||identityTranslation);
+   const vm=item.vehicleMaterial,vs=sourceView?.marrowBoard?.vehicle;gl.uniform1f(uni('uVehicle'),vm?1:0);if(vm){gl.uniform4fv(uni('uVehicleMaterial'),vm.slice(0,4));gl.uniform1f(uni('uVehicleDetail'),vm[4]);gl.uniform1f(uni('uVehicleEnergy'),.75+(vs?.energy||0)*.55+(vs?.deploy||0)*.35+(vs?.capture||0)*.3);gl.uniform1f(uni('uVehicleGrind'),vs?.grindLevel||0);}const kind=item.connectiveKind;gl.uniform1f(uni('uMaterial'),item.id===highlight?4:kind==='fibrocartilage'||kind==='cartilage'?3:kind==='tendon'||kind==='ligament'?2:item.connective||item.group==='connective'?4:item.tissue?1:0);
    gl.uniform3fv(uni('uColor'),item.id===highlight?[1,.81,.48]:item.color);gl.uniform1f(uni('uDim'),dim);gl.uniform1f(uni('uAlpha'),alpha);
    gl.bindBuffer(gl.ARRAY_BUFFER,item.buffer);
    gl.enableVertexAttribArray(locP);gl.vertexAttribPointer(locP,3,gl.FLOAT,false,28,0);
    gl.enableVertexAttribArray(locN);gl.vertexAttribPointer(locN,3,gl.FLOAT,false,28,12);
    gl.enableVertexAttribArray(locW);gl.vertexAttribPointer(locW,1,gl.FLOAT,false,28,24);
-   if(item.indexBuffer){gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,item.indexBuffer);gl.drawElements(gl.TRIANGLES,item.count,item.indexType,0);}else gl.drawArrays(gl.TRIANGLES,0,item.count);drawCalls++;submittedTriangles+=item.count/3;
+   if(item.indexBuffer){gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,item.indexBuffer);if(ranges){for(const q of ranges){gl.drawElements(gl.TRIANGLES,q.count,item.indexType,q.offset);drawCalls++;submittedTriangles+=q.count/3;}return;}gl.drawElements(gl.TRIANGLES,item.count,item.indexType,0);}else gl.drawArrays(gl.TRIANGLES,0,item.count);drawCalls++;submittedTriangles+=item.count/3;
   };
+  if(inspection){if(!marrowMesh)marrowMesh=window.BodyMarrowBoard.geometry(board.vehicle?.skin).map(p=>makeBuffer(p,p.id,'marrow',p.color));gl.depthMask(true);for(const m of marrowMesh)draw(m,window.BodyMarrowBoard.intensity(m.id,board),1,true);frameStats={drawCalls,submittedTriangles,marrowInspection:true,marrowVehicleDrawCalls:marrowMesh.length,marrowVehicleTriangles:submittedTriangles,backingWidth:canvas.width,backingHeight:canvas.height};return size;}
   if(sourceView){
    gl.depthMask(true);
    const V=window.BodyVHF,now=performance.now(),cam={...camera,width:size.width,height:size.height},bounded=!!sourceView.bounded,parts=sourceView.parts,axial=!!sourceView.stream,legacy=parts.sourceInfo?.processing==='legacy';
@@ -501,12 +520,25 @@ function create(canvas,onContextLost=()=>{}){
     // Re-arm even after the final chunk: subsequent streamed assets must never inherit a closed gate.
     if((pending||vhfUploadGate)&&!vhfCacheFrame){const generation=vhfGeneration;vhfCacheFrame=requestAnimationFrame(()=>{vhfCacheFrame=0;vhfUploadGate=false;if(generation===vhfGeneration&&!document.hidden)window.dispatchEvent(new Event('body:vhf-residency-frame'));});}
    }
-   for(const m of vhfMeshes){if(!wanted.has(m.id)||!V.visible(m,sourceView)||!V.inView(sourceView.playground?.bounds(m)||m,cam))continue;m.lastUse=now;draw(m,1,1,true);drawn.add(m.id);}
+   if(sourceView.marrowBoard&&window.BodyMarrowRide){
+    // Exact index partitions share the resident original vertex/normal buffer.
+    // No simplification, topology change, or source-face deletion.
+    for(const p of parts){if(!wanted.has(p.id))continue;const original=resident.get(p.id);if(!original)continue;let q=marrowDisplay.get(p.id);
+     if(q&&q.original!==original){gl.deleteBuffer(q.mesh.indexBuffer);marrowDisplay.delete(p.id);q=null;}
+     if(!q&&original.lodLevel==='exact'&&original.count===p.indices.length&&p.indices.length/3>18000){let indexBuffer=null;try{const exact=window.BodyMarrowRide.exactChunks(p,.10),packed=new p.indices.constructor(p.indices.length),chunks=[];let start=0;for(const c of exact){packed.set(c.indices,start);chunks.push({count:c.indices.length,offset:start*packed.BYTES_PER_ELEMENT,min:c.min,max:c.max,bufferBytes:c.indices.byteLength});start+=c.indices.length;}if(start!==p.indices.length)throw Error('MARROW exact coverage');indexBuffer=gl.createBuffer();if(!indexBuffer)throw Error('MARROW index allocation');gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,indexBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,packed,gl.STATIC_DRAW);q={original,chunks,mesh:{...original,indexBuffer,indexType:packed.BYTES_PER_ELEMENT===2?gl.UNSIGNED_SHORT:gl.UNSIGNED_INT}};marrowDisplay.set(p.id,q);}catch(e){if(indexBuffer)gl.deleteBuffer(indexBuffer);console.warn('MARROW exact partition fallback',e.message);q=null;}}
+     if(q){const visible=q.chunks.filter(m=>V.inView(m,cam));if(visible.length)draw(q.mesh,1,1,true,visible);}else draw(original,1,1,true);drawn.add(p.id);
+    }
+   }else{if(marrowDisplay.size)clearMarrowDisplay();for(const m of vhfMeshes){if(!wanted.has(m.id)||!V.visible(m,sourceView)||!V.inView(sourceView.playground?.bounds(m)||m,cam))continue;m.lastUse=now;draw(m,1,1,true);drawn.add(m.id);}}
+
+   if(sourceView.marrowBoard){
+    if(!marrowMesh){marrowMesh=window.BodyMarrowBoard.geometry(sourceView.marrowBoard.vehicle?.skin).map(p=>makeBuffer(p,p.id,'marrow',p.color));}
+    for(const m of marrowMesh)draw(m,window.BodyMarrowBoard.intensity(m.id,sourceView.marrowBoard),1,true);
+   }else if(marrowMesh){for(const m of marrowMesh)disposeMesh(m);marrowMesh=null;}
    sourceView.renderedIds=bounded||sourceView.playground?drawn:null;
    if(drawn.size&&vhfFirstDrawMs===null)vhfFirstDrawMs=performance.now()-(parts.sourceInfo?.streamStartedAt??now);
    const bytes=vhfMeshes.reduce((n,m)=>n+m.bufferBytes,0);
    const lodCounts={overview:0,regional:0,exact:0};for(const m of vhfMeshes)lodCounts[m.lodLevel||'exact']++;
-   frameStats={drawCalls,submittedTriangles,drawnSourceIds:[...drawn],residentSourceIds:vhfMeshes.map(m=>m.id),...(axial?{firstDrawMs:vhfFirstDrawMs,uploadChunks:vhfChunkCount,maxUploadChunkCpuMs:vhfMaxChunkMs,stagedGpuBufferBytes:vhfStage?.mesh.bufferBytes||0,preparedCpuBytes:parts.reduce((n,p)=>n+(p.packed?.byteLength||0)+(p.lods||[]).reduce((a,l)=>a+(l.packed?.byteLength||0),0),0),lodCounts,gpuFailedIds:[...vhfFailed]}:{}),eligibleStructures,eligibleTriangles,culledStructures,culledTriangles,residentStructures:vhfMeshes.length,residentTriangles:vhfMeshes.reduce((n,m)=>n+m.count/3,0),estimatedSourceGpuBufferBytes:bytes,residency:bounded?{targetBytes:32*1024*1024,overTarget:bytes>32*1024*1024,pending,failed:vhfFailed.size,evictions:vhfEvictions,uploads:vhfUploads,uploadCpuMs:vhfUploadMs}:null};
+   frameStats={drawCalls,submittedTriangles,marrowVehicleDrawCalls:marrowMesh?.length||0,marrowVehicleTriangles:marrowMesh?.reduce((n,m)=>n+m.count/3,0)||0,marrowDisplayTriangles:[...marrowDisplay.values()].reduce((n,q)=>n+q.chunks.reduce((a,m)=>a+m.count/3,0),0),marrowDisplayBytes:[...marrowDisplay.values()].reduce((n,q)=>n+q.chunks.reduce((a,m)=>a+m.bufferBytes,0),0),drawnSourceIds:[...drawn],residentSourceIds:vhfMeshes.map(m=>m.id),...(axial?{firstDrawMs:vhfFirstDrawMs,uploadChunks:vhfChunkCount,maxUploadChunkCpuMs:vhfMaxChunkMs,stagedGpuBufferBytes:vhfStage?.mesh.bufferBytes||0,preparedCpuBytes:parts.reduce((n,p)=>n+(p.packed?.byteLength||0)+(p.lods||[]).reduce((a,l)=>a+(l.packed?.byteLength||0),0),0),lodCounts,gpuFailedIds:[...vhfFailed]}:{}),eligibleStructures,eligibleTriangles,culledStructures,culledTriangles,residentStructures:vhfMeshes.length,residentTriangles:vhfMeshes.reduce((n,m)=>n+m.count/3,0),estimatedSourceGpuBufferBytes:bytes,residency:bounded?{targetBytes:32*1024*1024,overTarget:bytes>32*1024*1024,pending,failed:vhfFailed.size,evictions:vhfEvictions,uploads:vhfUploads,uploadCpuMs:vhfUploadMs}:null};
    return size;
   }
   const region=detail.has(selected)?selected:null;

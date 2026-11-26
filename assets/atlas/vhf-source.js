@@ -19,10 +19,10 @@ globalThis.BodyVHF=(function sourceModule(){
  let outside=63;
  for(let i=0;i<8;i++){
   const x0=(i&1?p.max[0]:p.min[0])-c.target.x,y0=(i&2?p.max[1]:p.min[1])-c.target.y,z0=(i&4?p.max[2]:p.min[2])-c.target.z;
-  const x=x0*cy+z0*sy,z=z0*cy-x0*sy,y=y0*cp-z*sp,z2=y0*sp+z*cp,w=(7.4-z2)/7.4;
-  if(!Number.isFinite(w)||w<=.10)return true; // perspective clamp: conservatively retain
-  const X=x*scale/(c.width*.5)+(ax-.5)*2*w,Y=(y-.04)*scale/(c.height*.5)-(ay-.5)*2*w,Z=-z2/15;
-  const margin=.005*Math.max(1,w);
+  let x=x0*cy+z0*sy,z=z0*cy-x0*sy,y=y0*cp-z*sp,z2=y0*sp+z*cp;const B=c.marrowBasis;if(B){x=x0*B[0]+y0*B[1]+z0*B[2];y=x0*B[3]+y0*B[4]+z0*B[5];z2=x0*B[6]+y0*B[7]+z0*B[8];}const D=c.marrowDistance||7.4,w=(D-z2)/D;
+  if(!Number.isFinite(w)||(!c.marrowDistance&&w<=.10))return true; // perspective clamp: conservatively retain
+  const X=x*scale/(c.width*.5)+(ax-.5)*2*w,Y=(y-(c.marrowDistance?0:.04))*scale/(c.height*.5)-(ay-.5)*2*w,Z=c.marrowDistance?((20.004/19.996)*(D-z2)-.16/19.996)/D:-z2/15;
+  const margin=.005*Math.max(1,Math.abs(w));
   let mask=0;if(X < -w-margin)mask|=1;if(X>w+margin)mask|=2;if(Y< -w-margin)mask|=4;if(Y>w+margin)mask|=8;if(Z< -w-margin)mask|=16;if(Z>w+margin)mask|=32;
   outside&=mask;if(!outside)return true;
  }
@@ -235,7 +235,7 @@ globalThis.BodyVHF=(function sourceModule(){
   const scale=Math.min(c.width/3.25,c.height/c.frameSpan)*c.zoom;
   const cy=Math.cos(c.yaw),sy=Math.sin(c.yaw),cp=Math.cos(c.pitch),sp=Math.sin(c.pitch);
   const inverse=(a,b,d)=>{const z=d*cp-b*sp;return [a*cy-z*sy,b*cp+d*sp,a*sy+z*cy];};
-  const o=inverse(0,.04,7.4),d=inverse((x-c.width*c.anchorX)/scale,-(y-c.height*c.anchorY)/scale,-7.4);
+  const D=c.marrowDistance||7.4,o=inverse(0,c.marrowDistance?0:.04,D),d=inverse((x-c.width*c.anchorX)/scale,-(y-c.height*c.anchorY)/scale,-D);
   return {o:[o[0]+c.target.x,o[1]+c.target.y,o[2]+c.target.z],d};
  }
  function boxHit(o,d,min,max){let lo=0,hi=Infinity;for(let k=0;k<3;k++){if(Math.abs(d[k])<1e-12){if(o[k]<min[k]||o[k]>max[k])return false;continue;}let a=(min[k]-o[k])/d[k],b=(max[k]-o[k])/d[k];if(a>b)[a,b]=[b,a];lo=Math.max(lo,a);hi=Math.min(hi,b);if(hi<lo)return false;}return true;}
