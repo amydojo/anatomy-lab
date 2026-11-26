@@ -63,3 +63,18 @@ export class UnityGeometrySession{
 }
 // Explicit fallback for testing only; production should provide a worker-backed prepare.
 export async function prepareOnMainThread(record,root,signal){return packCompact(await loadDisplay(root,record,{signal}));}
+
+export function createGeometryWorker(){
+ const worker=new Worker(new URL('./unity-geometry-worker.mjs',import.meta.url),{type:'module'}),jobs=new Map();let serial=0,closed=false;
+ const finish=(id,error,packed)=>{const j=jobs.get(id);if(!j)return;jobs.delete(id);clearTimeout(j.timer);j.signal?.removeEventListener('abort',j.cancel);error?j.reject(Error(error)):j.resolve(packed);};
+ const close=(reason='worker closed')=>{closed=true;worker.terminate();for(const id of jobs.keys())finish(id,reason);};
+ worker.onmessage=({data})=>finish(data.id,data.error,data.packed);
+ worker.onerror=()=>close('geometry worker failed');worker.onmessageerror=()=>close('geometry worker message failed');
+ const prepare=(record,root,signal)=>new Promise((resolve,reject)=>{
+  if(closed||signal?.aborted){reject(Error('geometry worker unavailable'));return;}
+  const id=++serial,cancel=()=>{worker.postMessage({id,cancel:true});finish(id,'geometry request canceled');};
+  const timer=setTimeout(()=>close('geometry worker timeout'),30000);jobs.set(id,{resolve,reject,signal,cancel,timer});signal?.addEventListener('abort',cancel,{once:true});
+  try{worker.postMessage({id,record,root:new URL(root,location.href).href});}catch(e){finish(id,String(e.message||e));}
+ });
+ return {prepare,close};
+}
