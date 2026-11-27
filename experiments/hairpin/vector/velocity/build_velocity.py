@@ -161,8 +161,13 @@ dest=os.path.join(out,'VECTOR-005-VELOCITY-'+str(tier)+'.blend')
 bpy.ops.wm.save_as_mainfile(filepath=dest);report['masterSha256']=sha(dest)
 # Join by assembly ONLY after saving the individual qualification meshes.
 joined=[]
-for group in ('front','rear','joint','front_pod','rear_pod'):
-    items=[o for o in lows if o['assembly']==group];select(items[0])
+# Blender join destroys the absorbed RNA objects. Partition before any join,
+# so later assemblies never dereference invalidated objects from lows.
+groups=('front','rear','joint','front_pod','rear_pod')
+assembly_items={group:[o for o in lows if o['assembly']==group] for group in groups}
+assert all(assembly_items.values()) and sum(map(len,assembly_items.values()))==len(lows)
+for group in groups:
+    items=assembly_items.pop(group);select(items[0])
     for o in items:o.select_set(True)
     bpy.ops.object.join();o=bpy.context.object;o.name='__marrow_'+group;o['assembly']=group
     for v in o.data.vertices:v.co*=.001
