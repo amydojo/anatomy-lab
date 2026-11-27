@@ -1,11 +1,6 @@
 name: HAIRPIN COUTURE CHIMERA
 on:
-  pull_request:
-    branches: ['experiment/marrow-hairpin-001']
-    paths:
-      - 'experiments/hairpin/couture/chimera_*.py'
-      - 'experiments/hairpin/couture/CHIMERA.md'
-      - '.github/workflows/hairpin-chimera.yml'
+  # Frozen milestone: manual reproducibility only, to avoid redundant PR reruns.
   workflow_dispatch:
 permissions:
   contents: read
