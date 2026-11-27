@@ -1,10 +1,6 @@
 name: HAIRPIN COUTURE FIRST REVEAL
 on:
-  pull_request:
-    branches: ['experiment/marrow-hairpin-001']
-    paths:
-      - 'experiments/hairpin/couture/**'
-      - '.github/workflows/hairpin-couture.yml'
+  # FIRST REVEAL historical reproduction only; METAMORPHOSIS has its own workflow.
   workflow_dispatch:
 permissions:
   contents: read
