@@ -1,0 +1,68 @@
+name: VECTOR IGNITION exported articulation
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - 'experiments/hairpin/**'
+      - 'tests/velocity-articulation.spec.mjs'
+      - '.github/workflows/vector-ignition.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  native-reference:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-velocity-textured-20000
+          run-id: 45969785816
+          github-token: ${{ github.token }}
+          path: candidate
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/velocity/native_reference.py -- candidate/VECTOR-005-VELOCITY-20000.blend native.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vector-ignition-native-reference
+          path: native.json
+          if-no-files-found: error
+  runtime-articulation:
+    needs: native-reference
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-velocity-textured-20000
+          run-id: 45969785816
+          github-token: ${{ github.token }}
+          path: candidate
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-kinetic-replay
+          run-id: 45954118521
+          github-token: ${{ github.token }}
+          path: replay
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-ignition-native-reference
+          path: reference
+      - run: echo 'e64ef983520090af7b07b2e3f67e6fc365a615b17d5ba457faf2039f3920fb66  candidate/VECTOR-005-VELOCITY-20000.glb' | sha256sum -c -
+      - run: npm install --no-audit --no-fund
+      - run: VELOCITY_CANDIDATE="$PWD/candidate/VECTOR-005-VELOCITY-20000.glb" VELOCITY_NATIVE="$PWD/reference/native.json" VELOCITY_REPLAY="$PWD/replay/kinetic-replay.json" npx playwright test tests/velocity-articulation.spec.mjs --project=desktop-chromium --project=webkit-mobile --workers=1
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-ignition-articulation
+          path: test-results/
+          if-no-files-found: warn
