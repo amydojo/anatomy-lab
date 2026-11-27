@@ -1,0 +1,70 @@
+name: VECTOR First Light recovered asset
+on:
+  pull_request:
+    branches: ['experiment/marrow-001']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  recover:
+    if: github.head_ref == 'experiment/marrow-hairpin-001' || github.ref_name == 'experiment/marrow-hairpin-001'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-blender-output
+          run-id: 45920240694
+          github-token: ${{ github.token }}
+          path: recovered
+      - run: |
+          cd recovered
+          echo '242dc98c42b087ef6877cf8b0d88cab6368d2d74ca2fdb8c00ebf53648084104  VECTOR-005-preview.glb' | sha256sum -c -
+          echo '2bf525342c5a48fde5d6ef380f087b736109dd35c442513e79b7c6595c30ebdd  VECTOR-005-master.blend' | sha256sum -c -
+      - uses: actions/upload-artifact@v4
+        with:
+          name: first-light-exact-assets
+          path: recovered/
+  proofs:
+    needs: recover
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: first-light-exact-assets
+          path: vector-output
+      - run: sudo apt-get update && sudo apt-get install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/render_first_light.py -- --assets vector-output --out vector-proofs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: first-light-matched-proofs
+          path: vector-proofs/
+          if-no-files-found: warn
+  browser:
+    needs: recover
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: first-light-exact-assets
+          path: experiments/hairpin/vector/generated
+      - run: npm install --no-audit --no-fund
+      - run: VECTOR_REQUIRE_ASSET=1 node --test tests/marrow-vector.test.mjs
+      - if: ${{ !cancelled() }}
+        run: npx playwright test tests/marrow-vector.spec.mjs --project=desktop-chromium --project=webkit-mobile --workers=1
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: first-light-atelier-evidence
+          path: test-results/
+          if-no-files-found: warn
