@@ -1,0 +1,95 @@
+name: VECTOR AFTERBURN chromatic engineering
+on:
+  pull_request:
+    branches: ['experiment/marrow-001']
+    paths:
+      - 'experiments/hairpin/vector/afterburn/**'
+      - '.github/workflows/vector-afterburn.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  master:
+    if: github.head_ref == 'experiment/marrow-hairpin-001' || github.ref_name == 'experiment/marrow-hairpin-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-continuity-master
+          run-id: 45924963659
+          github-token: ${{ github.token }}
+          path: baseline
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/afterburn/build_afterburn.py -- --source baseline/VECTOR-005-CONTINUITY-master.blend --out afterburn-output
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-afterburn-masters
+          path: afterburn-output/
+          if-no-files-found: warn
+  geometry:
+    needs: master
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-afterburn-masters
+          path: afterburn-output
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/continuity/qualify_continuity.py -- --master afterburn-output/VECTOR-005-AFTERBURN-master.blend --out afterburn-geometry.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-afterburn-geometry
+          path: afterburn-geometry.json
+          if-no-files-found: warn
+  proofs:
+    needs: master
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - edition: factory
+            mode: studio
+            subset: hero
+          - edition: afterburn
+            mode: studio
+            subset: main
+          - edition: covert
+            mode: studio
+            subset: hero
+          - edition: afterburn
+            mode: studio
+            subset: details
+          - edition: afterburn
+            mode: id
+            subset: id
+          - edition: afterburn
+            mode: studio
+            subset: states
+          - edition: afterburn
+            mode: studio
+            subset: ride
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-afterburn-masters
+          path: afterburn-output
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
+      - run: |
+          edition="${{ matrix.edition }}"
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/afterburn/render_afterburn.py -- --master "afterburn-output/VECTOR-005-${edition^^}-master.blend" --edition "$edition" --mode ${{ matrix.mode }} --subset ${{ matrix.subset }} --out proofs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-afterburn-${{ matrix.edition }}-${{ matrix.subset }}
+          path: proofs/
+          if-no-files-found: warn
