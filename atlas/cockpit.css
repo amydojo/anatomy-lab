@@ -1,0 +1,24 @@
+/* COCKPIT: gameplay-only touch surface, no global accessibility gesture overrides. */
+#marrow-hud.cockpit-enabled{touch-action:none;user-select:none;-webkit-user-select:none;overscroll-behavior:contain}
+#marrow-hud.cockpit-enabled #marrow-ride-controls{display:none!important}
+#marrow-hud.cockpit-enabled:not([data-inspect=true]) .cockpit-legacy-look{display:none!important}
+#marrow-hud.cockpit-enabled>div:first-of-type h1{font-size:16px!important}
+.cockpit{position:absolute;inset:0;pointer-events:none;z-index:0;--unit:clamp(80px,18vmin,154px);--d:calc(var(--unit)*var(--cockpit-size,1));font:600 10px system-ui;color:#e2ff45}
+.cockpit[hidden]{display:none!important}.cockpit [data-role]{pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.cockpit-look{position:absolute;inset:0;z-index:0}
+.cockpit-steer,.cockpit-pedal{position:absolute;bottom:calc(12px + env(safe-area-inset-bottom,0px));width:calc(var(--d)*1.25);height:var(--d);z-index:2;opacity:var(--cockpit-opacity,.65);border:1px solid #dfff3866;background:#14141c30;border-radius:18px;box-sizing:border-box}
+.cockpit-steer{left:calc(12px + env(safe-area-inset-left,0px));overflow:hidden}.cockpit-pedal{right:calc(12px + env(safe-area-inset-right,0px));width:calc(var(--d)*.72);display:flex;flex-direction:column;justify-content:space-between;text-align:center;padding:10px 2px}
+.cockpit[data-hand=left] .cockpit-steer{left:auto;right:calc(12px + env(safe-area-inset-right,0px))}.cockpit[data-hand=left] .cockpit-pedal{right:auto;left:calc(12px + env(safe-area-inset-left,0px))}
+.cockpit-label{position:absolute;top:7px;left:9px}.cockpit-ring{position:absolute;left:50%;top:55%;width:calc(var(--d)*.66);height:calc(var(--d)*.66);transform:translate(-50%,-50%);border:1px solid #dfff38aa;border-radius:50%;display:grid;place-items:center;pointer-events:none}.cockpit-ring i{width:42%;height:42%;border-radius:50%;background:#dfff3877;border:1px solid #e2ff45}
+.cockpit-pedal i{position:absolute;top:calc(50% - 3px);left:15%;right:15%;height:6px;border-radius:4px;background:#e2ff45;pointer-events:none}
+.cockpit-actions{position:absolute;bottom:calc(var(--d) + 21px + env(safe-area-inset-bottom,0px));right:calc(12px + env(safe-area-inset-right,0px));display:flex;gap:5px;z-index:2;opacity:var(--cockpit-opacity,.65)}
+.cockpit[data-hand=left] .cockpit-actions{right:auto;left:calc(12px + env(safe-area-inset-left,0px))}
+.cockpit-actions button{min-height:42px;background:#151017c9!important;color:#e2ff45;border:1px solid #dfff3877!important;padding:8px!important;border-radius:10px!important}
+.cockpit:not([data-air=true]) [data-action=land],.cockpit[data-air=true] [data-action=grind]{display:none}
+.cockpit-settings,.cockpit-research{position:absolute;z-index:5;pointer-events:auto;touch-action:auto;color:#e2ff45;background:#151017e8;border:1px solid #7154a0;border-radius:8px;padding:7px;font:11px system-ui;max-width: min(260px,80vw);max-height:60%;overflow:auto}
+.cockpit-settings{top:calc(86px + env(safe-area-inset-top,0px));right:12px}.cockpit-research{top:calc(76px + env(safe-area-inset-top,0px));left:12px}
+.cockpit-settings label{display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:29px}.cockpit-settings input[type=range]{width:92px;touch-action:auto}.cockpit-settings output,.cockpit-settings small{display:block;margin-top:8px}.cockpit-research>div{position:static!important;max-width:none!important}
+#marrow-hud.cockpit-enabled>div:not(.cockpit):not(.cockpit-legacy-look){z-index:3}
+#marrow-hud.cockpit-enabled #marrow-sensitivity{display:none}
+@media(max-height:450px){.cockpit-settings{top:52px}.cockpit-research{top:58px}.cockpit-actions{bottom:calc(var(--d) + 16px)}}
+@media(max-width:500px){#marrow-hud.cockpit-enabled>div:nth-of-type(3){flex-wrap:wrap;max-width:65%;justify-content:flex-end}#marrow-hud.cockpit-enabled button{font-size:10px;padding:6px!important}.cockpit-research{top:85px}.cockpit-settings{top:85px}}
