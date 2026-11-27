@@ -214,6 +214,32 @@ def preflight():
 if '--preflight-only' in args:
     preflight()
     sys.exit(0)
+def verify_package():
+    manifest=json.load(open(os.path.join(out,'afterburn-material-manifest.json')))
+    pre=json.load(open(os.path.join(out,'shader-preflight.json')))
+    assert pre['passed'] and pre['blender']==bpy.app.version_string
+    bpy.ops.wm.open_mainfile(filepath=source);baseline=fingerprint()
+    assert len(baseline)==25 and manifest['sourceSha256']==sha(source)
+    verified={}
+    for edition in ('factory','afterburn','covert'):
+        entry=manifest['studies'][edition];path=os.path.join(out,entry['master'])
+        assert sha(path)==entry['sha256'] and os.path.getsize(path)>0
+        bpy.ops.wm.open_mainfile(filepath=path)
+        actual=fingerprint()
+        assert actual==baseline==entry['meshFingerprintsBefore']==entry['meshFingerprintsAfter']
+        families={m.get('family') for o in bpy.context.scene.objects if o.type=='MESH' for m in o.data.materials if m}
+        assert set(PARAMS)<=families
+        art=[im for im in bpy.data.images if im.name in ('MAPO-DOFU-wordmark','VECTOR-005-serial','VECTOR-velocity-emblem')]
+        assert len(art)==3 and all(im.packed_file and im.size[0]>0 and im.size[1]>0 for im in art)
+        silver=next(m for m in bpy.data.materials if m.get('family')=='silver')
+        p=silver.node_tree.nodes.get('Principled BSDF')
+        assert abs(socket(p,'Anisotropic IOR Level','Anisotropic').default_value-.28)<1e-6 and p.inputs['Tangent'].is_linked
+        verified[edition]={'sha256':sha(path),'bytes':os.path.getsize(path),'geometryFingerprints':len(actual),'materialFamilies':sorted(families),'packedArtwork':sorted(im.name for im in art),'anisotropySocket':socket(p,'Anisotropic IOR Level','Anisotropic').name}
+    json.dump({'qualifiedMasterPackage':True,'sourceSha256':sha(source),'blender':bpy.app.version_string,'masters':verified},open(os.path.join(out,'master-package-verification.json'),'w'),indent=2)
+    print('AFTERBURN_MASTER_PACKAGE_PASS',json.dumps(verified),flush=True)
+if '--verify-only' in args:
+    verify_package()
+    sys.exit(0)
 studies={name:build(name) for name in ('factory','afterburn','covert')}
 report={'sourceSha256':sha(source),'referenceSha256':'b63e7e1238e4fdcd38ec6b439d2745991eb4c745b00777008f58f399d6efd555','paletteSRGB':PALETTE,'materials':{k:{'palette':v[0],'metallic':v[1],'roughness':v[2],'coat':v[3],'restEmission':v[4],'linearBaseColor':linear(PALETTE[v[0]])} for k,v in PARAMS.items()},'studies':studies,'textures':{'wordmark':[2048,256],'serial':[1024,512],'emblem':[512,256]},'limitations':'Procedural bump, coat and anisotropy are Blender-native; no texture bake, production unwrap, runtime material parity or legibility certification. UVs are local graphic projections, not nonoverlapping atlases. No geometry edits.'}
 json.dump(report,open(os.path.join(out,'afterburn-material-manifest.json'),'w'),indent=2)
