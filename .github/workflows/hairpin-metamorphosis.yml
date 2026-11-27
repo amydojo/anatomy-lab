@@ -1,11 +1,6 @@
 name: HAIRPIN COUTURE METAMORPHOSIS
 on:
-  pull_request:
-    branches: ['experiment/marrow-hairpin-001']
-    paths:
-      - 'experiments/hairpin/couture/metamorphosis.py'
-      - 'experiments/hairpin/couture/persistent_motion.py'
-      - '.github/workflows/hairpin-metamorphosis.yml'
+  # Frozen milestone: manual reproducibility only, to avoid redundant PR reruns.
   workflow_dispatch:
 permissions:
   contents: read
