@@ -111,3 +111,64 @@ jobs:
           name: vector-velocity-browser-${{ matrix.tier }}
           path: test-results/
           if-no-files-found: warn
+  blender-proof:
+    needs: bake
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        tier: [20000, 10000, 5000, 3500]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-velocity-textured-${{ matrix.tier }}
+          path: asset
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-main
+          run-id: 45946040601
+          github-token: ${{ github.token }}
+          path: baseline
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/velocity/render_velocity.py -- --master asset/VECTOR-005-VELOCITY-${{ matrix.tier }}.blend --edition velocity --mode studio --subset main --baseline baseline/chromatic-studio-main-report.json --out proof
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-velocity-proof-${{ matrix.tier }}
+          path: proof/
+          if-no-files-found: warn
+  matched-camera:
+    needs: [adapter, blender-proof]
+    if: ${{ !cancelled() && needs.adapter.result == 'success' }}
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        tier: [20000, 10000, 5000, 3500]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-velocity-textured-${{ matrix.tier }}
+          path: asset
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-velocity-proof-${{ matrix.tier }}
+          path: proof
+      - run: npm install --no-audit --no-fund
+      - run: VELOCITY_GLB="$PWD/asset/VECTOR-005-VELOCITY-${{ matrix.tier }}.glb" VELOCITY_PROOF="$PWD/proof/velocity-studio-main-report.json" npx playwright test tests/marrow-velocity.spec.mjs --project=desktop-chromium --project=webkit-mobile --workers=1 --grep 'recorded Blender camera'
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-velocity-matched-${{ matrix.tier }}
+          path: test-results/
+          if-no-files-found: warn
