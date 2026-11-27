@@ -24,6 +24,7 @@ test('IGNITION pinned VECTOR on existing MARROW contact, control, flight and fal
  await capture('vector-idle');expect(samples['vector-idle'].renderer.vehicleTriangles).toBe(19986);expect(samples['vector-idle'].renderer.marrowVehicleDrawCalls).toBe(5);expect(samples['vector-idle'].renderer.vectorTextureBytes).toBeGreaterThan(0);
  await page.locator('[data-vector-quality]').click();await expect.poll(async()=> (await read()).renderer.vehicleMaterialQuality).toBe('performance');
  await capture('vector-performance');
+ await page.locator('[data-vector-chase]').click();await expect.poll(async()=>{const q=(await read()).camera;return q?.mode==='CHASE'&&q.close;}).toBe(true);await capture('close-chase');await page.locator('[data-vector-chase]').click();await expect.poll(async()=>{const q=(await read()).camera;return q?.mode==='STEADY'&&!q.close;}).toBe(true);
  for(const [name,x,y] of [['carve-left',-.7,-.55],['carve-right',.7,-.55]]){
   await page.evaluate(([x,y])=>{window.__marrowPad.axes[0]=x;window.__marrowPad.axes[1]=y;},[x,y]);try{await page.waitForTimeout(3500);}finally{await page.evaluate(()=>{window.__marrowPad.axes[0]=0;window.__marrowPad.axes[1]=0;});}
   await capture(name);
