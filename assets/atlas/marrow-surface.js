@@ -74,7 +74,7 @@ function spring(p,v,goal,dt,omega){const e=Math.exp(-omega*dt),d=sub(p,goal),j=a
 function basis(f,up,pitch,roll=0){const right=unit(cross(f,up),[1,0,0]),back=unit(add(mul(f,-Math.cos(pitch)),mul(up,Math.sin(pitch)))),vertical=unit(cross(back,right));return [rotate(right,back,roll),rotate(vertical,back,roll),back];}
 function rotationAngle(a,b){return Math.acos(clamp((dot(a[0],b[0])+dot(a[1],b[1])+dot(a[2],b[2])-1)*.5,-1,1));}
 function blendBasis(a,b,t,maxAngle){const theta=rotationAngle(a,b);if(theta<1e-7)return b.map(v=>v.slice());let axis=add(add(cross(a[0],b[0]),cross(a[1],b[1])),cross(a[2],b[2]));if(len(axis)<1e-6){const v=add(a[0],b[0]),w=add(a[1],b[1]),z=add(a[2],b[2]);axis=[v,w,z].sort((x,y)=>len(y)-len(x))[0];if(len(axis)<1e-7)axis=a[0];}const angle=Math.min(theta*t,maxAngle);return a.map(v=>unit(rotate(v,unit(axis),angle),v));}
-function rig(s,world){let mode=0,yaw=0,pitch=.72,sensitivity=1,close=false,recenter=false,look=[0,0],physical=s,worldForward=tangent(WORLD_UP,s.frame||s.f),orient=basis(worldForward,WORLD_UP,pitch),target=s.p.slice(),targetV=[0,0,0],distance=.36,distanceV=0,angular=0,transition=false,blockedFor=0,obstructedLast=false,recovery=0,lastMode='STEADY';
+function rig(s,world){let mode=0,yaw=0,pitch=.72,sensitivity=1,close=false,recenter=false,look=[0,0],physical=s,worldForward=tangent(WORLD_UP,s.frame||s.f),orient=basis(worldForward,WORLD_UP,pitch),target=s.p.slice(),targetV=[0,0,0],distance=.36,distanceV=0,angular=0,transition=false,blockedFor=0,obstructedLast=false,recovery=0,lastMode='STEADY',recoveringView=false,initializedView=false;
  const api={yaw:()=>yaw,controlYaw:()=>yaw,forward:()=>rotate(tangent(physical.n,physical.frame||physical.f),physical.n,yaw),mode:()=>MODES[mode],setMode:m=>{const next=MODES.indexOf(m);if(next>=0&&next!==mode){mode=next;transition=true;}return MODES[mode];},cycle:()=>api.setMode(MODES[(mode+1)%3]),toggle:()=>{close=!close;},sensitivity:()=>sensitivity,setSensitivity:v=>{if(Number.isFinite(v))sensitivity=clamp(v,.35,1.8);return sensitivity;},recenter:()=>{recenter=true;},step(s,i,dt,_unused,c){
  physical=s;const rawDt=Math.max(0,dt),h=clamp(rawDt,0,.05),trackDt=clamp(rawDt,0,.10),old=orient.map(v=>v.slice()),oldAngular=angular;
  look=mix(look,[clamp(i.x||0,-1,1),clamp(i.y||0,-1,1)],damp(18,h));if(Math.abs(i.x||0)+Math.abs(i.y||0)>.001){yaw+=look[0]*1.45*sensitivity*h;pitch=clamp(pitch+look[1]*1.05*sensitivity*h,.22,1.22);recenter=false;}else{look=[0,0];if(recenter){yaw*=Math.exp(-h*5);pitch+= (.72-pitch)*damp(5,h);if(Math.abs(yaw)<.005&&Math.abs(pitch-.72)<.005){yaw=0;pitch=.72;recenter=false;}}}
@@ -92,14 +92,17 @@ function rig(s,world){let mode=0,yaw=0,pitch=.72,sensitivity=1,close=false,recen
  const sight=b=>{const hit=world.ray(s.p,b[2],want+.012),safe=hit?Math.max(0,hit.distance-.012):want;return {hit,safe};};
  const aligned=back=>{const r=unit(plane(desired[0],back),unit(cross(WORLD_UP,back),orient[0]));return [r,unit(cross(back,r)),back];};
  let requested=sight(desired),chosen=desired,alternate=false;
- // Search a surface-aware viewing direction only if the requested view cannot
- // provide the whole board and terrain. Never feed this orientation to steering.
- const need=requested.safe<want*.87;
- if(need){let best=-Infinity;const dirs=[orient[2],localUp];for(const t of [.25,.5,.75,1,1.5,2,3]){dirs.push(unit(add(desired[2],mul(localUp,t)),localUp));dirs.push(unit(add(desired[2],add(mul(localUp,t),mul(localF,.5))),localUp));dirs.push(unit(add(desired[2],add(mul(localUp,t),mul(localF,-.5))),localUp));}for(const back of dirs){const b=aligned(back),q=sight(b);if(q.safe<want*.78||!extent(b,q.safe).framed)continue;const score=dot(back,desired[2])*.7+dot(back,orient[2])*.3;if(score>best){best=score;chosen=b;alternate=true;}}}
- let next=mode===2||transition||alternate||rotationAngle(orient,desired)>.06?blendBasis(orient,chosen,damp(10,h),1.7*h):chosen;
+ const contactProbe=world.ray(s.p,mul(localUp,-1),.024),onSurface=!!contactProbe&&contactProbe.distance<=.024;
+ const acceptable=(b,q)=>q.safe>=want*.76&&extent(b,q.safe).framed&&(!onSurface||dot(b[2],localUp)>=.24);
+ const need=requested.safe<want*.90||(onSurface&&dot(desired[2],localUp)<.32);
+ if(need){let best=-Infinity;const dirs=[orient[2],localUp];for(const t of [.12,.24,.4,.6,.8,1,1.5,2,3])for(const shift of [0,.3,-.3,.65,-.65]){dirs.push(unit(add(orient[2],add(mul(localUp,t),mul(localF,shift))),localUp));dirs.push(unit(add(desired[2],add(mul(localUp,t),mul(localF,shift))),localUp));}for(const back of dirs){const b=aligned(back),q=sight(b);if(!acceptable(b,q))continue;const score=dot(back,desired[2])*.22+dot(back,orient[2])*.78;if(score>best){best=score;chosen=b;alternate=true;}}}
+ let next;
+ if(!initializedView){next=chosen;initializedView=true;}
+ else if(mode===2||transition||alternate||recoveringView)next=blendBasis(orient,chosen,damp(12,h),1.7*h);
+ else next=chosen;
+ recoveringView=alternate||rotationAngle(next,desired)>.004;
  let clear=sight(next),emergency=false;
- if(alternate&&(!extent(next,clear.safe).framed||clear.safe<.085)){next=chosen;clear=sight(next);emergency=true;}
- orient=next;if(rotationAngle(orient,desired)<.004)transition=false;
+  orient=next;if(rotationAngle(orient,desired)<.004)transition=false;
  const [right,vertical,back]=orient;
  const hit=clear.hit,safe=Math.max(.007,clear.safe);
  if(hit){blockedFor+=rawDt;recovery=0;}else{if(obstructedLast)recovery=0;else recovery+=rawDt;blockedFor=0;}
