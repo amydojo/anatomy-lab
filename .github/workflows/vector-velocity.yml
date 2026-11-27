@@ -28,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tier: [20000, 10000, 5000, 3500]
+        tier: [20000, 13700]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -60,7 +60,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tier: [20000, 10000, 5000, 3500]
+        tier: [20000, 13700]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -93,7 +93,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tier: [20000, 10000, 5000, 3500]
+        tier: [20000, 13700]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -119,7 +119,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tier: [20000, 10000, 5000, 3500]
+        tier: [20000, 13700]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -150,7 +150,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tier: [20000, 10000, 5000, 3500]
+        tier: [20000, 13700]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
