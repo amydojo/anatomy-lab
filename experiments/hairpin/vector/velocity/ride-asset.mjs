@@ -37,7 +37,7 @@ export function createRideAsset(boardAPI){
   setQuality(q){quality=q==='performance'?'performance':'full';},
   fail(msg){active=false;error=String(msg);},
   reset(){original.reset();kinetic.reset();},
-  update(state,base,dt){const a=original.update(state,base,dt),v=kinetic.update(state,base,dt);return active?{...v,vehicle:{...v.vehicle,vector:true,quality}}:a;},
+  update(state,base,dt){const a=original.update(state,base,dt),v=kinetic.update(state,base,dt,{hover:.00035});return active?{...v,vehicle:{...v.vehicle,vector:true,quality}}:a;},
   report(){return {active,pending,loaded:!!parts,quality,error,origin,sha256:parts?VECTOR_SHA:null};},
   dispose(){generation++;pending=false;active=false;if(parts)closeVelocity(parts);parts=null;origin=null;}
  };
