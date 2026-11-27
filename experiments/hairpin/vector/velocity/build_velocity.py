@@ -7,7 +7,7 @@ from mathutils.bvhtree import BVHTree
 args=sys.argv[sys.argv.index('--')+1:]
 def arg(k):return args[args.index('--'+k)+1]
 src=os.path.abspath(arg('source'));out=os.path.abspath(arg('out'));os.makedirs(out,exist_ok=True)
-tier=int(arg('tier'));assert tier in (20000,10000,5000,3500)
+tier=int(arg('tier'));assert tier in (20000,13700,10000,5000,3500)
 def sha(p):return hashlib.sha256(open(p,'rb').read()).hexdigest()
 assert sha(src)=='1758f93d990ce18a2b962653457912a3dcf87d7b4431f0291b8b4fd0a20c66e9'
 bpy.ops.wm.open_mainfile(filepath=src);scene=bpy.context.scene
