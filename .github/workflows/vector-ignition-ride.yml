@@ -6,6 +6,8 @@ on:
       - 'assets/atlas/atlas-renderer.js'
       - 'assets/atlas/atlas-controller.js'
       - 'assets/atlas/marrow.js'
+      - 'assets/atlas/marrow-surface.js'
+      - 'tests/afterglow-camera.test.mjs'
       - 'play/index.html'
       - 'experiments/hairpin/vector/velocity/ride-asset.mjs'
       - 'tests/velocity-ride.spec.mjs'
@@ -39,7 +41,7 @@ jobs:
       - run: echo 'e64ef983520090af7b07b2e3f67e6fc365a615b17d5ba457faf2039f3920fb66  candidate/VECTOR-005-VELOCITY-20000.glb' | sha256sum -c -
       - run: node --check assets/atlas/atlas-renderer.js && node --check assets/atlas/atlas-controller.js && node --check assets/atlas/marrow.js && node --check experiments/hairpin/vector/velocity/ride-asset.mjs
       - run: npm install --no-audit --no-fund
-      - run: node --test tests/marrow-board.test.mjs tests/marrow-gyro.test.mjs tests/marrow-ride.test.mjs tests/marrow-surface.test.mjs
+      - run: node --test tests/marrow-board.test.mjs tests/marrow-gyro.test.mjs tests/marrow-ride.test.mjs tests/marrow-surface.test.mjs tests/afterglow-camera.test.mjs
       - if: ${{ !cancelled() }}
         run: VELOCITY_CANDIDATE="$PWD/candidate/VECTOR-005-VELOCITY-20000.glb" npx playwright test tests/velocity-ride.spec.mjs --project=${{ matrix.project }} --workers=1
       - if: always()
