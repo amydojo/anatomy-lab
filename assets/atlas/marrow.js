@@ -93,7 +93,7 @@ function mountVectorControls(){
  if(!vectorRequested||!active||inspection||terrainReview||!rideAsset?.active||!Array.isArray(rows)||rows.length<2||rows.length>120)return false;
  const ctx=api.context(),ids=new Set(ctx.parts.map(p=>p.id));
  if(rows.some(q=>!ids.has(q.id)||!q.poses?.legacy||!q.poses?.adaptive||!['p','n','f','frame','v'].every(k=>Array.isArray(q[k])&&q[k].length===3&&q[k].every(Number.isFinite))))return false;
- terrainReview={rows:rows.slice(),mode:mode==='legacy'?'legacy':'adaptive',flow:!!options.flow,slipstream:!!options.slipstream,view:options.view==='side'?'side':'chase',rig:null,elapsed:0,index:0,saved:{...ctx.camera,target:{...ctx.camera.target}}};resetReviewRig();
+ terrainReview={rows:rows.slice(),mode:options.slipstream&&['slipstream','slipstream-strict'].includes(mode)||options.flow&&!options.slipstream&&['constraint','compliant'].includes(mode)?mode:mode==='legacy'?'legacy':'adaptive',flow:!!options.flow,slipstream:!!options.slipstream,view:options.view==='side'?'side':'chase',rig:null,elapsed:0,index:0,saved:{...ctx.camera,target:{...ctx.camera.target}}};resetReviewRig();
  keys.clear();touch.clear();armed=false;const b=panel?.querySelector('[data-terrain-review]');if(b)b.textContent='Resume';return true;
  }
  function resetReviewRig(){const q=terrainReview;if(!q)return;const row=q.rows[0],state=row.states?.[q.mode]||row;q.rig=root.BodyMarrowSurface.rig(state,terrainWorld,q.flow?{mode:'CHASE',yaw:q.view==='side'?Math.PI/2:0}:{});q.elapsed=0;q.index=0;}
