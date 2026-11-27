@@ -86,6 +86,28 @@ jobs:
         with:
           name: couture-native-masters
           path: masters
+      - run: sudo apt-get update && sudo apt-get install -y blender
+      - name: Actual minimal CPU Cycles renders, no denoising
+        run: |
+          mkdir -p preflight
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/build_couture.py -- --mode preflight --candidate C01 --source masters/C01.blend --out preflight/candidate 2>&1 | tee preflight/candidate.log
+          test -s preflight/candidate/preflight.png
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: couture-render-preflight
+          path: preflight/
+          if-no-files-found: warn
+  transition-preflight:
+    needs: reopen
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: couture-native-masters
+          path: masters
       - uses: actions/download-artifact@v4
         with:
           name: vector-chromatic-candidate
@@ -96,15 +118,13 @@ jobs:
       - name: Actual minimal CPU Cycles renders, no denoising
         run: |
           mkdir -p preflight
-          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/build_couture.py -- --mode preflight --candidate C01 --source masters/C01.blend --out preflight/candidate 2>&1 | tee preflight/candidate.log
           blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/transition.py -- --source source/VECTOR-005-AFTERBURN-0042-master.blend --compact masters/C03.blend --out preflight/transition --preflight 2>&1 | tee preflight/transition.log
-          test -s preflight/candidate/preflight.png
           test -s preflight/transition/frame-0000.png
           test -s preflight/transition/frame-0048.png
       - if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: couture-render-preflight
+          name: couture-transition-preflight
           path: preflight/
           if-no-files-found: warn
   render:
@@ -160,7 +180,7 @@ jobs:
           path: board/
           if-no-files-found: error
   transition:
-    needs: preflight
+    needs: transition-preflight
     runs-on: ubuntu-24.04
     timeout-minutes: 55
     steps:
