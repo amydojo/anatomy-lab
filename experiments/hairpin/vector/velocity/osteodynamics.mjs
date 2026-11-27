@@ -57,27 +57,62 @@ export function translatePose(pose,axis,lift){
  const delta=mul(axis,lift),shift=q=>({...q,t:add(q.t,delta)});
  const out=shift(pose);for(const name of ['front','rear','frontPod','rearPod'])if(pose[name])out[name]=shift(pose[name]);return out;
 }
+// Common rigid-body correction: preserves every qualified relative assembly
+// transform exactly. This is NOT a new hinge or an authoritative force.
+const TILT_MAX=.12,TILT_RATE=.50;
+const rotate=(v,w)=>{const a=len(w);if(a<1e-9)return v.slice();const k=mul(w,1/a);return add(add(mul(v,Math.cos(a)),mul(cross(k,v),Math.sin(a))),mul(k,dot(k,v)*(1-Math.cos(a))));};
+const approach=(a,b,max)=>{const d=sub(b,a),m=len(d);return m<=max?b.slice():add(a,mul(d,max/m));};
+export function alignPose(pose,rotation,offset){
+ const pivot=pose.t,shift=q=>({...q,t:add(add(pivot,rotate(sub(q.t,pivot),rotation)),offset),r:[0,3,6].flatMap(k=>rotate(q.r.slice(k,k+3),rotation))});
+ const out=shift(pose);for(const name of ['front','rear','frontPod','rearPod'])if(pose[name])out[name]=shift(pose[name]);return out;
+}
+function podImbalance(m){const a=m.pods.frontPod.minGap,b=m.pods.rearPod.minGap;return a===null||b===null?null:Math.abs(a-b);}
+function desiredTilt(m,pose){
+ const find=label=>m.probes.find(q=>q.label===label&&q.valid),front=find('frontPod-center'),rear=find('rearPod-center');
+ if(!front||!rear||!m.center.valid||m.supportRatio<.80)return [0,0,0];
+ const r=pose.r.slice(0,3),f=pose.r.slice(6,9),dz=dot(sub(front.point,rear.point),f);
+ let pitch=Math.abs(dz)>.015?clamp((front.gap-rear.gap)/dz,-.10,.10):0;
+ const roll=[];
+ for(const side of ['frontPod','rearPod']){const a=find(side+'-left'),b=find(side+'-right');if(!a||!b)continue;const dx=dot(sub(b.point,a.point),r);if(Math.abs(dx)>.004)roll.push(clamp(-(b.gap-a.gap)/dx,-.08,.08));}
+ const bank=roll.length?roll.reduce((a,b)=>a+b,0)/roll.length:0,w=add(mul(r,pitch),mul(f,bank)),l=len(w);
+ return l>TILT_MAX?mul(w,TILT_MAX/l):w;
+}
 export function createTerrainInterpreter(world,boardAPI){
- let cachedParts=null,foot=null,elapsed=1,lift=0,target=0,last=null,axis=UP.slice(),cpu=[],samples=0,rayCount=0,previous=null,acceleration=null,jerk=null;
- return {reset(){cachedParts=null;foot=null;elapsed=1;lift=target=0;last=null;cpu=[];samples=rayCount=0;previous=null;acceleration=jerk=null;},update(state,pose,parts,dt,adaptive=false,enabled=true){
-  dt=clamp(dt,0,.1);if(parts!==cachedParts){cachedParts=parts;foot=footprint(parts);elapsed=1;lift=target=0;last=null;}
+ let cachedParts=null,foot=null,elapsed=1,offset=[0,0,0],rotation=[0,0,0],targetOffset=[0,0,0],targetRotation=[0,0,0],last=null,cpu=[],samples=0,rayCount=0,previous=null,acceleration=null,jerk=null,appliedLift=0,appliedTilt=0;
+ return {reset(){cachedParts=null;foot=null;elapsed=1;offset=rotation=targetOffset=targetRotation=[0,0,0];last=null;cpu=[];samples=rayCount=0;previous=null;acceleration=jerk=null;appliedLift=appliedTilt=0;},update(state,pose,parts,dt,adaptive=false,enabled=true){
   if(!enabled)return pose;
+  dt=clamp(dt,0,.1);if(parts!==cachedParts){cachedParts=parts;foot=footprint(parts);elapsed=1;offset=rotation=targetOffset=targetRotation=[0,0,0];last=null;}
   const speed=len(state.v||[0,0,0]);elapsed+=dt;
+  // 8–20 Hz sample clock, with a bounded number of probes. Reuse the same BVH.
   const interval=(cpu.at(-1)||0)>3?.125:speed>.08?1/20:1/12;
-  if(state.glide||!state.ground){target=0;last=null;elapsed=1;}
+  if(state.glide||!state.ground){targetOffset=targetRotation=[0,0,0];last=null;elapsed=1;}
   else if(elapsed>=interval){const start=performance.now(),before=world.stats?.().calls||0;elapsed=0;
-   const m=measure(world,state,pose,foot,boardAPI);axis=m.normal;
-   // Only use coherent, actual same-structure support; never infer missing ground.
-   const requested=m.center.valid&&m.supportRatio>=.55&&m.minGap!==null?clamp(.0012-m.minGap,0,LIFT_MAX):0;
-   let ceiling=requested;
-   if(requested>0)for(const q of foot.top){const point=apply(boardAPI.transform(q.id,pose),q.local),hit=world.ray(add(point,mul(axis,.0003)),axis,requested+.0013);if(hit)ceiling=Math.min(ceiling,Math.max(0,hit.distance-.001));}
-   target=ceiling;last={...m,requestedLift:requested,allowedLift:ceiling,probeCount:foot.probes.length,overheadLimited:ceiling+1e-9<requested,step:state.steps??null};samples++;rayCount+=(world.stats?.().calls||0)-before;
+   const m=measure(world,state,pose,foot,boardAPI),axis=m.normal;
+   let tilt=adaptive?desiredTilt(m,pose):[0,0,0],candidate=pose,trial=m,reason='no-correction';
+   if(len(tilt)>1e-5){candidate=alignPose(pose,tilt,[0,0,0]);trial=measure(world,state,candidate,foot,boardAPI);
+    const beforeGap=podImbalance(m),afterGap=podImbalance(trial);
+    // Reject changes that lose measured support, worsen penetration, or do not
+    // improve the measured differential support. Sparse probe proxy only.
+    if(trial.supportRatio<m.supportRatio||trial.minGap===null||trial.minGap<Math.min(.0012,m.minGap??.0012)||beforeGap===null||afterGap===null||afterGap>=beforeGap-.00005){tilt=[0,0,0];candidate=pose;trial=m;reason='tilt-rejected';}else reason='tilt-qualified-samples';
+   }
+   const requested=trial.center.valid&&trial.supportRatio>=.55&&trial.minGap!==null?clamp(.0012-trial.minGap,0,LIFT_MAX):0;
+   let ceiling=requested,blocked=false;
+   if(requested>0||len(tilt)>1e-5)for(const q of foot.top){
+    const original=apply(boardAPI.transform(q.id,pose),q.local),point=apply(boardAPI.transform(q.id,candidate),q.local),delta=sub(point,original),d=len(delta);
+    if(d>1e-6&&world.ray(original,unit(delta),d+.0005)){blocked=true;break;}
+    if(requested>0){const hit=world.ray(add(point,mul(axis,.0003)),axis,requested+.0013);if(hit)ceiling=Math.min(ceiling,Math.max(0,hit.distance-.001));}
+   }
+   if(blocked){tilt=[0,0,0];ceiling=0;trial=m;reason='overhead-motion-blocked';}
+   targetOffset=mul(axis,ceiling);targetRotation=tilt;
+   last={...m,requestedLift:requested,allowedLift:ceiling,requestedTilt:len(tilt),trialMinGap:trial.minGap,trialPodImbalance:podImbalance(trial),baselinePodImbalance:podImbalance(m),correctionReason:reason,probeCount:foot.probes.length,overheadLimited:blocked||ceiling+1e-9<requested,step:state.steps??null};samples++;rayCount+=(world.stats?.().calls||0)-before;
    cpu.push(performance.now()-start);if(cpu.length>240)cpu.shift();
   }
   if(previous&&dt>0){const a=mul(sub(state.v||[0,0,0],previous),1/dt);jerk=acceleration?len(sub(a,acceleration))/dt:null;acceleration=a;}previous=(state.v||[0,0,0]).slice();
-  const desired=adaptive?target:0;
-  // Clear the cosmetic offset in flight; while grounded use bounded, nonoscillatory slew.
-  lift=state.glide||!state.ground?0:lift+clamp(desired-lift,-LIFT_RATE*dt,LIFT_RATE*dt);
-  return lift>0?translatePose(pose,axis,lift):pose;
- },report(){const a=cpu.slice().sort((x,y)=>x-y);return {samples,rayCount,cpuMs:{median:a[Math.floor(a.length*.5)]??null,p95:a[Math.floor(a.length*.95)]??null},lift,target,acceleration:acceleration?len(acceleration):null,jerk,last};}};
+  // Rate-limited world-space corrections, never change authoritative state.
+  // Legacy is exact; flight does not use terrain-derived offset.
+  if(!adaptive||state.glide||!state.ground){offset=rotation=[0,0,0];}
+  else{offset=approach(offset,targetOffset,LIFT_RATE*dt);rotation=approach(rotation,targetRotation,TILT_RATE*dt);}
+  appliedLift=len(offset);appliedTilt=len(rotation);
+  return appliedLift>1e-9||appliedTilt>1e-9?alignPose(pose,rotation,offset):pose;
+ },report(){const a=cpu.slice().sort((x,y)=>x-y);return {samples,rayCount,cpuMs:{median:a[Math.floor(a.length*.5)]??null,p95:a[Math.floor(a.length*.95)]??null},lift:appliedLift,tilt:appliedTilt,target:len(targetOffset),targetTilt:len(targetRotation),acceleration:acceleration?len(acceleration):null,jerk,last};}};
 }
