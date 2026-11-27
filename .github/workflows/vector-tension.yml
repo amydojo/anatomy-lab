@@ -1,0 +1,92 @@
+name: VECTOR TENSION front master and proofs
+on:
+  pull_request:
+    branches: ['experiment/marrow-001']
+    paths:
+      - 'experiments/hairpin/vector/tension/**'
+      - '.github/workflows/vector-tension.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  master:
+    if: github.head_ref == 'experiment/marrow-hairpin-001' || github.ref_name == 'experiment/marrow-hairpin-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-exoskeleton-master
+          run-id: 45922028710
+          github-token: ${{ github.token }}
+          path: frozen
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/tension/build_tension.py -- --source frozen/VECTOR-005-EXOSKELETON-master.blend --out tension-output
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vector-tension-front-master
+          path: tension-output/
+  geometry:
+    needs: master
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-tension-front-master
+          path: tension-output
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/tension/qualify_tension.py -- --master tension-output/VECTOR-005-TENSION-front.blend --out tension-geometry.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-tension-geometry
+          path: tension-geometry.json
+          if-no-files-found: warn
+  proofs:
+    needs: master
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - edition: after
+            mode: clay
+          - edition: after
+            mode: zebra
+          - edition: before
+            mode: zebra
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-tension-front-master
+          path: tension-output
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-exoskeleton-master
+          run-id: 45922028710
+          github-token: ${{ github.token }}
+          path: frozen
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-vertical-front-clay
+          run-id: 45922268509
+          github-token: ${{ github.token }}
+          path: baseline
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
+      - name: Matched actual Blender proof
+        run: |
+          asset=tension-output/VECTOR-005-TENSION-front.blend
+          if [ "${{ matrix.edition }}" = before ]; then asset=frozen/VECTOR-005-EXOSKELETON-master.blend; fi
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/tension/render_tension.py -- --master "$asset" --baseline baseline/exoskeleton-proof-report.json --edition ${{ matrix.edition }} --mode ${{ matrix.mode }} --out proof-output
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-tension-${{ matrix.edition }}-${{ matrix.mode }}
+          path: proof-output/
+          if-no-files-found: warn
