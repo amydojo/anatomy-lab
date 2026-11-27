@@ -157,17 +157,27 @@ def semantic_object(role):
     return found[0]
 def audit():
     bpy.context.view_layer.update();items=[];allv=[]
+    roles=('body','moving_leaf','axle','fixed_ear_negative','fixed_ear_positive','release_axis')
+    resolved={k:semantic_object(k) for k in roles}
+    axis=resolved['release_axis'].matrix_world.translation
+    def cylindrical(o):
+        _,v,_=topology(o);r=[math.hypot(p.x-axis.x,p.z-axis.z) for p in v];y=[p.y-axis.y for p in v];return r,y
+    ar,ay=cylindrical(resolved['axle']);shaft=[q for q,y in zip(ar,ay) if abs(y)<=4.2001 and q<1.2];heads=[q for q,y in zip(ar,ay) if abs(y)>4.2001]
+    bore={}
+    for role in roles[1:2]+roles[3:5]:
+        rr,yy=cylindrical(resolved[role]);bore[role]={'minSampledVertexRadiusMm':min(rr),'axialExtentMm':[min(yy),max(yy)]}
+    hardware={'shaftSampledMaxRadiusMm':max(shaft) if shaft else None,'headSampledMaxRadiusMm':max(heads) if heads else None,'axleAxialExtentMm':[min(ay),max(ay)],'boreVertexSamples':bore,'retentionQualified':False,'note':'Vertex-radius samples only; no swept-solid fit, axial pullout, force, tolerance or assembly proof.'}
     for o in bpy.context.scene.objects:
         if o.type!='MESH':continue
         st,v,f=topology(o);allv+=v;items.append((o,st,v,BVHTree.FromPolygons(v,f,all_triangles=True)))
     pairs=[]
     for (a,_,av,at),(b,_,bv,bt) in itertools.combinations(items,2):
-        hits=len(at.overlap(bt));dist=min([bt.find_nearest(p)[3] for p in av]+[at.find_nearest(p)[3] for p in bv])
+        overlaps=at.overlap(bt);hits=len(overlaps);dist=min([bt.find_nearest(p)[3] for p in av]+[at.find_nearest(p)[3] for p in bv])
         pairs.append({'a':a.name,'b':b.name,'roleA':semantic_id(a),'roleB':semantic_id(b),'surfaceTrianglePairs':hits,'sampledVertexSurfaceMm':dist})
     body=next(st for o,st,v,t in items if semantic_id(o)=='body')
     assert body['connected_components']==1 and body['nonmanifold_edges']==0
     leaf=next(st for o,st,v,t in items if semantic_id(o)=='moving_leaf')
-    return {'bounds_mm':[max(v[i] for v in allv)-min(v[i] for v in allv) for i in range(3)],'parts':{o.name:st for o,st,v,t in items},'pairs':pairs,'leafUnionQualified':leaf['connected_components']==1 and leaf['nonmanifold_edges']==0,'mechanicalQualification':False}
+    return {'bounds_mm':[max(v[i] for v in allv)-min(v[i] for v in allv) for i in range(3)],'parts':{o.name:st for o,st,v,t in items},'pairs':pairs,'leafUnionQualified':leaf['connected_components']==1 and leaf['nonmanifold_edges']==0,'mechanicalQualification':False,'semanticRoles':{k:o.name for k,o in resolved.items()},'hardware':hardware}
 def sphere(name,loc,scale,m):
     bpy.ops.mesh.primitive_uv_sphere_add(segments=64,ring_count=32,location=loc);o=bpy.context.object;o.name=name;o.scale=scale;o.data.materials.append(m)
     for p in o.data.polygons:p.use_smooth=True
@@ -233,7 +243,7 @@ else:
             a=audit();hits=[x for x in a['pairs'] if x['surfaceTrianglePairs']]
             intended=[x for x in hits if ('body' in (x['roleA'],x['roleB']) and any(str(q).startswith('fixed_ear') for q in (x['roleA'],x['roleB'])))]
             # Classification is proposed by named fixed mating interface only, not spatially validated.
-            samples.append({'degrees':deg,'leafMatrix':[list(row) for row in semantic_object('moving_leaf').matrix_world],'allOverlaps':hits,'proposedFixedRootMates':intended,'unclassified':[x for x in hits if x not in intended],'leafUnionQualified':a['leafUnionQualified']})
+            samples.append({'degrees':deg,'leafMatrix':[list(row) for row in semantic_object('moving_leaf').matrix_world],'allOverlaps':hits,'proposedFixedRootMates':intended,'unclassified':[x for x in hits if x not in intended],'leafUnionQualified':a['leafUnionQualified'],'hardware':a['hardware']})
         result={'samples':samples,'shaftRadiusMm':1,'boreRadiusMm':1.15,'headRadiusMm':1.55,'earOuterYmm':4.0,'headInnerYmm':4.2,'nominalRadialClearanceMm':.15,'nominalAxialGapMm':.2,'retentionQualified':False,'limitations':'Sampled surface overlap, no swept-solid, contact force, axial extraction or assembly proof. Fixed-root contacts proposed but not locally qualified.'}
         (out/'sweep.json').write_text(json.dumps(result,indent=2))
     elif mode=='open-render':render(s,'open-mechanism',(-45,-80,-110),(-37,0,-5),80)
