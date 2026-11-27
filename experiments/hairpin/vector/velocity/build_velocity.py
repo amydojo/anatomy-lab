@@ -159,6 +159,7 @@ for hi in high:bpy.data.objects.remove(hi,do_unlink=True)
 # unchanged complete-vehicle gate runs against this saved geometry.
 dest=os.path.join(out,'VECTOR-005-VELOCITY-'+str(tier)+'.blend')
 bpy.ops.wm.save_as_mainfile(filepath=dest);report['masterSha256']=sha(dest)
+json.dump(report,open(os.path.join(out,'reduction.json'),'w'),indent=2)
 # Join by assembly ONLY after saving the individual qualification meshes.
 joined=[]
 # Blender join destroys the absorbed RNA objects. Partition before any join,
