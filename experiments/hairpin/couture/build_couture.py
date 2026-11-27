@@ -1,7 +1,7 @@
 """COUTURE 001: editable millimetre-scale industrial design studies.
 Run Blender background with -- --out <directory>. No riding asset edits.
 """
-import bpy, math, json, sys, os
+import bpy, math, json, sys, os, hashlib, itertools
 from mathutils import Vector, Matrix
 from mathutils.bvhtree import BVHTree
 from pathlib import Path
@@ -83,32 +83,83 @@ def studio():
     for name,loc,power,size in [('Key',(-30,-75,105),85000,90),('Strip',(45,65,70),70000,70),('Rim',(0,-10,-80),30000,65)]:
         d=bpy.data.lights.new(name,'AREA');d.energy=power;d.shape='RECTANGLE';d.size=size;d.size_y=size*.27
         o=bpy.data.objects.new(name,d);s.collection.objects.link(o);o.location=loc;o.rotation_euler=(-o.location).to_track_quat('-Z','Y').to_euler()
-    s.render.engine='CYCLES';s.cycles.samples=20;s.cycles.use_denoising=True;s.render.resolution_x=1000;s.render.resolution_y=700;s.render.resolution_percentage=100;s.render.image_settings.file_format='PNG'
+    s.render.engine='CYCLES';s.cycles.device='CPU';s.cycles.samples=48;s.cycles.use_denoising=False;s.render.resolution_x=1000;s.render.resolution_y=700;s.render.resolution_percentage=100;s.render.image_settings.file_format='PNG'
+    for layer in s.view_layers:layer.cycles.use_denoising=False
+    s.render.threads_mode='FIXED';s.render.threads=4
     return s
 def render(s,cam,loc,path,scale=155,target=(0,0,0)):
     cam.location=loc;cam.rotation_euler=(Vector(target)-cam.location).to_track_quat('-Z','Y').to_euler();cam.data.ortho_scale=scale;s.render.filepath=str(path);bpy.ops.render.render(write_still=True)
-report={}
-for code in ('C01','C02','C03'):
-    parts,clasp=make(code);s=studio();cam=camera(s,(35,-80,130))
-    report[code]=evidence(parts)
-    bpy.ops.wm.save_as_mainfile(filepath=str(out/(code+'.blend')))
-    for label,loc in [('hero',(30,-80,130)),('top',(0,0,150)),('side',(0,-150,0)),('reverse',(-45,95,110))]:
-        render(s,cam,loc,out/(code+'-'+label+'.png'))
-    render(s,cam,(-60,-55,100),out/(code+'-detail.png'),45,(-40 if code!='C03' else 34,0,3))
-    if clasp:
-        base=clasp.matrix_world.copy();pivot=Vector((-40,0,-2.7));samples=[]
-        for degrees in range(0,76,5):
-            clasp.matrix_world=Matrix.Translation(pivot)@Matrix.Rotation(math.radians(degrees),4,'Y')@Matrix.Translation(-pivot)@base
-            samples.append({'degrees':degrees,**evidence(parts)})
-        report[code]['clasp_samples']=samples
-        render(s,cam,(30,-85,75),out/(code+'-clasp-open.png'))
-        bpy.ops.wm.save_as_mainfile(filepath=str(out/(code+'-open.blend')))
-        clasp.matrix_world=base
-    # Deliberately approximate head envelope: not human-fit evidence.
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=48,ring_count=24,location=(0,0,-100))
-    head=bpy.context.object;head.name='REFERENCE ONLY — assumed 160 x 190 x 220 mm head envelope';head.scale=(80,95,100)
-    material=bpy.data.materials.new('Neutral reference');material.diffuse_color=(.23,.23,.23,1);head.data.materials.append(material)
-    render(s,cam,(80,-230,190),out/(code+'-head-envelope.png'),270,(0,0,-45))
-    bpy.data.objects.remove(head,do_unlink=True)
-    (out/'candidate-evidence.json').write_text(json.dumps(report,indent=2))
-print(json.dumps(report))
+
+def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def audit(parts):
+    bpy.context.view_layer.update()
+    items=[]
+    for o in parts:
+        v,f=evaluated(o)
+        items.append((o,v,BVHTree.FromPolygons(v,f,all_triangles=False)))
+    pairs=[]
+    for (a,av,at),(b,bv,bt) in itertools.combinations(items,2):
+        hits=len(at.overlap(bt))
+        # Bidirectional vertex-to-surface distances: sampled upper bound, not exact solid clearance.
+        dist=min([bt.find_nearest(v)[3] for v in av]+[at.find_nearest(v)[3] for v in bv])
+        pairs.append({'a':a.name,'b':b.name,'surfaceOverlapPairs':hits,'sampledVertexSurfaceDistanceMm':round(dist,5),'state':'surface_intersection' if hits else 'no_sampled_surface_intersection','mechanicalConnectionEstablished':False})
+    return {**evidence(parts),'pairs':pairs,'objects':[{'name':o.name,'vertices':len(v),'parent':o.parent.name if o.parent else None,'constraints':len(o.constraints)} for o,v,t in items],'limitations':'No hinge pin, fastening, bonding, containment or structural tests. Nonintersection is not proof of separation; distance is sampled, not exact clearance.'}
+def configure(s,samples):
+    s.render.engine='CYCLES';s.cycles.device='CPU';s.cycles.samples=samples;s.cycles.use_denoising=False
+    for l in s.view_layers:l.cycles.use_denoising=False
+    s.render.threads_mode='FIXED';s.render.threads=4
+def arg(k,default=None):return sys.argv[sys.argv.index('--'+k)+1] if '--'+k in sys.argv else default
+mode=arg('mode','generate');code=arg('candidate')
+if mode=='generate':
+    for code in ('C01','C02','C03'):
+        parts,clasp=make(code);s=studio();cam=camera(s,(35,-80,130))
+        bpy.ops.wm.save_as_mainfile(filepath=str(out/(code+'.blend')))
+        if clasp:
+            base=clasp.matrix_world.copy();pivot=Vector((-40,0,-2.7))
+            clasp.matrix_world=Matrix.Translation(pivot)@Matrix.Rotation(math.radians(75),4,'Y')@Matrix.Translation(-pivot)@base
+            bpy.context.view_layer.update()
+            bpy.ops.wm.save_as_mainfile(filepath=str(out/(code+'-open.blend')))
+elif mode in ('reopen','render','preflight'):
+    source=Path(arg('source')).resolve()
+    bpy.ops.wm.open_mainfile(filepath=str(source))
+    s=bpy.context.scene;cam=s.camera
+    parts=[o for o in s.objects if o.type=='MESH']
+    assert len(parts)=={'C01':3,'C02':4,'C03':5}[code] and cam
+    assert abs(s.unit_settings.scale_length-.001)<1e-8
+    clasp=next((o for o in parts if 'deployant leaf' in o.name),None)
+    configure(s,48)
+    if mode=='reopen':
+        report={'masterSha256':sha(source),'candidate':code,**audit(parts)}
+        if clasp:
+            base=clasp.matrix_world.copy();p=Vector((-40,0,-2.7));samples=[]
+            for deg in range(0,76,5):
+                clasp.matrix_world=Matrix.Translation(p)@Matrix.Rotation(math.radians(deg),4,'Y')@Matrix.Translation(-p)@base
+                samples.append({'degrees':deg,**evidence(parts)})
+            clasp.matrix_world=base;report['clasp_samples']=samples
+        (out/(code+'-reopen.json')).write_text(json.dumps(report,indent=2))
+    elif mode=='preflight':
+        configure(s,8);s.render.resolution_x=320;s.render.resolution_y=224
+        render(s,cam,(30,-80,130),out/'preflight.png')
+        assert (out/'preflight.png').stat().st_size>1000
+        (out/'preflight.json').write_text(json.dumps({'blender':bpy.app.version_string,'samples':8,'denoising':False,'imageSha256':sha(out/'preflight.png'),'masterSha256':sha(source)},indent=2))
+    else:
+        report=audit(parts)
+        # Fixed matched camera scale and neutral lighting across all three candidates.
+        for label,loc in [('hero',(30,-80,130)),('top',(0,0,150)),('side',(0,-150,0)),('reverse',(-45,95,110))]:
+            render(s,cam,loc,out/(code+'-'+label+'.png'))
+        render(s,cam,(-60,-55,100),out/(code+'-detail.png'),45,(-40 if code!='C03' else 34,0,3))
+        if clasp:
+            render(s,cam,(30,-85,75),out/(code+'-clasp-closed.png'))
+            base=clasp.matrix_world.copy();p=Vector((-40,0,-2.7))
+            clasp.matrix_world=Matrix.Translation(p)@Matrix.Rotation(math.radians(75),4,'Y')@Matrix.Translation(-p)@base
+            render(s,cam,(30,-85,75),out/(code+'-clasp-open.png'))
+            clasp.matrix_world=base
+        # A tangent placement on assumed ellipsoid, not hair or validated fit.
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=48,ring_count=24,location=(0,0,-100))
+        head=bpy.context.object;head.name='REFERENCE ONLY — 160 x 190 x 200 mm ellipsoid';head.scale=(80,95,100)
+        m=bpy.data.materials.new('Neutral reference');m.use_nodes=True;m.node_tree.nodes.get('Principled BSDF').inputs['Base Color'].default_value=(.12,.12,.12,1);m.node_tree.nodes.get('Principled BSDF').inputs['Roughness'].default_value=.65;head.data.materials.append(m)
+        for poly in head.data.polygons:poly.use_smooth=True
+        render(s,cam,(80,-230,190),out/(code+'-head-envelope.png'),270,(0,0,-45))
+        report['sourceSha256']=sha(source);report['renderSamples']=48;report['denoising']=False
+        (out/(code+'-render-evidence.json')).write_text(json.dumps(report,indent=2))
+else:raise ValueError(mode)
