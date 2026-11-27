@@ -1,0 +1,43 @@
+name: HAIRPIN COUTURE GENESIS
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - 'experiments/hairpin/couture/genesis_*.py'
+      - '.github/workflows/hairpin-genesis.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  conditioning:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: morphogenesis-endpoint-clay
+          run-id: 46046310819
+          github-token: ${{ github.token }}
+          path: baseline
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-candidate
+          run-id: 45946040601
+          github-token: ${{ github.token }}
+          path: source
+      - run: sudo apt-get update && sudo apt-get install -y blender python3-numpy python3-scipy python3-shapely
+      - run: python3 -m py_compile experiments/hairpin/couture/genesis_*.py
+      - name: Actual native source and conditioned mesh reopening
+        run: |
+          mkdir -p proof
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/genesis_reopen.py -- --baseline baseline/preflight --source source/VECTOR-005-AFTERBURN-0042-master.blend --out proof 2>&1 | tee proof/reopen.log
+          python3 -c "import json; assert json.load(open('proof/qualification.json'))['endpointPass']"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-conditioned-reopen
+          path: proof/
+          if-no-files-found: warn
