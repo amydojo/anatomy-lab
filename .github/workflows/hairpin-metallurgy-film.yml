@@ -43,10 +43,11 @@ jobs:
           mkdir -p proof
           OPENBLAS_NUM_THREADS=1 blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/metallurgy_regional_film.py -- --baseline baseline --inspection inspection --bridge bridge --mode ${{ matrix.treatment }} --out proof 2>&1 | tee proof/film.log
           python3 -c "import json; r=json.load(open('proof/regional-ritual-gate.json')); assert r['bridge']['fullPass'] and r['tension']['fullPass'] and r['renderedFrames']==101"
-          ffmpeg -v error -framerate 16 -i proof/frame-%04d.png -i proof/regional.wav -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -movflags +faststart proof/forward.mp4
+          ffmpeg -v error -framerate 16 -i proof/frame-%04d.png -i proof/regional.wav -vf 'pad=ceil(iw/2)*2:ceil(ih/2)*2:0:0' -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -movflags +faststart proof/forward.mp4
           ffmpeg -v error -i proof/forward.mp4 -vf reverse -af areverse -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -movflags +faststart proof/reverse.mp4
-          ffprobe -v error -show_streams -show_format -of json proof/forward.mp4 > proof/video-report.json
-          python3 -c "import json; s=json.load(open('proof/video-report.json'))['streams']; assert int(next(x for x in s if x['codec_type']=='video')['nb_frames'])==101"
+          ffprobe -v error -count_frames -show_streams -show_format -of json proof/forward.mp4 > proof/video-report.json
+          ffprobe -v error -count_frames -show_streams -show_format -of json proof/reverse.mp4 > proof/reverse-video-report.json
+          python3 -c "import json; s=json.load(open('proof/video-report.json'))['streams']; assert int(next(x for x in s if x['codec_type']=='video')['nb_read_frames'])==101; t=json.load(open('proof/reverse-video-report.json'))['streams']; assert int(next(x for x in t if x['codec_type']=='video')['nb_read_frames'])==101"
       - if: always()
         uses: actions/upload-artifact@v4
         with:
