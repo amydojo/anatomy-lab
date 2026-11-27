@@ -187,24 +187,3 @@ bpy.ops.export_scene.gltf(filepath=os.path.abspath(os.path.join(out,'VECTOR-005-
 json.dump({'blender':bpy.app.version_string,'parts':stats,'masterTriangles':sum(x['masterTriangles'] for x in stats),'runtimeTriangles':sum(x['runtimeTriangles'] for x in stats),'qualification':'unapproved volumetric candidate; no texture bake or intersection certification'},open(os.path.join(out,'build-report.json'),'w'),indent=2)
 print('VECTOR_BUILD_REPORT',json.dumps(stats))
 
-# Reopen editable master for proof renders after GLB export.
-bpy.ops.wm.open_mainfile(filepath=os.path.abspath(os.path.join(out,'VECTOR-005-master.blend')))
-scene=bpy.context.scene
-# Render master in actual Blender; no generated concept image substituted.
-def camera(name,loc,target,ortho=None):
-    d=bpy.data.cameras.new(name);o=bpy.data.objects.new(name,d);scene.collection.objects.link(o);o.location=xyz(loc);o.rotation_euler=(Vector(xyz(target))-o.location).to_track_quat('-Z','Y').to_euler()
-    if ortho:d.type='ORTHO';d.ortho_scale=ortho
-    else:d.lens=55
-    return o
-def light(name,loc,power,size,color):
-    d=bpy.data.lights.new(name,'AREA');d.energy=power;d.shape='DISK';d.size=size;d.color=color;o=bpy.data.objects.new(name,d);scene.collection.objects.link(o);o.location=xyz(loc);o.rotation_euler=(-o.location).to_track_quat('-Z','Y').to_euler()
-light('Key softbox',(-38,65,38),65000,48,(.76,.87,1))
-light('Warm rim',(45,28,-45),55000,37,(1,.54,.25))
-light('Orchid rim',(-30,13,-42),24000,29,(1,.20,.52))
-light('Underside fill',(15,-40,25),36000,36,(.65,.75,1))
-scene.world.color=(.12,.12,.12)
-scene.render.engine='CYCLES';scene.cycles.samples=16;scene.cycles.use_denoising=True
-scene.render.resolution_x=800;scene.render.resolution_y=580;scene.render.resolution_percentage=100
-scene.render.image_settings.file_format='PNG'
-for name,loc,ortho in [('hero',(-82,56,105),None),('top',(0,125,.01),90),('side',(-125,0,0),90),('underside',(0,-125,.01),90),('front',(0,8,125),32),('rear',(0,8,-125),32)]:
-    scene.camera=camera(name,loc,(0,0,0),ortho);scene.render.filepath=os.path.abspath(os.path.join(out,name+'.png'));bpy.ops.render.render(write_still=True)
