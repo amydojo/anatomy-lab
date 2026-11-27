@@ -70,6 +70,14 @@ for lo,rec in zip(lows,records):lo.name=rec['name']
 # Save via a separate build stage below after baking; report now for recovery.
 report={'tier':tier,'sourceSha256':sha(src),'components':records,'triangles':sum(v['triangles'] for v in records),'vertices':sum(v['vertices'] for v in records),'limitations':'Quadric and same-material planar simplification; no exact preservation guarantee. Bidirectional vertex sampling, not continuous Hausdorff. All tiers require independent mechanical and visual qualification.'}
 json.dump(report,open(os.path.join(out,'reduction.json'),'w'),indent=2)
+if '--geometry-only' in args:
+    for hi in high:bpy.data.objects.remove(hi,do_unlink=True)
+    dest=os.path.join(out,'VECTOR-005-VELOCITY-'+str(tier)+'-geometry.blend')
+    bpy.ops.wm.save_as_mainfile(filepath=dest)
+    report['geometryMasterSha256']=sha(dest)
+    json.dump(report,open(os.path.join(out,'reduction.json'),'w'),indent=2)
+    print('VELOCITY_GEOMETRY',json.dumps({k:v for k,v in report.items() if k!='components'}),flush=True)
+    sys.exit(0)
 # UV packing: two 512x512 tiles across upper half, 32 128px tiles
 # in lower half. Actual smart-project charts within each padded tile.
 SIZE=1024;small=0
