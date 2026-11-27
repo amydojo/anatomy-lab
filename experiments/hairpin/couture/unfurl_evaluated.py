@@ -29,7 +29,7 @@ def triangle(uv,xyz):
 def interp(q,p):
     a,b,c=q['uv'];d=orient(a,b,c);assert d>1e-14
     v=orient(a,p,c)/d;w=orient(a,b,p)/d
-    return q['p'][0]*(1-v-w)+q['p'][1]*v+q['p'][2]*w
+    return Vector(np.array(q['p'],dtype=np.float64).T@np.array([1-v-w,v,w],dtype=np.float64))
 def chart(o,start,end,first,last,stride,offset=0):
     d=o.data;M=o.matrix_world
     ids={offset+i*stride+j:(i,j) for i in range(start,end+1) for j in range(first,last+1)}
@@ -96,17 +96,37 @@ C=Matrix.Translation(rootB-R@rootA)@R.to_4x4()
 for i,p in enumerate(pa):pa[i]=C@p
 source_tree=surface_tree([{'p':[C@p for p in q['p']]} for q in compactOriginal]);target_tree=surface_tree(B)
 def maxdist(points,tree):return max(tree.find_nearest(p)[3] for p in points)
-e0=maxdist(pa,source_tree);e1=maxdist(pb,target_tree);en=maxdist(pb,native_eval)
-assert max(e0,e1)<2e-5
-# Also check triangle centroids and edge midpoints: no silent planar shortcut.
+def error_detail(points,tree):
+    worst={'distance':-1}
+    for i,p in enumerate(points):
+        hit=tree.find_nearest(p)
+        if hit[3]>worst['distance']:
+            worst={'index':i,'distance':float(hit[3]),'point':list(p),'closest':list(hit[0]),'triangle':int(hit[2])}
+    return worst
 def witnesses(v):
     for a,b,c in faces:
         yield (v[a]+v[b]+v[c])/3
         yield (v[a]+v[b])/2;yield (v[b]+v[c])/2;yield (v[c]+v[a])/2
-e0w=maxdist(witnesses(pa),source_tree);e1w=maxdist(witnesses(pb),target_tree)
-assert max(e0w,e1w)<2e-5,(e0w,e1w)
-nativew=maxdist(witnesses(pb),native_eval)
-assert max(en,nativew)<2e-5,(en,nativew)
+errors={
+    'compactRemapAgainstOriginal':error_detail((C@p for q in A for p in q['p']),source_tree),
+    'evaluatedExtractAgainstNative':error_detail((p for q in B for p in q['p']),native_eval),
+    'compactVertices':error_detail(pa,source_tree),
+    'targetRegionVertices':error_detail(pb,target_tree),
+    'nativeEvaluatedVertices':error_detail(pb,native_eval),
+    'compactWitnesses':error_detail(witnesses(pa),source_tree),
+    'targetRegionWitnesses':error_detail(witnesses(pb),target_tree),
+    'nativeEvaluatedWitnesses':error_detail(witnesses(pb),native_eval)}
+(out/'endpoint-diagnostics.json').write_text(json.dumps(errors,indent=2))
+# Preserve actual region triangles and correspondence arrays on every result.
+np.savez_compressed(out/'endpoint-correspondence.npz',
+    compactOriginal=np.array([[tuple(C@p) for p in q['p']] for q in compactOriginal],dtype=np.float64),
+    compactRemapped=np.array([[tuple(C@p) for p in q['p']] for q in A],dtype=np.float64),
+    targetRegion=np.array([[tuple(p) for p in q['p']] for q in B],dtype=np.float64),
+    sourceUV=np.array([q['uv'] for q in A]),targetUV=np.array([q['uv'] for q in B]),
+    chartUV=np.array(uvs),compact=np.array(pa),deployed=np.array(pb),faces=np.array(faces))
+e0=errors['compactVertices']['distance'];e1=errors['targetRegionVertices']['distance'];en=errors['nativeEvaluatedVertices']['distance']
+e0w=errors['compactWitnesses']['distance'];e1w=errors['targetRegionWitnesses']['distance'];nativew=errors['nativeEvaluatedWitnesses']['distance']
+assert max(v['distance'] for v in errors.values())<2e-5,errors
 # Keep native source immutable. Only research derivative scene objects are removed.
 for o in list(s.objects):
     if o.type in ('MESH','CAMERA','LIGHT'):bpy.data.objects.remove(o,do_unlink=True)
