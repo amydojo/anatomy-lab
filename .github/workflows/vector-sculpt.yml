@@ -1,0 +1,53 @@
+name: VECTOR SCULPT clay master
+on:
+  pull_request:
+    branches: ['experiment/marrow-001']
+    paths:
+      - 'experiments/hairpin/vector/sculpt/**'
+      - '.github/workflows/vector-sculpt.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  master:
+    if: github.head_ref == 'experiment/marrow-hairpin-001' || github.ref_name == 'experiment/marrow-hairpin-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/sculpt/build_sculpt.py -- --out sculpt-output
+      - run: |
+          test -s sculpt-output/VECTOR-005-SCULPT-master.blend
+          sha256sum sculpt-output/VECTOR-005-SCULPT-master.blend
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-sculpt-master
+          path: sculpt-output/
+          if-no-files-found: warn
+  clay:
+    needs: master
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-sculpt-master
+          path: sculpt-output
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-blender-output
+          run-id: 45920240694
+          github-token: ${{ github.token }}
+          path: first-light
+      - run: sudo apt-get update && sudo apt-get install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/sculpt/render_clay.py -- --old first-light/VECTOR-005-master.blend --new sculpt-output/VECTOR-005-SCULPT-master.blend --out clay-output
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-sculpt-clay-proofs
+          path: clay-output/
+          if-no-files-found: warn
