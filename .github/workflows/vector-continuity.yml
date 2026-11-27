@@ -1,0 +1,102 @@
+name: VECTOR CONTINUITY complete clay master
+on:
+  pull_request:
+    branches: ['experiment/marrow-001']
+    paths:
+      - 'experiments/hairpin/vector/continuity/**'
+      - '.github/workflows/vector-continuity.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  master:
+    if: github.head_ref == 'experiment/marrow-hairpin-001' || github.ref_name == 'experiment/marrow-hairpin-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-precision-master
+          run-id: 45923602408
+          github-token: ${{ github.token }}
+          path: precision
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/continuity/build_continuity.py -- --source precision/VECTOR-005-PRECISION-front.blend --out continuity
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-continuity-master
+          path: continuity/
+          if-no-files-found: warn
+  geometry:
+    needs: master
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-continuity-master
+          path: continuity
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/continuity/qualify_continuity.py -- --master continuity/VECTOR-005-CONTINUITY-master.blend --out continuity-geometry.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-continuity-geometry
+          path: continuity-geometry.json
+          if-no-files-found: warn
+  proofs:
+    needs: master
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - edition: continuity
+            mode: clay
+            subset: main
+          - edition: continuity
+            mode: clay
+            subset: details
+          - edition: continuity
+            mode: zebra
+            subset: zebra
+          - edition: continuity
+            mode: clay
+            subset: articulation
+          - edition: precision
+            mode: clay
+            subset: matched
+          - edition: exoskeleton
+            mode: clay
+            subset: matched
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-continuity-master
+          path: continuity
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-precision-master
+          run-id: 45923602408
+          github-token: ${{ github.token }}
+          path: precision
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-exoskeleton-master
+          run-id: 45922028710
+          github-token: ${{ github.token }}
+          path: exo
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/continuity/render_continuity.py -- --master continuity/VECTOR-005-CONTINUITY-master.blend --precision precision/VECTOR-005-PRECISION-front.blend --exo exo/VECTOR-005-EXOSKELETON-master.blend --edition ${{ matrix.edition }} --mode ${{ matrix.mode }} --subset ${{ matrix.subset }} --out proofs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-continuity-${{ matrix.edition }}-${{ matrix.mode }}-${{ matrix.subset }}
+          path: proofs/
+          if-no-files-found: warn
