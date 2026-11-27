@@ -80,32 +80,35 @@ function rig(s,world){let mode=0,yaw=0,pitch=.72,sensitivity=1,close=false,recen
  look=mix(look,[clamp(i.x||0,-1,1),clamp(i.y||0,-1,1)],damp(18,h));if(Math.abs(i.x||0)+Math.abs(i.y||0)>.001){yaw+=look[0]*1.45*sensitivity*h;pitch=clamp(pitch+look[1]*1.05*sensitivity*h,.22,1.22);recenter=false;}else{look=[0,0];if(recenter){yaw*=Math.exp(-h*5);pitch+= (.72-pitch)*damp(5,h);if(Math.abs(yaw)<.005&&Math.abs(pitch-.72)<.005){yaw=0;pitch=.72;recenter=false;}}}
  const f=rotate(worldForward,WORLD_UP,yaw),speed=len(s.v||[0,0,0]),localUp=s.n,localF=rotate(tangent(localUp,s.frame||s.f),localUp,yaw),roll=mode===1?clamp(dot(s.v||[0,0,0],unit(cross(f,WORLD_UP)))*.25,-.055,.055):0;
  const desired=mode===2?basis(localF,localUp,pitch):basis(f,WORLD_UP,pitch,roll);
- if(mode===2||transition){orient=blendBasis(orient,desired,damp(7,h),1.7*h);if(rotationAngle(orient,desired)<.004){orient=desired;transition=false;}}else orient=desired;
- const [right,vertical,back]=orient;
- const ahead=mode===1?mul(s.v||[0,0,0],.19):[0,0,0],goal=add(s.p,ahead);
+ // Keep the control frame independent of presentation recovery.
+ const ahead=mode===1?mul(s.v||[0,0,0],.10):[0,0,0],goal=add(s.p,ahead);
  [target,targetV]=spring(target,targetV,goal,trackDt,13);
- // Bounded tracking lag: avoid losing the board on a dropped frame. No angular
- // obstruction correction, no view-basis or input change from collision.
- const lag=sub(target,s.p);if(len(lag)>.075){target=add(s.p,mul(unit(lag),.075));targetV=[0,0,0];}
- const want=(close?.24:.36)+(mode===1?Math.min(.10,speed*.24):0);
- // Test the sightline from the actual board, not a lagging target that may be
- // inside a curved bone. Try bounded positional shifts only, never rotate the
- // view or change the control yaw. Keep all candidates within the fixed FOV.
- const lagOffset=sub(target,s.p);
- function clearance(x,y){const off=add(lagOffset,add(mul(right,x),mul(vertical,y))),eye=add(off,mul(back,want)),length=len(eye),dir=unit(eye,back),hit=world.ray(s.p,dir,length+.012),factor=hit?clamp((hit.distance-.008)/Math.max(.001,length),.018/want,1):1;return {hit,off,factor,score:factor*want-Math.hypot(x,y)*.42};}
- let best=clearance(0,0);if(best.factor<.78){const offset=Math.min(.075,want*.20);for(const [x,y] of [[offset,0],[-offset,0],[0,offset],[0,-offset],[offset*.7,offset*.7],[-offset*.7,offset*.7]]){const q=clearance(x,y);if(q.score>best.score+.012)best=q;}}
- const hit=best.hit,safe=Math.max(.007,want*best.factor);
+ const lag=sub(target,s.p);if(len(lag)>.035){target=add(s.p,mul(unit(lag),.035));targetV=[0,0,0];}
+ const aspect=c.width/Math.max(1,c.height),want=(close?.17:.225)+(aspect<.85?.045:0)+Math.min(.04,speed*.13);
+ const lens=c.height*.5/Math.tan(FOV*.5),span=Math.max(.001,Math.min(c.width/3.25,c.height/c.frameSpan));
+ const boardRight=unit(cross(s.n,s.f)),corners=[];
+ for(const x of [-.018,.018])for(const y of [-.009,.012])for(const z of [-.038,.038])corners.push(add(mul(boardRight,x),add(mul(s.n,y),mul(s.f,z))));
+ const extent=(b,d,off=[0,0,0])=>{let x=0,y=0,depth=Infinity;for(const v of corners){const q=sub(v,off),z=d-dot(q,b[2]);depth=Math.min(depth,z);x=Math.max(x,Math.abs(dot(q,b[0])*lens/Math.max(.0001,z)));y=Math.max(y,Math.abs(dot(q,b[1])*lens/Math.max(.0001,z)));}return {depth,x,y,framed:depth>.006&&x<c.width*.47&&y<c.height*.43};};
+ const sight=b=>{const hit=world.ray(s.p,b[2],want+.012),safe=hit?Math.max(0,hit.distance-.012):want;return {hit,safe};};
+ const aligned=back=>{const r=unit(plane(desired[0],back),unit(cross(WORLD_UP,back),orient[0]));return [r,unit(cross(back,r)),back];};
+ let requested=sight(desired),chosen=desired,alternate=false;
+ // Search a surface-aware viewing direction only if the requested view cannot
+ // provide the whole board and terrain. Never feed this orientation to steering.
+ const need=requested.safe<want*.87;
+ if(need){let best=-Infinity;const dirs=[orient[2],localUp];for(const t of [.25,.5,.75,1,1.5,2,3]){dirs.push(unit(add(desired[2],mul(localUp,t)),localUp));dirs.push(unit(add(desired[2],add(mul(localUp,t),mul(localF,.5))),localUp));dirs.push(unit(add(desired[2],add(mul(localUp,t),mul(localF,-.5))),localUp));}for(const back of dirs){const b=aligned(back),q=sight(b);if(q.safe<want*.78||!extent(b,q.safe).framed)continue;const score=dot(back,desired[2])*.7+dot(back,orient[2])*.3;if(score>best){best=score;chosen=b;alternate=true;}}}
+ let next=mode===2||transition||alternate||rotationAngle(orient,desired)>.06?blendBasis(orient,chosen,damp(10,h),1.7*h):chosen;
+ let clear=sight(next),emergency=false;
+ if(alternate&&(!extent(next,clear.safe).framed||clear.safe<.085)){next=chosen;clear=sight(next);emergency=true;}
+ orient=next;if(rotationAngle(orient,desired)<.004)transition=false;
+ const [right,vertical,back]=orient;
+ const hit=clear.hit,safe=Math.max(.007,clear.safe);
  if(hit){blockedFor+=rawDt;recovery=0;}else{if(obstructedLast)recovery=0;else recovery+=rawDt;blockedFor=0;}
  [distance,distanceV]=spring([distance],[distanceV],[safe],trackDt,9).map(v=>v[0]);if(distance>safe){distance=safe;distanceV=0;}distance=Math.max(.007,distance);obstructedLast=!!hit;
- // Retain the same direction from the board to eye while dollying. This
- // prevents near-plane tunneling as the tracking spring crosses the mesh.
- const viewTarget=add(s.p,mul(best.off,distance/want));
- const span=Math.max(.001,Math.min(c.width/3.25,c.height/c.frameSpan)),lens=c.height*.5/Math.tan(FOV*.5);
+ const viewTarget=s.p.slice();
  c.marrowBasis=[...right,...vertical,...back];c.target={x:viewTarget[0],y:viewTarget[1],z:viewTarget[2]};c.marrowDistance=distance;c.anchorX=.5;c.anchorY=.53;c.zoom=lens/(distance*span);c.yaw=Math.atan2(-back[0],-back[2]);c.pitch=Math.asin(clamp(back[1],-1,1));
- const offsets=[];for(const x of [-.018,.018])for(const y of [-.009,.012])for(const z of [-.038,.038]){const q=sub(add(s.p,add(mul(unit(cross(s.f,s.n)),x),add(mul(s.n,y),mul(s.f,z)))),viewTarget),depth=distance-dot(q,back);offsets.push({x:dot(q,right),y:dot(q,vertical),depth});}
- const framed=offsets.every(q=>q.depth>.004&&Math.abs(q.x*lens/q.depth)<c.width*.47&&Math.abs(q.y*lens/q.depth)<c.height*.43);
- angular=h>0?rotationAngle(old,orient)/h:0;const angularAcceleration=h>0?Math.abs(angular-oldAngular)/h:0;lastMode=MODES[mode];
- return {mode:lastMode,yaw:c.yaw,pitch:c.pitch,distance,target:viewTarget.slice(),framed,obstructed:!!hit,basis:c.marrowBasis.slice(),fovDegrees:52,controlYaw:yaw,angularVelocity:angular,angularAcceleration,trackingError:len(sub(target,s.p)),horizonRoll:Math.asin(clamp(right[1],-1,1)),blockedSeconds:blockedFor,recoverySeconds:recovery,cameraDt:h,transition};
+ const projection=extent(orient,distance),framed=projection.framed;
+  angular=h>0?rotationAngle(old,orient)/h:0;const angularAcceleration=h>0?Math.abs(angular-oldAngular)/h:0;lastMode=MODES[mode];
+ return {mode:lastMode,yaw:c.yaw,pitch:c.pitch,distance,target:viewTarget.slice(),framed,obstructed:!!hit,basis:c.marrowBasis.slice(),fovDegrees:52,controlYaw:yaw,angularVelocity:angular,angularAcceleration,trackingError:len(sub(target,s.p)),horizonRoll:Math.asin(clamp(right[1],-1,1)),projection,recoveryView:alternate,emergency,blockedSeconds:blockedFor,recoverySeconds:recovery,cameraDt:h,transition};
  }};return api;}
 root.BodyMarrowSurface=Object.freeze({create,rig,legacyRig,contact,transport,STEP});
 })(globalThis);
