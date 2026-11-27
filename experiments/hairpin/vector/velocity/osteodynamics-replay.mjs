@@ -18,7 +18,7 @@ export function seedRoutes(world,part,vectorParts,boardAPI,boardMatrix){
 // No wall-clock scheduling variance, no synthetic replacement of source geometry.
 export function replayRoute(world,seed,vectorParts,boardAPI,surfaceAPI,boardMatrix,{approach='parallel',push=1,steps=360}={}){
  const h=seed.hit,n=h.normal,reference=seed.ridge||h.forward,axis=unit(plane(reference,n),h.forward),side=unit(cross(n,axis)),a=approach==='perpendicular'?Math.PI*.5:approach==='diagonal'?Math.PI*.25:0,forward=unit(add(mul(axis,Math.cos(a)),mul(side,Math.sin(a))));
- const sim=surfaceAPI.create(world,{...h,forward}),oldMotion=boardAPI.motion(),kinetic=createKinetic(boardAPI),terrain=createTerrainInterpreter(world,boardAPI),originalParts=boardAPI.geometry('bone-acid'),vf=footprint(vectorParts),of=footprint(originalParts),rows=[];
+ const sim=surfaceAPI.create(world,{...h,forward}),oldMotion=boardAPI.motion(),kinetic=createKinetic(boardAPI),terrain=createTerrainInterpreter(world,boardAPI,{deterministic:true}),originalParts=boardAPI.geometry('bone-acid'),vf=footprint(vectorParts),of=footprint(originalParts),rows=[];
  let maxLift=0,maxTilt=0,lastV=null,lastA=null,maxAcceleration=0,maxJerk=0,prevPose=null,maxPresentationSpeed=0,maxNormalDeviation=0;
  for(let i=0;i<steps;i++){
   sim.advance(1/120,{stick:[0,-1],controlYaw:0,push});const state=sim.visual(),base=boardMatrix(state),legacy=kinetic.update(state,base,1/120,{hover:.00035}),original=oldMotion.update(state,base,1/120),adaptive=terrain.update(state,legacy,vectorParts,1/120,true,true),diag=terrain.report();
