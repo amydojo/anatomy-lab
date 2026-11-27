@@ -70,26 +70,31 @@ for p in d.polygons:
         for l in p.loop_indices:chartuv.data[l].uv=uv[d.loops[l].vertex_index]
 bpy.context.view_layer.update();dg=bpy.context.evaluated_depsgraph_get();e=copy.evaluated_get(dg);me=e.to_mesh(preserve_all_data_layers=True,depsgraph=dg);me.calc_loop_triangles()
 sys.path.insert(0,str(Path(__file__).parent))
-from unfurl_chart import chart_evaluated,overlay_noded
+from unfurl_chart import chart_evaluated,overlay_noded,remap_compact
+compactOriginal=A
+rootA=sum((p for q in A for u,p in zip(q['uv'],q['p']) if u[0]>.999999),Vector())/sum(u[0]>.999999 for q in A for u in q['uv'])
 probe_diag={}
 try:
-    B=chart_evaluated(me,e.matrix_world,mi,probe_diag)
-    (out/'evaluated-chart.json').write_text(json.dumps(probe_diag,indent=2))
-    uvs,pa,pb,faces,diag=overlay_noded(A,B,interp)
+    B,boundaryMap,domain=chart_evaluated(me,e.matrix_world,mi,probe_diag)
+    A=remap_compact(A,boundaryMap,probe_diag)
+    targetRootUV={q[2] for q in boundaryMap if 1<=q[0]<=2}
+    rootBpts=[p for q in B for uv,p in zip(q['uv'],q['p']) if tuple(uv) in targetRootUV]
+    assert rootBpts
+    rootB=sum(rootBpts,Vector())/len(rootBpts)
+    (out/'evaluated-chart.json').write_text(json.dumps(probe_diag,indent=2,default=lambda x:x.item() if isinstance(x,np.generic) else str(x)))
+    uvs,pa,pb,faces,diag=overlay_noded(A,B,interp,domain)
     probe_diag['overlay']=diag
-    (out/'evaluated-chart.json').write_text(json.dumps(probe_diag,indent=2))
+    (out/'evaluated-chart.json').write_text(json.dumps(probe_diag,indent=2,default=lambda x:x.item() if isinstance(x,np.generic) else str(x)))
     assert diag['pass'],diag
 finally:
-    (out/'evaluated-chart.json').write_text(json.dumps(probe_diag,indent=2))
+    (out/'evaluated-chart.json').write_text(json.dumps(probe_diag,indent=2,default=lambda x:x.item() if isinstance(x,np.generic) else str(x)))
     e.to_mesh_clear();bpy.data.objects.remove(copy,do_unlink=True)
 use_eval=True
 # The two actual regions remain tied to one index buffer through the film.
 # Register compact root to target root for coherent unfolding at real chart scale.
-rootA=sum((p for p,uv in zip(pa,uvs) if uv[0]>.999999),Vector())/sum(uv[0]>.999999 for uv in uvs)
-rootB=sum((p for p,uv in zip(pb,uvs) if uv[0]>.999999),Vector())/sum(uv[0]>.999999 for uv in uvs)
 C=Matrix.Translation(rootB-R@rootA)@R.to_4x4()
 for i,p in enumerate(pa):pa[i]=C@p
-source_tree=surface_tree([{'p':[C@p for p in q['p']]} for q in A]);target_tree=surface_tree(B)
+source_tree=surface_tree([{'p':[C@p for p in q['p']]} for q in compactOriginal]);target_tree=surface_tree(B)
 def maxdist(points,tree):return max(tree.find_nearest(p)[3] for p in points)
 e0=maxdist(pa,source_tree);e1=maxdist(pb,target_tree);en=maxdist(pb,native_eval)
 assert max(e0,e1)<2e-5
@@ -101,6 +106,7 @@ def witnesses(v):
 e0w=maxdist(witnesses(pa),source_tree);e1w=maxdist(witnesses(pb),target_tree)
 assert max(e0w,e1w)<2e-5,(e0w,e1w)
 nativew=maxdist(witnesses(pb),native_eval)
+assert max(en,nativew)<2e-5,(en,nativew)
 # Keep native source immutable. Only research derivative scene objects are removed.
 for o in list(s.objects):
     if o.type in ('MESH','CAMERA','LIGHT'):bpy.data.objects.remove(o,do_unlink=True)
