@@ -18,9 +18,11 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --no-audit --no-fund
-      - run: node --test tests/marrow-hairpin.test.mjs
+      - run: npx playwright test tests/marrow-atelier.spec.mjs --project=desktop-chromium --project=webkit-mobile --workers=1 --grep 'PARITY matched camera'
       - if: ${{ !cancelled() }}
-        run: npx playwright test tests/marrow-atelier.spec.mjs --project=desktop-chromium --project=webkit-mobile --workers=1
+        run: node --test tests/marrow-hairpin.test.mjs
+      - if: ${{ !cancelled() }}
+        run: npx playwright test tests/marrow-atelier.spec.mjs --project=desktop-chromium --project=webkit-mobile --workers=1 --grep-invert 'PARITY matched camera'
       - if: always()
         uses: actions/upload-artifact@v4
         with:
