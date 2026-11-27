@@ -95,13 +95,21 @@ function rig(s,world){let mode=0,yaw=0,pitch=.72,sensitivity=1,close=false,recen
  const contactProbe=world.ray(s.p,mul(localUp,-1),.024),onSurface=!!contactProbe&&contactProbe.distance<=.024;
  const acceptable=(b,q)=>q.safe>=want*.76&&extent(b,q.safe).framed&&(!onSurface||dot(b[2],localUp)>=.24);
  const need=requested.safe<want*.90||(onSurface&&dot(desired[2],localUp)<.32);
- if(need){let best=-Infinity;const dirs=[orient[2],localUp];for(const t of [.12,.24,.4,.6,.8,1,1.5,2,3])for(const shift of [0,.3,-.3,.65,-.65]){dirs.push(unit(add(orient[2],add(mul(localUp,t),mul(localF,shift))),localUp));dirs.push(unit(add(desired[2],add(mul(localUp,t),mul(localF,shift))),localUp));}for(const back of dirs){const b=aligned(back),q=sight(b);if(!acceptable(b,q))continue;const score=dot(back,desired[2])*.22+dot(back,orient[2])*.78;if(score>best){best=score;chosen=b;alternate=true;}}}
- let next;
+ if(need){let best=-Infinity;
+  // The common case needs only a few BVH rays. Expand the candidate fan
+  // only when no nearby direction is safe. Reuse the current view when possible.
+  const consider=back=>{const b=aligned(back),q=sight(b);if(!acceptable(b,q))return;const score=dot(back,desired[2])*.22+dot(back,orient[2])*.78;if(score>best){best=score;chosen=b;alternate=true;}};
+  consider(orient[2]);consider(localUp);
+  for(const t of [.2,.5,1,2])consider(unit(add(orient[2],mul(localUp,t)),localUp));
+  for(const t of [.4,1,2])consider(unit(add(desired[2],mul(localUp,t)),localUp));
+  if(!alternate)for(const t of [.5,1.5])for(const shift of [-.65,.65])consider(unit(add(orient[2],add(mul(localUp,t),mul(localF,shift))),localUp));
+ }
+ const firstView=!initializedView;let next;
  if(!initializedView){next=chosen;initializedView=true;}
  else if(mode===2||transition||alternate||recoveringView)next=blendBasis(orient,chosen,damp(12,h),1.7*h);
  else next=chosen;
  recoveringView=alternate||rotationAngle(next,desired)>.004;
- let clear=sight(next),emergency=false;
+ let clear=sight(next);
   orient=next;if(rotationAngle(orient,desired)<.004)transition=false;
  const [right,vertical,back]=orient;
  const hit=clear.hit,safe=Math.max(.007,clear.safe);
@@ -110,8 +118,8 @@ function rig(s,world){let mode=0,yaw=0,pitch=.72,sensitivity=1,close=false,recen
  const viewTarget=s.p.slice();
  c.marrowBasis=[...right,...vertical,...back];c.target={x:viewTarget[0],y:viewTarget[1],z:viewTarget[2]};c.marrowDistance=distance;c.anchorX=.5;c.anchorY=.53;c.zoom=lens/(distance*span);c.yaw=Math.atan2(-back[0],-back[2]);c.pitch=Math.asin(clamp(back[1],-1,1));
  const projection=extent(orient,distance),framed=projection.framed;
-  angular=h>0?rotationAngle(old,orient)/h:0;const angularAcceleration=h>0?Math.abs(angular-oldAngular)/h:0;lastMode=MODES[mode];
- return {mode:lastMode,yaw:c.yaw,pitch:c.pitch,distance,target:viewTarget.slice(),framed,obstructed:!!hit,basis:c.marrowBasis.slice(),fovDegrees:52,controlYaw:yaw,angularVelocity:angular,angularAcceleration,trackingError:len(sub(target,s.p)),horizonRoll:Math.asin(clamp(right[1],-1,1)),projection,recoveryView:alternate,emergency,blockedSeconds:blockedFor,recoverySeconds:recovery,cameraDt:h,transition};
+  angular=h>0&&!firstView?rotationAngle(old,orient)/h:0;const angularAcceleration=h>0?Math.abs(angular-oldAngular)/h:0;lastMode=MODES[mode];
+ return {mode:lastMode,yaw:c.yaw,pitch:c.pitch,distance,target:viewTarget.slice(),framed,obstructed:!!hit,basis:c.marrowBasis.slice(),fovDegrees:52,controlYaw:yaw,angularVelocity:angular,angularAcceleration,trackingError:len(sub(target,s.p)),horizonRoll:Math.asin(clamp(right[1],-1,1)),projection,recoveryView:recoveringView,blockedSeconds:blockedFor,recoverySeconds:recovery,cameraDt:h,transition};
  }};return api;}
 root.BodyMarrowSurface=Object.freeze({create,rig,legacyRig,contact,transport,STEP});
 })(globalThis);
