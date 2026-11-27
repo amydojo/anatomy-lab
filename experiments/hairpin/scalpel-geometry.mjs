@@ -17,7 +17,7 @@ function build(name){const d=STUDIES[name];if(!d)throw Error('Unknown study '+na
  function ring(z,levels,n=20,cap=false){loft(levels.map(([r,y])=>Array.from({length:n},(_,k)=>{const a=-2*Math.PI*k/n;return [r*Math.cos(a),y,z+r*Math.sin(a)];})),cap);}
  function beam(a,b,w,h,y){const dx=b[0]-a[0],dz=b[1]-a[1],q=Math.hypot(dx,dz),x=-dz*w/2/q,z=dx*w/2/q;loft([y-h/2,y+h/2].map(v=>[[a[0]+x,v,a[1]+z],[b[0]+x,v,b[1]+z],[b[0]-x,v,b[1]-z],[a[0]-x,v,a[1]-z]]));}
  function wedge(z,r0,r1,a,b,y0,y1){loft([y0,y1].map(y=>[[r0*Math.cos(a),y,z+r0*Math.sin(a)],[r1*Math.cos(a),y,z+r1*Math.sin(a)],[r1*Math.cos(b),y,z+r1*Math.sin(b)],[r0*Math.cos(b),y,z+r0*Math.sin(b)]]));}
- fn({face,loft,section,ring,beam,wedge});const positions=Float32Array.from(pos),uv=new Float32Array(pos.length/3*2);for(let i=0;i<pos.length/3;i++){uv[2*i]=positions[3*i]/.024+.5;uv[2*i+1]=id.startsWith('rear')?(positions[3*i+2]+.036)/.032:(positions[3*i+2]-.004)/.032;}parts.push({id:'__marrow_'+id,color:C[key].slice(),material:M[key].slice(),positions,indices:Uint16Array.from(idx),uv,texture});}
+ fn({face,loft,section,ring,beam,wedge});const positions=Float32Array.from(pos),uv=new Float32Array(pos.length/3*2);for(let i=0;i<pos.length/3;i++){uv[2*i]=positions[3*i]/.024+.5;uv[2*i+1]=id.startsWith('rear')?(positions[3*i+2]+.036)/.032:(positions[3*i+2]-.004)/.032;}parts.push({id:'__marrow_'+id,color:C[key].slice(),material:M[key].slice(),positions,indices:Uint16Array.from(idx),uv,texture,mapMinY:0});}
  // A low, elongated central coupling. Its two end tongues are deliberate
  // bearing overlaps; moving chassis sections never cross the central gap.
  const neck=name==='mantis'?4.6:name==='lancet'?4.0:3.8;
