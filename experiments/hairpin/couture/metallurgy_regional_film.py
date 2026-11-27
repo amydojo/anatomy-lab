@@ -44,7 +44,10 @@ assert report['bridge']['fullPass'] and report['tension']['fullPass'],'Eased reg
 P=np.concatenate([B[::4],T[2::2]]);assert len(P)==101
 np.savez_compressed(out/'rendered-poses.npz',poses=P,faces=F,uv=U)
 if mode=='clay':
-    m=bpy.data.materials.get('Inspection clay');assert m is not None;d.materials[0]=m
+    m=bpy.data.materials.get('Inspection clay')
+    if m is None:
+        m=bpy.data.materials.new('Inspection clay');m.use_nodes=True;bs=m.node_tree.nodes.get('Principled BSDF');bs.inputs['Base Color'].default_value=(.4,.4,.4,1);bs.inputs['Metallic'].default_value=0;bs.inputs['Roughness'].default_value=.5
+    d.materials[0]=m
 cam=s.camera;center=Vector(tuple((P.max((0,1))+P.min((0,1)))/2));cam.location=center+Vector((55,-25,95));cam.rotation_euler=(center-cam.location).to_track_quat('-Z','Y').to_euler();cam.data.ortho_scale=max(12,float(np.max(P.max((0,1))-P.min((0,1))))*1.40)
 s.render.resolution_x=1000;s.render.resolution_y=563;s.cycles.samples=32;s.render.fps=16;s.render.image_settings.file_format='PNG'
 # Editable absolute linear shape keys, independently reopened and tested.
