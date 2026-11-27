@@ -65,12 +65,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: vector-chromatic-candidate
-          run-id: 45946040601
+          name: vector-velocity-FAILED-bake-${{ matrix.tier }}
+          run-id: 45969365914
           github-token: ${{ github.token }}
-          path: source
+          path: baked
       - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
-      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/velocity/build_velocity.py -- --source source/VECTOR-005-AFTERBURN-0042-master.blend --tier ${{ matrix.tier }} --out baked
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/velocity/recover_export.py -- --tier ${{ matrix.tier }} --out baked
       - if: success()
         uses: actions/upload-artifact@v4
         with:
