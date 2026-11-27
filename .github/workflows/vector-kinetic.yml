@@ -1,0 +1,132 @@
+name: VECTOR KINETIC motion and HAIRPIN feasibility
+on:
+  pull_request:
+    branches: ['experiment/marrow-001']
+    paths:
+      - 'experiments/hairpin/vector/kinetic/**'
+      - '.github/workflows/vector-kinetic.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  replay:
+    if: github.head_ref == 'experiment/marrow-hairpin-001' || github.ref_name == 'experiment/marrow-hairpin-001'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node experiments/hairpin/vector/kinetic/replay.mjs replay
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vector-kinetic-replay
+          path: replay/
+          if-no-files-found: error
+  clearance:
+    needs: replay
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-candidate
+          run-id: 45946040601
+          github-token: ${{ github.token }}
+          path: source
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-kinetic-replay
+          path: replay
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy ffmpeg
+      - name: Unchanged complete vehicle mechanical gate
+        run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/continuity/qualify_continuity.py -- --master source/VECTOR-005-AFTERBURN-0042-master.blend --out mechanical.json
+      - name: Kinetic intermediate poses and compact hypothesis
+        if: always()
+        run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/kinetic/qualify_kinetic.py -- --source source/VECTOR-005-AFTERBURN-0042-master.blend --replay replay/kinetic-replay.json --out kinetic-clearance.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-kinetic-clearance
+          path: |
+            mechanical.json
+            kinetic-clearance.json
+          if-no-files-found: error
+  motion:
+    needs: replay
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - mode: afterburn
+            sequence: studio
+          - mode: clay
+            sequence: studio
+          - mode: afterburn
+            sequence: fixture
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-candidate
+          run-id: 45946040601
+          github-token: ${{ github.token }}
+          path: source
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-kinetic-replay
+          path: replay
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy ffmpeg
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/kinetic/render_kinetic.py -- --source source/VECTOR-005-AFTERBURN-0042-master.blend --replay replay/kinetic-replay.json --mode ${{ matrix.mode }} --sequence ${{ matrix.sequence }} --out frames
+      - name: Encode actual rendered frames
+        run: |
+          ffmpeg -v error -framerate 12 -i frames/frame-%04d.png -c:v libx264 -crf 18 -pix_fmt yuv420p -movflags +faststart kinetic.mp4
+          ffprobe -v error -show_streams -show_format -of json kinetic.mp4 > video-report.json
+      - if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-kinetic-${{ matrix.mode }}-${{ matrix.sequence }}
+          path: |
+            kinetic.mp4
+            video-report.json
+            frames/motion-report.json
+            frames/frame-0000.png
+          if-no-files-found: error
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-kinetic-FAILED-${{ matrix.mode }}-${{ matrix.sequence }}
+          path: frames/
+          if-no-files-found: warn
+  import-asset:
+    needs: replay
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-candidate
+          run-id: 45946040601
+          github-token: ${{ github.token }}
+          path: source
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy ffmpeg
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/kinetic/export_kinetic.py -- --source source/VECTOR-005-AFTERBURN-0042-master.blend --out asset
+      - name: Validate existing GLB importer
+        run: node --input-type=module -e "import fs from 'node:fs';import {decodeVectorGLB} from './experiments/hairpin/vector/glb-adapter.mjs';const b=fs.readFileSync('asset/VECTOR-005-KINETIC-scalar.glb');const p=decodeVectorGLB(b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength));const report={triangles:p.reduce((n,x)=>n+x.indices.length/3,0),batches:p.length,vertexBytes:p.reduce((n,x)=>n+x.positions.byteLength+x.normals.byteLength+x.uv.byteLength+x.indices.byteLength,0),assemblies:[...new Set(p.map(x=>x.assembly))]};if(report.assemblies.length!==5)throw Error('Assembly mapping failure');fs.writeFileSync('asset/import-report.json',JSON.stringify(report,null,2));console.log(report)"
+      - if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-kinetic-import-asset
+          path: asset/
+          if-no-files-found: error
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-kinetic-FAILED-import
+          path: asset/
+          if-no-files-found: warn
