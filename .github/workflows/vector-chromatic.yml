@@ -1,0 +1,146 @@
+name: VECTOR CHROMATIC PRECISION
+on:
+  pull_request:
+    branches: ['experiment/marrow-001']
+    paths:
+      - 'experiments/hairpin/vector/chromatic/**'
+      - '.github/workflows/vector-chromatic.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  historical-diagnosis:
+    if: github.head_ref == 'experiment/marrow-hairpin-001' || github.ref_name == 'experiment/marrow-hairpin-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-continuity-master
+          run-id: 45924963659
+          github-token: ${{ github.token }}
+          path: clay
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-afterburn-masters
+          run-id: 45926972180
+          github-token: ${{ github.token }}
+          path: original
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-afterburn-FAILED-partial
+          run-id: 45926985394
+          github-token: ${{ github.token }}
+          path: partial
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/chromatic/diagnose_geometry.py -- --source clay/VECTOR-005-CONTINUITY-master.blend --successful original --partial partial --out historical-diagnostics.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-chromatic-historical-diagnostics
+          path: historical-diagnostics.json
+          if-no-files-found: error
+  master:
+    if: github.head_ref == 'experiment/marrow-hairpin-001' || github.ref_name == 'experiment/marrow-hairpin-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-afterburn-masters
+          run-id: 45926972180
+          github-token: ${{ github.token }}
+          path: original
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/chromatic/refine_chromatic.py -- --source original/VECTOR-005-AFTERBURN-master.blend --out refined
+      - if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-chromatic-candidate
+          path: refined/
+          if-no-files-found: error
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-chromatic-FAILED-partial
+          path: refined/
+          if-no-files-found: warn
+  reopen:
+    needs: master
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-continuity-master
+          run-id: 45924963659
+          github-token: ${{ github.token }}
+          path: clay
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-afterburn-masters
+          run-id: 45926972180
+          github-token: ${{ github.token }}
+          path: original
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-candidate
+          path: refined
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/chromatic/verify_chromatic.py -- --source original/VECTOR-005-AFTERBURN-master.blend --clay clay/VECTOR-005-CONTINUITY-master.blend --master refined/VECTOR-005-AFTERBURN-0042-master.blend --out reopened-diagnostics.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-chromatic-reopened-diagnostics
+          path: reopened-diagnostics.json
+          if-no-files-found: error
+  geometry:
+    needs: master
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-candidate
+          path: refined
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/continuity/qualify_continuity.py -- --master refined/VECTOR-005-AFTERBURN-0042-master.blend --out geometry.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-chromatic-mechanical
+          path: geometry.json
+          if-no-files-found: error
+  proofs:
+    needs: master
+    strategy:
+      fail-fast: false
+      matrix:
+        subset: [main, details, ride]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-candidate
+          path: refined
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-afterburn-afterburn-${{ matrix.subset }}
+          run-id: 45926972180
+          github-token: ${{ github.token }}
+          path: baseline
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/chromatic/render_chromatic.py -- --master refined/VECTOR-005-AFTERBURN-0042-master.blend --edition chromatic --mode studio --subset ${{ matrix.subset }} --baseline baseline/afterburn-studio-${{ matrix.subset }}-report.json --out proofs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-chromatic-${{ matrix.subset }}
+          path: proofs/
+          if-no-files-found: warn

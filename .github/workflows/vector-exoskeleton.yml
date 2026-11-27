@@ -1,0 +1,79 @@
+name: VECTOR EXOSKELETON master and clay
+on:
+  pull_request:
+    branches: ['experiment/marrow-001']
+    paths:
+      - 'experiments/hairpin/vector/exoskeleton/**'
+      - '.github/workflows/vector-exoskeleton.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  master:
+    if: github.head_ref == 'experiment/marrow-hairpin-001' || github.ref_name == 'experiment/marrow-hairpin-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/exoskeleton/build_exoskeleton.py -- --out exo-output
+      - run: sha256sum exo-output/VECTOR-005-EXOSKELETON-master.blend
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-exoskeleton-master
+          path: exo-output/
+          if-no-files-found: warn
+  geometry:
+    needs: master
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-exoskeleton-master
+          path: exo-output
+      - run: sudo apt-get update && sudo apt-get install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/exoskeleton/qualify_exoskeleton.py -- --master exo-output/VECTOR-005-EXOSKELETON-master.blend --out geometry-report.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-exoskeleton-geometry
+          path: geometry-report.json
+          if-no-files-found: warn
+  clay:
+    needs: master
+    strategy:
+      fail-fast: false
+      matrix:
+        edition: [first-light, sculpt, exoskeleton]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-exoskeleton-master
+          path: exo-output
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-blender-output
+          run-id: 45920240694
+          github-token: ${{ github.token }}
+          path: first-light
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-sculpt-master
+          run-id: 45921249157
+          github-token: ${{ github.token }}
+          path: sculpt
+      - run: sudo apt-get update && sudo apt-get install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/exoskeleton/render_exoskeleton.py -- --first first-light/VECTOR-005-master.blend --sculpt sculpt/VECTOR-005-SCULPT-master.blend --exo exo-output/VECTOR-005-EXOSKELETON-master.blend --edition ${{ matrix.edition }} --out clay-output
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-exo-clay-${{ matrix.edition }}
+          path: clay-output/
+          if-no-files-found: warn
