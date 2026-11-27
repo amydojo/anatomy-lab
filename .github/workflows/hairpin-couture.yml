@@ -1,4 +1,4 @@
-name: HAIRPIN COUTURE wearable research
+name: HAIRPIN COUTURE FIRST REVEAL
 on:
   pull_request:
     branches: ['experiment/marrow-hairpin-001']
@@ -9,51 +9,166 @@ on:
 permissions:
   contents: read
   actions: read
+concurrency:
+  group: couture-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
-  candidates:
+  native:
     if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
-    steps:
-      - uses: actions/checkout@v4
-      - run: sudo apt-get update && sudo apt-get install -y blender ffmpeg
-      - run: python3 -m py_compile experiments/hairpin/couture/*.py
-      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/build_couture.py -- --out couture
-      - name: Verify candidate outputs
-        run: |
-          python3 - <<'PY'
-          import json,pathlib
-          p=pathlib.Path('couture')
-          r=json.loads((p/'candidate-evidence.json').read_text())
-          assert set(r)=={'C01','C02','C03'}
-          assert len(r['C03']['clasp_samples'])==16
-          for c in r:
-              assert all(0<x<200 for x in r[c]['bounds_mm'])
-              for f in [c+'.blend']+[c+'-'+x+'.png' for x in ('hero','top','side','reverse','detail','head-envelope')]:
-                  assert (p/f).stat().st_size>1000
-          PY
-      - if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: hairpin-couture-candidates
-          path: couture/
-          if-no-files-found: error
-      - if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: hairpin-couture-candidates-FAILED
-          path: couture/
-          if-no-files-found: warn
-  transition:
-    needs: candidates
-    runs-on: ubuntu-24.04
-    timeout-minutes: 50
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: hairpin-couture-candidates
-          path: couture
+          name: hairpin-couture-candidates-FAILED
+          run-id: 45964913287
+          github-token: ${{ github.token }}
+          path: original
+      - name: Verify and preserve original LANCET
+        run: echo '7943a0891c74b94c4954218ac3e737bdc3d35be1ddd83a83fb3080c5e5bbf46e  original/C01.blend' | sha256sum -c -
+      - uses: actions/upload-artifact@v4
+        with:
+          name: couture-original-LANCET
+          path: original/
+          if-no-files-found: error
+      - run: sudo apt-get update && sudo apt-get install -y blender
+      - run: python3 -m py_compile experiments/hairpin/couture/*.py
+      - name: Generate all native masters without rendering
+        run: |
+          mkdir -p masters
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/build_couture.py -- --mode generate --out masters 2>&1 | tee masters/generation.log
+          sha256sum masters/*.blend > masters/SHA256SUMS
+          test -s masters/C01.blend && test -s masters/C02.blend && test -s masters/C03.blend && test -s masters/C03-open.blend
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: couture-native-masters
+          path: masters/
+          if-no-files-found: warn
+  reopen:
+    needs: native
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate: [C01, C02, C03]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: couture-native-masters
+          path: masters
+      - run: sudo apt-get update && sudo apt-get install -y blender
+      - name: Independent fresh-process reopen
+        run: |
+          mkdir -p audit
+          sha256sum -c masters/SHA256SUMS
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/build_couture.py -- --mode reopen --candidate ${{ matrix.candidate }} --source masters/${{ matrix.candidate }}.blend --out audit 2>&1 | tee audit/reopen.log
+          test -s audit/${{ matrix.candidate }}-reopen.json
+          if [ "${{ matrix.candidate }}" = C03 ]; then
+            blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/build_couture.py -- --mode reopen --candidate C03 --source masters/C03-open.blend --out audit/open 2>&1 | tee audit/reopen-open.log
+          fi
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: couture-audit-${{ matrix.candidate }}
+          path: audit/
+          if-no-files-found: warn
+  preflight:
+    needs: reopen
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: couture-native-masters
+          path: masters
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-candidate
+          run-id: 45946040601
+          github-token: ${{ github.token }}
+          path: source
+      - run: sudo apt-get update && sudo apt-get install -y blender
+      - name: Actual minimal CPU Cycles renders, no denoising
+        run: |
+          mkdir -p preflight
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/build_couture.py -- --mode preflight --candidate C01 --source masters/C01.blend --out preflight/candidate 2>&1 | tee preflight/candidate.log
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/transition.py -- --source source/VECTOR-005-AFTERBURN-0042-master.blend --compact masters/C03.blend --out preflight/transition --preflight 2>&1 | tee preflight/transition.log
+          test -s preflight/candidate/preflight.png
+          test -s preflight/transition/frame-0000.png
+          test -s preflight/transition/frame-0048.png
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: couture-render-preflight
+          path: preflight/
+          if-no-files-found: warn
+  render:
+    needs: preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate: [C01, C02, C03]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: couture-native-masters
+          path: masters
+      - run: sudo apt-get update && sudo apt-get install -y blender
+      - name: Matched independent candidate renders
+        run: |
+          mkdir -p renders
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/build_couture.py -- --mode render --candidate ${{ matrix.candidate }} --source masters/${{ matrix.candidate }}.blend --out renders 2>&1 | tee renders/render.log
+          for view in hero top side reverse detail head-envelope; do test -s renders/${{ matrix.candidate }}-$view.png || exit 1; done
+          if [ "${{ matrix.candidate }}" = C03 ]; then test -s renders/C03-clasp-open.png && test -s renders/C03-clasp-closed.png; fi
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: couture-render-${{ matrix.candidate }}
+          path: renders/
+          if-no-files-found: warn
+  board:
+    needs: render
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: couture-render-C*
+          path: proofs
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: couture-audit-C*
+          path: proofs
+      - run: sudo apt-get update && sudo apt-get install -y python3-pil fonts-dejavu-core
+      - run: |
+          for c in C01 C02 C03; do
+            mv proofs/couture-render-$c proofs/render-$c
+            mv proofs/couture-audit-$c proofs/audit-$c
+          done
+          python3 experiments/hairpin/couture/comparison.py proofs board
+      - uses: actions/upload-artifact@v4
+        with:
+          name: couture-comparison-board
+          path: board/
+          if-no-files-found: error
+  transition:
+    needs: preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: couture-native-masters
+          path: masters
       - uses: actions/download-artifact@v4
         with:
           name: vector-chromatic-candidate
@@ -61,35 +176,27 @@ jobs:
           github-token: ${{ github.token }}
           path: source
       - run: sudo apt-get update && sudo apt-get install -y blender ffmpeg
-      - name: Unchanged mechanical gate on protected source
+      - name: Unchanged protected source qualification
         run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/continuity/qualify_continuity.py -- --master source/VECTOR-005-AFTERBURN-0042-master.blend --out mechanical.json
-      - name: Fictional choreography and sampled overlap evidence
-        run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/transition.py -- --source source/VECTOR-005-AFTERBURN-0042-master.blend --compact couture/C03.blend --out frames
-      - name: Rendered motion and original audio
+      - name: Isolated fictional choreography
+        run: |
+          mkdir -p frames
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/transition.py -- --source source/VECTOR-005-AFTERBURN-0042-master.blend --compact masters/C03.blend --out frames 2>&1 | tee frames/transition.log
+      - name: Encode original sound and forward / reverse films
         run: |
           python3 experiments/hairpin/couture/sound.py ritual.wav
           ffmpeg -v error -framerate 8 -i frames/frame-%04d.png -i ritual.wav -c:v libx264 -crf 19 -pix_fmt yuv420p -c:a aac -shortest -movflags +faststart deployment.mp4
           ffmpeg -v error -i deployment.mp4 -vf reverse -af areverse -c:v libx264 -crf 19 -pix_fmt yuv420p -c:a aac -movflags +faststart stow.mp4
           ffprobe -v error -show_streams -show_format -of json deployment.mp4 > video-report.json
-      - if: success()
+      - if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: hairpin-couture-transformation
+          name: couture-transformation
           path: |
             deployment.mp4
             stow.mp4
             ritual.wav
             mechanical.json
             video-report.json
-            frames/transition-evidence.json
-            frames/frame-0000.png
-            frames/frame-0048.png
-          if-no-files-found: error
-      - if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: hairpin-couture-transformation-FAILED
-          path: |
-            mechanical.json
             frames/
           if-no-files-found: warn
