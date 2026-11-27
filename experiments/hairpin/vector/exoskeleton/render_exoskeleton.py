@@ -9,6 +9,7 @@ def arg(k):return args[args.index('--'+k)+1]
 paths={'first-light':os.path.abspath(arg('first')),'sculpt':os.path.abspath(arg('sculpt')),'exoskeleton':os.path.abspath(arg('exo'))}
 out=os.path.abspath(arg('out'));os.makedirs(out,exist_ok=True)
 edition=arg('edition')
+front_only='--front-only' in args
 def sha(p):return hashlib.sha256(open(p,'rb').read()).hexdigest()
 assert sha(paths['first-light'])=='2bf525342c5a48fde5d6ef380f087b736109dd35c442513e79b7c6595c30ebdd'
 assert sha(paths['sculpt'])=='996b0e91c3ed1fc5731b75c5bdbdf2efbabc8ec2306b78efe13bd93387a8ca32'
@@ -17,6 +18,9 @@ def open_model(name):
     bpy.ops.wm.open_mainfile(filepath=paths[name]);scene=bpy.context.scene
     for o in scene.objects:
         if name=='first-light' and ('wordmark' in o.name or 'emblem' in o.name):o.hide_render=True
+        if front_only and o.type=='MESH':
+            group=o.get('assembly','')
+            o.hide_render=not (group in ('front','front_pod','joint') or (name=='first-light' and any(x in o.name for x in ['__marrow_front_','__marrow_joint_'])))
     return scene
 def points(scene):
     deps=bpy.context.evaluated_depsgraph_get();v=[]
@@ -40,7 +44,9 @@ views={
  'gimbal':((1,.25,.45),(0,1,0),(0,0,0)),
  'standing-underside':((.7,-.8,.6),(0,1,0),(0,0,18))
 }
-W,H=1200,800;aspect=W/H
+if front_only:
+    views={'hero':((82,49,96),(0,1,0),None),'low-angle':((1,-.32,.62),(0,1,0),None),'side':((1,0,0),(0,1,0),None)}
+W,H=(1600,1100) if front_only else (1200,800);aspect=W/H
 def frame(name):
     direction,up_hint,focus=views[name];back=xyz(direction).normalized()
     right=xyz(up_hint).cross(back).normalized();up=back.cross(right).normalized()
@@ -64,11 +70,11 @@ def light(name,loc,power,size):
     d=bpy.data.lights.new(name,'AREA');d.energy=power;d.shape='DISK';d.size=size
     o=bpy.data.objects.new(name,d);scene.collection.objects.link(o);o.location=xyz(loc);o.rotation_euler=(-o.location).to_track_quat('-Z','Y').to_euler()
 light('Broad key',(36,65,42),85000,48);light('Character strip',(-40,26,-38),62000,30);light('Rear rim',(15,48,-58),43000,32);light('Underside fill',(-20,-45,23),34000,42)
-scene.render.engine='CYCLES';scene.cycles.device='CPU';scene.cycles.samples=24;scene.cycles.use_denoising=False
+scene.render.engine='CYCLES';scene.cycles.device='CPU';scene.cycles.samples=48 if front_only else 24;scene.cycles.use_denoising=False
 scene.render.resolution_x=W;scene.render.resolution_y=H;scene.render.resolution_percentage=100
 scene.render.pixel_aspect_x=scene.render.pixel_aspect_y=1
 scene.render.image_settings.file_format='PNG';scene.render.film_transparent=False;scene.render.threads_mode='FIXED';scene.render.threads=4
-report={'edition':edition,'sourceSha256':sha(paths[edition]),'commonSourceHashes':{k:sha(p) for k,p in paths.items()},'views':[]}
+report={'edition':edition,'frontOnly':front_only,'sourceSha256':sha(paths[edition]),'commonSourceHashes':{k:sha(p) for k,p in paths.items()},'views':[]}
 for name in views:
     r,u,b,center,scale=frame(name);d=bpy.data.cameras.new(name);o=bpy.data.objects.new(name,d);scene.collection.objects.link(o)
     o.location=center+b*140;o.rotation_euler=Matrix((r,u,b)).transposed().to_euler();d.type='ORTHO';d.ortho_scale=scale;d.clip_end=500;scene.camera=o
