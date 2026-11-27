@@ -6,7 +6,7 @@ test('COCKPIT real MARROW surface: dual touch, recovery, lift and magnetic landi
  await expect(page.locator('.cockpit')).toBeVisible({timeout:120000});
  const read=()=>page.evaluate(()=>window.__MARROW__.report());
  await expect.poll(async()=>!!(await read()).camera?.framed,{timeout:30000}).toBe(true);
- const point=async selector=>{const b=await page.locator(selector).boundingBox();return {x:b.x+b.width*.5,y:b.y+b.height*.55,w:b.width,h:b.height};};
+ const point=async selector=>{await expect(page.locator(selector)).toBeVisible();const b=await page.locator(selector).boundingBox();return {x:b.x+b.width*.5,y:b.y+b.height*.55,w:b.width,h:b.height};};
  const fire=async(selector,type,id,x,y)=>page.locator(selector).dispatchEvent(type,{pointerId:id,pointerType:'touch',isPrimary:id===1,clientX:x,clientY:y,button:0,buttons:type==='pointerup'?0:1,bubbles:true,cancelable:true});
  const s=await point('.cockpit-steer'),p=await point('.cockpit-pedal'),before=await read();
  await fire('.cockpit-steer','pointerdown',1,s.x,s.y);await fire('.cockpit-pedal','pointerdown',2,p.x,p.y);
@@ -18,8 +18,9 @@ test('COCKPIT real MARROW surface: dual touch, recovery, lift and magnetic landi
  await fire('.cockpit-pedal','pointerup',2,p.x,p.y);await expect.poll(async()=> (await read()).cockpit.intent.push).toBe(0);
  const l=await point('[data-action=lift]');await fire('[data-action=lift]','pointerdown',3,l.x,l.y);
  await expect.poll(async()=>!!(await read()).simulation.glide,{timeout:30000}).toBe(true);const flying=await read();
- await fire('[data-action=lift]','pointerup',3,l.x,l.y);
- const land=await point('[data-action=land]');await fire('[data-action=land]','pointerdown',4,land.x,land.y);
+ const land=await point('[data-action=land]');
+ // Atomic release and explicit landing request: do not race auto-descent/render latency.
+ await page.evaluate(({l,land})=>{const f=(selector,type,id,xy)=>document.querySelector(selector).dispatchEvent(new PointerEvent(type,{pointerId:id,pointerType:'touch',button:0,buttons:type==='pointerup'?0:1,clientX:xy.x,clientY:xy.y,bubbles:true,cancelable:true}));f('[data-action=lift]','pointerup',3,l);f('[data-action=land]','pointerdown',4,land);},{l,land});
  try{await expect.poll(async()=> (await read()).simulation.landings-flying.simulation.landings,{timeout:45000}).toBeGreaterThan(0);}finally{await fire('[data-action=land]','pointerup',4,land.x,land.y).catch(()=>{});}
  const landed=await read();
  await fire('.cockpit-pedal','pointerdown',5,p.x,p.y);await fire('.cockpit-pedal','pointermove',5,p.x,p.y-p.h*.36);
@@ -35,7 +36,7 @@ test('COCKPIT real MARROW surface: dual touch, recovery, lift and magnetic landi
 });
 test('COCKPIT one-finger fallback and control layout',async({page},info)=>{
  test.setTimeout(150000);await page.setViewportSize({width:390,height:844});
- await page.goto('/play/?mode=marrow&cockpit=1&touch=single');await page.bringToFront();await expect(page.locator('.cockpit')).toBeVisible({timeout:120000});
+ await page.goto('/play/?mode=marrow&cockpit=1&touch=single&cockpitVersion=1');await page.bringToFront();await expect(page.locator('.cockpit')).toBeVisible({timeout:120000});
  const read=()=>page.evaluate(()=>window.__MARROW__.report()),b=await page.locator('.cockpit-steer').boundingBox(),x=b.x+b.width/2,y=b.y+b.height*.55;
  const fire=(type,dy)=>page.locator('.cockpit-steer').dispatchEvent(type,{pointerId:1,pointerType:'touch',button:0,buttons:1,clientX:x,clientY:y+dy,bubbles:true,cancelable:true});
  await fire('pointerdown',0);await fire('pointermove',-b.height*.26);await expect.poll(async()=> (await read()).cockpit.intent.push).toBeGreaterThan(.25);
