@@ -1,0 +1,58 @@
+name: HAIRPIN COUTURE METALLURGY CLAY RECOVERY
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - '.github/workflows/hairpin-metallurgy-clay-recovery.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: metallurgy-clay-recovery-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  film:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        treatment: [clay]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: genesis-chart-qualified-endpoints
+          run-id: 46048612249
+          github-token: ${{ github.token }}
+          path: baseline
+      - uses: actions/download-artifact@v4
+        with:
+          name: metallurgy-actual-worst-frames
+          run-id: 46051259012
+          github-token: ${{ github.token }}
+          path: inspection
+      - uses: actions/download-artifact@v4
+        with:
+          name: metallurgy-frozen-B-bridge-retry
+          run-id: 46051582774
+          github-token: ${{ github.token }}
+          path: bridge
+      - run: sudo apt-get update && sudo apt-get install -y blender ffmpeg python3-numpy python3-scipy python3-shapely
+      - name: Requalify eased bridge and tension then render fixed-camera regional film
+        run: |
+          mkdir -p proof
+          OPENBLAS_NUM_THREADS=1 blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/metallurgy_regional_film.py -- --baseline baseline --inspection inspection --bridge bridge --mode ${{ matrix.treatment }} --out proof 2>&1 | tee proof/film.log
+          python3 -c "import json; r=json.load(open('proof/regional-ritual-gate.json')); assert r['bridge']['fullPass'] and r['tension']['fullPass'] and r['renderedFrames']==101"
+          ffmpeg -v error -framerate 16 -i proof/frame-%04d.png -i proof/regional.wav -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -movflags +faststart proof/forward.mp4
+          ffmpeg -v error -i proof/forward.mp4 -vf reverse -af areverse -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -movflags +faststart proof/reverse.mp4
+          ffprobe -v error -show_streams -show_format -of json proof/forward.mp4 > proof/video-report.json
+          python3 -c "import json; s=json.load(open('proof/video-report.json'))['streams']; assert int(next(x for x in s if x['codec_type']=='video')['nb_frames'])==101"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: metallurgy-regional-film-clay-recovered
+          path: proof/
+          if-no-files-found: warn
