@@ -42,3 +42,23 @@ test('VELOCITY embedded maps and real sustained replay',async({page},info)=>{
  const disposed=await page.evaluate(()=>window.__ATELIER__.report());
  expect(disposed.ready).toBe(false);expect(disposed.renderer.liveTextures).toBe(0);
 });
+
+test('VELOCITY recorded Blender camera comparison',async({page},info)=>{
+ const proof=process.env.VELOCITY_PROOF;test.skip(!path||!proof,'Requires actual Blender proof camera report');
+ const views=JSON.parse(fs.readFileSync(proof,'utf8')).views;
+ await page.goto('/experiments/hairpin/?edition=velocity');
+ await page.locator('#vector-file').setInputFiles(path);
+ await expect.poll(()=>page.evaluate(()=>window.__ATELIER__?.report().ready),{timeout:30000}).toBe(true);
+ const cameraReports=[];
+ for(const v of views){
+  await page.evaluate(spec=>{const canvas=document.querySelector('#vehicle'),stage=canvas.closest('.stage');stage.style.height=(stage.getBoundingClientRect().width/spec.aspect)+'px';window.__ATELIER__.proofCamera(spec);},v.browserCamera);
+  await page.waitForTimeout(500);
+  const report=await page.evaluate(()=>window.__ATELIER__.report());
+  expect(report.renderer.camera.orthographic).toBe(true);
+  expect(report.renderer.camera.basis).toEqual(v.browserCamera.basis);
+  expect(Math.abs(report.renderer.camera.width/report.renderer.camera.height-v.browserCamera.aspect)).toBeLessThan(.025);
+  await page.locator('#vehicle').screenshot({path:info.outputPath('matched-'+v.view+'.png')});
+  cameraReports.push({view:v.view,camera:report.renderer.camera,material:report.renderer.materialContract});
+ }
+ fs.writeFileSync(info.outputPath('matched-cameras.json'),JSON.stringify(cameraReports,null,2));
+});
