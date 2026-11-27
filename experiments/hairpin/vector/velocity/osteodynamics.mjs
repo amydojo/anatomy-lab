@@ -47,7 +47,7 @@ export function measure(world,state,pose,foot,boardAPI){
   const a=(zz*xu-xz*zu)/determinant,b=(xx*zu-xz*xu)/determinant,c=(zz*xv-xz*zv)/determinant,d=(xx*zv-xz*xv)/determinant,k=(b+c)*.5;
   residual=Math.sqrt(fit.reduce((sum,q)=>sum+(a*q.x+k*q.z-q.u)**2+(k*q.x+d*q.z-q.v)**2,0)/fit.length);
   confidence=clamp(ratio*(normalCoherence/fit.length)*Math.max(0,1-residual/.20),0,1);
-  if(confidence>=.60&&Math.abs(b-c)<30){const mid=(a+d)*.5,delta=Math.hypot((a-d)*.5,k),hi=mid+delta,lo=mid-delta;principal=[hi,lo];const angle=.5*Math.atan2(2*k,a-d);ridgeDirection=unit(add(mul(r,-Math.sin(angle)),mul(f,Math.cos(angle))),f);}
+  if(confidence>=.60&&Math.abs(b-c)<30){const mid=(a+d)*.5,delta=Math.hypot((a-d)*.5,k),hi=mid+delta,lo=mid-delta;principal=[hi,lo];const angle=.5*Math.atan2(2*k,a-d);const highAxis=unit(add(mul(r,Math.cos(angle)),mul(f,Math.sin(angle))),r),lowAxis=unit(add(mul(r,-Math.sin(angle)),mul(f,Math.cos(angle))),f);const magnitude=Math.max(Math.abs(hi),Math.abs(lo)),minor=Math.min(Math.abs(hi),Math.abs(lo));if(magnitude>.5&&magnitude>1.8*Math.max(.05,minor))ridgeDirection=Math.abs(hi)<=Math.abs(lo)?highAxis:lowAxis;}
  }
  const gradient=valid.length?Math.max(...valid.map(q=>Math.acos(clamp(dot(q.normal,n),-1,1)))):null;
  const nextNormal=prediction.filter(q=>q.valid).at(-1)?.normal;
@@ -77,14 +77,14 @@ function desiredTilt(m,pose){
  const bank=roll.length?roll.reduce((a,b)=>a+b,0)/roll.length:0,w=add(mul(r,pitch),mul(f,bank)),l=len(w);
  return l>TILT_MAX?mul(w,TILT_MAX/l):w;
 }
-export function createTerrainInterpreter(world,boardAPI){
+export function createTerrainInterpreter(world,boardAPI,{deterministic=false}={}){
  let cachedParts=null,foot=null,elapsed=1,offset=[0,0,0],rotation=[0,0,0],targetOffset=[0,0,0],targetRotation=[0,0,0],last=null,cpu=[],samples=0,rayCount=0,previous=null,acceleration=null,jerk=null,appliedLift=0,appliedTilt=0;
  return {reset(){cachedParts=null;foot=null;elapsed=1;offset=rotation=targetOffset=targetRotation=[0,0,0];last=null;cpu=[];samples=rayCount=0;previous=null;acceleration=jerk=null;appliedLift=appliedTilt=0;},update(state,pose,parts,dt,adaptive=false,enabled=true){
   if(!enabled)return pose;
   dt=clamp(dt,0,.1);if(parts!==cachedParts){cachedParts=parts;foot=footprint(parts);elapsed=1;offset=rotation=targetOffset=targetRotation=[0,0,0];last=null;}
   const speed=len(state.v||[0,0,0]);elapsed+=dt;
   // 8–20 Hz sample clock, with a bounded number of probes. Reuse the same BVH.
-  const interval=(cpu.at(-1)||0)>3?.125:speed>.08?1/20:1/12;
+  const interval=!deterministic&&(cpu.at(-1)||0)>3?.125:speed>.08?1/20:1/12;
   if(state.glide||!state.ground){targetOffset=targetRotation=[0,0,0];last=null;elapsed=1;}
   else if(elapsed>=interval){const start=performance.now(),before=world.stats?.().calls||0;elapsed=0;
    const m=measure(world,state,pose,foot,boardAPI),axis=m.normal;
