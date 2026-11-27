@@ -1,5 +1,6 @@
 import {test,expect} from '@playwright/test';
 import fs from 'node:fs';
+test.use({video:'on'});
 test('IGNITION pinned VECTOR on existing MARROW contact, control, flight and fallback',async({page},info)=>{
  test.setTimeout(240000);
  const file=process.env.VELOCITY_CANDIDATE;
@@ -13,6 +14,7 @@ test('IGNITION pinned VECTOR on existing MARROW contact, control, flight and fal
  await expect.poll(async()=> (await read()).frames).toBeGreaterThan(0);
  await capture('original-idle');expect(samples['original-idle'].simulation.ground).toBe(true);
  const input=page.getByLabel('Import qualified VECTOR GLB');
+ await expect(input).toBeEnabled({timeout:10000});
  await input.setInputFiles({name:'wrong.glb',mimeType:'model/gltf-binary',buffer:Buffer.from('invalid')});
  await expect.poll(async()=> (await read()).vector?.error||'').toContain('digest mismatch');
  expect((await read()).renderer.vehicleAsset).toBe('bone-acid');
@@ -39,4 +41,7 @@ test('IGNITION pinned VECTOR on existing MARROW contact, control, flight and fal
  await page.keyboard.press('Escape');await expect(page.locator('#marrow-hud')).toHaveCount(0);
  expect((await read()).active).toBe(false);expect(errors).toEqual([]);
  fs.writeFileSync(info.outputPath('ignition-ride.json'),JSON.stringify({samples,errors,project:info.project.name,limitations:'Automated controller/keyboard; physical device performance and unrestricted wall/ceiling traversal not established.'},null,2));
+ // Local cache is per-origin and must revalidate the pinned digest after reload.
+ await page.reload();await page.bringToFront();await expect(page.locator('#marrow-hud')).toBeVisible({timeout:120000});await expect.poll(async()=> (await read()).renderer?.vehicleAsset,{timeout:30000}).toBe('vector');expect((await read()).vector.origin).toBe('cache');await capture('cached-vector-reload');
+ fs.writeFileSync(info.outputPath('afterglow-ride.json'),JSON.stringify({samples,errors,project:info.project.name,limitations:'Automated controls only; frame timings are CI, not physical device measurements.'},null,2));
 });
