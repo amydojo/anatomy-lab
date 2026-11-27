@@ -1,0 +1,170 @@
+name: HAIRPIN COUTURE UNFURL
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - 'experiments/hairpin/couture/unfurl_*.py'
+      - '.github/workflows/hairpin-unfurl.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: unfurl-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  history:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: liquid-historical-masters
+          run-id: 46033173109
+          github-token: ${{ github.token }}
+          path: history
+      - uses: actions/download-artifact@v4
+        with:
+          name: liquid-serpent004-native
+          run-id: 46033173109
+          github-token: ${{ github.token }}
+          path: native
+      - run: |
+          sha256sum -c native/SHA256SUMS
+          mv native history/liquid
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unfurl-historical-masters
+          path: history/
+          if-no-files-found: error
+  wearable:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        concept: [A,B]
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y blender
+      - run: python3 -m py_compile experiments/hairpin/couture/unfurl_*.py
+      - name: Generate native concept and reopen independent audit
+        run: |
+          mkdir -p native audits
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/unfurl_wearable.py -- --concept ${{ matrix.concept }} --mode build --out native 2>&1 | tee native/build.log
+          sha256sum native/*.blend > native/SHA256SUMS
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/unfurl_wearable.py -- --concept ${{ matrix.concept }} --mode audit --source native/UNFURL-${{ matrix.concept }}-closed.blend --out audits/closed
+          if [ "${{ matrix.concept }}" = A ]; then
+            blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/unfurl_wearable.py -- --concept A --mode audit --source native/UNFURL-A-open.blend --out audits/open
+            blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/unfurl_wearable.py -- --concept A --mode sweep --source native/UNFURL-A-closed.blend --out audits
+            python3 -c "import json; assert len(json.load(open('audits/sweep.json'))['samples'])==27"
+          fi
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unfurl-wearable-native-${{ matrix.concept }}
+          path: |
+            native/
+            audits/
+          if-no-files-found: warn
+      - name: Matched neutral and metallic wearable render
+        run: |
+          mkdir -p renders
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/unfurl_wearable.py -- --concept ${{ matrix.concept }} --mode render --source native/UNFURL-${{ matrix.concept }}-closed.blend --out renders 2>&1 | tee renders/render.log
+          for f in metal-hero metal-crown metal-side clay-hero worn-back mechanism-underside; do test -s renders/$f.png; done
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unfurl-wearable-fashion-${{ matrix.concept }}
+          path: renders/
+          if-no-files-found: warn
+  comparison:
+    needs: wearable
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: unfurl-wearable-fashion-*
+          path: proofs
+      - run: sudo apt-get update && sudo apt-get install -y python3-pil fonts-dejavu-core
+      - run: |
+          mkdir -p board
+          python3 - <<'PY'
+          from PIL import Image,ImageDraw,ImageFont
+          c=Image.new('RGB',(1600,2230),'#e5e3df');d=ImageDraw.Draw(c)
+          def f(n):return ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',n)
+          d.text((40,20),'UNFURL / RELEASE ARCHITECTURES',font=f(36),fill='#181c23')
+          d.text((40,68),'ACTUAL NATIVE RENDERS / B IS FICTIONAL / NO WEARABILITY CLAIM',font=f(21),fill='#41464b')
+          for i,(code,label) in enumerate([('A','A / CONCEALED CLEVIS'),('B','B / SELF-ACTUATING RIBBON')]):
+              x=40+i*780;d.text((x,110),label,font=f(28),fill='#181c23')
+              for j,name in enumerate(['metal-hero','metal-crown','mechanism-underside','worn-back']):
+                  im=Image.open('proofs/unfurl-wearable-fashion-'+code+'/'+name+'.png').convert('RGB');im.thumbnail((740,488));y=153+j*515
+                  c.paste(im,(x+(740-im.width)//2,y));d.text((x,y+488),name.upper(),font=f(17),fill='#181c23')
+          c.save('board/UNFURL-release-comparison.png')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unfurl-release-comparison
+          path: board/
+  regional:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        study: [evaluated, aperture]
+        treatment: [clay, metal]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: liquid-serpent004-native
+          run-id: 46033173109
+          github-token: ${{ github.token }}
+          path: native
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-candidate
+          run-id: 45946040601
+          github-token: ${{ github.token }}
+          path: source
+      - run: sha256sum -c native/SHA256SUMS
+      - run: sudo apt-get update && sudo apt-get install -y blender ffmpeg python3-numpy python3-scipy python3-shapely
+      - name: Immutable riding endpoint qualification
+        run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/continuity/qualify_continuity.py -- --master source/VECTOR-005-AFTERBURN-0042-master.blend --out mechanical.json
+      - name: Regional preflight with failure diagnostics
+        run: |
+          mkdir -p preflight
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/unfurl_${{ matrix.study }}.py -- --mode ${{ matrix.treatment }} --source source/VECTOR-005-AFTERBURN-0042-master.blend --compact native/SERPENT-004-closed.blend --out preflight --preflight 2>&1 | tee preflight/render.log
+          test -s preflight/evidence.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unfurl-preflight-${{ matrix.study }}-${{ matrix.treatment }}
+          path: |
+            preflight/
+            mechanical.json
+          if-no-files-found: warn
+      - name: Render 81 actual frames and save editable animated source
+        run: |
+          mkdir -p frames
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/unfurl_${{ matrix.study }}.py -- --mode ${{ matrix.treatment }} --source source/VECTOR-005-AFTERBURN-0042-master.blend --compact native/SERPENT-004-closed.blend --out frames 2>&1 | tee frames/render.log
+          test -s frames/evidence.json
+      - name: Encode both directions at 16 fps
+        run: |
+          ffmpeg -v error -framerate 16 -i frames/frame-%04d.png -c:v libx264 -crf 18 -pix_fmt yuv420p -movflags +faststart forward.mp4
+          ffmpeg -v error -i forward.mp4 -vf reverse -c:v libx264 -crf 18 -pix_fmt yuv420p -movflags +faststart reverse.mp4
+          ffprobe -v error -show_streams -show_format -of json forward.mp4 > video-report.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unfurl-regional-${{ matrix.study }}-${{ matrix.treatment }}
+          path: |
+            frames/
+            forward.mp4
+            reverse.mp4
+            video-report.json
+            mechanical.json
+          if-no-files-found: warn
