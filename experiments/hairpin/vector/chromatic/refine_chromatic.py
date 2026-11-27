@@ -41,7 +41,9 @@ for node in n:
 art=next(node for node in n if node.bl_idname=='ShaderNodeTexImage')
 rough=n.new('ShaderNodeMixRGB');rough.inputs[1].default_value=(.24,.24,.24,1);rough.inputs[2].default_value=(.43,.43,.43,1);l.new(art.outputs['Alpha'],rough.inputs[0]);l.new(rough.outputs[0],p.inputs['Roughness'])
 metal=n.new('ShaderNodeMixRGB');metal.inputs[1].default_value=(.84,.84,.84,1);metal.inputs[2].default_value=(.18,.18,.18,1);l.new(art.outputs['Alpha'],metal.inputs[0]);l.new(metal.outputs[0],p.inputs['Metallic'])
-serial=mat('petrol / VECTOR-005-serial')
+serial=mat('petrol / VECTOR-005-serial').copy();serial.name='AFTERBURN / petrol / CHROMATIC serial'
+for node in serial.node_tree.nodes:
+    if node.bl_idname=='ShaderNodeUVMap':node.uv_map='ChromaticArtworkUV'
 # Dedicated UVs use actual arc lengths along the center rail and across
 # each transverse section. Do not overwrite the original alloy tangent UVs.
 zones={};graphic={}
@@ -49,7 +51,7 @@ for name in ('TENSION_continuous_frame','CONTINUITY_rear_frame'):
     o=bpy.data.objects[name];d=o.data;g=o['assembly']
     assert len(d.vertices)>=3636
     uv=d.uv_layers.get('ChromaticArtworkUV') or d.uv_layers.new(name='ChromaticArtworkUV')
-    for m in (stripe,logo):
+    for m in (stripe,logo,serial):
         if m.name not in d.materials:d.materials.append(m)
     slot={m.name:i for i,m in enumerate(d.materials)}
     coords=[Vector((v.co.x,v.co.z,-v.co.y)) for v in d.vertices]
@@ -99,6 +101,7 @@ for name in ('TENSION_continuous_frame','CONTINUITY_rear_frame'):
                 # 60% glyph height; 1.9-unit projection yields 1.14 height.
                 v=.5-(c[col]-middle)/1.9
                 if m==stripe:v=.5-(c[col]-c[5])/max(c[-1]-c[2],.1)
+                if m==serial:v=1-c[col]/max(c[4],.1)
                 uv.data[li].uv=(u,v)
         elif g=='rear' and max(ids)>=3636 and y>5:m=mat('orange')
         f.material_index=slot[m.name];counts[m.name]=counts.get(m.name,0)+1
