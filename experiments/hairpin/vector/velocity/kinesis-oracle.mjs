@@ -20,29 +20,35 @@ export function triangleBox(t,h){
 function rayBox(o,d,b){let a=0,z=Infinity;for(let k=0;k<3;k++){if(Math.abs(d[k])<1e-14){if(o[k]<b.lo[k]-EPS||o[k]>b.hi[k]+EPS)return false;continue;}let x=(b.lo[k]-o[k])/d[k],y=(b.hi[k]-o[k])/d[k];a=Math.max(a,Math.min(x,y));z=Math.min(z,Math.max(x,y));if(a>z)return false;}return true;}
 function rayTri(o,d,t){const e=sub(t[1],t[0]),f=sub(t[2],t[0]),h=cross(d,f),det=dot(e,h);if(Math.abs(det)<1e-13)return null;const p=sub(o,t[0]),u=dot(p,h)/det;if(u< -1e-9||u>1+1e-9)return null;const q=cross(p,e),v=dot(d,q)/det;if(v< -1e-9||u+v>1+1e-9)return null;const z=dot(f,q)/det;if(z<=EPS)return null;return {ambiguous:Math.min(u,v,1-u-v)<EPS};}
 function outside(root,o){for(const d of rays){let hits=0;const stack=[root];while(stack.length){const n=stack.pop();if(!rayBox(o,d,n))continue;if(n.left){stack.push(n.left,n.right);continue;}for(const x of n.items){const h=rayTri(o,d,x.t);if(h?.ambiguous)return false;if(h)hits++;}}if(hits%2)return false;}return true;}
-function solidTopology(p){const ids=new Map(),map=new Int32Array(p.positions.length/3),edges=new Map();let next=0,degenerate=0;
- for(let i=0;i<map.length;i++){const key=Array.from(p.positions.slice(i*3,i*3+3)).join(',');if(!ids.has(key))ids.set(key,next++);map[i]=ids.get(key);}
- for(let i=0;i<p.indices.length;i+=3){const a=[map[p.indices[i]],map[p.indices[i+1]],map[p.indices[i+2]]];if(new Set(a).size!==3){degenerate++;continue;}for(let k=0;k<3;k++){const x=a[k],y=a[(k+1)%3],key=x<y?x+':'+y:y+':'+x,old=edges.get(key)||[0,0];old[0]++;old[1]+=x<y?1:-1;edges.set(key,old);}}
+function solidTopology(p){const ids=new Map(),map=new Int32Array(p.positions.length/3),edges=new Map();let next=0,degenerate=0;const parent=[],vertices=[];const find=x=>{while(parent[x]!==x){parent[x]=parent[parent[x]];x=parent[x];}return x;};const join=(x,y)=>{const a=find(x),b=find(y);if(a!==b)parent[b]=a;};
+ for(let i=0;i<map.length;i++){const key=Array.from(p.positions.slice(i*3,i*3+3)).join(',');if(!ids.has(key)){ids.set(key,next);parent.push(next++);vertices.push(Array.from(p.positions.slice(i*3,i*3+3)));}map[i]=ids.get(key);}
+ for(let i=0;i<p.indices.length;i+=3){const a=[map[p.indices[i]],map[p.indices[i+1]],map[p.indices[i+2]]];if(new Set(a).size!==3){degenerate++;continue;}join(a[0],a[1]);join(a[1],a[2]);for(let k=0;k<3;k++){const x=a[k],y=a[(k+1)%3],key=x<y?x+':'+y:y+':'+x,old=edges.get(key)||[0,0];old[0]++;old[1]+=x<y?1:-1;edges.set(key,old);}}
  let boundary=0,nonmanifold=0,inconsistent=0;for(const [n,s] of edges.values()){if(n===1)boundary++;else if(n!==2)nonmanifold++;else if(s!==0)inconsistent++;}
- return {vertices:next,edges:edges.size,boundary,nonmanifold,inconsistent,degenerate,closed:boundary+nonmanifold+inconsistent+degenerate===0};
+ const components=new Map();for(let k=0;k<next;k++){const q=find(k);if(!components.has(q))components.set(q,vertices[k]);}return {vertices:next,edges:edges.size,boundary,nonmanifold,inconsistent,degenerate,components:[...components.values()],closed:boundary+nonmanifold+inconsistent+degenerate===0};
 }
-function localTree(part){return tree(Array.from({length:part.indices.length/3},(_,i)=>box(tri(part,i))),5);}
+function localTree(part){return tree(Array.from({length:part.indices.length/3},(_,i)=>{const t=tri(part,i);return {...box(t),t};}),5);}
 function validPose(q){if(!q||q.r?.length!==9||q.t?.length!==3||![...q.r,...q.t].every(Number.isFinite))return false;const a=q.r.slice(0,3),b=q.r.slice(3,6),c=q.r.slice(6,9);return Math.abs(dot(a,cross(b,c))-1)<1e-6&&[a,b,c].every(v=>Math.abs(len(v)-1)<1e-6)&&Math.max(Math.abs(dot(a,b)),Math.abs(dot(a,c)),Math.abs(dot(b,c)))<1e-6;}
 function rotationMid(a,b){const aa=[0,3,6].map(k=>a.r.slice(k,k+3)),bb=[0,3,6].map(k=>b.r.slice(k,k+3)),theta=Math.acos(clamp((aa.reduce((s,v,k)=>s+dot(v,bb[k]),0)-1)/2,-1,1)),w=aa.reduce((s,v,k)=>add(s,cross(v,bb[k])),[0,0,0]);if(theta>Math.PI-1e-5)return null;const k=unit(w),angle=theta/2,rot=v=>theta<1e-8?v.slice():add(add(mul(v,Math.cos(angle)),mul(cross(k,v),Math.sin(angle))),mul(k,dot(k,v)*(1-Math.cos(angle))));return {r:aa.flatMap(rot),t:mul(add(a.t,b.t),.5),theta};}
 export function createConfigurationOracle(anatomy,parts,B){
- const topology=solidTopology(anatomy),root=tree(Array.from({length:anatomy.indices.length/3},(_,i)=>{const t=tri(anatomy,i);return {...box(t),t};})),local=parts.map(p=>({id:p.id,tree:localTree(p),radius:Array.from({length:p.positions.length/3},(_,i)=>Math.hypot(...p.positions.slice(i*3,i*3+3))).reduce((a,b)=>Math.max(a,b),0)}));
+ const topology=solidTopology(anatomy),root=tree(Array.from({length:anatomy.indices.length/3},(_,i)=>{const t=tri(anatomy,i);return {...box(t),t};})),local=parts.map(p=>({id:p.id,tree:localTree(p),topology:solidTopology(p),radius:Array.from({length:p.positions.length/3},(_,i)=>Math.hypot(...p.positions.slice(i*3,i*3+3))).reduce((a,b)=>Math.max(a,b),0)}));
  function check(entries,depth,inflate){let boxes=0,triangleTests=0;const start=performance.now();function result(clear,reason){return {clear,reason,boxes,triangleTests,cpuMs:performance.now()-start};}
-  if(!topology.closed)return result(false,'source-topology-unqualified');
+  if(!topology.closed)return result(false,'source-topology-unqualified');if(local.some(p=>!p.topology.closed))return result(false,'vehicle-topology-unqualified');
   for(let i=0;i<local.length;i++){const q=entries[i];if(!validPose(q))return result(false,'invalid-transform');const stack=[local[i].tree];while(stack.length){const n=stack.pop(),mid=mul(add(n.lo,n.hi),.5),c=apply(q,mid),h=mul(sub(n.hi,n.lo),.5).map(x=>x+inflate[i]+1e-10),ext=axis.map((_,k)=>Math.abs(q.r[k])*h[0]+Math.abs(q.r[k+3])*h[1]+Math.abs(q.r[k+6])*h[2]),a={lo:sub(c,ext),hi:add(c,ext)},work=[root];let hit=false;boxes++;
     while(work.length&&!hit){const z=work.pop();if(!overlap(a,z))continue;if(z.left){work.push(z.left,z.right);continue;}for(const x of z.items){if(!overlap(a,x))continue;triangleTests++;if(triangleBox(x.t.map(v=>inverse({r:q.r,t:c},v)),h)){hit=true;break;}}}
     if(!hit){if(!outside(root,c))return result(false,'inside-or-ambiguous');continue;}
     if(!n.left||n.level>=depth)return result(false,'envelope-contact');
     stack.push(n.left,n.right);
-   }}
+   }
+   // Reverse containment: a connected source component can lie entirely inside
+   // a closed vehicle assembly without crossing its shell. When shell envelopes
+   // are disjoint, a representative per exact-welded component is sufficient
+   // under the conditional closed, non-self-intersecting solid assumption.
+   for(const point of topology.components){const v=inverse(q,point),b=local[i].tree;if(axis.every((_,k)=>v[k]>=b.lo[k]-EPS&&v[k]<=b.hi[k]+EPS)&&!outside(b,v))return result(false,'reverse-containment-or-ambiguous');}
+  }
   return result(true,'conditional-envelope-clear');
  }
  const entries=pose=>local.map(p=>B.transform(p.id,pose));
- return {topology,pose(pose,depth=5,margin=0){return check(entries(pose),depth,local.map(()=>margin));},sweep(a,b,{depth=5,maxSub=3}={}){
+ return {topology,vehicleTopology:local.map(p=>({id:p.id,...p.topology})),pose(pose,depth=5,margin=0){return check(entries(pose),depth,local.map(()=>margin));},sweep(a,b,{depth=5,maxSub=3}={}){
   let intervals=0,unresolved=0,boxes=0,triangleTests=0,maxInflation=0;
   function visit(A,C,level){intervals++;const mid=[],inflate=[];for(let k=0;k<A.length;k++){if(!validPose(A[k])||!validPose(C[k])){unresolved++;return false;}const m=rotationMid(A[k],C[k]);if(!m){unresolved++;return false;}mid.push(m);const bound=len(sub(A[k].t,C[k].t))/2+2*local[k].radius*Math.sin(m.theta/4);inflate.push(bound);maxInflation=Math.max(maxInflation,bound);}
    const q=check(mid,depth,inflate);boxes+=q.boxes;triangleTests+=q.triangleTests;if(q.clear)return true;if(level>=maxSub){unresolved++;return false;}const first=visit(A,mid,level+1),second=visit(mid,C,level+1);return first&&second;
