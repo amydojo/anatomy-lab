@@ -45,7 +45,7 @@ jobs:
           name: vector-blender-output
           path: experiments/hairpin/vector/generated
       - run: npm install --no-audit --no-fund
-      - run: node --test tests/marrow-vector.test.mjs
+      - run: VECTOR_REQUIRE_ASSET=1 node --test tests/marrow-vector.test.mjs
       - if: ${{ !cancelled() }}
         run: npx playwright test tests/marrow-vector.spec.mjs --project=desktop-chromium --project=webkit-mobile --workers=1
       - if: always()
