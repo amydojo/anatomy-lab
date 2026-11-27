@@ -55,7 +55,7 @@ def snapshot(o,transform,source=False):
 bpy.ops.wm.open_mainfile(filepath=str(compact));bpy.context.view_layer.update()
 wear=[o for o in bpy.context.scene.objects if o.type=='MESH']
 closed=[q for o in wear for q in snapshot(o,C,True)]
-pivot=bpy.data.objects['Release axis — proposed'];pivot.rotation_euler.y=math.radians(52);bpy.context.view_layer.update()
+pivot=bpy.data.objects['Release axis — proposed'];pivot_c=C@pivot.matrix_world.translation;axis_c=(C.to_3x3()@Vector((0,1,0))).normalized();pivot.rotation_euler.y=math.radians(52);bpy.context.view_layer.update()
 opened={(q['name'],q['index']):q for o in wear for q in snapshot(o,C,True)}
 for q in closed:
     p=opened[(q['name'],q['index'])];assert q['ids']==p['ids'];q['open']=p['v'];q['openNorm']=p['norm']
@@ -109,7 +109,7 @@ def transport(A,B):
         if hi>lo:
             a,b=A[i],B[j];u0=(lo-ae[i])/(enda-ae[i]);u1=(hi-ae[i])/(enda-ae[i]);v0=(lo-be[j])/(endb-be[j]);v1=(hi-be[j])/(endb-be[j])
             ca[i]+=u1-u0;cb[j]+=v1-v0
-            p.append({'a':wedge(a['v'],u0,u1),'open':wedge(a['open'],u0,u1),'b':wedge(b['v'],v0,v1),'an':normw(a['norm'],u0,u1),'on':normw(a['openNorm'],u0,u1),'bn':normw(b['norm'],v0,v1),'style':a['mat'],'mat':b['mat'],'uv':{k:wedge(v,v0,v1) for k,v in b['uv'].items()},'name':b['name'],'group':b['group']})
+            p.append({'a':wedge(a['v'],u0,u1),'open':wedge(a['open'],u0,u1),'b':wedge(b['v'],v0,v1),'an':normw(a['norm'],u0,u1),'on':normw(a['openNorm'],u0,u1),'bn':normw(b['norm'],v0,v1),'sourceName':a['name'],'style':a['mat'],'mat':b['mat'],'uv':{k:wedge(v,v0,v1) for k,v in b['uv'].items()},'name':b['name'],'group':b['group']})
         if enda<=endb:i+=1
         if endb<=enda:j+=1
     err=max(abs(x-1) for x in ca+cb);assert err<1e-6,err
@@ -125,6 +125,9 @@ def distance(v,t):return max(t.find_nearest(p)[3] for p in v)
 e0=distance((v for q in patches for v in q['a']),tree(closed))
 e1=distance((v for q in patches for v in q['b']),tree(target))
 assert max(e0,e1)<2e-5,(e0,e1)
+for g,v in coverage.items():
+    for k in ('Source','Target'):
+        assert abs(v['partition'+k+'Area']-v[k.lower()+'Area'])/v[k.lower()+'Area']<1e-5,(g,k,v)
 for o in list(s.objects):
     if o.type in ('MESH','CAMERA','LIGHT'):bpy.data.objects.remove(o,do_unlink=True)
 for l in s.view_layers:l.material_override=None;l.cycles.use_denoising=False
@@ -160,6 +163,7 @@ for name in sorted({q['name'] for q in patches}):
             for j,p in enumerate(q['uv'].get(uvname,[Vector((0,0))]*3)):u.data[3*i+j].uv=p
     o=bpy.data.objects.new(name+' / CHIMERA',d);s.collection.objects.link(o)
     arrays={k:np.array([tuple(p) for q in rows for p in q[k]],dtype=np.float32) for k in ('a','open','b','an','on','bn')}
+    arrays['leafMask']=np.repeat(np.array([q['sourceName']=='Concealed release leaf' for q in rows]),3)
     objects.append((o,rows[0]['group'],arrays,f));patch_order.extend(rows)
 # Shared compact coordinate witnesses: measure seams instead of concealing them.
 source_pts=np.concatenate([a['a'] for o,g,a,f in objects]);target_pts=np.concatenate([a['b'] for o,g,a,f in objects])
@@ -176,7 +180,9 @@ def apply(t):
     # Outward swing of rear prong before expansion, avoiding historical
     # counter-rotation across the other pod. Fictional, not collision-free.
     for o,g,a,f in objects:
-        A=(1-release)*a['a']+release*a['open'];N=(1-release)*a['an']+release*a['on']
+        A=a['a'].copy();N=a['an'].copy();mask=a['leafMask']
+        RR=np.array(Matrix.Rotation(math.radians(52)*release,3,axis_c),dtype=np.float32);pc=np.array(pivot_c,dtype=np.float32)
+        A[mask]=(A[mask]-pc)@RR.T+pc;N[mask]=N[mask]@RR.T
         angle=math.pi*unfold if g=='rear' else 0.
         R=np.array([[math.cos(angle),-math.sin(angle),0],[math.sin(angle),math.cos(angle),0],[0,0,1]],dtype=np.float32)
         shift=np.array([(1 if g=='rear' else -1 if g=='front' else 0)*2.5*math.sin(math.pi*morph),0,0],dtype=np.float32)
@@ -223,5 +229,7 @@ for i in ([0,16,48] if preflight else range(N)):
     assert Path(s.render.filepath).stat().st_size>1000
 assert np.max(np.abs(P-target_pts))==0 and sha(src)==expected
 report['endpointMaxStoredCoordinateError']=float(np.max(np.abs(P-target_pts)))
+# Read back actual rendered mesh positions, not only the input arrays.
+actual=np.concatenate([np.array([tuple(v.co) for v in o.data.vertices],dtype=np.float32) for o,g,a,f in objects]);report['endpointMaxMeshCoordinateError']=float(np.max(np.abs(actual-target_pts)));assert report['endpointMaxMeshCoordinateError']==0
 (out/'evidence.json').write_text(json.dumps(report,indent=2))
 print('CHIMERA surface transport',json.dumps({k:v for k,v in report.items() if k!='samples'}))
