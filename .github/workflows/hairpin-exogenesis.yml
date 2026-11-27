@@ -1,10 +1,6 @@
 name: HAIRPIN COUTURE EXOGENESIS
 on:
-  pull_request:
-    branches: ['experiment/marrow-hairpin-001']
-    paths:
-      - 'experiments/hairpin/couture/exogenesis_*.py'
-      - '.github/workflows/hairpin-exogenesis.yml'
+  # Passed milestone retained for manual reproduction.
   workflow_dispatch:
 permissions:
   contents: read
