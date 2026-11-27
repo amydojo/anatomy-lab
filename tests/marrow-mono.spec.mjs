@@ -18,7 +18,7 @@ test('MONO global movement fallback and no duplicate processing',async({page},in
 });
 test('MONO native Chromium touch input on live MARROW, diagonal drive and neutral recovery',async({browser,browserName},info)=>{
  test.skip(browserName!=='chromium','CDP browser-native touch injection is Chromium-only; WebKit uses synthetic fallback test and existing source gate');
- test.setTimeout(180000);const context=await browser.newContext({hasTouch:true,isMobile:true,viewport:{width:1024,height:600},deviceScaleFactor:1});const page=await context.newPage();const cdp=await context.newCDPSession(page);
+ test.setTimeout(180000);const context=await browser.newContext({baseURL:info.project.use.baseURL,hasTouch:true,isMobile:true,viewport:{width:1024,height:600},deviceScaleFactor:1});const page=await context.newPage();const cdp=await context.newCDPSession(page);
  try{
   await page.goto('/play/?mode=marrow&cockpit=1&touch=single&steering=vehicle');await page.bringToFront();await expect(page.locator('.cockpit[data-mono=true]')).toBeVisible({timeout:120000});
   const read=()=>page.evaluate(()=>window.__MARROW__.report());await expect.poll(async()=>!!(await read()).camera?.framed,{timeout:30000}).toBe(true);
