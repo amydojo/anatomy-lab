@@ -79,7 +79,7 @@ for g,rows in [('front',front),('rear',rear)]:
         patch(g+'_lower_spar_'+str(s),g,st,'lower load path',.48,[.62,.68,.58])
 # Open fork nose: tiny solid leading blade joins the two primary spars;
 # the longitudinal channel opens behind the tip.
-patch('nose_knife','front',[[(0,.04,38.2),(.12,.05,38.2),(.24,.01,38.0)],[(-.65,.21,36.5),(0,.52,36.8),(.65,.21,36.5)],[(-1.55,.50,34.2),(0,.83,34.8),(1.55,.50,34.2)],[(-2.25,.8,32.2),(0,.90,33.0),(2.25,.8,32.2)]],'nose bridge',.29)
+patch('nose_knife','front',[[(-.12,.04,37.8),(0,.05,37.9),(.12,.01,37.8)],[(-.65,.21,36.5),(0,.52,36.8),(.65,.21,36.5)],[(-1.55,.50,34.2),(0,.83,34.8),(1.55,.50,34.2)],[(-2.25,.8,32.2),(0,.90,33.0),(2.25,.8,32.2)]],'nose bridge',.29)
 # Thin standing inserts (open underside except for two discrete cross webs).
 def tread(g,rows):
     stations=[[( -w,y-.13,z),(-w+.35,y,z),(0,y+.05,z),(w-.35,y,z),(w,y-.13,z)] for z,w,y in rows]
