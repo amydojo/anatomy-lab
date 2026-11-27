@@ -1,0 +1,236 @@
+name: HAIRPIN COUTURE LIQUID METAL
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - 'experiments/hairpin/couture/liquid_*.py'
+      - '.github/workflows/hairpin-liquid-metal.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: liquid-metal-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  repair:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: chimera-native
+          run-id: 45973063703
+          github-token: ${{ github.token }}
+          path: native
+      - run: sha256sum -c native/SHA256SUMS
+      - run: sudo apt-get update && sudo apt-get install -y blender
+      - name: Recover original 003 clearance evidence from unchanged masters
+        run: |
+          mkdir -p audits
+          for pose in closed open; do
+            blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/chimera_serpent.py -- --mode audit --source native/SERPENT-003-$pose.blend --out audits/$pose 2>&1 | tee audits/$pose.log
+          done
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/chimera_serpent.py -- --mode sweep --source native/SERPENT-003-closed.blend --out audits 2>&1 | tee audits/sweep.log
+          python3 -c "import json; r=json.load(open('audits/sweep.json')); assert [s['degrees'] for s in r['samples']]==list(range(0,53,2))"
+          sha256sum -c native/SHA256SUMS
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: liquid-serpent003-repaired-clearance
+          path: audits/
+          if-no-files-found: warn
+  native:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: chimera-historical-masters
+          run-id: 45973063703
+          github-token: ${{ github.token }}
+          path: history
+      - uses: actions/download-artifact@v4
+        with:
+          name: chimera-native
+          run-id: 45973063703
+          github-token: ${{ github.token }}
+          path: native
+      - run: |
+          sha256sum -c native/SHA256SUMS
+          test -s history/native/SERPENT-002-closed.blend
+          for c in C01 C02 C03; do test -s history/first/$c.blend; done
+          mv native history/chimera
+      - uses: actions/upload-artifact@v4
+        with:
+          name: liquid-historical-masters
+          path: history/
+          if-no-files-found: error
+      - run: sudo apt-get update && sudo apt-get install -y blender
+      - run: python3 -m py_compile experiments/hairpin/couture/liquid_*.py experiments/hairpin/couture/chimera_serpent.py
+      - run: |
+          mkdir -p native
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/liquid_serpent.py -- --mode build --out native 2>&1 | tee native/build.log
+          sha256sum native/*.blend > native/SHA256SUMS
+          test -s native/SERPENT-004-closed.blend && test -s native/SERPENT-004-open.blend
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: liquid-serpent004-native
+          path: native/
+          if-no-files-found: warn
+  audit004:
+    needs: native
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: liquid-serpent004-native
+          path: native
+      - run: sha256sum -c native/SHA256SUMS
+      - run: sudo apt-get update && sudo apt-get install -y blender
+      - run: |
+          mkdir -p audits
+          for pose in closed open; do
+            blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/liquid_serpent.py -- --mode audit --source native/SERPENT-004-$pose.blend --out audits/$pose 2>&1 | tee audits/$pose.log
+          done
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/liquid_serpent.py -- --mode sweep --source native/SERPENT-004-closed.blend --out audits 2>&1 | tee audits/sweep.log
+          python3 -c "import json; r=json.load(open('audits/sweep.json')); assert len(r['samples'])==27"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: liquid-serpent004-clearance
+          path: audits/
+          if-no-files-found: warn
+  fashion:
+    needs: native
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - pose: closed
+            mode: render
+          - pose: open
+            mode: open-render
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: liquid-serpent004-native
+          path: native
+      - run: sha256sum -c native/SHA256SUMS
+      - run: sudo apt-get update && sudo apt-get install -y blender
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/liquid_serpent.py -- --mode preflight --source native/SERPENT-004-${{ matrix.pose }}.blend --out preflight
+      - run: |
+          mkdir -p renders
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/liquid_serpent.py -- --mode ${{ matrix.mode }} --source native/SERPENT-004-${{ matrix.pose }}.blend --out renders 2>&1 | tee renders/render.log
+          if [ "${{ matrix.pose }}" = closed ]; then
+            for f in metal-hero metal-crown clay-hero worn-back worn-profile; do test -s renders/$f.png; done
+          else
+            test -s renders/open-mechanism.png
+          fi
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: liquid-fashion-${{ matrix.pose }}
+          path: |
+            renders/
+            preflight/
+          if-no-files-found: warn
+  comparison:
+    needs: fashion
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: chimera-fashion-closed
+          run-id: 45973063703
+          github-token: ${{ github.token }}
+          path: previous
+      - uses: actions/download-artifact@v4
+        with:
+          name: liquid-fashion-closed
+          path: current
+      - run: sudo apt-get update && sudo apt-get install -y python3-pil fonts-dejavu-core
+      - run: |
+          mkdir -p board
+          python3 - <<'PY'
+          from PIL import Image,ImageDraw,ImageFont
+          c=Image.new('RGB',(1600,2230),'#e5e3df');d=ImageDraw.Draw(c)
+          font='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
+          def f(n):return ImageFont.truetype(font,n)
+          d.text((40,20),'LIQUID METAL / ADAPTIVE SCULPTURE',font=f(36),fill='#181c23')
+          d.text((40,68),'MATCHED NATIVE RENDERS · NO WEARABILITY CLAIM',font=f(21),fill='#41464b')
+          for i,(root,label) in enumerate([('previous','SERPENT 003'),('current','SERPENT 004')]):
+              x=40+i*780
+              d.text((x,110),label,font=f(28),fill='#181c23')
+              for j,name in enumerate(['metal-hero','metal-crown','clay-hero','worn-back']):
+                  im=Image.open(root+'/renders/'+name+'.png').convert('RGB')
+                  im.thumbnail((740,488));y=153+j*515
+                  c.paste(im,(x+(740-im.width)//2,y));d.text((x,y+488),name.upper(),font=f(17),fill='#181c23')
+          c.save('board/LIQUID-METAL-comparison.png')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: liquid-fashion-comparison
+          path: board/
+          if-no-files-found: error
+  ribbon:
+    needs: native
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    strategy:
+      fail-fast: false
+      matrix:
+        treatment: [clay, metal]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: liquid-serpent004-native
+          path: native
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-candidate
+          run-id: 45946040601
+          github-token: ${{ github.token }}
+          path: source
+      - run: sha256sum -c native/SHA256SUMS
+      - run: sudo apt-get update && sudo apt-get install -y blender ffmpeg python3-numpy
+      - name: Unchanged protected native mechanical gate
+        run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/continuity/qualify_continuity.py -- --master source/VECTOR-005-AFTERBURN-0042-master.blend --out mechanical.json
+      - name: Actual regional endpoints and midpoint
+        run: |
+          mkdir -p preflight
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/liquid_ribbon.py -- --mode ${{ matrix.treatment }} --source source/VECTOR-005-AFTERBURN-0042-master.blend --compact native/SERPENT-004-closed.blend --out preflight --preflight 2>&1 | tee preflight/render.log
+          test -s preflight/evidence.json
+      - name: Connected regional deformation film
+        run: |
+          mkdir -p frames
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/liquid_ribbon.py -- --mode ${{ matrix.treatment }} --source source/VECTOR-005-AFTERBURN-0042-master.blend --compact native/SERPENT-004-closed.blend --out frames 2>&1 | tee frames/render.log
+          test -s frames/evidence.json
+      - name: Forward and reverse regional films
+        run: |
+          ffmpeg -v error -framerate 8 -i frames/frame-%04d.png -c:v libx264 -crf 18 -pix_fmt yuv420p -movflags +faststart forward.mp4
+          ffmpeg -v error -i forward.mp4 -vf reverse -c:v libx264 -crf 18 -pix_fmt yuv420p -movflags +faststart reverse.mp4
+          ffprobe -v error -show_streams -show_format -of json forward.mp4 > video-report.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: liquid-ribbon-${{ matrix.treatment }}
+          path: |
+            preflight/
+            frames/
+            mechanical.json
+            forward.mp4
+            reverse.mp4
+            video-report.json
+          if-no-files-found: warn
