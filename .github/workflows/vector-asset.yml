@@ -1,0 +1,56 @@
+name: VECTOR Blender asset qualification
+on:
+  pull_request:
+    branches: ['experiment/marrow-001']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  blender:
+    if: github.head_ref == 'experiment/marrow-hairpin-001' || github.ref_name == 'experiment/marrow-hairpin-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Blender from Ubuntu packages
+        run: sudo apt-get update && sudo apt-get install -y blender
+      - name: Build editable asset and render actual master
+        run: |
+          blender --version
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/build_vector.py -- --out vector-output
+      - name: Verify exported files
+        run: |
+          test -s vector-output/VECTOR-005-master.blend
+          test -s vector-output/VECTOR-005-preview.glb
+          sha256sum vector-output/VECTOR-005-preview.glb vector-output/VECTOR-005-master.blend
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-blender-output
+          path: vector-output/
+          if-no-files-found: warn
+  atelier:
+    needs: blender
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-blender-output
+          path: experiments/hairpin/vector/generated
+      - run: npm install --no-audit --no-fund
+      - run: node --test tests/marrow-vector.test.mjs
+      - if: ${{ !cancelled() }}
+        run: npx playwright test tests/marrow-vector.spec.mjs --project=desktop-chromium --project=webkit-mobile --workers=1
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-atelier-evidence
+          path: test-results/
+          if-no-files-found: warn
