@@ -31,13 +31,15 @@ test('FIRST RIDE equivalent-condition performance and bottleneck isolation',asyn
   result.measurements[edition]=rows;
   await page.evaluate(()=>window.__ATELIER__.dispose());
   if(edition==='velocity'){
-   for(const [label,query] of [['scalar-same-geometry','material=scalar'],['normal-disabled','material=no-normal'],['half-backing-resolution','resolution=.5']]){
+   for(const [label,query] of [['scalar-same-geometry','material=scalar'],['normal-disabled','material=no-normal'],['half-backing-resolution','resolution=.5'],['artwork-performance','material=performance'],['adaptive-performance','material=performance&resolution=auto']]){
     await page.goto('/experiments/hairpin/?edition=velocity&'+query);
     await page.locator('#vector-file').setInputFiles(file);
     await expect.poll(()=>page.evaluate(()=>window.__ATELIER__?.report().ready),{timeout:30000}).toBe(true);
     await page.evaluate(()=>{window.__ATELIER__.view('hero');window.__ATELIER__.state('hover');});
     const row=await measure(label);expect(row.triangles).toBe(rows[0].triangles);expect(row.renderer.cssWidth).toBe(rows[0].renderer.cssWidth);expect(row.renderer.cssHeight).toBe(rows[0].renderer.cssHeight);
     if(label==='half-backing-resolution'){expect(row.renderer.backingWidth).toBeLessThan(rows[0].renderer.backingWidth);expect(row.renderer.backingHeight).toBeLessThan(rows[0].renderer.backingHeight);}
+    if(label.includes('performance')){expect(row.renderer.materialQuality).toBe('performance');await page.locator('#vehicle').screenshot({path:info.outputPath(label+'.png')});}
+    if(label==='adaptive-performance'){expect(row.renderer.adaptiveResolution).toBe(true);expect(row.renderer.adaptiveScale).toBeGreaterThanOrEqual(.5);expect(row.renderer.adaptiveScale).toBeLessThanOrEqual(1);}
     rows.push(row);await page.evaluate(()=>window.__ATELIER__.dispose());
    }
   }
