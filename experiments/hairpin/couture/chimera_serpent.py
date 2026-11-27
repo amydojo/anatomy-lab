@@ -98,10 +98,11 @@ def build():
         if (.405+.009*(j-3))<t<(.456+.009*(j-3)) and j in (2,3,4):return 2
         return 1 if (t<.40 and j in (2,3,4,5,6)) or (t>=.40 and j in (0,1,7)) else 0
     body=ribbon('SERPENT_003 continuous crown and prongs',path,params,[silver,petrol,orchid],paint)
-    body['design_role']='single integrated U-ribbon with inlaid material stripe'
+    body['design_role']='single integrated U-ribbon with inlaid material stripe';body['couture_role']='body'
     # Exploratory clevis: modeled bores and pin; crown interface is NOT certified.
     x,z=-54.0,-5.3
-    for y in (-3.2,3.2):annulus('Fixed clevis ear '+str(y),x,y,z,2.7,1.15,1.6,petrol,root=9.0)
+    for y in (-3.2,3.2):
+        ear=annulus('Fixed clevis ear '+str(y),x,y,z,2.7,1.15,1.6,petrol,root=9.0);ear['couture_role']='fixed_ear_positive' if y>0 else 'fixed_ear_negative'
     # One continuous shouldered axle, with geometric axial stops beyond the ears.
     vv=[];ff=[];N=64;profile=[(-4.85,1.55),(-4.2,1.55),(-4.2,1.0),(4.2,1.0),(4.2,1.55),(4.85,1.55)]
     for y,r in profile:
@@ -109,7 +110,7 @@ def build():
     for k in range(len(profile)-1):
         for i in range(N):ff.append((k*N+i,k*N+(i+1)%N,(k+1)*N+(i+1)%N,(k+1)*N+i))
     ff.extend([tuple(range(N-1,-1,-1)),tuple(range((len(profile)-1)*N,len(profile)*N))])
-    pin=mesh('Exploratory shouldered axle',vv,ff,[silver],smooth=True)
+    pin=mesh('Exploratory shouldered axle',vv,ff,[silver],smooth=True);pin['couture_role']='axle'
     ring=annulus('Moving knuckle with bore',x,0,z,2.4,1.15,3.2,silver)
     leafpath=[Vector((x+1.3+35*t,0,z-.6-1.4*math.sin(math.pi*t))) for t in [i/120 for i in range(121)]]
     leaf=ribbon('Concealed release leaf',leafpath,lambda t:(1.0+1.6*math.sin(math.pi*t),.62,0),[silver,petrol],lambda t,j:0)
@@ -117,7 +118,8 @@ def build():
     bpy.context.view_layer.objects.active=leaf
     mod=leaf.modifiers.new('Knuckle-to-leaf solid union','BOOLEAN');mod.operation='UNION';mod.solver='EXACT';mod.object=ring
     bpy.ops.object.modifier_apply(modifier=mod.name);bpy.data.objects.remove(ring,do_unlink=True)
-    pivot=bpy.data.objects.new('Release axis — proposed',None);s.collection.objects.link(pivot);pivot.location=(x,0,z)
+    leaf['couture_role']='moving_leaf'
+    pivot=bpy.data.objects.new('Release axis — proposed',None);pivot['couture_role']='release_axis';s.collection.objects.link(pivot);pivot.location=(x,0,z)
     bpy.context.view_layer.update();mw=leaf.matrix_world.copy();leaf.parent=pivot;leaf.matrix_world=mw
     s=studio();bpy.context.view_layer.update()
     bpy.ops.wm.save_as_mainfile(filepath=str(out/'SERPENT-003-closed.blend'))
@@ -137,6 +139,22 @@ def topology(o):
                     if a not in seen:seen.add(a);todo.append(a)
     stat={'connected_components':components,'nonmanifold_edges':sum(not e.is_manifold for e in bm.edges),'vertices':len(v),'triangles':len(f)}
     bm.free();ev.to_mesh_clear();return stat,v,f
+def semantic_id(o):
+    # Legacy masters: use semantic role, parent relation and geometry, not revision display name.
+    if o.get('couture_role'):return o['couture_role']
+    if o.get('design_role','').startswith('single integrated'):return 'body'
+    if o.type=='MESH' and o.parent and o.parent.type=='EMPTY':return 'moving_leaf'
+    if o.type=='EMPTY' and any(c.type=='MESH' for c in o.children):return 'release_axis'
+    if o.type=='MESH':
+        ys=[(o.matrix_world@v.co).y for v in o.data.vertices]
+        if min(ys)<-4.5 and max(ys)>4.5:return 'axle'
+        if min(ys)>1.5:return 'fixed_ear_positive'
+        if max(ys)<-1.5:return 'fixed_ear_negative'
+    return None
+def semantic_object(role):
+    found=[o for o in bpy.context.scene.objects if semantic_id(o)==role]
+    assert len(found)==1,(role,[o.name for o in found])
+    return found[0]
 def audit():
     bpy.context.view_layer.update();items=[];allv=[]
     for o in bpy.context.scene.objects:
@@ -145,10 +163,10 @@ def audit():
     pairs=[]
     for (a,_,av,at),(b,_,bv,bt) in itertools.combinations(items,2):
         hits=len(at.overlap(bt));dist=min([bt.find_nearest(p)[3] for p in av]+[at.find_nearest(p)[3] for p in bv])
-        pairs.append({'a':a.name,'b':b.name,'surfaceTrianglePairs':hits,'sampledVertexSurfaceMm':dist})
-    body=next(st for o,st,v,t in items if o.name.startswith('SERPENT_002'))
+        pairs.append({'a':a.name,'b':b.name,'roleA':semantic_id(a),'roleB':semantic_id(b),'surfaceTrianglePairs':hits,'sampledVertexSurfaceMm':dist})
+    body=next(st for o,st,v,t in items if semantic_id(o)=='body')
     assert body['connected_components']==1 and body['nonmanifold_edges']==0
-    leaf=next(st for o,st,v,t in items if o.name.startswith('Concealed release'))
+    leaf=next(st for o,st,v,t in items if semantic_id(o)=='moving_leaf')
     return {'bounds_mm':[max(v[i] for v in allv)-min(v[i] for v in allv) for i in range(3)],'parts':{o.name:st for o,st,v,t in items},'pairs':pairs,'leafUnionQualified':leaf['connected_components']==1 and leaf['nonmanifold_edges']==0,'mechanicalQualification':False}
 def sphere(name,loc,scale,m):
     bpy.ops.mesh.primitive_uv_sphere_add(segments=64,ring_count=32,location=loc);o=bpy.context.object;o.name=name;o.scale=scale;o.data.materials.append(m)
@@ -209,13 +227,13 @@ else:
         for l in s.view_layers:l.material_override=None
         worn(s)
     elif mode=='sweep':
-        p=bpy.data.objects['Release axis — proposed'];samples=[]
+        p=semantic_object('release_axis');samples=[]
         for deg in range(0,53,2):
             p.rotation_euler.y=math.radians(deg);bpy.context.view_layer.update()
             a=audit();hits=[x for x in a['pairs'] if x['surfaceTrianglePairs']]
-            intended=[x for x in hits if ('SERPENT_003' in x['a'] and 'Fixed clevis ear' in x['b']) or ('SERPENT_003' in x['b'] and 'Fixed clevis ear' in x['a'])]
+            intended=[x for x in hits if ('body' in (x['roleA'],x['roleB']) and any(str(q).startswith('fixed_ear') for q in (x['roleA'],x['roleB'])))]
             # Classification is proposed by named fixed mating interface only, not spatially validated.
-            samples.append({'degrees':deg,'leafMatrix':[list(row) for row in bpy.data.objects['Concealed release leaf'].matrix_world],'allOverlaps':hits,'proposedFixedRootMates':intended,'unclassified':[x for x in hits if x not in intended],'leafUnionQualified':a['leafUnionQualified']})
+            samples.append({'degrees':deg,'leafMatrix':[list(row) for row in semantic_object('moving_leaf').matrix_world],'allOverlaps':hits,'proposedFixedRootMates':intended,'unclassified':[x for x in hits if x not in intended],'leafUnionQualified':a['leafUnionQualified']})
         result={'samples':samples,'shaftRadiusMm':1,'boreRadiusMm':1.15,'headRadiusMm':1.55,'earOuterYmm':4.0,'headInnerYmm':4.2,'nominalRadialClearanceMm':.15,'nominalAxialGapMm':.2,'retentionQualified':False,'limitations':'Sampled surface overlap, no swept-solid, contact force, axial extraction or assembly proof. Fixed-root contacts proposed but not locally qualified.'}
         (out/'sweep.json').write_text(json.dumps(result,indent=2))
     elif mode=='open-render':render(s,'open-mechanism',(-45,-80,-110),(-37,0,-5),80)
