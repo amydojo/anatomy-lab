@@ -93,17 +93,22 @@ PARAMS={
 'grip':('obsidian',.04,.75,0,0),
 'orchid':('orchid',.55,.25,.22,0),
 'amber':('amber',.22,.27,.06,.55)}
+def socket(node,*names):
+    for name in names:
+        found=node.inputs.get(name)
+        if found is not None:return found
+    raise RuntimeError('Unsupported shader input '+str(names)+' on '+node.bl_idname+'; available='+str([i.name for i in node.inputs]))
 def material(key,art=None):
     pal,metal,rough,coat,emit=PARAMS[key];m=bpy.data.materials.new('AFTERBURN / '+key+(' / '+art.name if art else ''));m.use_nodes=True
     m.diffuse_color=(*linear(PALETTE[pal]),1);m['family']=key;m['base_srgb_hex']='#'+PALETTE[pal]
     n=m.node_tree.nodes;l=m.node_tree.links;p=n.get('Principled BSDF')
-    p.inputs['Base Color'].default_value=m.diffuse_color;p.inputs['Metallic'].default_value=metal;p.inputs['Roughness'].default_value=rough;p.inputs['Coat Weight'].default_value=coat;p.inputs['Coat Roughness'].default_value=.22
+    p.inputs['Base Color'].default_value=m.diffuse_color;p.inputs['Metallic'].default_value=metal;p.inputs['Roughness'].default_value=rough;socket(p,'Coat Weight','Clearcoat').default_value=coat;socket(p,'Coat Roughness','Clearcoat Roughness').default_value=.22
     if key=='silver':
-        p.inputs['Anisotropic IOR Level'].default_value=.28
+        socket(p,'Anisotropic IOR Level','Anisotropic').default_value=.28
         uv=n.new('ShaderNodeUVMap');uv.uv_map='AfterburnUV'
         tangent=n.new('ShaderNodeTangent');tangent.direction_type='UV_MAP';tangent.uv_map='AfterburnUV';l.new(tangent.outputs['Tangent'],p.inputs['Tangent'])
     if key=='amber':
-        p.inputs['Emission Color'].default_value=(*linear(PALETTE['amber']),1);p.inputs['Emission Strength'].default_value=emit
+        socket(p,'Emission Color','Emission').default_value=(*linear(PALETTE['amber']),1);p.inputs['Emission Strength'].default_value=emit
     if key in ('grip','carbon','silver'):
         # Shading detail only; no displacement. Object-scale texture, not
         # oversized weave. Fine directional tread on grip, fine noise on alloy.
@@ -178,6 +183,37 @@ def build(treatment):
     dest=os.path.join(out,'VECTOR-005-'+treatment.upper()+'-master.blend')
     bpy.ops.wm.save_as_mainfile(filepath=dest)
     return {'master':os.path.basename(dest),'sha256':sha(dest),'geometryUnchanged':before==after,'meshFingerprintsBefore':before,'meshFingerprintsAfter':after,'zones':zones}
+def preflight():
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    probe=bpy.data.materials.new('Principled compatibility probe');probe.use_nodes=True
+    p=probe.node_tree.nodes.get('Principled BSDF')
+    report={'blender':bpy.app.version_string,'principledInputs':[{'name':i.name,'identifier':i.identifier,'type':i.bl_idname} for i in p.inputs],
+        'anisotropySocket':socket(p,'Anisotropic IOR Level','Anisotropic').name,
+        'coatSocket':socket(p,'Coat Weight','Clearcoat').name,
+        'coatRoughnessSocket':socket(p,'Coat Roughness','Clearcoat Roughness').name,
+        'emissionSocket':socket(p,'Emission Color','Emission').name,'families':{},'artworkBranches':[]}
+    print('AFTERBURN_SOCKET_INVENTORY',json.dumps(report),flush=True)
+    im=bpy.data.images.new('Preflight artwork',width=4,height=4,alpha=True)
+    for key in PARAMS:
+        mat=material(key);n=mat.node_tree.nodes;p=n.get('Principled BSDF')
+        assert p is not None and n.get('Material Output').inputs['Surface'].is_linked
+        if key=='silver':
+            assert abs(socket(p,'Anisotropic IOR Level','Anisotropic').default_value-.28)<1e-6
+            assert p.inputs['Tangent'].is_linked and p.inputs['Normal'].is_linked
+        if key=='amber':assert abs(p.inputs['Emission Strength'].default_value-.55)<1e-6
+        report['families'][key]={'nodes':[n.bl_idname for n in mat.node_tree.nodes],'links':len(mat.node_tree.links)}
+    for key in ('petrol','grip'):
+        mat=material(key,im);assert mat.node_tree.nodes.get('Principled BSDF').inputs['Base Color'].is_linked
+        report['artworkBranches'].append(key)
+    # Audit actual artwork creation too, including all label glyphs.
+    for name,shapes in [('wordmark',wordmark()),('serial',labels()),('emblem',insignia())]:
+        image=raster('preflight-'+name,64,32,shapes);assert image.packed_file
+    report['passed']=True
+    json.dump(report,open(os.path.join(out,'shader-preflight.json'),'w'),indent=2)
+    print('AFTERBURN_PREFLIGHT_PASS',json.dumps(report),flush=True)
+if '--preflight-only' in args:
+    preflight()
+    sys.exit(0)
 studies={name:build(name) for name in ('factory','afterburn','covert')}
 report={'sourceSha256':sha(source),'referenceSha256':'b63e7e1238e4fdcd38ec6b439d2745991eb4c745b00777008f58f399d6efd555','paletteSRGB':PALETTE,'materials':{k:{'palette':v[0],'metallic':v[1],'roughness':v[2],'coat':v[3],'restEmission':v[4],'linearBaseColor':linear(PALETTE[v[0]])} for k,v in PARAMS.items()},'studies':studies,'textures':{'wordmark':[2048,256],'serial':[1024,512],'emblem':[512,256]},'limitations':'Procedural bump, coat and anisotropy are Blender-native; no texture bake, production unwrap, runtime material parity or legibility certification. UVs are local graphic projections, not nonoverlapping atlases. No geometry edits.'}
 json.dump(report,open(os.path.join(out,'afterburn-material-manifest.json'),'w'),indent=2)
