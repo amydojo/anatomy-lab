@@ -109,17 +109,30 @@ function rig(s,world){let mode=0,yaw=0,pitch=.72,sensitivity=1,close=false,recen
  else if(mode===2||transition||alternate||recoveringView)next=blendBasis(orient,chosen,damp(12,h),1.7*h);
  else next=chosen;
  recoveringView=alternate||rotationAngle(next,desired)>.004;
- let clear=sight(next);
-  orient=next;if(rotationAngle(orient,desired)<.004)transition=false;
+ let clear=sight(next),safetyCut=false,searchRays=0;
+ // Real cavities can invalidate a direction faster than a rate-limited orbit
+ // can turn. Search only when the proposed camera cannot contain the board.
+ // Keep the normal recovery smooth; a safety cut is explicitly telemetered.
+ const fits=(b,q)=>q.safe>.065&&extent(b,q.safe).framed;
+ if(!fits(next,clear)){
+  let best=null;const consider=back=>{const b=aligned(unit(back,localUp)),q=sight(b);searchRays++;if(!fits(b,q))return;
+   const score=dot(b[2],orient[2])*.55+dot(b[2],desired[2])*.25+Math.min(q.safe/want,1)*.20;
+   if(!best||score>best.score)best={b,q,score};};
+  for(const d of [chosen[2],localUp,mul(localUp,-1),localF,mul(localF,-1),boardRight,mul(boardRight,-1)])consider(d);
+  if(!best)for(const x of [-1,0,1])for(const y of [-1,0,1])for(const z of [-1,0,1])if(x||y||z)consider(add(mul(boardRight,x),add(mul(localUp,y),mul(localF,z))));
+  if(best){const bounded=blendBasis(orient,best.b,1,1.7*h),q=sight(bounded);
+   if(fits(bounded,q)){next=bounded;clear=q;}else{next=best.b;clear=best.q;safetyCut=true;}recoveringView=true;}
+ }
+ orient=next;if(rotationAngle(orient,desired)<.004)transition=false;
  const [right,vertical,back]=orient;
  const hit=clear.hit,safe=Math.max(.007,clear.safe);
  if(hit){blockedFor+=rawDt;recovery=0;}else{if(obstructedLast)recovery=0;else recovery+=rawDt;blockedFor=0;}
- [distance,distanceV]=spring([distance],[distanceV],[safe],trackDt,9).map(v=>v[0]);if(distance>safe){distance=safe;distanceV=0;}distance=Math.max(.007,distance);obstructedLast=!!hit;
+ [distance,distanceV]=spring([distance],[distanceV],[safe],trackDt,9).map(v=>v[0]);if(distance>safe){distance=safe;distanceV=0;}distance=Math.max(.007,distance);if(!extent(orient,distance).framed&&extent(orient,safe).framed){distance=safe;distanceV=0;safetyCut=true;}obstructedLast=!!hit;
  const viewTarget=s.p.slice();
  c.marrowBasis=[...right,...vertical,...back];c.target={x:viewTarget[0],y:viewTarget[1],z:viewTarget[2]};c.marrowDistance=distance;c.anchorX=.5;c.anchorY=.53;c.zoom=lens/(distance*span);c.yaw=Math.atan2(-back[0],-back[2]);c.pitch=Math.asin(clamp(back[1],-1,1));
  const projection=extent(orient,distance),framed=projection.framed;
   angular=h>0&&!firstView?rotationAngle(old,orient)/h:0;const angularAcceleration=h>0?Math.abs(angular-oldAngular)/h:0;lastMode=MODES[mode];
- return {mode:lastMode,yaw:c.yaw,pitch:c.pitch,distance,target:viewTarget.slice(),framed,obstructed:!!hit,basis:c.marrowBasis.slice(),fovDegrees:52,controlYaw:yaw,angularVelocity:angular,angularAcceleration,trackingError:len(sub(target,s.p)),horizonRoll:Math.asin(clamp(right[1],-1,1)),projection,recoveryView:recoveringView,blockedSeconds:blockedFor,recoverySeconds:recovery,cameraDt:h,transition};
+ return {mode:lastMode,yaw:c.yaw,pitch:c.pitch,distance,target:viewTarget.slice(),framed,obstructed:!!hit,basis:c.marrowBasis.slice(),fovDegrees:52,controlYaw:yaw,angularVelocity:angular,angularAcceleration,trackingError:len(sub(target,s.p)),horizonRoll:Math.asin(clamp(right[1],-1,1)),projection,recoveryView:recoveringView,safetyCut,searchRays,blockedSeconds:blockedFor,recoverySeconds:recovery,cameraDt:h,transition};
  }};return api;}
 root.BodyMarrowSurface=Object.freeze({create,rig,legacyRig,contact,transport,STEP});
 })(globalThis);
