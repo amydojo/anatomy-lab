@@ -15,7 +15,7 @@ parts=[(o,o.matrix_world.copy(),o.get('assembly')) for o in s.objects if o.type=
 assert len(parts)==25 and {g for o,m,g in parts}=={'front','rear','front_pod','rear_pod','joint'}
 for o in list(s.objects):
     if o.type in ('CAMERA','LIGHT'):bpy.data.objects.remove(o,do_unlink=True)
-for layer in s.view_layers:layer.material_override=None
+for layer in s.view_layers:layer.material_override=None;layer.cycles.use_denoising=False
 with bpy.data.libraries.load(str(arg('compact')),link=False) as (a,b):
     b.objects=[n for n in a.objects if n.startswith(('SWITCH','Orchid'))]
 shell=[]
@@ -33,7 +33,8 @@ for name,loc,power,size in [('Key',(30,-30,65),90000,65),('Strip',(-40,35,30),70
     o=bpy.data.objects.new(name,d);s.collection.objects.link(o);o.location=loc;o.rotation_euler=(-o.location).to_track_quat('-Z','Y').to_euler()
 camd=bpy.data.cameras.new('COUTURE camera');cam=bpy.data.objects.new('COUTURE camera',camd);s.collection.objects.link(cam);s.camera=cam
 camd.type='ORTHO';camd.clip_end=2000;cam.location=(100,-85,140);cam.rotation_euler=(-cam.location).to_track_quat('-Z','Y').to_euler()
-s.render.engine='CYCLES';s.cycles.samples=8;s.cycles.use_denoising=True;s.render.resolution_x=768;s.render.resolution_y=432;s.render.resolution_percentage=100;s.render.image_settings.file_format='PNG'
+s.render.engine='CYCLES';s.cycles.device='CPU';s.cycles.samples=24;s.cycles.use_denoising=False;s.render.resolution_x=768;s.render.resolution_y=432;s.render.resolution_percentage=100;s.render.image_settings.file_format='PNG'
+s.render.threads_mode='FIXED';s.render.threads=4
 def smooth(x):
     x=max(0,min(1,x));return x*x*(3-2*x)
 def phase(t,a,b):return smooth((t-a)/(b-a))
@@ -88,7 +89,10 @@ for o,m,g in parts:
                     socket=p.inputs['Emission Strength'];emit.append((socket,socket.default_value))
 report={'sourceSha256':expected,'candidate':'C03 SWITCH (provisional choreography proxy, not selection)','illustrativeMmPerUnit':10,'fictional':True,'mechanicalQualification':False,'limitations':['No volume conservation or continuous clearance.','Distinct compact shell topology retracts to near zero and is hidden; not a topology-preserving morph.','Sampled surface overlaps include historical contacts; no containment or nesting validation.','Static native endpoint; no gameplay or hover solver integration.'],'samples':[]}
 N=49
-for i in range(N):
+preflight='--preflight' in args
+if preflight:
+    s.cycles.samples=8;s.render.resolution_x=320;s.render.resolution_y=180
+for i in ([0,N-1] if preflight else range(N)):
     t=i/(N-1);scale,shrink,ignite=apply(t)
     for socket,target in emit:socket.default_value=target*ignite
     camd.ortho_scale=15+85*phase(t,.28,.88)
@@ -97,6 +101,8 @@ for i in range(N):
         visible=[o for o,m,g in parts]+[o for o,m in shell if not o.hide_render]
         report['samples'].append({'t':t,'scale':scale,'shellScale':shrink,'shellHidden':shell[0][0].hide_render,'worldMatrices':{o.name:[list(row) for row in o.matrix_world] for o in visible},'surfaceOverlaps':inspect(visible)})
     bpy.ops.render.render(write_still=True)
+    assert dest.stat().st_size>1000
+    (out/'transition-partial-evidence.json').write_text(json.dumps(report,indent=2))
 error=max(matrix_error(o.matrix_world,m) for o,m,g in parts)
 report['endpointMaxMatrixError']=error;report['endpointPartCount']=len(parts)
 assert error<1e-6 and all(o.hide_render for o,m in shell)
