@@ -1,0 +1,126 @@
+name: HAIRPIN COUTURE MORPHOGENESIS
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - 'experiments/hairpin/couture/morphogenesis_*.py'
+      - '.github/workflows/hairpin-morphogenesis.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: morphogenesis-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  endpoint:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        treatment: [clay, metal]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: liquid-serpent004-native
+          run-id: 46033173109
+          github-token: ${{ github.token }}
+          path: native
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-candidate
+          run-id: 45946040601
+          github-token: ${{ github.token }}
+          path: source
+      - run: sha256sum -c native/SHA256SUMS
+      - run: sudo apt-get update && sudo apt-get install -y blender ffmpeg python3-numpy python3-scipy python3-shapely
+      - run: python3 -m py_compile experiments/hairpin/couture/morphogenesis_*.py
+      - name: Protected native qualification
+        run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/continuity/qualify_continuity.py -- --master source/VECTOR-005-AFTERBURN-0042-master.blend --out mechanical.json
+      - name: Actual bidirectional evaluated endpoint gate
+        run: |
+          mkdir -p preflight
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/morphogenesis_evaluated.py -- --mode ${{ matrix.treatment }} --source source/VECTOR-005-AFTERBURN-0042-master.blend --compact native/SERPENT-004-closed.blend --out preflight --preflight 2>&1 | tee preflight/render.log
+          python3 -c "import json; assert json.load(open('preflight/independent-endpoint-qualification.json'))['endpointPass']"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: morphogenesis-endpoint-${{ matrix.treatment }}
+          path: |
+            preflight/
+            mechanical.json
+          if-no-files-found: warn
+      - name: Exact evaluated regional film only after endpoint gate
+        run: |
+          mkdir -p frames
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/morphogenesis_evaluated.py -- --mode ${{ matrix.treatment }} --source source/VECTOR-005-AFTERBURN-0042-master.blend --compact native/SERPENT-004-closed.blend --out frames 2>&1 | tee frames/render.log
+          ffmpeg -v error -framerate 16 -i frames/frame-%04d.png -c:v libx264 -crf 18 -pix_fmt yuv420p forward.mp4
+          ffmpeg -v error -i forward.mp4 -vf reverse -c:v libx264 -crf 18 -pix_fmt yuv420p reverse.mp4
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: morphogenesis-evaluated-film-${{ matrix.treatment }}
+          path: |
+            frames/
+            forward.mp4
+            reverse.mp4
+          if-no-files-found: warn
+  wearable:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: unfurl-wearable-native-B
+          run-id: 46034998786
+          github-token: ${{ github.token }}
+          path: previous-native
+      - uses: actions/download-artifact@v4
+        with:
+          name: unfurl-wearable-fashion-B
+          run-id: 46034998786
+          github-token: ${{ github.token }}
+          path: previous-renders
+      - run: sudo apt-get update && sudo apt-get install -y blender python3-pil fonts-dejavu-core
+      - run: |
+          mkdir -p native audits
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/morphogenesis_wearable.py -- --mode build --out native 2>&1 | tee native/build.log
+          sha256sum native/*.blend > native/SHA256SUMS
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/morphogenesis_wearable.py -- --mode audit --source native/MORPHOGENESIS-B-closed.blend --out audits
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: morphogenesis-B-native
+          path: |
+            native/
+            audits/
+          if-no-files-found: warn
+      - run: |
+          mkdir -p renders board
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/morphogenesis_wearable.py -- --mode render --source native/MORPHOGENESIS-B-closed.blend --out renders 2>&1 | tee renders/render.log
+          python3 - <<'PY'
+          from PIL import Image,ImageDraw,ImageFont
+          c=Image.new('RGB',(1600,2230),'#e5e3df');d=ImageDraw.Draw(c)
+          def f(n):return ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',n)
+          d.text((40,20),'MORPHOGENESIS / SCULPTURAL IDENTITY',font=f(36),fill='#181c23')
+          d.text((40,68),'ACTUAL MATCHED RENDERS / FICTIONAL ACTUATION',font=f(22),fill='#41464b')
+          for i,(root,label) in enumerate([('previous-renders','UNFURL B'),('renders','MORPHOGENESIS B')]):
+              x=40+i*780;d.text((x,110),label,font=f(28),fill='#181c23')
+              for j,name in enumerate(['metal-hero','metal-crown','clay-hero','worn-back']):
+                  im=Image.open(root+'/'+name+'.png').convert('RGB');im.thumbnail((740,488));y=153+j*515
+                  c.paste(im,(x+(740-im.width)//2,y));d.text((x,y+488),name.upper(),font=f(17),fill='#181c23')
+          c.save('board/MORPHOGENESIS-fashion-comparison.png')
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: morphogenesis-B-fashion
+          path: |
+            renders/
+            board/
+          if-no-files-found: warn
