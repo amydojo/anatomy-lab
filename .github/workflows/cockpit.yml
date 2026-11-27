@@ -1,0 +1,42 @@
+name: COCKPIT touch qualification
+on:
+  push:
+    branches: ['experiment/marrow-cockpit-001']
+  pull_request:
+    branches: ['experiment/vector-velocity-006']
+    paths: ['assets/atlas/marrow-cockpit.js','assets/atlas/marrow.js','atlas/cockpit.css','atlas/index.html','play/index.html','tests/marrow-cockpit*','.github/workflows/cockpit.yml']
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/marrow-cockpit.test.mjs tests/marrow-gyro.test.mjs tests/marrow-surface.test.mjs tests/marrow.test.mjs
+  browser:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop-chromium, webkit-mobile]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright test tests/marrow-cockpit.spec.mjs --project=${{ matrix.project }} --workers=1
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cockpit-${{ matrix.project }}
+          path: |
+            test-results/
+            artifacts/results.json
+          if-no-files-found: warn

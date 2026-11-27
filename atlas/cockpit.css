@@ -1,5 +1,5 @@
 /* COCKPIT: gameplay-only touch surface, no global accessibility gesture overrides. */
-#marrow-hud.cockpit-enabled{touch-action:none;user-select:none;-webkit-user-select:none;overscroll-behavior:contain}
+#marrow-hud.cockpit-enabled{user-select:none;-webkit-user-select:none;overscroll-behavior:contain}
 #marrow-hud.cockpit-enabled #marrow-ride-controls{display:none!important}
 #marrow-hud.cockpit-enabled:not([data-inspect=true]) .cockpit-legacy-look{display:none!important}
 #marrow-hud.cockpit-enabled>div:first-of-type h1{font-size:16px!important}
@@ -22,3 +22,5 @@
 #marrow-hud.cockpit-enabled #marrow-sensitivity{display:none}
 @media(max-height:450px){.cockpit-settings{top:52px}.cockpit-research{top:58px}.cockpit-actions{bottom:calc(var(--d) + 16px)}}
 @media(max-width:500px){#marrow-hud.cockpit-enabled>div:nth-of-type(3){flex-wrap:wrap;max-width:65%;justify-content:flex-end}#marrow-hud.cockpit-enabled button{font-size:10px;padding:6px!important}.cockpit-research{top:85px}.cockpit-settings{top:85px}}
+
+#marrow-hud.cockpit-enabled>div:not(.cockpit):has(>h1){max-width:42%!important;left:12px!important;top:10px!important}#marrow-hud.cockpit-enabled>div:not(.cockpit):has(>h1) small{display:none}#marrow-hud.cockpit-enabled>div:not(.cockpit):has(>h1) h1{font-size:15px!important;letter-spacing:.15em!important}#marrow-hud.cockpit-enabled>div:has(>[data-a=exit]){max-width:55%;flex-wrap:wrap;justify-content:flex-end;gap:3px!important}#marrow-hud.cockpit-enabled>div:has(>[data-a=exit]) button{padding:6px!important;font-size:10px}.cockpit-settings,.cockpit-research{max-height:50%;overscroll-behavior:contain}
