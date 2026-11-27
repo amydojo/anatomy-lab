@@ -23,6 +23,6 @@ test('OSTEO exact plane distributed support, no fabricated curvature on missing 
 });
 test('OSTEO arbitrary orientation and bounded pose correction does not change authoritative simulation',()=>{
  const world=M.collision([part],null,true),hit=world.ray([0,-.2,0],[0,1,0],.4),sim=S.create(world,{...hit,forward:[0,0,-1]}),parts=B.geometry(),motion=B.motion(),interpreter=createTerrainInterpreter(world,B,{deterministic:true});
- for(let i=0;i<240;i++){sim.advance(1/120,{stick:[0,-1],push:.4});const state=sim.visual(),before=JSON.stringify(sim.report()),pose=motion.update(state,M.boardMatrix(state),1/120);interpreter.update(state,pose,parts,1/120,true,true);const after=sim.report();delete after.flightCollision;const prior=JSON.parse(before);delete prior.flightCollision;assert.deepEqual(after,prior);const d=interpreter.report();assert.ok(d.lift<=.00800001&&d.tilt<=.12000001);}
+ for(let i=0;i<240;i++){sim.advance(1/120,{stick:[0,-1],push:.4});const state=sim.visual(),before=structuredClone(sim.report()),pose=motion.update(state,M.boardMatrix(state),1/120);interpreter.update(state,pose,parts,1/120,true,true);const after=sim.report();delete after.flightCollision;delete before.flightCollision;assert.deepEqual(after,before);const d=interpreter.report();assert.ok(d.lift<=.00800001&&d.tilt<=.12000001);}
  assert.equal(sim.s.ground,true);assert.equal(sim.s.glideEntries,0);assert.equal(sim.s.remounts,0);
 });
