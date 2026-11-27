@@ -75,6 +75,7 @@ json.dump(report,open(os.path.join(out,'reduction.json'),'w'),indent=2)
 SIZE=1024;small=0
 for lo,rec in zip(lows,records):
     select(lo)
+    for old in list(lo.data.uv_layers):lo.data.uv_layers.remove(old)
     uv=lo.data.uv_layers.new(name='VelocityAtlas');lo.data.uv_layers.active=uv
     bpy.ops.object.mode_set(mode='EDIT');bpy.ops.mesh.select_all(action='SELECT');bpy.ops.uv.smart_project(angle_limit=math.radians(66),island_margin=.025);bpy.ops.object.mode_set(mode='OBJECT')
     if rec['name']=='TENSION_continuous_frame':x,y,w=0,512,512
@@ -139,7 +140,7 @@ mat=bpy.data.materials.new('VELOCITY / baked AFTERBURN');mat.use_nodes=True;n=ma
 uv=n.new('ShaderNodeUVMap');uv.uv_map='VelocityAtlas'
 tex={}
 for key,im in images.items():
-    t=n.new('ShaderNodeTexImage');t.image=im;l.new(uv.outputs['UV'],t.inputs['Vector']);tex[key]=t
+    t=n.new('ShaderNodeTexImage');t.image=im;t.extension='EXTEND';l.new(uv.outputs['UV'],t.inputs['Vector']);tex[key]=t
 l.new(tex['base'].outputs['Color'],p.inputs['Base Color'])
 sep=n.new('ShaderNodeSeparateColor');sep.mode='RGB';l.new(tex['orm'].outputs['Color'],sep.inputs[0]);l.new(sep.outputs[1],p.inputs['Roughness']);l.new(sep.outputs[2],p.inputs['Metallic'])
 normal=n.new('ShaderNodeNormalMap');normal.uv_map='VelocityAtlas';l.new(tex['normal'].outputs['Color'],normal.inputs['Color']);l.new(normal.outputs[0],p.inputs['Normal'])
