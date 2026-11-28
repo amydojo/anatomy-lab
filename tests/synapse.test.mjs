@@ -15,3 +15,10 @@ test('SYNAPSE failed preparation is memoized, never becomes positive clearance',
 test('SYNAPSE refuses stale identity, nonrigid transform and out-of-range articulation',()=>{
  const m=createSpatialMemory({pose:()=>({clear:true})},parts,B,I),q=m.build(pose());const changed=createSpatialMemory({pose:()=>({clear:true})},parts,B,{...I,solver:'new'});assert.equal(changed.contains(q,pose(),pose()),false);const fake={...pose(),r:[2,0,0,0,1,0,0,0,1]};assert.equal(m.lookup(fake,pose()),null);assert.equal(m.build(pose(0,0,.3)),null);
 });
+
+test('SYNAPSE connected-cell coverage admits only fully covered subintervals',()=>{
+ const m=createSpatialMemory({pose:()=>({clear:true})},parts,B,I,{margins:[.002]});
+ const a=m.build(pose(0)),b=m.build(pose(.003));
+ assert.equal(m.lookup(pose(),pose(.003)),null);assert.ok(m.cover(pose(),pose(.003),2));
+ assert.equal(m.cover(pose(),pose(.008),2),null);assert.equal(m.contains({...a,margin:1},pose(),pose(.008)),false);assert.ok(Object.isFrozen(a.pose.r));assert.ok(b);
+});
