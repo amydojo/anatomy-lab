@@ -30,7 +30,7 @@
 
 /* FLOW TOUCH is an opt-in separate phone profile. Touch surface is broad, visual controls are small. */
 .flow-hint,.flow-meter,.flow-only{display:none!important}
-.cockpit[data-flow=true] .cockpit-steer{left:10px;right:10px;bottom:calc(12px + env(safe-area-inset-bottom,0px));width:auto;height:clamp(142px,32dvh,250px);border:1px solid #e2ff4538;border-radius:24px;background:linear-gradient(0deg,#10101855,transparent);opacity:var(--cockpit-opacity,.65);overflow:visible}
+.cockpit[data-flow=true] .cockpit-steer{left:10px;right:10px;bottom:calc(12px + env(safe-area-inset-bottom,0px));width:auto;height:clamp(142px,calc(32dvh * var(--cockpit-size,1)),280px);border:1px solid #e2ff4538;border-radius:24px;background:linear-gradient(0deg,#10101855,transparent);opacity:var(--cockpit-opacity,.65);overflow:visible}
 .cockpit[data-flow=true][data-hand=left] .cockpit-steer{left:10px;right:10px}
 .cockpit[data-flow=true] .cockpit-ring{width:78px;height:78px;left:73%;top:62%;border-color:#dfff3855;pointer-events:none}
 .cockpit[data-flow=true][data-hand=left] .cockpit-ring{left:27%}
@@ -41,7 +41,7 @@
 .cockpit[data-flow=true] .flow-hint{display:block!important;position:absolute;bottom:10px;left:0;right:0;text-align:center;pointer-events:none;font-size:11px}
 .cockpit[data-flow=true] .flow-meter{display:block!important;position:absolute;bottom:30px;left:25%;right:25%;height:3px;background:#dfff3830;pointer-events:none;border-radius:3px}
 .cockpit[data-flow=true] .flow-meter i{display:block;height:100%;background:#dfff38;border-radius:3px}
-.cockpit[data-flow=true] .cockpit-actions{left:auto;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(clamp(142px,32dvh,250px) + 22px + env(safe-area-inset-bottom,0px));max-width:none}
+.cockpit[data-flow=true] .cockpit-actions{left:auto;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(clamp(142px,calc(32dvh * var(--cockpit-size,1)),280px) + 22px + env(safe-area-inset-bottom,0px));max-width:none}
 .cockpit[data-flow=true][data-hand=left] .cockpit-actions{right:auto;left:calc(18px + env(safe-area-inset-left,0px))}
 .cockpit[data-flow=true] .cockpit-actions button{min-width:52px;min-height:48px;font-size:12px}
 .flow-touch-enabled .flow-menu{top:calc(10px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px));max-height:75%;max-width:min(310px,86vw);padding:10px;touch-action:pan-y}
@@ -52,4 +52,7 @@
 .flow-touch-enabled .flow-menu .cockpit-research{position:static;max-width:none;max-height:none;margin-top:8px}
 .flow-touch-enabled .flow-menu #marrow-sensitivity{display:block!important;position:static!important;margin-top:8px}
 .flow-touch-enabled .flow-menu[open]{background:#151017f5}
-@media(orientation:landscape){.cockpit[data-flow=true] .cockpit-steer{left:auto;right:calc(12px + env(safe-area-inset-right,0px));width:min(48vw,440px);height:clamp(110px,44dvh,210px)}.cockpit[data-flow=true][data-hand=left] .cockpit-steer{left:calc(12px + env(safe-area-inset-left,0px));right:auto}.cockpit[data-flow=true] .cockpit-actions{bottom:calc(clamp(110px,44dvh,210px) + 22px + env(safe-area-inset-bottom,0px))}}
+@media(orientation:landscape){.cockpit[data-flow=true] .cockpit-steer{left:auto;right:calc(12px + env(safe-area-inset-right,0px));width:min(calc(48vw * var(--cockpit-size,1)),55vw,440px);height:clamp(110px,calc(44dvh * var(--cockpit-size,1)),210px)}.cockpit[data-flow=true][data-hand=left] .cockpit-steer{left:calc(12px + env(safe-area-inset-left,0px));right:auto}.cockpit[data-flow=true] .cockpit-actions{bottom:calc(clamp(110px,calc(44dvh * var(--cockpit-size,1)),210px) + 22px + env(safe-area-inset-bottom,0px))}}
+
+@supports not (height:1dvh){.cockpit[data-flow=true] .cockpit-steer{height:clamp(142px,32vh,250px)}.cockpit[data-flow=true] .cockpit-actions{bottom:calc(clamp(142px,32vh,250px) + 22px + env(safe-area-inset-bottom,0px))}@media(orientation:landscape){.cockpit[data-flow=true] .cockpit-steer{height:clamp(110px,44vh,210px)}.cockpit[data-flow=true] .cockpit-actions{bottom:calc(clamp(110px,44vh,210px) + 22px + env(safe-area-inset-bottom,0px))}}}
+.cockpit[data-flow=true] .cockpit-steer{left:calc(10px + env(safe-area-inset-left,0px));right:calc(10px + env(safe-area-inset-right,0px))}.cockpit[data-flow=true][data-hand=left] .cockpit-steer{left:calc(10px + env(safe-area-inset-left,0px));right:calc(10px + env(safe-area-inset-right,0px))}@media(orientation:landscape){.cockpit[data-flow=true] .cockpit-steer{left:auto;right:calc(12px + env(safe-area-inset-right,0px))}.cockpit[data-flow=true][data-hand=left] .cockpit-steer{left:calc(12px + env(safe-area-inset-left,0px));right:auto}}

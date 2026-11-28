@@ -1,0 +1,56 @@
+[
+  {
+    "profile": "MONO",
+    "initialForwardPixels": 28,
+    "initialThrottle": 0.48225619915160894,
+    "steadyThrottle": 0.48225619915160894,
+    "throttleVariation": 0,
+    "commandFirstStep": 1,
+    "actualFirstStep": 4,
+    "peakActualRadPerS": 0.44811685274380725,
+    "headingDegrees": 20.6913316245016,
+    "rideDistance": 0.16424734984932737,
+    "coast": {
+      "before": 0.08669892606760246,
+      "after": 0.031894752471913805,
+      "steering": {
+        "steer": 0.5404211553048133,
+        "reference": "vehicle",
+        "flow": false,
+        "coasting": false,
+        "requestedRate": 0,
+        "commandRate": 0,
+        "requestedHeading": 0.39107255771937766,
+        "actualRate": 0.03329150678215534
+      },
+      "blocked": 0
+    }
+  },
+  {
+    "profile": "FLOW",
+    "initialForwardPixels": 16,
+    "initialThrottle": 0.48,
+    "steadyThrottle": 0.48,
+    "throttleVariation": 0,
+    "commandFirstStep": 1,
+    "actualFirstStep": 4,
+    "peakActualRadPerS": 0.39358595501236826,
+    "headingDegrees": 18.226642553791507,
+    "rideDistance": 0.1634962131538785,
+    "coast": {
+      "before": 0.08631766092259938,
+      "after": 0.031754492863431884,
+      "steering": {
+        "steer": 0.5404211553048133,
+        "reference": "vehicle",
+        "flow": true,
+        "coasting": true,
+        "requestedRate": 0.9160421584956475,
+        "commandRate": 0.9160421584956475,
+        "requestedHeading": 0.5136305923782143,
+        "actualRate": 0.842943317783382
+      },
+      "blocked": 0
+    }
+  }
+]
