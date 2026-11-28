@@ -1,8 +1,10 @@
-import '../../../../assets/atlas/marrow-ride.js';
-import '../../../../assets/atlas/marrow-surface.js';
-import '../../../../assets/atlas/marrow-board.js';
-import '../../../../assets/atlas/marrow.js';
-import '../../../../assets/atlas/vhf-source.js';
+// In the browser main thread retain already mounted globals. A worker or Node
+// initializes its own independent module scope.
+if(!globalThis.BodyMarrowRide)await import('../../../../assets/atlas/marrow-ride.js');
+if(!globalThis.BodyMarrowSurface)await import('../../../../assets/atlas/marrow-surface.js');
+if(!globalThis.BodyMarrowBoard)await import('../../../../assets/atlas/marrow-board.js');
+if(!globalThis.BodyMarrow)await import('../../../../assets/atlas/marrow.js');
+if(!globalThis.BodyVHF)await import('../../../../assets/atlas/vhf-source.js');
 export const SHA='e64ef983520090af7b07b2e3f67e6fc365a615b17d5ba457faf2039f3920fb66',SOURCE='9e7ce356a6d9a84b722eb0255b1748137e8e7c7b183c58adc712cb8a2e5412b0',MANIFEST='2fdd5646e81e66ab16458091fdc9d8a45ffbbc1465f5f2bb0056f07cedc953d7';
 export const identity=Object.freeze({sourceSHA:SOURCE,vehicleSHA:SHA,coordinateFrame:'VHF-axis-v1 (240-X,Z-1000,Y-235)*.005',solver:'HORIZON-1/2cf8fae',sourceID:'bonehub-vhf-skull_cranial_maxilla',mechanical:'root geodesic + linear qualified twist/compression/deploy; depth5 inflated OBB; conditional closed solid'});
 export const B=globalThis.BodyMarrowBoard,M=globalThis.BodyMarrow,S=globalThis.BodyMarrowSurface;
