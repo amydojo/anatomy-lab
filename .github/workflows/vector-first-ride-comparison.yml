@@ -1,0 +1,81 @@
+name: VECTOR FIRST RIDE equivalent qualification
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - 'tests/velocity-equivalence.spec.mjs'
+      - '.github/workflows/vector-first-ride-comparison.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  compare:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-kinetic-import-asset
+          run-id: 45954118521
+          github-token: ${{ github.token }}
+          path: baseline
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-velocity-textured-20000
+          run-id: 45969785816
+          github-token: ${{ github.token }}
+          path: candidate
+      - run: |
+          echo 'f9766ca2cd80f81fcfafbb5e839f585f6f620c48b1470efbcf69ca109646d942  baseline/VECTOR-005-KINETIC-scalar.glb' | sha256sum -c -
+          echo 'e64ef983520090af7b07b2e3f67e6fc365a615b17d5ba457faf2039f3920fb66  candidate/VECTOR-005-VELOCITY-20000.glb' | sha256sum -c -
+      - run: npm install --no-audit --no-fund
+      - run: KINETIC_BASELINE="$PWD/baseline/VECTOR-005-KINETIC-scalar.glb" VELOCITY_CANDIDATE="$PWD/candidate/VECTOR-005-VELOCITY-20000.glb" npx playwright test tests/velocity-equivalence.spec.mjs --project=desktop-chromium --project=webkit-mobile --workers=1
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-first-ride-equivalent-performance
+          path: test-results/
+          if-no-files-found: warn
+  baked-motion-clearance:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-velocity-textured-20000
+          run-id: 45969785816
+          github-token: ${{ github.token }}
+          path: candidate
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-kinetic-replay
+          run-id: 45954118521
+          github-token: ${{ github.token }}
+          path: replay
+      - run: echo 'f51f570cf1815a9c2c6d31df0af3fc75f17683450e619736be5edb703dd17fe2  candidate/VECTOR-005-VELOCITY-20000.blend' | sha256sum -c -
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
+      - name: Unchanged complete gate on actual baked master
+        run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/continuity/qualify_continuity.py -- --master candidate/VECTOR-005-VELOCITY-20000.blend --out mechanical.json
+      - name: Original KINETIC sampled gate with only candidate digest substituted
+        if: always()
+        run: |
+          sed 's/1758f93d990ce18a2b962653457912a3dcf87d7b4431f0291b8b4fd0a20c66e9/f51f570cf1815a9c2c6d31df0af3fc75f17683450e619736be5edb703dd17fe2/' experiments/hairpin/vector/kinetic/qualify_kinetic.py > /tmp/qualify_velocity.py
+          blender -b -t 4 --python-exit-code 1 --python /tmp/qualify_velocity.py -- --source candidate/VECTOR-005-VELOCITY-20000.blend --replay replay/kinetic-replay.json --out kinetic-clearance.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-first-ride-baked-motion-clearance
+          path: |
+            mechanical.json
+            kinetic-clearance.json
+          if-no-files-found: warn

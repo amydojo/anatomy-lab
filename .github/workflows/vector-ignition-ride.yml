@@ -1,0 +1,55 @@
+name: VECTOR IGNITION physical ride candidate
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - 'assets/atlas/atlas-renderer.js'
+      - 'assets/atlas/atlas-controller.js'
+      - 'assets/atlas/marrow.js'
+      - 'assets/atlas/marrow-surface.js'
+      - 'tests/afterglow-camera.test.mjs'
+      - 'tests/euphoria-input.test.mjs'
+      - 'tests/euphoria-camera.spec.mjs'
+      - 'play/index.html'
+      - 'experiments/hairpin/vector/velocity/ride-asset.mjs'
+      - 'tests/velocity-ride.spec.mjs'
+      - '.github/workflows/vector-ignition-ride.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  ride:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop-chromium, webkit-mobile]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-velocity-textured-20000
+          run-id: 45969785816
+          github-token: ${{ github.token }}
+          path: candidate
+      - run: echo 'e64ef983520090af7b07b2e3f67e6fc365a615b17d5ba457faf2039f3920fb66  candidate/VECTOR-005-VELOCITY-20000.glb' | sha256sum -c -
+      - run: mkdir -p experiments/hairpin/vector/velocity/generated && cp candidate/VECTOR-005-VELOCITY-20000.glb experiments/hairpin/vector/velocity/generated/
+      - run: node --check assets/atlas/atlas-renderer.js && node --check assets/atlas/atlas-controller.js && node --check assets/atlas/marrow.js && node --check experiments/hairpin/vector/velocity/ride-asset.mjs
+      - run: npm install --no-audit --no-fund
+      - run: node --test tests/marrow-board.test.mjs tests/marrow-gyro.test.mjs tests/marrow-ride.test.mjs tests/marrow-surface.test.mjs tests/afterglow-camera.test.mjs tests/euphoria-input.test.mjs
+      - if: ${{ !cancelled() }}
+        run: VELOCITY_CANDIDATE="$PWD/candidate/VECTOR-005-VELOCITY-20000.glb" npx playwright test tests/velocity-ride.spec.mjs tests/euphoria-camera.spec.mjs --project=${{ matrix.project }} --workers=1
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-ignition-ride-${{ matrix.project }}
+          path: test-results/
+          if-no-files-found: warn

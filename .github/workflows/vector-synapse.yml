@@ -1,0 +1,82 @@
+name: VECTOR SYNAPSE spatial intelligence research
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - 'experiments/hairpin/vector/velocity/synapse-*.mjs'
+      - 'tests/synapse*'
+      - 'assets/atlas/marrow.js'
+      - '.github/workflows/vector-synapse.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  restricted:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/synapse.test.mjs tests/foresight.test.mjs tests/kinesis.test.mjs tests/slipstream.test.mjs tests/flow-state.test.mjs tests/osteodynamics.test.mjs tests/marrow-surface.test.mjs tests/marrow-gyro.test.mjs tests/marrow-board.test.mjs
+      - run: |
+          mkdir -p synapse-results
+          SYNAPSE_OUTPUT=synapse-results/synapse-restricted-results.json node --max-old-space-size=6144 experiments/hairpin/vector/velocity/synapse-restricted.mjs
+          SYNAPSE_TRAINING=synapse-results/synapse-restricted-results.json SYNAPSE_OUTPUT=synapse-results/synapse-prepared-results.json node --max-old-space-size=6144 experiments/hairpin/vector/velocity/synapse-prepared.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-synapse-restricted-lab
+          path: synapse-results/
+          if-no-files-found: warn
+  advanced-regression:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        specimen: [VERTEBRA_C1, SCAPULA_LEFT]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - env:
+          FORESIGHT_SPECIMEN: ${{ matrix.specimen }}
+        run: node --max-old-space-size=6144 experiments/hairpin/vector/velocity/foresight-lab-runner.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-synapse-advanced-${{ matrix.specimen }}
+          path: foresight-results/
+          if-no-files-found: warn
+  browser-review:
+    needs: restricted
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop-chromium, webkit-mobile]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-synapse-restricted-lab
+          path: synapse-results
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright test tests/synapse.spec.mjs --project=${{ matrix.project }} --workers=1
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-synapse-browser-${{ matrix.project }}
+          path: test-results/
+          if-no-files-found: warn

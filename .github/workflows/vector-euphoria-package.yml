@@ -1,0 +1,41 @@
+name: VECTOR EUPHORIA pinned experimental resource
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - '.github/workflows/vector-euphoria-package.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  package:
+    if: github.repository == 'amydojo/anatomy-lab' && ((github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'experiment/vector-velocity-006') || (github.event_name == 'workflow_dispatch' && github.ref_name == 'experiment/vector-velocity-006'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-velocity-textured-20000
+          run-id: 45969785816
+          github-token: ${{ github.token }}
+          path: candidate
+      - name: Verify and package only the qualified runtime bytes
+        run: |
+          set -eu
+          source=candidate/VECTOR-005-VELOCITY-20000.glb
+          dest=experiments/hairpin/vector/velocity/generated/VECTOR-005-VELOCITY-20000.glb
+          echo "e64ef983520090af7b07b2e3f67e6fc365a615b17d5ba457faf2039f3920fb66  $source" | sha256sum -c -
+          mkdir -p "$(dirname "$dest")"
+          cp "$source" "$dest"
+          git add -f -- "$dest"
+          git diff --cached --stat
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "EUPHORIA: package exact SHA-256 qualified VECTOR runtime resource"
+          # Ordinary fast-forward only. Never overwrite intervening work.
+          git push origin HEAD:refs/heads/experiment/vector-velocity-006

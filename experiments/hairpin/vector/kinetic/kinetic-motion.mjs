@@ -17,7 +17,7 @@ export function scriptedState(t){
 }
 export function createKinetic(boardAPI){
  const motion=boardAPI.motion();let time=0,pulse=0,lastLandings=0,level=0;
- return {reset(){motion.reset();time=pulse=lastLandings=level=0;},update(state,base,dt,options={}){
+ return {reset(){motion.reset();time=pulse=lastLandings=level=0;},checkpoint:()=>({time,pulse,lastLandings,level,motion:motion.checkpoint()}),restore:q=>{({time,pulse,lastLandings,level}=q);motion.restore(q.motion);},update(state,base,dt,options={}){
  dt=clamp(dt,0,.1);time+=dt;
  if((state.landings||0)>lastLandings)pulse=1;
  lastLandings=state.landings||0;pulse*=Math.exp(-dt*12);

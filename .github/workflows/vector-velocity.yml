@@ -1,0 +1,174 @@
+name: VECTOR VELOCITY runtime qualification
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - 'experiments/hairpin/**'
+      - 'tests/marrow-velocity*'
+      - '.github/workflows/vector-velocity.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  adapter:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/marrow-velocity.test.mjs
+      - run: node --check experiments/hairpin/atelier.mjs && node --check experiments/hairpin/studio-renderer.mjs
+  reduction:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        tier: [20000, 13700]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-candidate
+          run-id: 45946040601
+          github-token: ${{ github.token }}
+          path: source
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/velocity/build_velocity.py -- --source source/VECTOR-005-AFTERBURN-0042-master.blend --tier ${{ matrix.tier }} --out reduced --geometry-only
+      - if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-velocity-geometry-${{ matrix.tier }}
+          path: reduced/
+          if-no-files-found: error
+      - name: Unchanged complete-vehicle gate
+        run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/continuity/qualify_continuity.py -- --master reduced/VECTOR-005-VELOCITY-${{ matrix.tier }}-geometry.blend --out mechanical.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-velocity-mechanical-${{ matrix.tier }}
+          path: mechanical.json
+          if-no-files-found: warn
+  bake:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        tier: [20000, 13700]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-velocity-FAILED-bake-${{ matrix.tier }}
+          run-id: 45969365914
+          github-token: ${{ github.token }}
+          path: baked
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/velocity/recover_export.py -- --tier ${{ matrix.tier }} --out baked
+      - if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-velocity-textured-${{ matrix.tier }}
+          path: baked/
+          if-no-files-found: error
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-velocity-FAILED-bake-${{ matrix.tier }}
+          path: baked/
+          if-no-files-found: warn
+  browser:
+    needs: [adapter, bake]
+    if: ${{ !cancelled() && needs.adapter.result == 'success' }}
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        tier: [20000, 13700]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-velocity-textured-${{ matrix.tier }}
+          path: asset
+      - run: npm install --no-audit --no-fund
+      - run: VELOCITY_GLB="$PWD/asset/VECTOR-005-VELOCITY-${{ matrix.tier }}.glb" npx playwright test tests/marrow-velocity.spec.mjs --project=desktop-chromium --project=webkit-mobile --workers=1
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-velocity-browser-${{ matrix.tier }}
+          path: test-results/
+          if-no-files-found: warn
+  blender-proof:
+    needs: bake
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        tier: [20000, 13700]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-velocity-textured-${{ matrix.tier }}
+          path: asset
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-main
+          run-id: 45946040601
+          github-token: ${{ github.token }}
+          path: baseline
+      - run: sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- update && sudo apt-get -o Dir::Etc::sourcelist=sources.list.d/ubuntu.sources -o Dir::Etc::sourceparts=- install -y blender python3-numpy
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/velocity/render_velocity.py -- --master asset/VECTOR-005-VELOCITY-${{ matrix.tier }}.blend --edition velocity --mode studio --subset main --baseline baseline/chromatic-studio-main-report.json --out proof
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-velocity-proof-${{ matrix.tier }}
+          path: proof/
+          if-no-files-found: warn
+  matched-camera:
+    needs: [adapter, blender-proof]
+    if: ${{ !cancelled() && needs.adapter.result == 'success' }}
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        tier: [20000, 13700]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-velocity-textured-${{ matrix.tier }}
+          path: asset
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-velocity-proof-${{ matrix.tier }}
+          path: proof
+      - run: npm install --no-audit --no-fund
+      - run: VELOCITY_GLB="$PWD/asset/VECTOR-005-VELOCITY-${{ matrix.tier }}.glb" VELOCITY_PROOF="$PWD/proof/velocity-studio-main-report.json" npx playwright test tests/marrow-velocity.spec.mjs --project=desktop-chromium --project=webkit-mobile --workers=1 --grep 'recorded Blender camera'
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-velocity-matched-${{ matrix.tier }}
+          path: test-results/
+          if-no-files-found: warn

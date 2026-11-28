@@ -40,7 +40,7 @@ compression*=Math.exp(-dt*14);twist=mix(twist,clamp((state.bank||0)*.85,-.14,.14
 const pose=(b,a,offset=0)=>{const r=b.r.slice(),u=r.slice(3,6),x=r.slice(0,3),f=r.slice(6,9),right=x.map((v,k)=>v*Math.cos(a)-u[k]*Math.sin(a)),up=u.map((v,k)=>v*Math.cos(a)+x[k]*Math.sin(a));return {r:[...right,...up,...f],t:b.t.map((v,k)=>v+u[k]*offset)};};
 const front=pose(base,twist, -compression),rear=pose(base,-twist,-compression);
 return {...base,front,rear,frontPod:pose(front,-twist*.65,-.0006*deploy+compression*.65),rearPod:pose(rear,twist*.65,-.0006*deploy+compression*.65),vehicle:{skin:'bone-acid',deploy,compression,twist,energy,grind:!!state.grind,grindLevel:grind,capture}};
-}return {update,reset};}
+}return {update,reset,checkpoint:()=>({twist,deploy,compression,lastLanding,lastRemount,energy,grind,capture}),restore:q=>{({twist,deploy,compression,lastLanding,lastRemount,energy,grind,capture}=q);}};}
 function transform(id,board){if(id.includes('_front_pod'))return board.frontPod||board.front||board;if(id.includes('_rear_pod'))return board.rearPod||board.rear||board;if(id.includes('_front_'))return board.front||board;if(id.includes('_rear_'))return board.rear||board;return board;}
 function intensity(id,board){const s=board.vehicle;if(!s)return 1;if(id.endsWith('_pod'))return .84+.34*s.energy+.22*s.deploy+.25*s.capture;if(id.endsWith('_hardware'))return 1+.08*(s.grindLevel||0);return 1;}
 // Inspection is a pure camera presentation of the actual current vehicle.

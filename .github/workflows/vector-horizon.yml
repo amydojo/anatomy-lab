@@ -1,0 +1,81 @@
+name: VECTOR HORIZON adaptive spatial preparation research
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - 'experiments/hairpin/vector/velocity/horizon-*.mjs'
+      - 'experiments/hairpin/vector/velocity/synapse-cells.mjs'
+      - 'tests/horizon*'
+      - 'assets/atlas/marrow.js'
+      - '.github/workflows/vector-horizon.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  laboratory:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/horizon.test.mjs tests/synapse.test.mjs tests/foresight.test.mjs tests/kinesis.test.mjs tests/slipstream.test.mjs tests/flow-state.test.mjs tests/osteodynamics.test.mjs tests/marrow-surface.test.mjs tests/marrow-board.test.mjs tests/marrow-gyro.test.mjs
+      - run: |
+          mkdir -p horizon-results
+          HORIZON_OUTPUT=horizon-results/horizon-default.json node --max-old-space-size=6144 experiments/hairpin/vector/velocity/horizon-lab.mjs
+          HORIZON_LIFT=.002 HORIZON_COVERAGE_FIRST=1 HORIZON_OUTPUT=horizon-results/horizon-clearance.json node --max-old-space-size=6144 experiments/hairpin/vector/velocity/horizon-lab.mjs
+          SYNAPSE_OUTPUT=horizon-results/synapse-training.json node --max-old-space-size=6144 experiments/hairpin/vector/velocity/synapse-restricted.mjs
+          SYNAPSE_TRAINING=horizon-results/synapse-training.json SYNAPSE_OUTPUT=horizon-results/horizon-prepared-comparison.json node --max-old-space-size=6144 experiments/hairpin/vector/velocity/horizon-prepared-comparison.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-horizon-laboratory
+          path: horizon-results/
+          if-no-files-found: warn
+  browser-review:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop-chromium, webkit-mobile]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright test tests/horizon.spec.mjs --project=${{ matrix.project }} --workers=1
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-horizon-browser-${{ matrix.project }}
+          path: test-results/
+          if-no-files-found: warn
+  advanced-regression:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        specimen: [VERTEBRA_C1, SCAPULA_LEFT]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - env:
+          FORESIGHT_SPECIMEN: ${{ matrix.specimen }}
+        run: node --max-old-space-size=6144 experiments/hairpin/vector/velocity/foresight-lab-runner.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-horizon-advanced-${{ matrix.specimen }}
+          path: foresight-results/
+          if-no-files-found: warn

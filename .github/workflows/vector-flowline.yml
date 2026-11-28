@@ -1,0 +1,101 @@
+name: VECTOR FLOWLINE applied marrowdynamics research
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - 'experiments/hairpin/vector/velocity/flowline-*.mjs'
+      - 'experiments/hairpin/vector/velocity/horizon-*.mjs'
+      - 'experiments/hairpin/vector/velocity/magnetodynamics.mjs'
+      - 'assets/atlas/marrow.js'
+      - 'tests/flowline*'
+      - '.github/workflows/vector-flowline.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regressions:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/flowline.test.mjs tests/magnetodynamics.test.mjs tests/horizon.test.mjs tests/synapse.test.mjs tests/foresight.test.mjs tests/kinesis.test.mjs tests/slipstream.test.mjs tests/flow-state.test.mjs tests/osteodynamics.test.mjs tests/marrow-surface.test.mjs tests/marrow-board.test.mjs tests/marrow-gyro.test.mjs
+  matched-worker:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        policy: [A, B, C, D, E, F, G]
+        region: [0, 1]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - env:
+          FLOWLINE_MODE: ${{ matrix.policy }}
+          FLOWLINE_REGION: ${{ matrix.region }}
+        run: |
+          mkdir -p flowline-results
+          FLOWLINE_OUTPUT=flowline-results/first.json node --max-old-space-size=3072 experiments/hairpin/vector/velocity/flowline-lab.mjs
+          if [ "$FLOWLINE_MODE" = C ] || [ "$FLOWLINE_MODE" = D ] || [ "$FLOWLINE_MODE" = E ] || [ "$FLOWLINE_MODE" = F ] || [ "$FLOWLINE_MODE" = G ]; then
+            FLOWLINE_REPEAT=1 FLOWLINE_OUTPUT=flowline-results/repeat.json node --max-old-space-size=3072 experiments/hairpin/vector/velocity/flowline-lab.mjs
+          fi
+          if [ "$FLOWLINE_MODE" != A ] && [ "$FLOWLINE_MODE" != B ]; then
+            FLOWLINE_SCHEDULE=challenge FLOWLINE_OUTPUT=flowline-results/challenge.json node --max-old-space-size=3072 experiments/hairpin/vector/velocity/flowline-lab.mjs
+          fi
+          if { [ "$FLOWLINE_MODE" = D ] || [ "$FLOWLINE_MODE" = F ] || [ "$FLOWLINE_MODE" = G ]; } && [ "$FLOWLINE_REGION" = 1 ]; then
+            FLOWLINE_STEPS=360 FLOWLINE_AUDIT_REJECTS=1 FLOWLINE_OUTPUT=flowline-results/rejected-audit.json node --max-old-space-size=3072 experiments/hairpin/vector/velocity/flowline-lab.mjs
+          fi
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-flowline-worker-${{ matrix.policy }}-${{ matrix.region }}
+          path: flowline-results/
+          if-no-files-found: warn
+  advanced:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          mkdir -p flowline-results
+          FLOWLINE_OUTPUT=flowline-results/advanced.json node --max-old-space-size=3072 experiments/hairpin/vector/velocity/flowline-advanced.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-flowline-advanced
+          path: flowline-results/
+          if-no-files-found: warn
+  browser-review:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop-chromium, webkit-mobile]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright test tests/flowline.spec.mjs --project=${{ matrix.project }} --workers=1
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-flowline-browser-${{ matrix.project }}
+          path: test-results/
+          if-no-files-found: warn
