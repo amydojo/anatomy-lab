@@ -16,6 +16,7 @@ jobs:
       - run: |
           mkdir -p proof
           blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/anastomosis_native_fusion.py -- --out proof 2>&1 | tee proof/fusion.log
+          python3 experiments/hairpin/couture/anastomosis_event_audit.py proof
           python3 -c "import json; r=json.load(open('proof/native-fusion.json')); assert r['actualEventPass'] and r['filmFrames']==52"
           ffmpeg -v error -framerate 16 -i proof/frame-%04d.png -i proof/fusion.wav -vf 'pad=ceil(iw/2)*2:ceil(ih/2)*2:0:0' -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac proof/forward.mp4
           ffmpeg -v error -i proof/forward.mp4 -vf reverse -af areverse -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac proof/reverse.mp4
