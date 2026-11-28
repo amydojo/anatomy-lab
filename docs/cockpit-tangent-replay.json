@@ -1,0 +1,196 @@
+{
+  "results": [
+    {
+      "name": "independent acquisition, carving cannot accelerate",
+      "pass": true
+    },
+    {
+      "name": "flow alone responds to 15px and ignores horizontal travel",
+      "pass": true
+    },
+    {
+      "name": "matched independent axes and release of either contact",
+      "pass": true
+    },
+    {
+      "name": "bounded jitter and finite steering hold",
+      "pass": true
+    },
+    {
+      "name": "differential common mode and opposite mode isolated",
+      "pass": true
+    },
+    {
+      "name": "cancel, duplicate role, third contact and rapid recontact are neutral",
+      "pass": true
+    },
+    {
+      "name": "three matched flat-surface comparisons retain CONTACT OPTICAL and neutral coast",
+      "pass": true
+    },
+    {
+      "name": "ANCHOR camera-only variants produce identical physical trajectories",
+      "pass": true
+    },
+    {
+      "name": "ORBIT and CONTACT hold orientation on unoccluded flat surface",
+      "pass": true
+    },
+    {
+      "name": "SOFT follows without camera-to-physics feedback",
+      "pass": true
+    },
+    {
+      "name": "screen comparison remains finite and retains attachment",
+      "pass": true
+    },
+    {
+      "name": "edge-on screen projection preserves transported heading instead of flipping",
+      "pass": true
+    },
+    {
+      "name": "CONTACT optical retains bounded screen tracking while eliminating offset ray toggles",
+      "pass": true
+    },
+    {
+      "name": "two fingers arm without drive; midpoint translation builds propulsion only",
+      "pass": true
+    },
+    {
+      "name": "rotation about midpoint produces heading but no propulsion",
+      "pass": true
+    },
+    {
+      "name": "paired translation and rotation retain independent channels",
+      "pass": true
+    },
+    {
+      "name": "separation changes do not generate drive or heading",
+      "pass": true
+    },
+    {
+      "name": "release one foot neutralizes, remaining finger cannot propel, recontact starts neutral",
+      "pass": true
+    },
+    {
+      "name": "crossing singularity neutralizes and re-arms without a heading jump",
+      "pass": true
+    },
+    {
+      "name": "third contact rejected, cancellation clears pair, no flight even at saturation",
+      "pass": true
+    },
+    {
+      "name": "surface replay translates and carves with no automatic flight",
+      "pass": true
+    },
+    {
+      "name": "projected points follow articulated front and rear poses and viewport offsets",
+      "pass": true
+    },
+    {
+      "name": "direct targets remain at actual projection; guide explicit if too close or out of frame",
+      "pass": true
+    },
+    {
+      "name": "acquisition rejects off-deck contact and locks targets after first foot",
+      "pass": true
+    },
+    {
+      "name": "explicit projected foot identity survives inverted deck and reverse touch order",
+      "pass": true
+    },
+    {
+      "name": "partial release exposes missing footprint relative to surviving finger; neutral recontact",
+      "pass": true
+    },
+    {
+      "name": "resting camera composition enlarges deck without altering heading or physical state",
+      "pass": true
+    },
+    {
+      "name": "independent thumb channels, neutral recontact, no implicit lift",
+      "pass": true
+    },
+    {
+      "name": "right and up handles yield corresponding projected world headings",
+      "pass": true
+    },
+    {
+      "name": "edge-on handle preserves prior heading without flip",
+      "pass": true
+    },
+    {
+      "name": "bounded rate and continuous response on flat, preview bounded",
+      "pass": true
+    },
+    {
+      "name": "explicit lift only, release stops authority, no repeated launch while held",
+      "pass": true
+    },
+    {
+      "name": "deliberate retreat waits for pivot, releases to neutral",
+      "pass": true
+    },
+    {
+      "name": "matched fixture keeps framing and no implicit flight",
+      "pass": true
+    },
+    {
+      "name": "bounded retreat attempts recovery using actual contact solver",
+      "pass": true
+    }
+  ],
+  "summary": [
+    {
+      "mode": "riptide",
+      "framed": 186,
+      "frames": 186,
+      "ride": 0.36075639728260434,
+      "flights": 0,
+      "blocked": 0,
+      "maxRate": 0.9750217999432478,
+      "maxRateDelta": 5.000000000000002,
+      "response": 0.016666666666666666,
+      "meanAimError": 0.060106482799344614,
+      "f": [
+        0.3417524190425885,
+        0,
+        -0.9397900212699319
+      ]
+    },
+    {
+      "mode": "tangent",
+      "framed": 186,
+      "frames": 186,
+      "ride": 0.3639918662901655,
+      "flights": 0,
+      "blocked": 0,
+      "maxRate": 1.5998376258138185,
+      "maxRateDelta": 7.000000000000002,
+      "response": 0.008333333333333333,
+      "meanAimError": 0.14633921354125234,
+      "f": [
+        0.703207520578849,
+        0,
+        -0.7109846573600219
+      ]
+    }
+  ],
+  "recovery": {
+    "blocked": 206,
+    "before": 0.12035565372929302,
+    "after": 0.2804732794706589,
+    "flights": 0,
+    "heading": [
+      -2.835628362773821e-8,
+      0,
+      0.9999999999999996
+    ],
+    "position": [
+      -0.0024697253195199013,
+      0.011,
+      0.0400561980635543
+    ]
+  }
+}

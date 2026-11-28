@@ -119,3 +119,24 @@
 .riptide-zone[data-role=flow] i{border-color:#a7caffaa;background:rgba(167,202,255,calc(.06 + var(--riptide-power,0)*.22));}
 .riptide-zone i[hidden]{display:none}
 @media(orientation:landscape){.riptide-zone{height:70%;width:42%}}
+
+/* TANGENT only: low resting docks, floating bounded envelopes, recovery and intent overlay. */
+.cockpit[data-thumb=tangent] :is(.cockpit-steer,.cockpit-pedal,.cockpit-actions,.cockpit-look){display:none!important}
+.cockpit[data-thumb=tangent] .riptide-zones{display:block}.cockpit[data-thumb=tangent] .riptide-zone{height:54%;width:50%}
+.tangent-dock{position:absolute;left:50%;bottom:calc(62px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:72px;height:72px;border:1px dashed #dfff7080;border-radius:50%;display:grid;place-items:center;pointer-events:none;color:#dfff70;background:#10131535}
+.tangent-dock span{font:24px system-ui}.tangent-dock small{position:absolute;top:100%;margin-top:5px;white-space:nowrap;font:600 9px system-ui;letter-spacing:.06em;text-shadow:0 1px 5px #000}
+.riptide-zone[data-role=flow] .tangent-dock{border-color:#a7caff80;color:#a7caff}
+.cockpit[data-thumb=tangent] .riptide-zone[data-held=true] .tangent-dock{opacity:0}
+.cockpit[data-thumb=tangent] .riptide-label{bottom:calc(18px + env(safe-area-inset-bottom,0px));opacity:.9}
+.tangent-envelope{position:absolute;left:0;top:0;width:80px;height:80px;margin:-40px;border:1px solid #dfff7080;border-radius:50%;box-sizing:border-box;pointer-events:none}
+.tangent-envelope[hidden],.tangent-recovery[hidden]{display:none}
+.tangent-envelope b{position:absolute;left:50%;top:50%;width:var(--handle-length,0px);height:2px;background:#dfff70;transform-origin:left center;transform:rotate(var(--handle-angle,0rad));box-shadow:0 0 7px #dfff7080}
+.tangent-envelope[data-saturated=true]{border-color:#f7e0a5}
+.riptide-zone[data-role=flow] .tangent-envelope{width:52px;margin-left:-26px;border-color:#a7caff80;background:conic-gradient(from 0deg,#a7caff30 calc(var(--riptide-power,0)*360deg),transparent 0deg)}
+.riptide-zone[data-role=flow] .tangent-envelope b{background:#a7caff}
+.tangent-status{position:absolute;bottom:calc(155px + env(safe-area-inset-bottom,0px));left:0;right:0;text-align:center;pointer-events:none;font:600 9px system-ui;letter-spacing:.12em;color:#eaf0db;text-shadow:0 1px 6px #000}
+.tangent-recovery{position:absolute;z-index:5;left:50%;transform:translateX(-50%);bottom:calc(192px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;pointer-events:none;white-space:nowrap}
+.tangent-recovery button{pointer-events:auto;min-height:44px;padding:9px 12px!important;background:#22251de8!important;border:1px solid #c7dd99!important;color:#eaffc8;border-radius:24px;font:600 10px system-ui}
+.tangent-ribbon{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:hidden}.tangent-ribbon path{fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.tangent-intent{stroke:#dfff70;stroke-width:2;stroke-dasharray:4 5;opacity:.72}.tangent-travel{stroke:#a7caff;stroke-width:1.5;opacity:.4}.cockpit[data-blocked=true] .tangent-intent{stroke:#f0be83}
+@media(orientation:landscape){.cockpit[data-thumb=tangent] .riptide-zone{height:72%;width:42%}.tangent-dock{bottom:calc(48px + env(safe-area-inset-bottom,0px))}.tangent-status{bottom:calc(20px + env(safe-area-inset-bottom,0px))}.tangent-recovery{bottom:calc(48px + env(safe-area-inset-bottom,0px))}}
