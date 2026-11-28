@@ -26,6 +26,8 @@ jobs:
           mkdir -p horizon-results
           HORIZON_OUTPUT=horizon-results/horizon-default.json node --max-old-space-size=6144 experiments/hairpin/vector/velocity/horizon-lab.mjs
           HORIZON_LIFT=.002 HORIZON_COVERAGE_FIRST=1 HORIZON_OUTPUT=horizon-results/horizon-clearance.json node --max-old-space-size=6144 experiments/hairpin/vector/velocity/horizon-lab.mjs
+          SYNAPSE_OUTPUT=horizon-results/synapse-training.json node --max-old-space-size=6144 experiments/hairpin/vector/velocity/synapse-restricted.mjs
+          SYNAPSE_TRAINING=horizon-results/synapse-training.json SYNAPSE_OUTPUT=horizon-results/horizon-prepared-comparison.json node --max-old-space-size=6144 experiments/hairpin/vector/velocity/horizon-prepared-comparison.mjs
       - if: always()
         uses: actions/upload-artifact@v4
         with:
