@@ -222,7 +222,7 @@ async function qualifySynapse(training,{variation='unseen',steps=1440}={}){
 }
 // HORIZON qualification uses a private worker and independent simulation.
 // Only available on loopback; ordinary deployed riding is unchanged.
-async function qualifyHorizon({region=0,steps=1440,preferredLift=0,coverageFirst=false}={}){
+async function qualifyHorizon({region=0,steps=1440,preferredLift=0,coverageFirst=false,compact=false,sharedSupport=false,adaptiveHorizon=false}={}){
  if(!['127.0.0.1','localhost'].includes(location.hostname)||!active||!rideAsset?.active||inspection||terrainReview||synapseQualification)throw Error('HORIZON is a development qualification only');
  if(![0,1].includes(region)||!Number.isInteger(steps)||steps<1||steps>1440||![0,.002].includes(preferredLift))throw Error('Invalid qualification bounds');
  const token={cancelled:false},asset=rideAsset,ctx=api.context(),saved={...ctx.camera,target:{...ctx.camera.target}};let client=null;
@@ -230,9 +230,9 @@ async function qualifyHorizon({region=0,steps=1440,preferredLift=0,coverageFirst
  try{
   const get=async url=>{const r=await fetch(url);if(!r.ok)throw Error('Asset unavailable');return r.arrayBuffer();},dir='/assets/atlas/vhf/axis/v1/',base='/experiments/hairpin/vector/velocity/';
   const [manifest,source,vehicle,{createHorizonClient},{createHorizonSession},{seedRoutes}]=await Promise.all([get(dir+'manifest.json'),get(dir+'bonehub-vhf-skull_cranial_maxilla.glb'),get(base+'generated/VECTOR-005-VELOCITY-20000.glb'),import(base+'horizon-client.mjs'),import(base+'horizon-session.mjs'),import(base+'osteodynamics-replay.mjs')]);
-  client=await createHorizonClient({manifest,source,vehicle},{generation:region+1});
+  client=await createHorizonClient({manifest,source,vehicle},{generation:region+1,compact:compact===true});
   if(token.cancelled||!active||asset!==rideAsset)throw Error('Qualification cancelled');
-  const {part,parts}=client,exact=collision([part],null,true),B=root.BodyMarrowBoard,S=root.BodyMarrowSurface,seeds=seedRoutes(exact,part,parts,B,boardMatrix),first=seeds.selected,far=seeds.seeds.filter(q=>q.supportRatio>=.55).sort((a,b)=>Math.hypot(...b.hit.point.map((v,k)=>v-first.hit.point[k]))-Math.hypot(...a.hit.point.map((v,k)=>v-first.hit.point[k])))[0],seed=region?far:first,session=await createHorizonSession(client,seed,{preferredLift,coverageFirst});
+  const {part,parts}=client,exact=collision([part],null,true),B=root.BodyMarrowBoard,S=root.BodyMarrowSurface,seeds=seedRoutes(exact,part,parts,B,boardMatrix),first=seeds.selected,far=seeds.seeds.filter(q=>q.supportRatio>=.55).sort((a,b)=>Math.hypot(...b.hit.point.map((v,k)=>v-first.hit.point[k]))-Math.hypot(...a.hit.point.map((v,k)=>v-first.hit.point[k])))[0],seed=region?far:first,session=await createHorizonSession(client,seed,{preferredLift,coverageFirst,sharedSupport:sharedSupport===true,adaptiveHorizon:adaptiveHorizon===true,strictLift:true});
   if(!session.ready)throw Error('No admitted start');
   const cam=S.rig(session.current(),exact),frames=[],draw=[],samples=[];let processed=0,backlog=0,start=performance.now(),prior=start;
   await new Promise(resolve=>{function frame(now){
