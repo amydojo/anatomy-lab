@@ -1,0 +1,50 @@
+{
+  "workflow": 46101009721,
+  "artifact": 15246167491,
+  "source": "bonehub-vhf-skull_cranial_maxilla",
+  "project": "webkit-mobile",
+  "delivery": "synthetic pointer",
+  "flow": {
+    "framedRatio": 1,
+    "frameMedianMs": 114,
+    "frameP95Ms": 159,
+    "flights": 1,
+    "landings": 1,
+    "blockedSteps": 0,
+    "landingTangentialSpeed": 1.9112673880443604e-16
+  },
+  "levitation": {
+    "framedRatio": 1,
+    "frameMedianMs": 87,
+    "frameP95Ms": 145,
+    "angularAccelerationP95": 33.57595583885487,
+    "ordinaryOvershootFlights": 0,
+    "flights": 1,
+    "landings": 1,
+    "blockedSteps": 0,
+    "touchdownSpeed": 0.08778223562336884,
+    "touchdownCarry": 0.08778223562336884,
+    "remounts": 0
+  },
+  "blockedRecovery": {
+    "recovery": "rider-lift",
+    "longestBlockSeconds": 18.999999999999563,
+    "blockedStepsAtRecovery": 2404,
+    "stationaryTurns": 208,
+    "frameMedianMs": 143,
+    "frameP95Ms": 318,
+    "touchdownCarry": 0.16069966718297682,
+    "touchdownSpeed": 0.16069966718297682,
+    "remounts": 0,
+    "falls": 0,
+    "contactRejections": {
+      "forward": 20393,
+      "offset-distance": 126983,
+      "normal": 1,
+      "no-hit": 107123,
+      "intent": 15236,
+      "local-gap": 29
+    }
+  },
+  "limits": "CI software renderer timing, not iPhone performance. Recovery succeeded only after pivot-retreat failed and deliberate lift. Counts refer to candidate rejections not independent obstacles."
+}
