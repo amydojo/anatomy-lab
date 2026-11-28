@@ -15,7 +15,7 @@ function create(options={}){
   const dx=x-q.x,dy=y-q.y;if(Math.abs(dx)>.5&&Math.abs(dy)>.5)q.diagonals++;
   const scale=clamp(q.r/44,.75,1.2),band=3*scale,deltaY=y-q.verticalAnchor;
   let d=0;if(Math.abs(deltaY)>band){const next=y-Math.sign(deltaY)*band;d=-(next-q.verticalAnchor)/scale;q.verticalAnchor=next;q.verticalTravel+=Math.abs(d)*scale;}
-  if(!q.activated){q.initialTravel=Math.max(0,q.initialTravel+d);if(q.initialTravel>=12){q.activated=true;q.cruise=.48;d=q.initialTravel-12;q.initialTravel=0;}else d=0;}
+  if(!q.activated){q.initialTravel=Math.max(0,q.initialTravel+d);if(q.initialTravel>=12){q.activated=true;q.cruise=.48;d=q.initialTravel-12;q.initialTravel=0;q.verticalAnchor=y;}else d=0;}
   if(q.activated&&d!==0){
    if(q.launched||q.wasAir){const energy=q.lift-q.descent+d*.024;q.lift=clamp(energy,0,1);q.descent=clamp(-energy,0,1);if(q.lift<.07)q.lift=0;}
    else if(d>0){const pay=Math.min(q.braking,d*.012);q.braking-=pay;d-=pay/.012;const use=Math.min(Math.max(0,d),(1-q.cruise)/.012);q.cruise=clamp(q.cruise+use*.012,0,1);d-=use;if(q.cruise>=.98&&!q.recapture&&d>0){const threshold=settings.resistance==='firm'?52:36;q.over+=d;q.detent=clamp(q.over/threshold,0,1);if(q.over>=threshold){q.launched=true;q.lift=clamp(.22+(q.over-threshold)*.024,.22,1);q.descent=0;}}}

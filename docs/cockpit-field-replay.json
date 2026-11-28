@@ -1,0 +1,515 @@
+{
+  "rows": [
+    {
+      "profile": "FLOW",
+      "initialThrottle": 0.48,
+      "diagonalThrottle": 0.48,
+      "diagonalSteer": 0.2716997383062671,
+      "firstLiftVerticalPixels": null,
+      "trace": [
+        {
+          "y": 40,
+          "push": 0.48,
+          "steer": 0.31451541723804516,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 50,
+          "push": 0.66,
+          "steer": 0.4057307022004188,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 60,
+          "push": 0.7800000000000001,
+          "steer": 0.5038268203509914,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 70,
+          "push": 0.9000000000000002,
+          "steer": 0.6082581365756747,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 80,
+          "push": 1,
+          "steer": 0.7185859350032137,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 90,
+          "push": 1,
+          "steer": 0.834447740332555,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 100,
+          "push": 1,
+          "steer": 0.955537677448469,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 110,
+          "push": 1,
+          "steer": 1,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 120,
+          "push": 1,
+          "steer": 1,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 130,
+          "push": 1,
+          "steer": 1,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 140,
+          "push": 1,
+          "steer": 1,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 150,
+          "push": 1,
+          "steer": 1,
+          "lift": 0,
+          "detent": 0
+        }
+      ]
+    },
+    {
+      "profile": "LEV gate",
+      "initialThrottle": 0.48,
+      "diagonalThrottle": 0.48,
+      "diagonalSteer": 0.2716997383062671,
+      "firstLiftVerticalPixels": null,
+      "trace": [
+        {
+          "y": 40,
+          "push": 0.48,
+          "steer": 0.31451541723804516,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 50,
+          "push": 0.66,
+          "steer": 0.4057307022004188,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 60,
+          "push": 0.7800000000000001,
+          "steer": 0.5038268203509914,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 70,
+          "push": 0.9000000000000002,
+          "steer": 0.6082581365756747,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 80,
+          "push": 1,
+          "steer": 0.7185859350032137,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 90,
+          "push": 1,
+          "steer": 0.834447740332555,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 100,
+          "push": 1,
+          "steer": 0.955537677448469,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 110,
+          "push": 1,
+          "steer": 1,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 120,
+          "push": 1,
+          "steer": 1,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 130,
+          "push": 1,
+          "steer": 1,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 140,
+          "push": 1,
+          "steer": 1,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 150,
+          "push": 1,
+          "steer": 1,
+          "lift": 0,
+          "detent": 0
+        }
+      ]
+    },
+    {
+      "profile": "LEV travel",
+      "initialThrottle": 0.48,
+      "diagonalThrottle": 0.48,
+      "diagonalSteer": 0.2716997383062671,
+      "firstLiftVerticalPixels": 127,
+      "trace": [
+        {
+          "y": 40,
+          "push": 0.48,
+          "steer": 0.31451541723804516,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 50,
+          "push": 0.66,
+          "steer": 0.4057307022004188,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 60,
+          "push": 0.7800000000000001,
+          "steer": 0.5038268203509914,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 70,
+          "push": 0.9000000000000002,
+          "steer": 0.6082581365756747,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 80,
+          "push": 1,
+          "steer": 0.7185859350032137,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 90,
+          "push": 1,
+          "steer": 0.834447740332555,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 100,
+          "push": 1,
+          "steer": 0.955537677448469,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 110,
+          "push": 1,
+          "steer": 1,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 120,
+          "push": 1,
+          "steer": 1,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 130,
+          "push": 1,
+          "steer": 1,
+          "lift": 0.3416666666666674,
+          "detent": 0
+        },
+        {
+          "y": 140,
+          "push": 1,
+          "steer": 1,
+          "lift": 0.5916666666666676,
+          "detent": 0
+        },
+        {
+          "y": 150,
+          "push": 1,
+          "steer": 1,
+          "lift": 0.8416666666666678,
+          "detent": 0
+        }
+      ]
+    },
+    {
+      "profile": "FIELD fluid",
+      "initialThrottle": 0.48,
+      "diagonalThrottle": 0.6839999999999999,
+      "diagonalSteer": 0.2716997383062671,
+      "firstLiftVerticalPixels": 98,
+      "trace": [
+        {
+          "y": 40,
+          "push": 0.744,
+          "steer": 0.31451541723804516,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 50,
+          "push": 0.8640000000000001,
+          "steer": 0.4057307022004188,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 60,
+          "push": 0.9840000000000002,
+          "steer": 0.5038268203509914,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 70,
+          "push": 1,
+          "steer": 0.6082581365756747,
+          "lift": 0,
+          "detent": 0.24074074074074125
+        },
+        {
+          "y": 80,
+          "push": 1,
+          "steer": 0.7185859350032137,
+          "lift": 0,
+          "detent": 0.518518518518519
+        },
+        {
+          "y": 90,
+          "push": 1,
+          "steer": 0.834447740332555,
+          "lift": 0,
+          "detent": 0.7962962962962968
+        },
+        {
+          "y": 100,
+          "push": 1,
+          "steer": 0.955537677448469,
+          "lift": 0.2840000000000005,
+          "detent": 1
+        },
+        {
+          "y": 110,
+          "push": 1,
+          "steer": 1,
+          "lift": 0.5240000000000007,
+          "detent": 1
+        },
+        {
+          "y": 120,
+          "push": 1,
+          "steer": 1,
+          "lift": 0.7640000000000009,
+          "detent": 1
+        },
+        {
+          "y": 130,
+          "push": 1,
+          "steer": 1,
+          "lift": 1,
+          "detent": 1
+        },
+        {
+          "y": 140,
+          "push": 1,
+          "steer": 1,
+          "lift": 1,
+          "detent": 1
+        },
+        {
+          "y": 150,
+          "push": 1,
+          "steer": 1,
+          "lift": 1,
+          "detent": 1
+        }
+      ]
+    },
+    {
+      "profile": "FIELD firm",
+      "initialThrottle": 0.48,
+      "diagonalThrottle": 0.6839999999999999,
+      "diagonalSteer": 0.2716997383062671,
+      "firstLiftVerticalPixels": 114,
+      "trace": [
+        {
+          "y": 40,
+          "push": 0.744,
+          "steer": 0.31451541723804516,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 50,
+          "push": 0.8640000000000001,
+          "steer": 0.4057307022004188,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 60,
+          "push": 0.9840000000000002,
+          "steer": 0.5038268203509914,
+          "lift": 0,
+          "detent": 0
+        },
+        {
+          "y": 70,
+          "push": 1,
+          "steer": 0.6082581365756747,
+          "lift": 0,
+          "detent": 0.16666666666666702
+        },
+        {
+          "y": 80,
+          "push": 1,
+          "steer": 0.7185859350032137,
+          "lift": 0,
+          "detent": 0.35897435897435936
+        },
+        {
+          "y": 90,
+          "push": 1,
+          "steer": 0.834447740332555,
+          "lift": 0,
+          "detent": 0.5512820512820517
+        },
+        {
+          "y": 100,
+          "push": 1,
+          "steer": 0.955537677448469,
+          "lift": 0,
+          "detent": 0.743589743589744
+        },
+        {
+          "y": 110,
+          "push": 1,
+          "steer": 1,
+          "lift": 0,
+          "detent": 0.9358974358974362
+        },
+        {
+          "y": 120,
+          "push": 1,
+          "steer": 1,
+          "lift": 0.38000000000000056,
+          "detent": 1
+        },
+        {
+          "y": 130,
+          "push": 1,
+          "steer": 1,
+          "lift": 0.6200000000000008,
+          "detent": 1
+        },
+        {
+          "y": 140,
+          "push": 1,
+          "steer": 1,
+          "lift": 0.860000000000001,
+          "detent": 1
+        },
+        {
+          "y": 150,
+          "push": 1,
+          "steer": 1,
+          "lift": 1,
+          "detent": 1
+        }
+      ]
+    }
+  ],
+  "cameraRows": [
+    {
+      "field": false,
+      "phase": "surface",
+      "distance": 0.28300000000000003,
+      "headingErrorDegrees": 89.25000000000001,
+      "framed": 120,
+      "angularAccelerationP95": 0,
+      "maxAngularVelocity": 0,
+      "controlYaw": 0,
+      "lookAhead": 0
+    },
+    {
+      "field": false,
+      "phase": "air",
+      "distance": 0.28300000000000003,
+      "headingErrorDegrees": 90,
+      "framed": 240,
+      "angularAccelerationP95": 0,
+      "maxAngularVelocity": 0,
+      "controlYaw": 0,
+      "lookAhead": 0
+    },
+    {
+      "field": true,
+      "phase": "surface",
+      "distance": 0.28300000000000003,
+      "headingErrorDegrees": 13.666838903926214,
+      "framed": 120,
+      "angularAccelerationP95": 1.4975545007836728,
+      "maxAngularVelocity": 0.7835691396232154,
+      "controlYaw": 0,
+      "lookAhead": 0.008469028009816871
+    },
+    {
+      "field": true,
+      "phase": "air",
+      "distance": 0.35789106755258515,
+      "headingErrorDegrees": 0.023954403533434313,
+      "framed": 240,
+      "angularAccelerationP95": 1.488995449640913,
+      "maxAngularVelocity": 0.7854804184735443,
+      "controlYaw": 0,
+      "lookAhead": 0.008499999999022685
+    }
+  ]
+}
