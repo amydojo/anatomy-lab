@@ -5,10 +5,13 @@ on:
     paths:
       - 'experiments/hairpin/vector/velocity/foresight-*.mjs'
       - 'tests/foresight*'
+      - 'assets/atlas/marrow.js'
+      - 'play/index.html'
       - '.github/workflows/vector-foresight.yml'
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 jobs:
   laboratory:
     if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
@@ -46,4 +49,33 @@ jobs:
         with:
           name: vector-foresight-${{ matrix.specimen }}
           path: foresight-results/
+          if-no-files-found: warn
+  browser-review:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop-chromium, webkit-mobile]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-foresight-SKULL_CRANIAL_MAXILLA
+          run-id: 46092599451
+          github-token: ${{ github.token }}
+          path: foresight-review-input
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright test tests/foresight.spec.mjs --project=${{ matrix.project }} --workers=1
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-foresight-review-${{ matrix.project }}
+          path: test-results/
           if-no-files-found: warn
