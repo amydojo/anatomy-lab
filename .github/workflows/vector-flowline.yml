@@ -30,7 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        policy: [A, B, C, D, E]
+        policy: [A, B, C, D, E, F, G]
         region: [0, 1]
     steps:
       - uses: actions/checkout@v4
@@ -43,10 +43,13 @@ jobs:
         run: |
           mkdir -p flowline-results
           FLOWLINE_OUTPUT=flowline-results/first.json node --max-old-space-size=3072 experiments/hairpin/vector/velocity/flowline-lab.mjs
-          if [ "$FLOWLINE_MODE" = C ] || [ "$FLOWLINE_MODE" = D ] || [ "$FLOWLINE_MODE" = E ]; then
+          if [ "$FLOWLINE_MODE" = C ] || [ "$FLOWLINE_MODE" = D ] || [ "$FLOWLINE_MODE" = E ] || [ "$FLOWLINE_MODE" = F ] || [ "$FLOWLINE_MODE" = G ]; then
             FLOWLINE_REPEAT=1 FLOWLINE_OUTPUT=flowline-results/repeat.json node --max-old-space-size=3072 experiments/hairpin/vector/velocity/flowline-lab.mjs
           fi
-          if [ "$FLOWLINE_MODE" = D ] && [ "$FLOWLINE_REGION" = 1 ]; then
+          if [ "$FLOWLINE_MODE" != A ] && [ "$FLOWLINE_MODE" != B ]; then
+            FLOWLINE_SCHEDULE=challenge FLOWLINE_OUTPUT=flowline-results/challenge.json node --max-old-space-size=3072 experiments/hairpin/vector/velocity/flowline-lab.mjs
+          fi
+          if { [ "$FLOWLINE_MODE" = D ] || [ "$FLOWLINE_MODE" = F ] || [ "$FLOWLINE_MODE" = G ]; } && [ "$FLOWLINE_REGION" = 1 ]; then
             FLOWLINE_STEPS=360 FLOWLINE_AUDIT_REJECTS=1 FLOWLINE_OUTPUT=flowline-results/rejected-audit.json node --max-old-space-size=3072 experiments/hairpin/vector/velocity/flowline-lab.mjs
           fi
       - if: always()
