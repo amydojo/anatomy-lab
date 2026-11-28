@@ -23,7 +23,7 @@ export async function createHorizonSession(client,seed,{approach='diagonal',stri
  tic=performance.now();if(!client.busy()&&(proposal||attempts%stride===0)){
   // Current-command lookahead only; never inspect future evaluation input.
   let look=proposal;if(!look){const x=sim.checkpoint(),k=kin.checkpoint();for(let j=0;j<4;j++){sim.advance(DT,{...input,push:(input.push||0)*drive,brake:Math.max(input.brake||0,1-drive)});const z=sim.researchState();look=commonCorrection(kin.update(z,M.boardMatrix(z),DT,{hover:.00035}),0,0,lift);}sim.restore(x);kin.restore(k);}
-  client.request(pose,look,state.v,input.stick||[0,-1]);}timing.prepare.push(performance.now()-tic);timing.step.push(performance.now()-t);return {committed:!q.reason,reason:q.reason,state:current(),previous:old,coverageMiss:!!proposal};
+  client.request(pose,look,state.v,input.stick||[0,-1],!!proposal);}timing.prepare.push(performance.now()-tic);timing.step.push(performance.now()-t);return {committed:!q.reason,reason:q.reason,state:current(),previous:old,coverageMiss:!!proposal};
  }
  return {ready:!!pose,current,step,report:()=>({spawnMs,attempts,committed,holds,longestHold,emergency,recoveries,braked,misses,distance,guideBlocked,rejections,cpu:Object.fromEntries(Object.entries(timing).map(([k,v])=>[k,stat(v)])),liveAuthorized:false})};
 }
