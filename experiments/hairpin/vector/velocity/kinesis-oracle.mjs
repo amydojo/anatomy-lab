@@ -1,3 +1,4 @@
+import {compactSource as buildCompactSource} from './compact-source.mjs';
 /* KINESIS offline configuration-space oracle. No live physics authorization.
  * All boxes contain their assigned indexed triangles by convexity. SAT checks
  * actual source triangles; outside parity is conditional on a valid closed solid.
@@ -29,13 +30,14 @@ function solidTopology(p){const ids=new Map(),map=new Int32Array(p.positions.len
 function localTree(part,depth){return tree(Array.from({length:part.indices.length/3},(_,i)=>{const t=tri(part,i);return {...box(t),t};}),depth);}
 function validPose(q){if(!q||q.r?.length!==9||q.t?.length!==3||![...q.r,...q.t].every(Number.isFinite))return false;const a=q.r.slice(0,3),b=q.r.slice(3,6),c=q.r.slice(6,9);return Math.abs(dot(a,cross(b,c))-1)<1e-6&&[a,b,c].every(v=>Math.abs(len(v)-1)<1e-6)&&Math.max(Math.abs(dot(a,b)),Math.abs(dot(a,c)),Math.abs(dot(b,c)))<1e-6;}
 function rotationMid(a,b){const aa=[0,3,6].map(k=>a.r.slice(k,k+3)),bb=[0,3,6].map(k=>b.r.slice(k,k+3)),theta=Math.acos(clamp((aa.reduce((s,v,k)=>s+dot(v,bb[k]),0)-1)/2,-1,1)),w=aa.reduce((s,v,k)=>add(s,cross(v,bb[k])),[0,0,0]);if(theta>Math.PI-1e-5)return null;const k=unit(w),angle=theta/2,rot=v=>theta<1e-8?v.slice():add(add(mul(v,Math.cos(angle)),mul(cross(k,v),Math.sin(angle))),mul(k,dot(k,v)*(1-Math.cos(angle))));return {r:aa.flatMap(rot),t:mul(add(a.t,b.t),.5),theta};}
-export function createConfigurationOracle(anatomy,parts,B,{maxDepth=5}={}){if(!Number.isInteger(maxDepth)||maxDepth<5||maxDepth>8)throw Error('Invalid oracle depth');
- const topology=solidTopology(anatomy),root=tree(Array.from({length:anatomy.indices.length/3},(_,i)=>{const t=tri(anatomy,i);return {...box(t),t};})),local=parts.map(p=>({id:p.id,tree:localTree(p,maxDepth),topology:solidTopology(p),radius:Array.from({length:p.positions.length/3},(_,i)=>Math.hypot(...p.positions.slice(i*3,i*3+3))).reduce((a,b)=>Math.max(a,b),0)}));
+export function createConfigurationOracle(anatomy,parts,B,{maxDepth=5,compactSource=false}={}){if(!Number.isInteger(maxDepth)||maxDepth<5||maxDepth>8)throw Error('Invalid oracle depth');
+ const topology=solidTopology(anatomy),packed=compactSource?buildCompactSource(anatomy):null,root=packed?null:tree(Array.from({length:anatomy.indices.length/3},(_,i)=>{const t=tri(anatomy,i);return {...box(t),t};})),local=parts.map(p=>({id:p.id,tree:localTree(p,maxDepth),topology:solidTopology(p),radius:Array.from({length:p.positions.length/3},(_,i)=>Math.hypot(...p.positions.slice(i*3,i*3+3))).reduce((a,b)=>Math.max(a,b),0)}));
  function check(entries,depth,inflate){let boxes=0,triangleTests=0;const start=performance.now();function result(clear,reason){return {clear,reason,boxes,triangleTests,cpuMs:performance.now()-start};}
   if(!topology.closed)return result(false,'source-topology-unqualified');if(local.some(p=>!p.topology.closed))return result(false,'vehicle-topology-unqualified');
   for(let i=0;i<local.length;i++){const q=entries[i];if(!validPose(q))return result(false,'invalid-transform');const stack=[local[i].tree];while(stack.length){const n=stack.pop(),mid=mul(add(n.lo,n.hi),.5),c=apply(q,mid),h=mul(sub(n.hi,n.lo),.5).map(x=>x+inflate[i]+1e-10),ext=axis.map((_,k)=>Math.abs(q.r[k])*h[0]+Math.abs(q.r[k+3])*h[1]+Math.abs(q.r[k+6])*h[2]),a={lo:sub(c,ext),hi:add(c,ext)},work=[root];let hit=false;boxes++;
-    while(work.length&&!hit){const z=work.pop();if(!overlap(a,z))continue;if(z.left){work.push(z.left,z.right);continue;}for(const x of z.items){if(!overlap(a,x))continue;triangleTests++;if(triangleBox(x.t.map(v=>inverse({r:q.r,t:c},v)),h)){hit=true;break;}}}
-    if(!hit){if(!outside(root,c))return result(false,'inside-or-ambiguous');continue;}
+    if(packed)hit=packed.any(a,t=>{triangleTests++;return triangleBox(t.map(v=>inverse({r:q.r,t:c},v)),h);});
+    else while(work.length&&!hit){const z=work.pop();if(!overlap(a,z))continue;if(z.left){work.push(z.left,z.right);continue;}for(const x of z.items){if(!overlap(a,x))continue;triangleTests++;if(triangleBox(x.t.map(v=>inverse({r:q.r,t:c},v)),h)){hit=true;break;}}}
+    if(!hit){if(!(packed?packed.outside(c,rays,rayTri):outside(root,c)))return result(false,'inside-or-ambiguous');continue;}
     if(!n.left||n.level>=depth)return result(false,'envelope-contact');
     stack.push(n.left,n.right);
    }
@@ -55,7 +57,7 @@ export function createConfigurationOracle(anatomy,parts,B,{maxDepth=5}={}){if(!N
    maxInflation=Math.max(maxInflation,...inflate);const z=check(entries(mid),depth,inflate);boxes+=z.boxes;triangleTests+=z.triangleTests;if(z.clear)return true;if(level>=maxSub){unresolved++;return false;}return visit(A,mid,level+1)&&visit(mid,C,level+1);}
   const clear=visit(a,b,0);return {clear,reason:clear?'conditional-articulated-envelope-clear':'articulated-envelope-unresolved',intervals,unresolved,boxes,triangleTests,maxInflation,cpuMs:performance.now()-start,contract:'root shortest rotation and linear translation; linear qualified twist/compression/deploy parameters reconstructed at every time; conditional closed-solid assumption'};
  }
- return {topology,maxDepth,articulatedSweep,vehicleTopology:local.map(p=>({id:p.id,...p.topology})),pose(pose,depth=5,margin=0){return check(entries(pose),depth,local.map(()=>margin));},sweep(a,b,{depth=5,maxSub=3}={}){
+ return {topology,maxDepth,sourceStorage:packed?{nodes:packed.nodes,bytes:packed.bytes}:null,articulatedSweep,vehicleTopology:local.map(p=>({id:p.id,...p.topology})),pose(pose,depth=5,margin=0){return check(entries(pose),depth,local.map(()=>margin));},sweep(a,b,{depth=5,maxSub=3}={}){
   let intervals=0,unresolved=0,boxes=0,triangleTests=0,maxInflation=0;
   function visit(A,C,level){intervals++;const mid=[],inflate=[];for(let k=0;k<A.length;k++){if(!validPose(A[k])||!validPose(C[k])){unresolved++;return false;}const m=rotationMid(A[k],C[k]);if(!m){unresolved++;return false;}mid.push(m);const bound=len(sub(A[k].t,C[k].t))/2+2*local[k].radius*Math.sin(m.theta/4);inflate.push(bound);maxInflation=Math.max(maxInflation,bound);}
    const q=check(mid,depth,inflate);boxes+=q.boxes;triangleTests+=q.triangleTests;if(q.clear)return true;if(level>=maxSub){unresolved++;return false;}const first=visit(A,mid,level+1),second=visit(mid,C,level+1);return first&&second;
