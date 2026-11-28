@@ -1,0 +1,18 @@
+[
+  {
+    "calm": false,
+    "initialThrottle": 1,
+    "finalThrottle": 1,
+    "finalLift": 1,
+    "aboveLaunchThresholdSamples": 13,
+    "turn": 3.792000000000001
+  },
+  {
+    "calm": true,
+    "initialThrottle": 1,
+    "finalThrottle": 1,
+    "finalLift": 0,
+    "aboveLaunchThresholdSamples": 0,
+    "turn": 2.5120000000000013
+  }
+]

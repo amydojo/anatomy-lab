@@ -4,7 +4,7 @@ on:
     branches: ['experiment/marrow-cockpit-001']
   pull_request:
     branches: ['experiment/vector-velocity-006']
-    paths: ['assets/atlas/marrow-cockpit.js','assets/atlas/marrow.js','atlas/cockpit.css','atlas/index.html','play/index.html','tests/marrow-cockpit*','tests/marrow-mono*','tests/marrow-flow-touch*','tests/marrow-levitation*','tests/marrow-field*','tests/marrow-sync*','assets/atlas/marrow-surface.js','.github/workflows/cockpit.yml']
+    paths: ['assets/atlas/marrow-cockpit.js','assets/atlas/marrow.js','atlas/cockpit.css','atlas/index.html','play/index.html','tests/marrow-cockpit*','tests/marrow-mono*','tests/marrow-flow-touch*','tests/marrow-levitation*','tests/marrow-field*','tests/marrow-sync*','tests/marrow-calm*','assets/atlas/marrow-surface.js','.github/workflows/cockpit.yml']
 permissions:
   contents: read
 jobs:
@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test tests/marrow-sync.test.mjs tests/marrow-field.test.mjs tests/marrow-levitation.test.mjs tests/marrow-flow-touch.test.mjs tests/marrow-mono.test.mjs tests/marrow-cockpit.test.mjs tests/marrow-gyro.test.mjs tests/marrow-surface.test.mjs tests/marrow.test.mjs
+      - run: node --test tests/marrow-calm.test.mjs tests/marrow-sync.test.mjs tests/marrow-field.test.mjs tests/marrow-levitation.test.mjs tests/marrow-flow-touch.test.mjs tests/marrow-mono.test.mjs tests/marrow-cockpit.test.mjs tests/marrow-gyro.test.mjs tests/marrow-surface.test.mjs tests/marrow.test.mjs
   browser:
     runs-on: ubuntu-latest
     container:
