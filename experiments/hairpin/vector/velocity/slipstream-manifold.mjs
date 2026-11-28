@@ -34,7 +34,7 @@ export function createSlipstreamManifold(world,parts,{variant='continuous'}={}){
   chartSamples++;confidenceSum+=confidence;if(!coherent)supportUnavailable++;
   return {point:hit.point.slice(),normal:estimate,rawNormal:hit.normal.slice(),id:hit.id,step,confidence,coherent,front,rear,forward:u};
  }
- return {reset(){cache=null;},select({anchor,p,n,dir,desired,length:d,id,forward,velocity,step}){
+ return {reset(){cache=null;},checkpoint:()=>structuredClone({cache,stats,calls,accepted,blocked,chartSamples,maxGuideStep,maxNormalLag,maxIntentDeviation,maxOffsetStep,maxGuideTurn,supportUnavailable,confidenceSum,timings,last}),restore:q=>{({cache,stats,calls,accepted,blocked,chartSamples,maxGuideStep,maxNormalLag,maxIntentDeviation,maxOffsetStep,maxGuideTurn,supportUnavailable,confidenceSum,timings,last}=structuredClone(q));},select({anchor,p,n,dir,desired,length:d,id,forward,velocity,step}){
   const start=performance.now();let selected=null;const old=anchor.point,raw=unit(anchor.normal,n),pred=add(old,mul(dir,d));
   // A bounded fan changes ray orientation, NOT intended travel direction.
   // All rays aim at the same rider-directed point.
