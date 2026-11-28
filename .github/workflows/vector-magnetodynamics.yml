@@ -1,0 +1,119 @@
+name: VECTOR MAGNETODYNAMICS exact geometry and force research
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - 'experiments/hairpin/vector/velocity/magnet*.mjs'
+      - 'experiments/hairpin/vector/velocity/osteosurf-lab.mjs'
+      - 'experiments/hairpin/vector/velocity/compact-source.mjs'
+      - 'experiments/hairpin/vector/velocity/kinesis-oracle.mjs'
+      - 'experiments/hairpin/vector/velocity/horizon-*.mjs'
+      - 'tests/magnetodynamics*'
+      - '.github/workflows/vector-magnetodynamics.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  exact-geometry:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/magnetodynamics.test.mjs tests/horizon.test.mjs tests/synapse.test.mjs tests/foresight.test.mjs tests/kinesis.test.mjs tests/slipstream.test.mjs tests/flow-state.test.mjs tests/osteodynamics.test.mjs tests/marrow-surface.test.mjs tests/marrow-board.test.mjs tests/marrow-gyro.test.mjs
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-synapse-restricted-lab
+          run-id: 46100559705
+          github-token: ${{ github.token }}
+          path: magnet-inputs
+      - run: |
+          mkdir -p magnet-results
+          OUTPUT=magnet-results/object.json node --expose-gc --max-old-space-size=4096 experiments/hairpin/vector/velocity/magnet-compact-lab.mjs magnet-inputs/synapse-restricted-results.json
+          COMPACT=1 OUTPUT=magnet-results/compact.json node --expose-gc --max-old-space-size=4096 experiments/hairpin/vector/velocity/magnet-compact-lab.mjs magnet-inputs/synapse-restricted-results.json
+          node --input-type=module -e "import fs from 'node:fs';const a=JSON.parse(fs.readFileSync('magnet-results/object.json')),b=JSON.parse(fs.readFileSync('magnet-results/compact.json'));for(const k of ['out','sweeps'])if(a[k].length!==b[k].length||a[k].some((x,i)=>x.clear!==b[k][i].clear))throw Error('Compact oracle admission discrepancy');"
+          OUTPUT=magnet-results/support.json node --max-old-space-size=4096 experiments/hairpin/vector/velocity/magnet-support-lab.mjs magnet-inputs/synapse-restricted-results.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-magnetodynamics-exact-geometry
+          path: magnet-results/
+          if-no-files-found: warn
+  force-model:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          mkdir -p magnet-results
+          OSTEO_STEPS=720 OSTEO_SPECIMENS=SKULL_CRANIAL_MAXILLA OSTEO_OUTPUT=magnet-results/ground-ablation.json node --max-old-space-size=4096 experiments/hairpin/vector/velocity/osteosurf-lab.mjs
+          OSTEO_STEPS=360 OSTEO_SPECIMENS=RIB_1_LEFT,VERTEBRA_C1,SCAPULA_LEFT OSTEO_OUTPUT=magnet-results/advanced.json node --max-old-space-size=4096 experiments/hairpin/vector/velocity/osteosurf-lab.mjs
+          OUTPUT=magnet-results/capture.json node --max-old-space-size=4096 experiments/hairpin/vector/velocity/magnet-capture-lab.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-magnetodynamics-force-model
+          path: magnet-results/
+          if-no-files-found: warn
+  worker-ablation:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        policy: [object, compact, support, zero, adaptive]
+        region: [0, 1]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - env:
+          MAGNET_REGION: ${{ matrix.region }}
+          POLICY: ${{ matrix.policy }}
+        run: |
+          mkdir -p magnet-results
+          export HORIZON_COVERAGE_FIRST=1 HORIZON_LIFT=.002 HORIZON_OUTPUT=magnet-results/worker.json
+          if [ "$POLICY" != object ]; then export MAGNET_COMPACT=1; fi
+          if [ "$POLICY" = support ] || [ "$POLICY" = zero ] || [ "$POLICY" = adaptive ]; then export MAGNET_SUPPORT=1; fi
+          if [ "$POLICY" = zero ]; then export HORIZON_LIFT=0; fi
+          if [ "$POLICY" = adaptive ]; then export MAGNET_ADAPTIVE=1; fi
+          node --max-old-space-size=4096 experiments/hairpin/vector/velocity/magnet-worker-lab.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-magnetodynamics-worker-${{ matrix.policy }}-${{ matrix.region }}
+          path: magnet-results/
+          if-no-files-found: warn
+  browser-review:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.0-noble
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop-chromium, webkit-mobile]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright test tests/magnetodynamics.spec.mjs --project=${{ matrix.project }} --workers=1
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-magnetodynamics-browser-${{ matrix.project }}
+          path: test-results/
+          if-no-files-found: warn
