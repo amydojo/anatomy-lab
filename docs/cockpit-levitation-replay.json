@@ -1,0 +1,64 @@
+{
+  "lift0.25": {
+    "authority": 0.25,
+    "deltaY": 0.023855042407001665,
+    "speed": 0.18871918392750603,
+    "air": 0.5000000000000007,
+    "explicitFlights": 1
+  },
+  "lift0.75": {
+    "authority": 0.75,
+    "deltaY": 0.07156512722100498,
+    "speed": 0.24773921154234577,
+    "air": 0.5000000000000007,
+    "explicitFlights": 1
+  },
+  "recapture": {
+    "steps": 97,
+    "seconds": 0.8083333333333333,
+    "carry": 0.17981007202064994,
+    "speed": 0.17981007202064994,
+    "carryRatio": 1,
+    "flights": 1,
+    "landings": 1,
+    "remounts": 0,
+    "falls": 0,
+    "contact": {
+      "lift": 0,
+      "descent": 0,
+      "armed": false,
+      "over": 0,
+      "recapture": true,
+      "mapping": "gate"
+    }
+  },
+  "edge": {
+    "blockedSteps": 146,
+    "longestBlock": 1.1499999999999984,
+    "rejections": {
+      "no-hit": 10000,
+      "forward": 4706,
+      "intent": 1765
+    },
+    "pivotSteps": 295,
+    "positionBefore": [
+      -0.0009986913305502273,
+      0.011,
+      -0.11999736468816558
+    ],
+    "positionAfterPivot": [
+      -0.0009985211604681592,
+      0.011,
+      -0.11999998276236098
+    ],
+    "pivotHeading": [
+      -0.810617706246151,
+      0,
+      0.5855757289371109
+    ],
+    "recoverySteps": 16,
+    "recoveryDistance": 0.01011648664542325,
+    "flights": 0,
+    "remounts": 0
+  }
+}
