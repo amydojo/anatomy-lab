@@ -1,0 +1,49 @@
+name: VECTOR FORESIGHT predictive configuration research
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - 'experiments/hairpin/vector/velocity/foresight-*.mjs'
+      - 'tests/foresight*'
+      - '.github/workflows/vector-foresight.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  laboratory:
+    if: github.head_ref == 'experiment/vector-velocity-006' || github.ref_name == 'experiment/vector-velocity-006'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        specimen: [VERTEBRA_C1, SCAPULA_LEFT, RIB_1_LEFT, FEMUR_LEFT, SKULL_CRANIAL_MAXILLA]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check experiments/hairpin/vector/velocity/foresight-planner.mjs && node --check experiments/hairpin/vector/velocity/foresight-lab-runner.mjs
+      - if: matrix.specimen == 'VERTEBRA_C1'
+        run: |
+          node --test tests/marrow-board.test.mjs tests/marrow-gyro.test.mjs tests/marrow-ride.test.mjs tests/marrow-surface.test.mjs tests/afterglow-camera.test.mjs tests/euphoria-input.test.mjs tests/osteodynamics.test.mjs tests/flow-state.test.mjs tests/slipstream.test.mjs tests/kinesis.test.mjs tests/foresight.test.mjs
+      - if: matrix.specimen == 'VERTEBRA_C1'
+        run: |
+          mkdir -p /tmp/foresight-reproduction
+          node --input-type=module -e "import fs from 'node:fs'; const m=JSON.parse(fs.readFileSync('assets/atlas/vhf/axis/v1/manifest.json')); for(const s of m.structures.filter(s=>['VERTEBRA_C1','SCAPULA_LEFT','RIB_1_LEFT'].includes(s.source_name))) console.log('assets/atlas/vhf/axis/v1/'+s.file)" > /tmp/foresight-inputs.txt
+          tar -czf /tmp/foresight-reproduction/source-bundle.tar.gz -T /tmp/foresight-inputs.txt assets/atlas/vhf/axis/v1/manifest.json assets/atlas/marrow-ride.js assets/atlas/marrow-surface.js assets/atlas/marrow-board.js assets/atlas/marrow.js assets/atlas/vhf-source.js experiments/hairpin/vector/velocity/foresight-planner.mjs experiments/hairpin/vector/velocity/foresight-lab-runner.mjs experiments/hairpin/vector/velocity/kinesis-oracle.mjs experiments/hairpin/vector/velocity/kinesis-path.mjs experiments/hairpin/vector/velocity/slipstream-manifold.mjs experiments/hairpin/vector/velocity/flow-support.mjs experiments/hairpin/vector/velocity/flow-lab.mjs experiments/hairpin/vector/velocity/flow-intersection.mjs experiments/hairpin/vector/velocity/osteodynamics.mjs experiments/hairpin/vector/velocity/osteodynamics-replay.mjs experiments/hairpin/vector/kinetic/kinetic-motion.mjs experiments/hairpin/vector/velocity/generated/VECTOR-005-VELOCITY-20000.glb
+      - if: matrix.specimen == 'VERTEBRA_C1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-foresight-reproduction-inputs
+          path: /tmp/foresight-reproduction/
+      - if: ${{ !cancelled() }}
+        env:
+          FORESIGHT_SPECIMEN: ${{ matrix.specimen }}
+        run: node --max-old-space-size=6144 experiments/hairpin/vector/velocity/foresight-lab-runner.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vector-foresight-${{ matrix.specimen }}
+          path: foresight-results/
+          if-no-files-found: warn
