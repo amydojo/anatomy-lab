@@ -20,7 +20,7 @@ export function createSynapseSession(world,seed,parts,B,S,boardMatrix,oracle,ide
   if(input.assist||input.ollie||input.flightToggle||input.land)return {committed:false,reason:'flight-outside-ground-domain'};
   const snap=sim.checkpoint(),ks=kin.checkpoint(),old=pose;let usedOracle=false;
   sim.advance(DT,{...input,push:(input.push||0)*drive,brake:Math.max(input.brake||0,1-drive)});const nextState=sim.researchState(),next=commonCorrection(kin.update(nextState,boardMatrix(nextState),DT,{hover:.00035}),0,0,correction),support=supportCheck(world,nextState,next,foot,B);let reason=null,cell=null;
-  if(!support.ok)reason='support';else{cell=memory.lookup(old,next);if(!cell&&offlineOracle){usedOracle=true;slow++;const c=memory.build(old);if(c&&memory.contains(c,old,next))cell=c;else if(!oracle.articulatedSweep(old,next,{depth,maxSub:2}).clear)reason='sweep-unresolved';}else if(!cell)reason='cell-miss';}
+  if(!support.ok)reason='support';else{cell=memory.cover(old,next);if(!cell&&offlineOracle){usedOracle=true;slow++;const c=memory.build(old);if(c&&memory.contains(c,old,next))cell=c;else if(!oracle.articulatedSweep(old,next,{depth,maxSub:2}).clear)reason='sweep-unresolved';}else if(!cell)reason='cell-miss';}
   if(reason){sim.restore(snap);kin.restore(ks);holds++;holdRun++;longestHold=Math.max(longestHold,holdRun);drive=Math.max(0,drive-.08);rejections[reason]=(rejections[reason]||0)+1;lastMiss=reason;
    // Explicit stationary recovery at a previously admitted configuration.
    // This is an emergency discontinuity, not a smooth braking success.
