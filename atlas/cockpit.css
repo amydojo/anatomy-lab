@@ -66,3 +66,15 @@
 .cockpit[data-calm=true] .cockpit-look{pointer-events:none}.cockpit[data-calm=true] .flow-hint{font-size:11px;letter-spacing:.025em}
 
 .cockpit[data-calm=true][data-anchor=true] .cockpit-look{pointer-events:auto}.anchor-export{margin-top:8px;min-height:38px;display:block;width:100%;color:#e2ff45;background:#151017;border:1px solid #9cae46;border-radius:7px}
+
+/* BARE: visual-only skin. Same touch bounds, ownership and motion mapping. */
+.cockpit[data-flow=true][data-bare=true] .cockpit-steer{background:none;border-color:transparent;box-shadow:none;opacity:1}
+.cockpit[data-flow=true][data-bare=true] .cockpit-label{display:none}
+.cockpit[data-flow=true][data-bare=true] .cockpit-ring{width:32px;height:32px;border:1px solid rgba(224,246,185,.62);box-shadow:none;opacity:0;transition:opacity 90ms linear;pointer-events:none}
+.cockpit[data-flow=true][data-bare=true][data-touching=true] .cockpit-ring{opacity:1}
+.cockpit[data-flow=true][data-bare=true] .cockpit-ring i{width:4px;height:4px;left:calc(50% - 2px);top:calc(50% - 2px);border:none;background:#e2ff9e}
+.cockpit[data-flow=true][data-bare=true][data-air=true] .cockpit-ring{border-color:#a5caff}
+.cockpit[data-flow=true][data-bare=true] .flow-hint{bottom:3px;font:500 9px/1.3 system-ui;letter-spacing:.16em;color:#edf2d9;text-shadow:0 1px 5px #000,0 0 9px #000;opacity:.75}
+.cockpit[data-flow=true][data-bare=true] .flow-meter{bottom:21px;left:calc(50% - 23px);right:calc(50% - 23px);height:1px;background:#dfff3830;opacity:0}
+.cockpit[data-flow=true][data-bare=true][data-touching=true] .flow-meter{opacity:.85}
+@media(prefers-reduced-motion:reduce){.cockpit[data-bare=true] .cockpit-ring{transition:none}}
