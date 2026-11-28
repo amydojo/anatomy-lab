@@ -222,30 +222,32 @@ async function qualifySynapse(training,{variation='unseen',steps=1440}={}){
 }
 // HORIZON qualification uses a private worker and independent simulation.
 // Only available on loopback; ordinary deployed riding is unchanged.
-async function qualifyHorizon({region=0,steps=1440,preferredLift=0,coverageFirst=false,compact=false,sharedSupport=false,adaptiveHorizon=false,flowline=false,directional=false}={}){
+async function qualifyHorizon({region=0,steps=1440,preferredLift=0,coverageFirst=false,compact=false,sharedSupport=false,adaptiveHorizon=false,flowline=false,directional=false,envelope=false,priority='legacy',schedule='established'}={}){
  if(!['127.0.0.1','localhost'].includes(location.hostname)||!active||!rideAsset?.active||inspection||terrainReview||synapseQualification)throw Error('HORIZON is a development qualification only');
  if(![0,1].includes(region)||!Number.isInteger(steps)||steps<1||steps>1440||![0,.002].includes(preferredLift))throw Error('Invalid qualification bounds');
+ if(envelope&&!flowline)throw Error('ENVELOPE requires FLOWLINE');if(!['established','challenge'].includes(schedule))throw Error('Invalid schedule');
  if(flowline===true&&(!compact||!sharedSupport||!coverageFirst||preferredLift!==.002))throw Error('FLOWLINE qualification requires matched compact/support policy');
  const token={cancelled:false},asset=rideAsset,ctx=api.context(),saved={...ctx.camera,target:{...ctx.camera.target}};let client=null;
  synapseQualification=token;keys.clear();touch.clear();armed=false;
  try{
   const get=async url=>{const r=await fetch(url);if(!r.ok)throw Error('Asset unavailable');return r.arrayBuffer();},dir='/assets/atlas/vhf/axis/v1/',base='/experiments/hairpin/vector/velocity/';
   const [manifest,source,vehicle,{createHorizonClient},{createHorizonSession},{seedRoutes}]=await Promise.all([get(dir+'manifest.json'),get(dir+'bonehub-vhf-skull_cranial_maxilla.glb'),get(base+'generated/VECTOR-005-VELOCITY-20000.glb'),import(base+'horizon-client.mjs'),import(base+'horizon-session.mjs'),import(base+'osteodynamics-replay.mjs')]);
-  client=await createHorizonClient({manifest,source,vehicle},{generation:region+1,compact:compact===true});
+  client=await createHorizonClient({manifest,source,vehicle},{generation:region+1,compact:compact===true,priority});
   if(token.cancelled||!active||asset!==rideAsset)throw Error('Qualification cancelled');
-  const {part,parts}=client,exact=collision([part],null,true),B=root.BodyMarrowBoard,S=root.BodyMarrowSurface,seeds=seedRoutes(exact,part,parts,B,boardMatrix),first=seeds.selected,far=seeds.seeds.filter(q=>q.supportRatio>=.55).sort((a,b)=>Math.hypot(...b.hit.point.map((v,k)=>v-first.hit.point[k]))-Math.hypot(...a.hit.point.map((v,k)=>v-first.hit.point[k])))[0],seed=region?far:first,session=flowline===true?await (await import(base+'flowline-session.mjs')).createFlowlineSession(client,seed,{directional:directional===true,maxSteps:steps,preferredLift}):await createHorizonSession(client,seed,{preferredLift,coverageFirst,sharedSupport:sharedSupport===true,adaptiveHorizon:adaptiveHorizon===true,strictLift:true});
+  const {part,parts}=client,exact=collision([part],null,true),B=root.BodyMarrowBoard,S=root.BodyMarrowSurface,seeds=seedRoutes(exact,part,parts,B,boardMatrix),first=seeds.selected,far=seeds.seeds.filter(q=>q.supportRatio>=.55).sort((a,b)=>Math.hypot(...b.hit.point.map((v,k)=>v-first.hit.point[k]))-Math.hypot(...a.hit.point.map((v,k)=>v-first.hit.point[k])))[0],seed=region?far:first,session=flowline===true?await (await import(base+'flowline-session.mjs')).createFlowlineSession(client,seed,{directional:directional===true,envelope:envelope===true,maxSteps:steps,preferredLift}):await createHorizonSession(client,seed,{preferredLift,coverageFirst,sharedSupport:sharedSupport===true,adaptiveHorizon:adaptiveHorizon===true,strictLift:true});
   if(!session.ready)throw Error('No admitted start');
+  const {commandAt}=await import(base+'flowline-envelope.mjs');
   const cam=S.rig(session.current(),exact),frames=[],draw=[],samples=[];let processed=0,backlog=0,maxBacklog=0,lateFrames=0,start=performance.now(),prior=start;const browserHeapStart=performance.memory?.usedJSHeapSize??null;
   await new Promise((resolve,reject)=>{function frame(now){try{
    if(token.cancelled||!active||asset!==rideAsset||document.hidden||!document.hasFocus()){resolve();return;}
    const dt=Math.max(0,now-prior);frames.push(dt);backlog+=dt;prior=now;maxBacklog=Math.max(maxBacklog,backlog);if(dt>1000/30)lateFrames++;let batch=0;
-   while(backlog>=1000/120&&processed<steps&&batch<8){const i=processed,cycle=i%360,phase=cycle%180,stick=[(phase<45?.48:phase<90?-.52:phase<130?.32:-.25)*(region?-.8:1),cycle<180?-1:1],push=phase<65?.24:phase<105?.13:phase<130?0:phase<150?.22:0,brake=phase>=150?.8:0,q=session.step({stick,controlYaw:0,push,brake});
+   while(backlog>=1000/120&&processed<steps&&batch<8){const i=processed,q=session.step(commandAt(i,region,schedule));
     if(i%120===0)samples.push({step:i+1,position:q.state?.p,suspension:q.state?.suspension??null,committed:q.committed,reason:q.reason});processed++;batch++;backlog-=1000/120;}
    const state=session.current(),t=performance.now();cam.step(state,{},Math.min(dt/1000,.05),null,ctx.camera);api.draw({...state.pose,vehicle:{...state.pose.vehicle,vector:true,quality:asset.quality},renderScale:1,sharp});draw.push(performance.now()-t);
    const status=panel?.querySelector('#marrow-status');if(status)status.textContent=(flowline?'FLOWLINE':'HORIZON')+' DEVELOPMENT TEST · '+processed+'/'+steps+' · '+(state.held?'BOUNDARY HOLD':'WORKER-ASSISTED');
    if(processed>=steps||now-start>60000)resolve();else requestAnimationFrame(frame);
   }catch(e){reject(e);}}requestAnimationFrame(frame);});
-  return {region,flowline:flowline===true,directional:directional===true,steps,processed,unprocessed:steps-processed,backlogMs:backlog,maxBacklogMs:maxBacklog,lateFrames,browserHeapStart,browserHeapEnd:performance.memory?.usedJSHeapSize??null,elapsedMs:performance.now()-start,session:session.report(),worker:client.report(),frameMs:summary(frames),renderCpuMs:summary(draw),samples,liveAuthorized:false};
+  return {region,flowline:flowline===true,directional:directional===true,envelope:envelope===true,priority,schedule,steps,processed,unprocessed:steps-processed,backlogMs:backlog,maxBacklogMs:maxBacklog,lateFrames,browserHeapStart,browserHeapEnd:performance.memory?.usedJSHeapSize??null,elapsedMs:performance.now()-start,session:session.report(),worker:client.report(),frameMs:summary(frames),renderCpuMs:summary(draw),samples,liveAuthorized:false};
  }finally{if(client)await client.close();if(synapseQualification===token){synapseQualification=null;keys.clear();touch.clear();armed=false;Object.assign(ctx.camera,saved,{target:{...saved.target}});if(active&&lastBoard)api.draw({...lastBoard,sharp});}}
 }
 const summary=a=>{const sorted=[...a].sort((a,b)=>a-b);return {samples:a.length,median:sorted[Math.floor(a.length*.5)]??null,p95:sorted[Math.floor(a.length*.95)]??null,p99:sorted[Math.floor(a.length*.99)]??null,max:sorted[sorted.length-1]??null};};return {active:()=>active,exit,terrainMode:()=>terrainMode,beginTerrainReview,endTerrainReview,setReviewMode,setReviewView,prepareFlowReview,...(['127.0.0.1','localhost'].includes(location.hostname)?{qualifySynapse,qualifyHorizon}:{}),qualifyCamera:(samples,width,height)=>{

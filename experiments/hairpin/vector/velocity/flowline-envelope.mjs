@@ -17,3 +17,7 @@ export function commandAt(i,index,schedule){
  const p=i%240,carve=Math.floor(p/12)%2?-.85:.85;
  return {stick:[(p<72?carve:p<132?.12:p<168?-.2:0)*sign,p<48?-1:p<72?1:p<132?-1:p<168?.4:-1],push:p<72?.22:p<104?0:p<132?.07:p<168?0:p<196?.18:0,brake:p>=132&&p<168||p>=196?1:0,controlYaw:0};
 }
+
+/* Diagnostic scheduling and exact decomposition of SYNAPSE's existing scalar bound; not an admission rule. */
+export function demandFirstOrder(out,urgent,proposal){if(!urgent||!proposal)return out;const rank=q=>q.kind==='requested'?0:q.kind==='urgent-midpoint'?1:['braking','retreat','continuation'].includes(q.kind)?2:q.kind.startsWith('envelope-')?4:3;return out.slice().sort((a,b)=>rank(a)-rank(b));}
+export function displacementComponents(a,b,radius){const x=a.vehicle,y=b.vehicle,cos=Math.max(-1,Math.min(1,(a.r.reduce((s,v,i)=>s+v*b.r[i],0)-1)/2)),translation=Math.hypot(...a.t.map((v,i)=>v-b.t[i])),orientation=radius*Math.acos(cos),twist=radius*Math.abs(x.twist-y.twist),compression=1.65*Math.abs(x.compression-y.compression),deployment=.0006*Math.abs(x.deploy-y.deploy);return {translation,orientation,twist,compression,deployment,total:translation+orientation+twist+compression+deployment+1e-9};}

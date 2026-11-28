@@ -49,8 +49,16 @@ jobs:
           if [ "$FLOWLINE_MODE" != A ] && [ "$FLOWLINE_MODE" != B ]; then
             FLOWLINE_SCHEDULE=challenge FLOWLINE_OUTPUT=flowline-results/challenge.json node --max-old-space-size=3072 experiments/hairpin/vector/velocity/flowline-lab.mjs
           fi
-          if { [ "$FLOWLINE_MODE" = D ] || [ "$FLOWLINE_MODE" = F ] || [ "$FLOWLINE_MODE" = G ]; } && [ "$FLOWLINE_REGION" = 1 ]; then
-            FLOWLINE_STEPS=360 FLOWLINE_AUDIT_REJECTS=1 FLOWLINE_OUTPUT=flowline-results/rejected-audit.json node --max-old-space-size=3072 experiments/hairpin/vector/velocity/flowline-lab.mjs
+          if [ "$FLOWLINE_MODE" != A ] && [ "$FLOWLINE_MODE" != B ] && [ "$FLOWLINE_REGION" = 1 ]; then
+            FLOWLINE_STEPS=360 FLOWLINE_TRACE=1 FLOWLINE_AUDIT_REJECTS=1 FLOWLINE_OUTPUT=flowline-results/rejected-audit.json node --max-old-space-size=3072 experiments/hairpin/vector/velocity/flowline-lab.mjs
+          fi
+          if [ "$FLOWLINE_MODE" = F ] || [ "$FLOWLINE_MODE" = G ]; then
+            FLOWLINE_PRIORITY=demand FLOWLINE_OUTPUT=flowline-results/demand-established.json node --max-old-space-size=3072 experiments/hairpin/vector/velocity/flowline-lab.mjs
+            FLOWLINE_PRIORITY=demand FLOWLINE_SCHEDULE=challenge FLOWLINE_OUTPUT=flowline-results/demand-challenge.json node --max-old-space-size=3072 experiments/hairpin/vector/velocity/flowline-lab.mjs
+          fi
+          if [ "$FLOWLINE_MODE" = G ] && [ "$FLOWLINE_REGION" = 1 ]; then
+            FLOWLINE_STEPS=7200 FLOWLINE_SCHEDULE=challenge FLOWLINE_TRACE=1 FLOWLINE_OUTPUT=flowline-results/long-legacy.json node --max-old-space-size=3072 experiments/hairpin/vector/velocity/flowline-lab.mjs
+            FLOWLINE_STEPS=7200 FLOWLINE_PRIORITY=demand FLOWLINE_SCHEDULE=challenge FLOWLINE_TRACE=1 FLOWLINE_OUTPUT=flowline-results/long-demand.json node --max-old-space-size=3072 experiments/hairpin/vector/velocity/flowline-lab.mjs
           fi
       - if: always()
         uses: actions/upload-artifact@v4

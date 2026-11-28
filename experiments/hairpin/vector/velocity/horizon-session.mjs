@@ -5,9 +5,10 @@ import {footprint} from './osteodynamics.mjs';
 import {commonCorrection} from './kinesis-oracle.mjs';
 import {initialConfiguration} from './kinesis-path.mjs';
 import {supportCheck} from './foresight-planner.mjs';
+import {displacementComponents} from './flowline-envelope.mjs';
 import {compactSource} from './compact-source.mjs';
 const DT=1/120,wait=ms=>new Promise(r=>setTimeout(r,ms)),dist=(a,b)=>Math.hypot(...a.map((x,k)=>x-b[k])),stat=a=>{const x=a.slice().sort((a,b)=>a-b);return {n:x.length,p95:x[Math.floor((x.length-1)*.95)]??null,p99:x[Math.floor((x.length-1)*.99)]??null,worst:x.at(-1)??null};};
-export async function createHorizonSession(client,seed,{approach='diagonal',stride=4,preferredLift=0,coverageFirst=false,maxSteps=7200,adaptiveHorizon=false,sharedSupport=false,strictLift=false}={}){
+export async function createHorizonSession(client,seed,{approach='diagonal',stride=4,preferredLift=0,coverageFirst=false,maxSteps=7200,adaptiveHorizon=false,sharedSupport=false,strictLift=false,auditRejected=false}={}){
  if(!Number.isInteger(maxSteps)||maxSteps<1||maxSteps>7200||!Number.isInteger(stride)||stride<1||stride>16||!Number.isFinite(preferredLift)||preferredLift<0||preferredLift>.004)throw Error('Invalid bounded session policy');
  const {part,parts}=client,reference=M.collision([part],null,true),world=sharedSupport?compactRayWorld(part,reference):reference,init=initialConfiguration(world,seed,B,S,M.boardMatrix,approach),sim=S.create(world,{...seed.hit,forward:init.f},{manifold:createSlipstreamManifold(world,parts),researchCheckpoint:true}),kin=createKinetic(B),foot=footprint(parts),base=kin.update(sim.researchState(),M.boardMatrix(sim.researchState()),0,{hover:.00035});
  let state=sim.researchState(),pose=null,lift=0,drive=1,attempts=0,committed=0,holds=0,holdRun=0,longestHold=0,emergency=0,recoveries=0,braked=0,distance=0,guideBlocked=0,misses=0,proposal=null;const horizonCounts={};const timing={step:[],checkpoint:[],proposal:[],support:[],lookup:[],restore:[],prepare:[]},rejections={};const start=performance.now();
@@ -19,13 +20,13 @@ export async function createHorizonSession(client,seed,{approach='diagonal',stri
  // Clearance margin is a heuristic, not a directional braking certificate.
  tic=performance.now();const cell=client.point(old),speed=Math.hypot(...state.v),slack=cell?client.remaining(cell,old):0,braking=speed*speed/1.4+speed*.04;timing.lookup.push(performance.now()-tic);
  if(slack<braking+.0005&&speed>.025)drive=Math.max(.2,drive-.06);else drive=Math.min(1,drive+.03);
- let q=trial(1-drive,drive);proposal=q.reason==='coverage'?q.p:null;if(q.reason==='coverage'){misses++;restore();const slow=trial(1,0);if(!slow.reason){q=slow;braked++;}}
+ let q=trial(1-drive,drive);proposal=q.reason==='coverage'?q.p:null;const diagnostic=auditRejected&&proposal&&Number.isFinite(client.radius)?{bound:displacementComponents(old,proposal,client.radius),workerBusy:client.busy(),latencyEstimate:client.latencyEstimate()}:null;if(q.reason==='coverage'){misses++;restore();const slow=trial(1,0);if(!slow.reason){q=slow;braked++;}}
  if(q.reason){restore();holds++;holdRun++;longestHold=Math.max(longestHold,holdRun);drive=Math.max(0,drive-.08);rejections[q.reason]=(rejections[q.reason]||0)+1;if(holdRun===8&&Math.hypot(...snap.v)>1e-8){snap.v=[0,0,0];snap.s.v=[0,0,0];sim.restore(snap);state=sim.researchState();emergency++;}}
- else{if(holdRun)recoveries++;holdRun=0;pose=q.p;state=q.q;committed++;distance+=dist(old.t,pose.t);guideBlocked+=Number(state.edgeBlocked);}
+ else{if(holdRun)recoveries++;holdRun=0;pose=q.p;state=q.q;client.noteCommittedCover?.(q.cell);committed++;distance+=dist(old.t,pose.t);guideBlocked+=Number(state.edgeBlocked);}
  tic=performance.now();if(!client.busy()&&(proposal||attempts%stride===0)){
   // Current-command lookahead only; never inspect future evaluation input.
   let look=proposal;if(!look){const x=sim.checkpoint(),k=kin.checkpoint();const H=adaptiveHorizon?Math.max(4,Math.min(16,Math.ceil((client.latencyEstimate()+12)*.12))):4;horizonCounts[H]=(horizonCounts[H]||0)+1;for(let j=0;j<H;j++){sim.advance(DT,{...input,push:(input.push||0)*drive,brake:Math.max(input.brake||0,1-drive)});const z=sim.researchState();look=commonCorrection(kin.update(z,M.boardMatrix(z),DT,{hover:.00035}),0,0,lift);}sim.restore(x);kin.restore(k);}
-  client.request(pose,look,state.v,input.stick||[0,-1],!!proposal);}timing.prepare.push(performance.now()-tic);timing.step.push(performance.now()-t);return {committed:!q.reason,reason:q.reason,state:current(),previous:old,coverageMiss:!!proposal};
+  client.request(pose,look,state.v,input.stick||[0,-1],!!proposal);}timing.prepare.push(performance.now()-tic);timing.step.push(performance.now()-t);return {committed:!q.reason,reason:q.reason,state:current(),previous:old,coverageMiss:!!proposal,...(diagnostic?{diagnostic}:{}),...(auditRejected&&q.reason?{rejected:{pose:q.p,state:q.q,from:old,reason:q.reason}}:{})};
  }
  return {ready:!!pose,current,step,report:()=>({spawnMs,lift,preferredLift,coverageFirst,adaptiveHorizon,sharedSupport,strictLift,horizonCounts,attempts,committed,holds,longestHold,emergency,recoveries,braked,misses,distance,guideBlocked,rejections,cpu:Object.fromEntries(Object.entries(timing).map(([k,v])=>[k,stat(v)])),liveAuthorized:false})};
 }
