@@ -18,7 +18,15 @@ materials=[petrol,silver,silver,amber,orchid]
 def mesh(P,F,U,roles,ids,name):
     d=bpy.data.meshes.new(name);d.from_pydata(P.tolist(),[],F.tolist());d.update();o=bpy.data.objects.new(name,d);s.collection.objects.link(o)
     layer=d.uv_layers.new(name='PersistentMaterialChart')
-    for l in d.loops:layer.data[l.index].uv=U[l.vertex_index]
+    for poly in d.polygons:
+        role=int(roles[poly.index])
+        if role<2:
+            for l in poly.loop_indices:layer.data[l].uv=U[d.loops[l].vertex_index]
+        else:
+            n=len(P)//2;vi=[d.loops[l].vertex_index for l in poly.loop_indices];base=sorted(set(v%n for v in vi));assert len(base)==2
+            delta=abs(U[base[1]]-U[base[0]]);axis=int(np.argmax(delta));assert delta[axis]>0
+            for l,v in zip(poly.loop_indices,vi):layer.data[l].uv=(float(U[v%n,axis]),1. if v<n else 0.)
+    W=np.array([tuple(l.uv) for l in layer.data]).reshape(-1,3,2);a=W[:,1]-W[:,0];b=W[:,2]-W[:,0];assert np.all(abs(a[:,0]*b[:,1]-a[:,1]*b[:,0])>0),'collapsed loop UV'
     for m in materials:d.materials.append(m)
     for x in d.polygons:
         role=int(roles[x.index]);x.material_index=4 if role==0 and .32<float(U[list(x.vertices),1].mean())<.38 else role;x.use_smooth=role<2
@@ -75,9 +83,9 @@ for stage in ('pre','post'):
     masters[stage]={'sha256':hashlib.sha256(f.read_bytes()).hexdigest(),'evaluatedKeyframeMaxError':max(errors)};bpy.data.objects.remove(o,do_unlink=True)
 rep['masters']=masters;(out/'native-fusion.json').write_text(json.dumps(rep,indent=2))
 assert rep['actualEventPass'],'Native event qualification failed; diagnostic preserved'
-# Short fixed-camera film, 33 pre frames + 18 post frames, actual direct
+# Short fixed-camera film, 33 pre frames + 19 post frames, actual direct
 # geometry with one localized connectivity event. No opacity or switching.
-seq=[('pre',k) for k in range(0,65,2)]+[('post',k) for k in range(0,36,2)];rep['filmFrames']=len(seq)
+seq=[('pre',k) for k in range(0,65,2)]+[('post',k) for k in range(0,36,2)]+[('post',35)];rep['filmFrames']=len(seq)
 for i,(stage,k) in enumerate(seq):render(q[stage][k],q[stage+'Faces'],q[stage+'UV'],q[stage+'Roles'],q[stage+'IDs'],f'frame-{i:04d}','couture')
 # Original low-amplitude synthesized contact event aligned to first post frame.
 rate=44100;fps=16;cue=33/fps;duration=len(seq)/fps
