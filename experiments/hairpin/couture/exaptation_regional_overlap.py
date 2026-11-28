@@ -1,0 +1,19 @@
+"""EXAPTATION: read-only parent-limited regional overlap between frozen B and FUSION 002.
+No common tessellation or collision waiver is implied."""
+import numpy as np,json,sys
+from pathlib import Path
+from shapely import polygons,intersection,area
+from shapely.strtree import STRtree
+root=Path(sys.argv[1]);out=Path(sys.argv[2]);out.mkdir(parents=True,exist_ok=True)
+q=np.load(root/'genesis/conditioned-correspondence.npz');b=np.load(root/'bridge/bridge-correspondence.npz');m=np.load(sys.argv[3]);F=q['faces'];U=q['idealTarget'][F][:,:,:2];native=q['targetChildNativeID'][q['targetFaceOwner']];H=m['postFaces'];P=m['idealPost'];owner=m['postOwner'];idx=np.flatnonzero(np.isin(owner,np.unique(native)));T=P[H[idx]][:,:,:2];polys=polygons(T);tree=STRtree(polys);s=polygons(U);i,j=tree.query(s,predicate='intersects');keep=native[i]==owner[idx[j]];i,j=i[keep],j[keep];inter=intersection(s[i],polys[j]);ar=area(inter);pos=ar>0;i,j,ar=i[pos],j[pos],ar[pos];inter=inter[pos];j=idx[j];orig=area(s);cover=np.bincount(i,weights=ar,minlength=len(F));diff=np.abs(cover-orig);cut=-20.013;cross=np.flatnonzero((U[:,:,1].min(1)<cut)&(U[:,:,1].max(1)>cut))
+def bary(x,t):
+ a=t[:,0];e=t[:,1]-a;f=t[:,2]-a;d=x-a;den=e[:,0]*f[:,1]-e[:,1]*f[:,0];u=(d[:,0]*f[:,1]-d[:,1]*f[:,0])/den;v=(e[:,0]*d[:,1]-e[:,1]*d[:,0])/den;return np.c_[1-u-v,u,v]
+coords=[];oa=[];ob=[]
+for k,g in enumerate(inter):
+ if g.geom_type!='Polygon' or g.is_empty:continue
+ a=np.asarray(g.exterior.coords)[:-1];x=np.r_[a,a.mean(0)[None],(a+np.roll(a,-1,axis=0))/2];coords.extend(x);oa.extend([i[k]]*len(x));ob.extend([j[k]]*len(x))
+coords=np.array(coords);oa=np.array(oa);ob=np.array(ob);wa=bary(coords,U[oa]);wb=bary(coords,P[H[ob]][:,:,:2]);violation=max(0,-wa.min(),-wb.min(),wa.max()-1,wb.max()-1);wa=np.maximum(wa,0);wa/=wa.sum(1)[:,None];wb=np.maximum(wb,0);wb/=wb.sum(1)[:,None]
+ref=np.einsum('ij,ijk->ik',wa,q['idealTarget'][F[oa]]);actual=np.einsum('ij,ijk->ik',wb,m['post'][H[ob]]);err=np.linalg.norm(ref-actual,axis=1);fr=np.einsum('ij,ijk->ik',wa,b['idealFrozen'][F[oa]]);compact=np.einsum('ij,ijk->ik',wa,q['idealCompact'][F[oa]])
+preF=m['preFaces'][:len(H)];assert np.array_equal(m['vertexMap'][preF],H);pre=np.einsum('ij,ijk->ik',wb,m['pre'][0][preF[ob]]);crit=np.einsum('ij,ijk->ik',wb,m['criticalPre'][preF[ob]]);dis=np.linalg.norm(pre-actual,axis=1);critical=np.linalg.norm(crit-actual,axis=1)
+r={'commonFaces':len(F),'nativeParentIDs':len(np.unique(native)),'parentsRepresentedInFusion002':len(np.intersect1d(native,owner)),'parentRestrictedOverlapCells':len(i),'projectedArea':float(orig.sum()),'coveredArea':float(cover.sum()),'maxPerCommonFaceAreaError':float(diff.max()),'maxRelativeCoverageError':float((diff/orig).max()),'uncoveredCommonFaces':int((cover==0).sum()),'commonTrianglesCrossingFusionPlane':len(cross),'crossingCommonFaceIDs':cross.tolist(),'witnessCount':len(err),'validMappedNativePostDistanceMax':float(err.max()),'rawBarycentricViolation':float(violation),'criticalEventRetainedWitnessError':float(critical.max()),'firstApproachDisplacementMax':float(dis.max()),'frozenWitnessBounds':[fr.min(0).tolist(),fr.max(0).tolist()],'targetWitnessBounds':[actual.min(0).tolist(),actual.max(0).tolist()],'scope':'Parent-limited overlap and valid mapped witnesses, not a common-mesh topology or full paired endpoint qualification. No inherited intersection waiver. No film.'};(out/'regional-overlap.json').write_text(json.dumps(r,indent=2));np.savez_compressed(out/'regional-overlap.npz',cellCommonOwner=i,cellBranchOwner=j,cellProjectedArea=ar,witnessChart=coords,witnessCommonOwner=oa,witnessBranchOwner=ob,witnessCompact=compact,witnessFrozen=fr,witnessDeployed=actual,witnessFirstApproach=pre,commonFaceCoverage=cover)
+assert not r['uncoveredCommonFaces'] and r['maxPerCommonFaceAreaError']<1e-9 and r['maxRelativeCoverageError']<1e-5 and r['validMappedNativePostDistanceMax']<2e-5 and r['criticalEventRetainedWitnessError']==0
