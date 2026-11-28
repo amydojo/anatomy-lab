@@ -1,0 +1,159 @@
+{
+  "results": [
+    {
+      "name": "ANCHOR camera-only variants produce identical physical trajectories",
+      "pass": true
+    },
+    {
+      "name": "ORBIT and CONTACT hold orientation on unoccluded flat surface",
+      "pass": true
+    },
+    {
+      "name": "SOFT follows without camera-to-physics feedback",
+      "pass": true
+    },
+    {
+      "name": "screen comparison remains finite and retains attachment",
+      "pass": true
+    },
+    {
+      "name": "edge-on screen projection preserves transported heading instead of flipping",
+      "pass": true
+    },
+    {
+      "name": "CONTACT optical retains bounded screen tracking while eliminating offset ray toggles",
+      "pass": true
+    },
+    {
+      "name": "two fingers arm without drive; midpoint translation builds propulsion only",
+      "pass": true
+    },
+    {
+      "name": "rotation about midpoint produces heading but no propulsion",
+      "pass": true
+    },
+    {
+      "name": "paired translation and rotation retain independent channels",
+      "pass": true
+    },
+    {
+      "name": "separation changes do not generate drive or heading",
+      "pass": true
+    },
+    {
+      "name": "release one foot neutralizes, remaining finger cannot propel, recontact starts neutral",
+      "pass": true
+    },
+    {
+      "name": "crossing singularity neutralizes and re-arms without a heading jump",
+      "pass": true
+    },
+    {
+      "name": "third contact rejected, cancellation clears pair, no flight even at saturation",
+      "pass": true
+    },
+    {
+      "name": "surface replay translates and carves with no automatic flight",
+      "pass": true
+    },
+    {
+      "name": "projected points follow articulated front and rear poses and viewport offsets",
+      "pass": true
+    },
+    {
+      "name": "direct targets remain at actual projection; guide explicit if too close or out of frame",
+      "pass": true
+    },
+    {
+      "name": "acquisition rejects off-deck contact and locks targets after first foot",
+      "pass": true
+    },
+    {
+      "name": "explicit projected foot identity survives inverted deck and reverse touch order",
+      "pass": true
+    },
+    {
+      "name": "partial release exposes missing footprint relative to surviving finger; neutral recontact",
+      "pass": true
+    },
+    {
+      "name": "resting camera composition enlarges deck without altering heading or physical state",
+      "pass": true
+    },
+    {
+      "name": "independent acquisition, carving cannot accelerate",
+      "pass": true
+    },
+    {
+      "name": "flow alone responds to 15px and ignores horizontal travel",
+      "pass": true
+    },
+    {
+      "name": "matched independent axes and release of either contact",
+      "pass": true
+    },
+    {
+      "name": "bounded jitter and finite steering hold",
+      "pass": true
+    },
+    {
+      "name": "differential common mode and opposite mode isolated",
+      "pass": true
+    },
+    {
+      "name": "cancel, duplicate role, third contact and rapid recontact are neutral",
+      "pass": true
+    },
+    {
+      "name": "three matched flat-surface comparisons retain CONTACT OPTICAL and neutral coast",
+      "pass": true
+    }
+  ],
+  "summary": [
+    {
+      "mode": "riptide",
+      "frames": 156,
+      "framed": 156,
+      "ride": 0.23705300873807714,
+      "flights": 0,
+      "blocked": 0,
+      "heading": [
+        0.34119586725665707,
+        0,
+        -0.939992223460906
+      ],
+      "speedBefore": 0.09600766849499082,
+      "coastSpeed": 0.05823159450973855
+    },
+    {
+      "mode": "dual",
+      "frames": 156,
+      "framed": 156,
+      "ride": 0.23709468921964189,
+      "flights": 0,
+      "blocked": 0,
+      "heading": [
+        0.25306132928259106,
+        0,
+        -0.9674502383180893
+      ],
+      "speedBefore": 0.0960078758452872,
+      "coastSpeed": 0.05823172027405065
+    },
+    {
+      "mode": "bare",
+      "frames": 156,
+      "framed": 156,
+      "ride": 0.26669106433119,
+      "flights": 0,
+      "blocked": 0,
+      "heading": [
+        0.29051482411457824,
+        0,
+        -0.9568704912210825
+      ],
+      "speedBefore": 0.10799977480783655,
+      "coastSpeed": 0.06550517466301298
+    }
+  ]
+}

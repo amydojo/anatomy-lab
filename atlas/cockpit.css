@@ -105,3 +105,17 @@
 .cockpit[data-footprint=deck]:not([data-acquired=true]) .flow-hint,.cockpit[data-footprint=guide]:not([data-acquired=true]) .flow-hint{visibility:hidden}
 .cockpit[data-footprint=deck] .flow-hint,.cockpit[data-footprint=guide] .flow-hint{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
 .cockpit[data-footprint=deck] .flow-meter,.cockpit[data-footprint=guide] .flow-meter{bottom:calc(34px + env(safe-area-inset-bottom,0px))}
+
+/* RIPTIDE: independent floating thumb regions; no visible panel or fixed target. */
+.cockpit[data-thumb=riptide] .cockpit-steer,.cockpit[data-thumb=dual] .cockpit-steer,.cockpit[data-thumb=riptide] .cockpit-pedal,.cockpit[data-thumb=dual] .cockpit-pedal,.cockpit[data-thumb=riptide] .cockpit-actions,.cockpit[data-thumb=dual] .cockpit-actions,.cockpit[data-thumb=riptide] .cockpit-look,.cockpit[data-thumb=dual] .cockpit-look{display:none!important}
+.riptide-zones{position:absolute;inset:0;pointer-events:none;z-index:2;display:none}
+.cockpit[data-thumb=riptide] .riptide-zones,.cockpit[data-thumb=dual] .riptide-zones{display:block}
+.riptide-zone{position:absolute;bottom:0;height:55%;width:50%;pointer-events:auto;touch-action:none;overflow:visible}
+.riptide-zone[data-role=carve]{left:0}.riptide-zone[data-role=flow]{right:0}
+.cockpit[data-swap=true] .riptide-zone[data-role=carve]{left:auto;right:0}.cockpit[data-swap=true] .riptide-zone[data-role=flow]{right:auto;left:0}
+.riptide-label{position:absolute;bottom:calc(19px + env(safe-area-inset-bottom,0px));left:0;right:0;text-align:center;font:600 9px system-ui;letter-spacing:.18em;color:#e6ead8;text-shadow:0 1px 5px #000;opacity:.65;pointer-events:none}
+.riptide-zone[data-held=true] .riptide-label{opacity:.25}
+.riptide-zone i{position:absolute;left:0;top:0;width:22px;height:22px;margin:-11px;border:1px solid #dfff7080;border-radius:50%;pointer-events:none;box-sizing:border-box;background:#dfff7010}
+.riptide-zone[data-role=flow] i{border-color:#a7caffaa;background:rgba(167,202,255,calc(.06 + var(--riptide-power,0)*.22));}
+.riptide-zone i[hidden]{display:none}
+@media(orientation:landscape){.riptide-zone{height:70%;width:42%}}
