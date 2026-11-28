@@ -19,11 +19,11 @@ export function classifyPlacement(oracle,world,parts,B,state,pose,{refine=true,f
  const support=fine.clear?supportCheck(world,state,pose,foot,B):null;
  return {coarse,fine,support,classification:!fine.clear?fine.reason:support?.ok?'conditional-admission':'insufficient-magnetic-proximity'};
 }
-export function foresightRoute(world,seed,parts,B,S,boardMatrix,oracle,{approach='parallel',push=.35,steps=240,schedule='straight',horizon=8,adaptiveHorizon=false,depth=5,maxSub=2,queryBudget=18000,maxCandidates=7,sampleEvery=12,replanStride=4}={}){
+export function foresightRoute(world,seed,parts,B,S,boardMatrix,oracle,{approach='parallel',push=.35,steps=240,schedule='straight',horizon=8,adaptiveHorizon=false,depth=5,maxSub=2,queryBudget=18000,maxCandidates=7,sampleEvery=12,replanStride=4,guardedNominal=true}={}){
  if(![4,8,16].includes(horizon)||![1,2,4].includes(replanStride)||maxCandidates<1||maxCandidates>9)throw Error('Unsupported bounded research configuration');
  const init=initialConfiguration(world,seed,B,S,boardMatrix,approach),manifold=createSlipstreamManifold(world,parts),sim=S.create(world,{...seed.hit,forward:init.f},{manifold,researchCheckpoint:true}),kinetic=createKinetic(B),foot=footprint(parts),startState=sim.researchState(),startPose=kinetic.update(startState,boardMatrix(startState),0,{hover:.00035});
  const span=Math.max(...parts.map(p=>{let lo=Infinity,hi=-Infinity;for(let i=2;i<p.positions.length;i+=3){lo=Math.min(lo,p.positions[i]);hi=Math.max(hi,p.positions[i]);}return hi-lo;})),allZ=parts.flatMap(p=>{let a=Infinity,b=-Infinity;for(let i=2;i<p.positions.length;i+=3){a=Math.min(a,p.positions[i]);b=Math.max(b,p.positions[i]);}return [a,b];}),vehicleLength=Math.max(...allZ)-Math.min(...allZ);
- const counts={},rows=[],stepsCpu=[],queryCpu=[],searchCpu=[],queries={pose:0,sweep:0,support:0},horizons={},actions={},start=performance.now();let stop=null,committed=0,blocked=0,run=0,longestBlock=0,progress=0,energy=0,maxIntentDeviation=0,dirDeviation=0,jerks=[],angularAcceleration=[],speeds=[],lastVel=null,lastAcc=null,lastOmega=null,lastPose=null,plan=null,inputKey=null,initial=null,budgetExhausted=false,forecastDistances=[],emergencyPlans=0,maxLift=0,maxTilt=0;
+ const counts={},rows=[],stepsCpu=[],queryCpu=[],searchCpu=[],queries={pose:0,sweep:0,support:0},horizons={},actions={},start=performance.now();let stop=null,committed=0,blocked=0,run=0,longestBlock=0,progress=0,energy=0,maxIntentDeviation=0,dirDeviation=0,jerks=[],angularAcceleration=[],speeds=[],lastVel=null,lastAcc=null,lastOmega=null,lastPose=null,plan=null,inputKey=null,initial=null,budgetExhausted=false,forecastDistances=[],emergencyPlans=0,nominalFastPaths=0,maxLift=0,maxTilt=0;
  const bump=(o,k)=>o[k]=(o[k]||0)+1;
  const budget=()=>!budgetExhausted&&queries.pose+queries.sweep+queries.support<queryBudget;
  const check=(state,pose,prev)=>{if(!budget()||queries.pose+queries.sweep+queries.support+(prev?3:2)>queryBudget){budgetExhausted=true;return {ok:false,reason:'deterministic-query-budget'};}
@@ -45,7 +45,7 @@ export function foresightRoute(world,seed,parts,B,S,boardMatrix,oracle,{approach
   return base;
  }
  function rollout(q,policy,H,input){
-  sim.restore(q.sim);kinetic.restore(q.kin);let prev=q,score=0,advance=0,lowSupport=1,path=[],failure=null,priorVelocity=q.chassisVelocity||[0,0,0],priorAcceleration=q.chassisAcceleration||[0,0,0];
+  sim.restore(q.sim);kinetic.restore(q.kin);let prev=q,score=0,advance=0,lowSupport=1,minGap=Infinity,path=[],failure=null,priorVelocity=q.chassisVelocity||[0,0,0],priorAcceleration=q.chassisAcceleration||[0,0,0];
   for(let j=0;j<H;j++){
    const speedScale=toward(prev.action.speedScale,policy.speedScale,5*DT),brake=toward(prev.action.brake,policy.brake,5*DT),c=slew(prev.correction,policy.target);
    // Reuse the current actual rider command throughout prediction, never future
@@ -55,13 +55,13 @@ export function foresightRoute(world,seed,parts,B,S,boardMatrix,oracle,{approach
    const desired=unit(add(mul(prev.state.frame,-input.stick[1]),mul(unit(cross(prev.state.frame,prev.state.n)),input.stick[0])),prev.state.f),delta=sub(state.p,prev.state.p),tangential=plane(delta,prev.state.n),along=dot(tangential,desired);
    // Do not reward a lift or tangential detour as useful progress.
    if(len(tangential)>1e-7&&along< -1e-8){failure='backward-intent';bump(counts,'trial:'+failure);break;}
-   advance+=Math.max(0,along);lowSupport=Math.min(lowSupport,qcheck.support.ratio);
+   advance+=Math.max(0,along);lowSupport=Math.min(lowSupport,qcheck.support.ratio);minGap=Math.min(minGap,qcheck.support.minGap??-Infinity);
    const chassisVelocity=mul(sub(pose.t,prev.pose.t),120),chassisAcceleration=mul(sub(chassisVelocity,priorVelocity),120),jerk=len(sub(chassisAcceleration,priorAcceleration))*120;priorVelocity=chassisVelocity;priorAcceleration=chassisAcceleration;
    score+=along-.08*len(sub(tangential,mul(desired,along)))-.03*Math.abs(c.lift-prev.correction.lift)-.00001*brake-Math.min(.00003,jerk*1e-9)-.000003*(1-qcheck.support.ratio);
    const next={step:prev.step+1,state,pose,correction:c,support:qcheck.support,sweep:qcheck.sweep,sim:sim.checkpoint(),kin:kinetic.checkpoint(),action:{...policy,speedScale,brake},chassisVelocity,chassisAcceleration,along,intentDeviation:len(tangential)>1e-7?Math.acos(clamp(dot(unit(tangential),desired),-1,1)):0};
    path.push(next);prev=next;
   }
-  return {path,score,advance,lowSupport,failure,complete:path.length===H};
+  return {path,score,advance,lowSupport,minGap,failure,complete:path.length===H};
  }
  for(let i=0;i<steps;i++){
   const tic=performance.now(),input=rider(i),key=JSON.stringify(input);
@@ -70,7 +70,12 @@ export function foresightRoute(world,seed,parts,B,S,boardMatrix,oracle,{approach
    const t=performance.now(),speed=len(cur.state.v),braking=speed*speed/(2*.7),curvature=cur.support.curvature?Math.max(...cur.support.curvature.map(Math.abs)):0;
    const H=adaptiveHorizon?(cur.support.ratio<.73||curvature*vehicleLength>.3||braking>vehicleLength*.12?16:speed>.08?8:4):horizon;
    bump(horizons,H);let best=null;
-   for(const policy of options(cur)){if(!budget())break;const trial=rollout(cur,policy,H,input);if(trial.complete&&(!best||trial.score>best.score+1e-12))best=trial;}
+   for(const [index,policy] of options(cur).entries()){if(!budget())break;const trial=rollout(cur,policy,H,input);if(trial.complete&&(!best||trial.score>best.score+1e-12))best=trial;
+    // Deterministic broad-surface fast path. All nominal steps still pass
+    // the same pose/support/articulated sweep checks; only alternate policy
+    // searches are avoided. Directional margin is a ranking heuristic only.
+    if(guardedNominal&&index===0&&trial.complete&&trial.lowSupport>=.73&&trial.minGap>=.001&&trial.path.every(q=>!q.state.edgeBlocked)){nominalFastPaths++;break;}
+   }
    sim.restore(cur.sim);kinetic.restore(cur.kin);
    searchCpu.push(performance.now()-t);inputKey=key;
    if(!best&&budget()&&len(cur.state.v)>.004){const slow=rollout(cur,{speedScale:0,brake:1,target:cur.correction},1,input);sim.restore(cur.sim);kinetic.restore(cur.kin);if(slow.complete&&len(slow.path[0].state.v)<len(cur.state.v)){best=slow;emergencyPlans++;}}
@@ -85,5 +90,5 @@ export function foresightRoute(world,seed,parts,B,S,boardMatrix,oracle,{approach
   committed++;cur=next;maxLift=Math.max(maxLift,cur.correction.lift);maxTilt=Math.max(maxTilt,Math.hypot(cur.correction.pitch,cur.correction.roll));stepsCpu.push(performance.now()-tic);if(committed%sampleEvery===0||committed===steps)rows.push(toRow(cur));
  }
  if(rows.at(-1).step!==cur.step)rows.push(toRow(cur));
- return {mode:'foresight',approach,push,schedule,horizon,adaptiveHorizon,steps,committed,stop,initial:{pose:initial.pose,correction:initial.correction,support:initial.support},vehicleLength,span,horizons,actions,emergencyPlans,maxLift,maxTilt,forecastAdvance:{mean:forecastDistances.length?forecastDistances.reduce((a,b)=>a+b,0)/forecastDistances.length:0,max:forecastDistances.length?Math.max(...forecastDistances):0},queries,rejections:counts,rows,liveAuthorized:false,summary:{distance:sim.s.rideDistance,chassisDistance:rows.slice(1).reduce((n,q,i)=>n+len(sub(q.p,rows[i].p)),0),intentProgress:progress,meanGroundSpeed:speeds.length?speeds.reduce((a,b)=>a+b,0)/speeds.length:0,medianSpeed:pct(speeds,.5),blockedSteps:blocked,longestBlockSeconds:longestBlock*DT,contactLosses:sim.s.contactLosses,p95ChassisJerk:pct(jerks,.95),maxJerk:jerks.length?Math.max(...jerks):null,p95AngularAcceleration:pct(angularAcceleration,.95),maxIntentDeviation,meanIntentDeviation:committed?dirDeviation/committed:0,energyIntegral:energy,uncommittedSteps:steps-committed},cpuMs:{total:performance.now()-start,perCommittedStepP95:pct(stepsCpu,.95),searchP95:pct(searchCpu,.95),searchWorst:searchCpu.length?Math.max(...searchCpu):null,oracleP95:pct(queryCpu,.95)},contract:'Independent offline fixed-step MARROW guide + common-body corrected chassis state. Each committed endpoint and declared mechanically coupled interpolation passes conditional oracle and directional support. Flight requests stop the ground experiment. No self-intersection proof, live or runtime authorization.'};
+ return {mode:'foresight',approach,push,schedule,horizon,adaptiveHorizon,steps,committed,stop,initial:{pose:initial.pose,correction:initial.correction,support:initial.support},vehicleLength,span,horizons,actions,guardedNominal,nominalFastPaths,emergencyPlans,maxLift,maxTilt,forecastAdvance:{mean:forecastDistances.length?forecastDistances.reduce((a,b)=>a+b,0)/forecastDistances.length:0,max:forecastDistances.length?Math.max(...forecastDistances):0},queries,rejections:counts,rows,liveAuthorized:false,summary:{distance:sim.s.rideDistance,chassisDistance:rows.slice(1).reduce((n,q,i)=>n+len(sub(q.p,rows[i].p)),0),intentProgress:progress,meanGroundSpeed:speeds.length?speeds.reduce((a,b)=>a+b,0)/speeds.length:0,medianSpeed:pct(speeds,.5),blockedSteps:blocked,longestBlockSeconds:longestBlock*DT,contactLosses:sim.s.contactLosses,p95ChassisJerk:pct(jerks,.95),maxJerk:jerks.length?Math.max(...jerks):null,p95AngularAcceleration:pct(angularAcceleration,.95),maxIntentDeviation,meanIntentDeviation:committed?dirDeviation/committed:0,energyIntegral:energy,uncommittedSteps:steps-committed},cpuMs:{total:performance.now()-start,perCommittedStepP95:pct(stepsCpu,.95),searchP95:pct(searchCpu,.95),searchWorst:searchCpu.length?Math.max(...searchCpu):null,oracleP95:pct(queryCpu,.95)},contract:'Independent offline fixed-step MARROW guide + common-body corrected chassis state. Each committed endpoint and declared mechanically coupled interpolation passes conditional oracle and directional support. Flight requests stop the ground experiment. No self-intersection proof, live or runtime authorization.'};
 }
