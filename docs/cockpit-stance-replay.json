@@ -1,0 +1,34 @@
+[
+  {
+    "name": "two fingers arm without drive; midpoint translation builds propulsion only",
+    "pass": true
+  },
+  {
+    "name": "rotation about midpoint produces heading but no propulsion",
+    "pass": true
+  },
+  {
+    "name": "paired translation and rotation retain independent channels",
+    "pass": true
+  },
+  {
+    "name": "separation changes do not generate drive or heading",
+    "pass": true
+  },
+  {
+    "name": "release one foot neutralizes, remaining finger cannot propel, recontact starts neutral",
+    "pass": true
+  },
+  {
+    "name": "crossing singularity neutralizes and re-arms without a heading jump",
+    "pass": true
+  },
+  {
+    "name": "third contact rejected, cancellation clears pair, no flight even at saturation",
+    "pass": true
+  },
+  {
+    "name": "surface replay translates and carves with no automatic flight",
+    "pass": true
+  }
+]

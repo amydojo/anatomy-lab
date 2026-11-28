@@ -78,3 +78,12 @@
 .cockpit[data-flow=true][data-bare=true] .flow-meter{bottom:21px;left:calc(50% - 23px);right:calc(50% - 23px);height:1px;background:#dfff3830;opacity:0}
 .cockpit[data-flow=true][data-bare=true][data-touching=true] .flow-meter{opacity:.85}
 @media(prefers-reduced-motion:reduce){.cockpit[data-bare=true] .cockpit-ring{transition:none}}
+
+/* STANCE: unboxed two-finger contact surface. Two small independent foot markers. */
+.cockpit[data-stance=true] .cockpit-steer{height:clamp(200px,52dvh,480px);left:8px;right:8px;width:auto;background:none;border-color:transparent}
+.cockpit[data-stance=true] .cockpit-ring,.cockpit[data-stance=true] .cockpit-look,.cockpit[data-stance=true] .cockpit-actions{display:none!important}
+.stance-feet{position:absolute;inset:0;pointer-events:none;z-index:4}
+.stance-feet i{position:absolute;top:0;left:0;width:18px;height:18px;margin:-9px;border:1px solid #dfff9e;border-radius:50%;box-sizing:border-box;background:#dfff9e12}
+.stance-feet i[data-foot=front]{border-color:#dfff70;background:#dfff7025}.stance-feet i[data-foot=rear]{border-color:#a7caff;background:#a7caff25}
+.stance-feet i[hidden]{display:none}
+@media(orientation:landscape){.cockpit[data-stance=true] .cockpit-steer{left:8px;right:8px;width:auto;height:clamp(130px,56dvh,310px)}}
