@@ -87,3 +87,21 @@
 .stance-feet i[data-foot=front]{border-color:#dfff70;background:#dfff7025}.stance-feet i[data-foot=rear]{border-color:#a7caff;background:#a7caff25}
 .stance-feet i[hidden]{display:none}
 @media(orientation:landscape){.cockpit[data-stance=true] .cockpit-steer{left:8px;right:8px;width:auto;height:clamp(130px,56dvh,310px)}}
+
+/* FOOTPRINT: discoverable two-contact acquisition without a visible control box. */
+.cockpit[data-footprint=deck] .cockpit-steer,.cockpit[data-footprint=guide] .cockpit-steer{inset:0!important;width:100%!important;height:100%!important;pointer-events:auto;background:none;border:none}
+.footprint-guide{position:absolute;inset:0;pointer-events:none;z-index:3;color:#e9f1d5}
+.footprint-guide[hidden]{display:none}
+.footprint-target{position:absolute;left:0;top:0;width:0;height:0;transition:opacity .12s linear}
+.footprint-target span{display:grid;place-items:center;position:absolute;left:0;top:0;width:var(--foot-size,64px);height:var(--foot-size,64px);transform:translate(-50%,-50%);border:1.5px dashed #dfff70;border-radius:50%;background:#dfff7014;box-shadow:0 0 12px #dfff7035;font:600 14px system-ui;color:#f1ffc4;text-shadow:0 1px 4px #000}
+.footprint-target[data-foot=rear] span{border-color:#a7caff;background:#a7caff14;color:#dbeaff;box-shadow:0 0 12px #a7caff35}
+.footprint-target small{position:absolute;top:calc(var(--foot-size,64px)*.5 + 3px);left:0;transform:translateX(-50%);font:600 9px system-ui;letter-spacing:.12em;text-shadow:0 1px 5px #000;white-space:nowrap}
+.footprint-target[data-acquired=true] span{border-style:solid;background:#dfff7040}.footprint-target[data-foot=rear][data-acquired=true] span{background:#a7caff40}
+.footprint-target[data-acquired=true] small{opacity:.45}
+.footprint-line{display:none;position:absolute;left:0;top:0;height:26px;margin-top:-13px;transform-origin:0 50%;border:1px solid #e4edd45c;border-radius:15px;background:#15191c55}
+.footprint-guide[data-kind=guide] .footprint-line,.footprint-guide[data-kind=recontact] .footprint-line{display:block}
+.footprint-prompt{position:absolute;left:0;right:0;bottom:calc(58px + env(safe-area-inset-bottom,0px));text-align:center;letter-spacing:.17em;font:600 10px system-ui;text-shadow:0 1px 6px #000}
+.footprint-guide[data-armed=true]{opacity:0;transition:opacity .18s linear}
+.cockpit[data-footprint=deck]:not([data-acquired=true]) .flow-hint,.cockpit[data-footprint=guide]:not([data-acquired=true]) .flow-hint{visibility:hidden}
+.cockpit[data-footprint=deck] .flow-hint,.cockpit[data-footprint=guide] .flow-hint{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+.cockpit[data-footprint=deck] .flow-meter,.cockpit[data-footprint=guide] .flow-meter{bottom:calc(34px + env(safe-area-inset-bottom,0px))}
