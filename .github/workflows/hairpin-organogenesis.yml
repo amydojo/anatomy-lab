@@ -1,0 +1,112 @@
+name: HAIRPIN COUTURE ORGANOGENESIS
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - 'experiments/hairpin/couture/organogenesis_*.py'
+      - '.github/workflows/hairpin-organogenesis.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  paired:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: genesis-chart-qualified-endpoints
+          run-id: 46048612249
+          github-token: ${{ github.token }}
+          path: evidence/genesis
+      - uses: actions/download-artifact@v4
+        with:
+          name: metallurgy-frozen-B-bridge-retry
+          run-id: 46051582774
+          github-token: ${{ github.token }}
+          path: evidence/bridge
+      - uses: actions/download-artifact@v4
+        with:
+          name: exogenesis-native-atlas
+          run-id: 46053562438
+          github-token: ${{ github.token }}
+          path: evidence/atlas
+      - run: sudo apt-get update && sudo apt-get install -y blender python3-numpy python3-scipy python3-shapely python3-venv
+      - run: |
+          python3 -m venv --system-site-packages /tmp/ontogenesis
+          /tmp/ontogenesis/bin/pip install shapely==2.1.2
+      - name: Deterministic conditioned chart and dissolved reference-pair arrangement
+        run: |
+          mkdir -p proof
+          OPENBLAS_NUM_THREADS=1 /tmp/ontogenesis/bin/python experiments/hairpin/couture/exaptation_optimize.py evidence proof/optimized
+          OPENBLAS_NUM_THREADS=1 /tmp/ontogenesis/bin/python experiments/hairpin/couture/organogenesis_pair.py evidence proof/rebuilt
+          OPENBLAS_NUM_THREADS=1 /tmp/ontogenesis/bin/python experiments/hairpin/couture/ontogenesis_dissolve.py proof/rebuilt proof/dissolved proof/optimized/optimized-chart.npy
+          python3 -c "import json; assert json.load(open('proof/dissolved/report.json'))['numericalPass']"
+      - name: Actual native diagnostic reopening and strict endpoint gate
+        run: |
+          set -o pipefail
+          OPENBLAS_NUM_THREADS=1 blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/organogenesis_native_readback.py -- proof/rebuilt proof/dissolved proof/reopened 2>&1 | tee proof/readback.log
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: organogenesis-paired-endpoints
+          path: proof/
+          if-no-files-found: warn
+  lineage:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: genesis-chart-qualified-endpoints
+          run-id: 46048612249
+          github-token: ${{ github.token }}
+          path: evidence/genesis
+      - uses: actions/download-artifact@v4
+        with:
+          name: metallurgy-frozen-B-bridge-retry
+          run-id: 46051582774
+          github-token: ${{ github.token }}
+          path: evidence/bridge
+      - uses: actions/download-artifact@v4
+        with:
+          name: exogenesis-native-atlas
+          run-id: 46053562438
+          github-token: ${{ github.token }}
+          path: evidence/atlas
+      - uses: actions/download-artifact@v4
+        with:
+          name: metallurgy-numerical-trajectories
+          run-id: 46051259012
+          github-token: ${{ github.token }}
+          path: evidence/tension
+      - run: sudo apt-get update && sudo apt-get install -y blender python3-numpy python3-scipy python3-venv
+      - run: |
+          python3 -m venv --system-site-packages /tmp/ontogenesis
+          /tmp/ontogenesis/bin/pip install shapely==2.1.2
+      - name: Native-derived regional lineage and 65-pose interior witness audit
+        run: |
+          mkdir -p proof
+          OPENBLAS_NUM_THREADS=1 /tmp/ontogenesis/bin/python experiments/hairpin/couture/morphosis_branch.py evidence/atlas/native-atlas.npz proof/branch
+          OPENBLAS_NUM_THREADS=1 /tmp/ontogenesis/bin/python experiments/hairpin/couture/exaptation_regional_overlap.py evidence evidence/overlap proof/branch/branch.npz
+          OPENBLAS_NUM_THREADS=1 /tmp/ontogenesis/bin/python experiments/hairpin/couture/ontogenesis_lineage.py evidence proof/branch/branch.npz evidence/tension/tension-161.npz proof/lineage
+          OPENBLAS_NUM_THREADS=1 /tmp/ontogenesis/bin/python experiments/hairpin/couture/ontogenesis_approach.py evidence proof/lineage proof/branch/branch.npz
+          python3 -c "import json; assert json.load(open('proof/lineage/approach.json'))['completeSampledTransferPass']"
+          OPENBLAS_NUM_THREADS=1 /tmp/ontogenesis/bin/python experiments/hairpin/couture/organogenesis_event.py evidence proof/lineage evidence/tension/tension-161.npz proof/event
+          OPENBLAS_NUM_THREADS=1 /tmp/ontogenesis/bin/python experiments/hairpin/couture/organogenesis_boundary_intervals.py proof/event proof/event
+          OPENBLAS_NUM_THREADS=1 /tmp/ontogenesis/bin/python experiments/hairpin/couture/organogenesis_connected.py proof/lineage proof/connected
+      - name: Native stored pose and separate editable regional master audit
+        run: |
+          set -o pipefail
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/organogenesis_native_event.py -- proof/event proof/reopened 2>&1 | tee proof/native.log
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: organogenesis-native-event
+          path: proof/
+          if-no-files-found: warn

@@ -1,0 +1,42 @@
+name: HAIRPIN COUTURE GENESIS AWAKEN
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - 'experiments/hairpin/couture/awaken_frozen.py'
+      - '.github/workflows/hairpin-genesis-awaken.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: genesis-awaken-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  awaken:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: morphogenesis-B-native
+          run-id: 46046310819
+          github-token: ${{ github.token }}
+          path: frozen
+      - run: cd frozen && sha256sum -c native/SHA256SUMS
+      - run: sudo apt-get update && sudo apt-get install -y blender ffmpeg
+      - name: Frozen B activation only
+        run: |
+          mkdir -p proof
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/awaken_frozen.py -- --source frozen/native/MORPHOGENESIS-B-closed.blend --out proof 2>&1 | tee proof/awaken.log
+          test -s proof/awaken.json
+          ffmpeg -v error -framerate 16 -i proof/frame-%04d.png -i proof/awaken.wav -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -shortest -movflags +faststart proof/GENESIS-AWAKEN.mp4
+          ffprobe -v error -show_streams -show_format -of json proof/GENESIS-AWAKEN.mp4 > proof/video-report.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-awaken-frozen-B
+          path: proof/
+          if-no-files-found: warn

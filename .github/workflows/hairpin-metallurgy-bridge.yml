@@ -1,0 +1,52 @@
+name: HAIRPIN COUTURE METALLURGY BRIDGE
+on:
+  # Milestone runs retained; use manual dispatch for exact reproduction.
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  frozen_bridge:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: genesis-chart-qualified-endpoints
+          run-id: 46048612249
+          github-token: ${{ github.token }}
+          path: baseline
+      - uses: actions/download-artifact@v4
+        with:
+          name: liquid-serpent004-native
+          run-id: 46033173109
+          github-token: ${{ github.token }}
+          path: native
+      - uses: actions/download-artifact@v4
+        with:
+          name: morphogenesis-B-native
+          run-id: 46046310819
+          github-token: ${{ github.token }}
+          path: frozen
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-candidate
+          run-id: 45946040601
+          github-token: ${{ github.token }}
+          path: source
+      - run: |
+          sha256sum -c native/SHA256SUMS
+          cd frozen && sha256sum -c native/SHA256SUMS
+      - run: sudo apt-get update && sudo apt-get install -y blender python3-numpy python3-scipy python3-shapely
+      - run: |
+          mkdir -p proof
+          OPENBLAS_NUM_THREADS=1 blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/metallurgy_bridge.py -- --baseline baseline --compact native/SERPENT-004-closed.blend --frozen frozen/native/MORPHOGENESIS-B-closed.blend --source source/VECTOR-005-AFTERBURN-0042-master.blend --out proof 2>&1 | tee proof/bridge.log
+          test -s proof/bridge-report.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: metallurgy-frozen-B-bridge-retry
+          path: proof/
+          if-no-files-found: warn

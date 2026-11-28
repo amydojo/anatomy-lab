@@ -1,0 +1,124 @@
+name: HAIRPIN COUTURE EXOGENESIS
+on:
+  # Passed milestone retained for manual reproduction.
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  encode:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - treatment: metal
+            run: 46052089183
+            archive: metallurgy-regional-film-metal
+          - treatment: clay
+            run: 46052398969
+            archive: metallurgy-regional-film-clay-recovered
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.archive }}
+          run-id: ${{ matrix.run }}
+          github-token: ${{ github.token }}
+          path: original
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Encode original 101 frames only
+        run: |
+          mkdir -p proof
+          test "$(find original -name 'frame-*.png' | wc -l)" -eq 101
+          cp original/film.log proof/original-film.log
+          cp original/regional-ritual-gate.json proof/native-geometry-gate.json
+          ffmpeg -v error -framerate 16 -i original/frame-%04d.png -i original/regional.wav -vf 'pad=ceil(iw/2)*2:ceil(ih/2)*2:0:0' -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -movflags +faststart proof/forward.mp4
+          ffmpeg -v error -i proof/forward.mp4 -vf reverse -af areverse -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -movflags +faststart proof/reverse.mp4
+          for mode in forward reverse; do ffprobe -v error -count_frames -show_streams -show_format -of json proof/$mode.mp4 > proof/$mode.json; done
+          python3 - <<'PY'
+          import json
+          for m in ('forward','reverse'):
+              s=json.load(open('proof/'+m+'.json'))['streams']
+              v=next(x for x in s if x['codec_type']=='video');a=next(x for x in s if x['codec_type']=='audio')
+              assert int(v['nb_read_frames'])==101 and v['r_frame_rate']=='16/1'
+              assert v['width']==1000 and v['height']==564
+              assert abs(float(v['duration'])-float(a['duration']))<1/16
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exogenesis-native-film-${{ matrix.treatment }}
+          path: proof/
+          if-no-files-found: warn
+  atlas:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-candidate
+          run-id: 45946040601
+          github-token: ${{ github.token }}
+          path: source
+      - uses: actions/download-artifact@v4
+        with:
+          name: morphogenesis-B-native
+          run-id: 46046310819
+          github-token: ${{ github.token }}
+          path: frozen
+      - uses: actions/download-artifact@v4
+        with:
+          name: metallurgy-native-growth-probe
+          run-id: 46052194441
+          github-token: ${{ github.token }}
+          path: probe
+      - uses: actions/download-artifact@v4
+        with:
+          name: genesis-chart-qualified-endpoints
+          run-id: 46048612249
+          github-token: ${{ github.token }}
+          path: baseline
+      - run: sudo apt-get update && sudo apt-get install -y blender python3-numpy python3-scipy python3-shapely
+      - run: |
+          mkdir -p proof
+          OPENBLAS_NUM_THREADS=1 blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/exogenesis_atlas.py -- --source source/VECTOR-005-AFTERBURN-0042-master.blend --frozen frozen/native/MORPHOGENESIS-B-closed.blend --probe probe --baseline baseline --out proof 2>&1 | tee proof/atlas.log
+          test -s proof/native-atlas.json && test -s proof/EXOGENESIS-native-atlas.blend
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exogenesis-native-atlas
+          path: proof/
+          if-no-files-found: warn
+  shell:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: genesis-chart-qualified-endpoints
+          run-id: 46048612249
+          github-token: ${{ github.token }}
+          path: baseline
+      - uses: actions/download-artifact@v4
+        with:
+          name: metallurgy-numerical-trajectories
+          run-id: 46051259012
+          github-token: ${{ github.token }}
+          path: numerics
+      - run: sudo apt-get update && sudo apt-get install -y blender python3-numpy python3-scipy python3-shapely
+      - run: |
+          mkdir -p proof
+          OPENBLAS_NUM_THREADS=1 blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/exogenesis_native_shell.py -- --baseline baseline --numerics numerics --out proof 2>&1 | tee proof/shell.log
+          python3 -c "import json; r=json.load(open('proof/actual-shell-report.json')); assert r['fullSampledPass'] and r['nativeUpperEndpointMaxError']==0"
+          test -s proof/EXOGENESIS-layered-shell.blend
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exogenesis-connected-shell
+          path: proof/
+          if-no-files-found: warn

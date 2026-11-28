@@ -1,0 +1,88 @@
+name: HAIRPIN COUTURE GENESIS CHART
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - 'experiments/hairpin/couture/genesis_chart*.py'
+      - 'experiments/hairpin/couture/genesis_motion.py'
+      - '.github/workflows/hairpin-genesis-chart.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: genesis-chart-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  endpoint:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: morphogenesis-endpoint-clay
+          run-id: 46046310819
+          github-token: ${{ github.token }}
+          path: baseline
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-candidate
+          run-id: 45946040601
+          github-token: ${{ github.token }}
+          path: source
+      - run: sudo apt-get update && sudo apt-get install -y blender python3-numpy python3-scipy python3-shapely
+      - run: python3 -m py_compile experiments/hairpin/couture/genesis_*.py
+      - name: Reopen exact native and locally conditioned chart
+        run: |
+          mkdir -p proof
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/genesis_chart_reopen.py -- --baseline baseline/preflight --source source/VECTOR-005-AFTERBURN-0042-master.blend --out proof 2>&1 | tee proof/reopen.log
+          python3 -c "import json; assert json.load(open('proof/qualification.json'))['endpointPass']"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-chart-qualified-endpoints
+          path: proof/
+          if-no-files-found: warn
+  motion:
+    needs: endpoint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        treatment: [metal,clay]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: genesis-chart-qualified-endpoints
+          path: conditioned
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-candidate
+          run-id: 45946040601
+          github-token: ${{ github.token }}
+          path: source
+      - run: sudo apt-get update && sudo apt-get install -y blender ffmpeg python3-numpy
+      - name: Actual 81-frame geometry and visual diagnostic
+        run: |
+          mkdir -p frames
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/genesis_motion.py -- --mode ${{ matrix.treatment }} --conditioned conditioned --source source/VECTOR-005-AFTERBURN-0042-master.blend --out frames 2>&1 | tee frames/motion.log
+          test -s frames/evidence.json
+          ffmpeg -v error -framerate 16 -i frames/frame-%04d.png -c:v libx264 -crf 18 -pix_fmt yuv420p -movflags +faststart forward.mp4
+          ffmpeg -v error -i forward.mp4 -vf reverse -c:v libx264 -crf 18 -pix_fmt yuv420p -movflags +faststart reverse.mp4
+          ffprobe -v error -show_streams -show_format -of json forward.mp4 > video-report.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genesis-evaluated-motion-${{ matrix.treatment }}
+          path: |
+            frames/
+            forward.mp4
+            reverse.mp4
+            video-report.json
+          if-no-files-found: warn
+      - name: Full sampled regional gate (never silently approve a diagnostic)
+        run: python3 -c "import json; r=json.load(open('frames/evidence.json')); assert len(r['samples'])==81 and r['sampledRegionalPass'], 'Regional movement failed; front assembly blocked'"

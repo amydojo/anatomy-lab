@@ -1,0 +1,33 @@
+name: HAIRPIN COUTURE MORPHOSIS FUSION 001 RECOVERY
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - '.github/workflows/hairpin-morphosis-fusion-recovery.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  fusion:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y blender ffmpeg python3-numpy python3-shapely
+      - run: |
+          mkdir -p proof
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/anastomosis_native_fusion.py -- --out proof 2>&1 | tee proof/fusion.log
+          python3 experiments/hairpin/couture/anastomosis_event_audit.py proof
+          python3 -c "import json; r=json.load(open('proof/native-fusion.json')); assert r['actualEventPass'] and r['filmFrames']==52"
+          ffmpeg -v error -framerate 16 -i proof/frame-%04d.png -i proof/fusion.wav -vf 'pad=ceil(iw/2)*2:ceil(ih/2)*2:0:0' -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac proof/forward.mp4
+          ffmpeg -v error -i proof/forward.mp4 -vf reverse -af areverse -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac proof/reverse.mp4
+          for m in forward reverse; do ffprobe -v error -count_frames -show_streams -show_format -of json proof/$m.mp4 > proof/$m.json; done
+          python3 -c "import json; assert all(int(next(s for s in json.load(open('proof/'+m+'.json'))['streams'] if s['codec_type']=='video')['nb_read_frames'])==52 for m in ('forward','reverse'))"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: morphosis-fusion-001-corrected
+          path: proof/
+          if-no-files-found: warn

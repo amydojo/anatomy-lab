@@ -1,0 +1,204 @@
+name: HAIRPIN COUTURE CHIMERA
+on:
+  # Frozen milestone: manual reproducibility only, to avoid redundant PR reruns.
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: chimera-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  native:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: metamorphosis-serpent-native
+          run-id: 45969684668
+          github-token: ${{ github.token }}
+          path: historical/native
+      - uses: actions/download-artifact@v4
+        with:
+          name: metamorphosis-historical-masters
+          run-id: 45969684668
+          github-token: ${{ github.token }}
+          path: historical/first
+      - name: Preserve historical candidates
+        run: |
+          sed 's@  native/@  historical/native/@' historical/native/SHA256SUMS | sha256sum -c -
+          sed 's@  masters/@  historical/first/@' historical/first/SHA256SUMS | sha256sum -c -
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chimera-historical-masters
+          path: historical/
+          if-no-files-found: error
+      - run: sudo apt-get update && sudo apt-get install -y blender
+      - run: python3 -m py_compile experiments/hairpin/couture/chimera_*.py
+      - name: Generate new native masters
+        run: |
+          mkdir -p native
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/chimera_serpent.py -- --mode build --out native 2>&1 | tee native/build.log
+          sha256sum native/*.blend > native/SHA256SUMS
+          test -s native/SERPENT-003-closed.blend && test -s native/SERPENT-003-open.blend
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chimera-native
+          path: native/
+          if-no-files-found: warn
+  clearance:
+    needs: native
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: chimera-native
+          path: native
+      - run: sudo apt-get update && sudo apt-get install -y blender
+      - name: Reopen audits and complete sampled opening path
+        run: |
+          sha256sum -c native/SHA256SUMS
+          mkdir -p audits
+          for pose in closed open; do
+            blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/chimera_serpent.py -- --mode audit --source native/SERPENT-003-$pose.blend --out audits/$pose
+          done
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/chimera_serpent.py -- --mode sweep --source native/SERPENT-003-closed.blend --out audits 2>&1 | tee audits/sweep.log
+          test -s audits/sweep.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chimera-clearance
+          path: audits/
+          if-no-files-found: warn
+  fashion:
+    needs: native
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - pose: closed
+            mode: render
+          - pose: open
+            mode: open-render
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: chimera-native
+          path: native
+      - run: sudo apt-get update && sudo apt-get install -y blender
+      - run: sha256sum -c native/SHA256SUMS
+      - run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/chimera_serpent.py -- --mode preflight --source native/SERPENT-003-${{ matrix.pose }}.blend --out preflight
+      - run: |
+          mkdir -p renders
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/chimera_serpent.py -- --mode ${{ matrix.mode }} --source native/SERPENT-003-${{ matrix.pose }}.blend --out renders 2>&1 | tee renders/render.log
+          if [ "${{ matrix.pose }}" = closed ]; then
+            for f in metal-hero metal-top metal-side metal-crown mechanism-underside clay-hero clay-crown zebra-hero zebra-crown worn-back worn-profile; do test -s renders/$f.png || exit 1; done
+          else
+            test -s renders/open-mechanism.png
+          fi
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chimera-fashion-${{ matrix.pose }}
+          path: |
+            preflight/
+            renders/
+          if-no-files-found: warn
+  comparison:
+    needs: fashion
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: metamorphosis-fashion-closed
+          run-id: 45969684668
+          github-token: ${{ github.token }}
+          path: previous
+      - uses: actions/download-artifact@v4
+        with:
+          name: chimera-fashion-closed
+          path: current
+      - run: sudo apt-get update && sudo apt-get install -y python3-pil fonts-dejavu-core
+      - run: |
+          mkdir -p board
+          python3 - <<'PY'
+          from PIL import Image,ImageDraw,ImageFont
+          c=Image.new('RGB',(1600,2230),'#e5e3df');d=ImageDraw.Draw(c)
+          font='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
+          def f(n):return ImageFont.truetype(font,n)
+          d.text((40,20),'CHIMERA / CONTINUOUS IDENTITY',font=f(36),fill='#181c23')
+          d.text((40,68),'MATCHED NATIVE RENDERS · NO WEARABILITY CLAIM',font=f(21),fill='#41464b')
+          for i,(root,label) in enumerate([('previous','SERPENT 002'),('current','SERPENT 003')]):
+              x=40+i*780
+              d.text((x,110),label,font=f(28),fill='#181c23')
+              for j,name in enumerate(['metal-hero','metal-crown','clay-hero','worn-back']):
+                  im=Image.open(root+'/renders/'+name+'.png').convert('RGB')
+                  im.thumbnail((740,488))
+                  y=153+j*515
+                  c.paste(im,(x+(740-im.width)//2,y))
+                  d.text((x,y+488),name.upper(),font=f(17),fill='#181c23')
+          c.save('board/CHIMERA-comparison.png')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chimera-comparison
+          path: board/
+          if-no-files-found: error
+  motion:
+    needs: native
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: chimera-native
+          path: native
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-candidate
+          run-id: 45946040601
+          github-token: ${{ github.token }}
+          path: source
+      - run: sudo apt-get update && sudo apt-get install -y blender ffmpeg python3-numpy
+      - run: sha256sum -c native/SHA256SUMS
+      - name: Unchanged protected mechanical gate
+        run: blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/vector/continuity/qualify_continuity.py -- --master source/VECTOR-005-AFTERBURN-0042-master.blend --out mechanical.json
+      - name: Actual compact, one-third and deployed preflight
+        run: |
+          mkdir -p preflight
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/chimera_transport.py -- --source source/VECTOR-005-AFTERBURN-0042-master.blend --compact native/SERPENT-003-closed.blend --out preflight --preflight 2>&1 | tee preflight/transport.log
+          test -s preflight/evidence.json
+      - name: Full surface correspondence film
+        run: |
+          mkdir -p frames
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/chimera_transport.py -- --source source/VECTOR-005-AFTERBURN-0042-master.blend --compact native/SERPENT-003-closed.blend --out frames 2>&1 | tee frames/transport.log
+          test -s frames/evidence.json
+      - name: Encode both directions, original mechanical study
+        run: |
+          python3 experiments/hairpin/couture/sound.py ritual.wav
+          ffmpeg -v error -framerate 8 -i frames/frame-%04d.png -i ritual.wav -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -shortest -movflags +faststart deployment.mp4
+          ffmpeg -v error -i deployment.mp4 -vf reverse -af areverse -c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac -movflags +faststart stow.mp4
+          ffprobe -v error -show_streams -show_format -of json deployment.mp4 > video-report.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chimera-surface-transport
+          path: |
+            preflight/
+            frames/
+            deployment.mp4
+            stow.mp4
+            ritual.wav
+            mechanical.json
+            video-report.json
+          if-no-files-found: warn

@@ -1,0 +1,97 @@
+name: HAIRPIN COUTURE EXAPTATION
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - 'experiments/hairpin/couture/exaptation_*.py'
+      - '.github/workflows/hairpin-exaptation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  paired:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: genesis-chart-qualified-endpoints
+          run-id: 46048612249
+          github-token: ${{ github.token }}
+          path: evidence/genesis
+      - uses: actions/download-artifact@v4
+        with:
+          name: metallurgy-frozen-B-bridge-retry
+          run-id: 46051582774
+          github-token: ${{ github.token }}
+          path: evidence/bridge
+      - uses: actions/download-artifact@v4
+        with:
+          name: exogenesis-native-atlas
+          run-id: 46053562438
+          github-token: ${{ github.token }}
+          path: evidence/atlas
+      - run: sudo apt-get update && sudo apt-get install -y blender python3-numpy python3-scipy python3-shapely python3-venv
+      - run: |
+          python3 -m venv --system-site-packages /tmp/exaptation
+          /tmp/exaptation/bin/pip install shapely==2.1.2
+      - name: Deterministic chart and full arrangement
+        run: |
+          mkdir -p proof
+          OPENBLAS_NUM_THREADS=1 /tmp/exaptation/bin/python experiments/hairpin/couture/exaptation_optimize.py evidence proof/optimized
+          OPENBLAS_NUM_THREADS=1 /tmp/exaptation/bin/python experiments/hairpin/couture/exaptation_overlay.py evidence proof/refinement proof/optimized/optimized-chart.npy
+      - name: Actual stored geometry and bidirectional endpoint gate
+        run: |
+          set -o pipefail
+          OPENBLAS_NUM_THREADS=1 blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/exaptation_readback.py -- evidence proof/refinement proof/reopened 2>&1 | tee proof/readback.log
+          python3 -c "import json; assert json.load(open('proof/reopened/qualification.json'))['endpointPass']"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exaptation-paired-diagnostics
+          path: proof/
+          if-no-files-found: warn
+  structural:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: genesis-chart-qualified-endpoints
+          run-id: 46048612249
+          github-token: ${{ github.token }}
+          path: evidence/genesis
+      - uses: actions/download-artifact@v4
+        with:
+          name: metallurgy-frozen-B-bridge-retry
+          run-id: 46051582774
+          github-token: ${{ github.token }}
+          path: evidence/bridge
+      - uses: actions/download-artifact@v4
+        with:
+          name: exogenesis-native-atlas
+          run-id: 46053562438
+          github-token: ${{ github.token }}
+          path: evidence/atlas
+      - run: sudo apt-get update && sudo apt-get install -y python3-numpy python3-scipy python3-venv python3-vtk9
+      - run: |
+          python3 -m venv --system-site-packages /tmp/exaptation
+          /tmp/exaptation/bin/pip install shapely==2.1.2
+      - name: Reconstruct immutable native-derived branch and classify inherited contacts
+        run: |
+          mkdir -p proof
+          OPENBLAS_NUM_THREADS=1 /tmp/exaptation/bin/python experiments/hairpin/couture/morphosis_branch.py evidence/atlas/native-atlas.npz proof/branch
+          OPENBLAS_NUM_THREADS=1 /tmp/exaptation/bin/python experiments/hairpin/couture/morphosis_collision.py proof/branch/branch.npz evidence/atlas/native-atlas.npz proof/collision.json
+          /tmp/exaptation/bin/python experiments/hairpin/couture/exaptation_intersections.py evidence proof/collision.json proof/intersections.json
+          /tmp/exaptation/bin/python experiments/hairpin/couture/exaptation_regional_overlap.py evidence proof/overlap proof/branch/branch.npz
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exaptation-native-overlap-and-intersections
+          path: proof/
+          if-no-files-found: warn

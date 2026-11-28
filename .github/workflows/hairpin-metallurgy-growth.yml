@@ -1,0 +1,35 @@
+name: HAIRPIN COUTURE METALLURGY GROWTH PROBE
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - 'experiments/hairpin/couture/metallurgy_growth_probe.py'
+      - '.github/workflows/hairpin-metallurgy-growth.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  probe:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-candidate
+          run-id: 45946040601
+          github-token: ${{ github.token }}
+          path: source
+      - run: sudo apt-get update && sudo apt-get install -y blender python3-numpy python3-scipy python3-shapely
+      - run: |
+          mkdir -p proof
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/metallurgy_growth_probe.py -- --source source/VECTOR-005-AFTERBURN-0042-master.blend --out proof 2>&1 | tee proof/probe.log
+          test -s proof/growth-probe.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: metallurgy-native-growth-probe
+          path: proof/
+          if-no-files-found: warn

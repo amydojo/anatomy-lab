@@ -1,0 +1,79 @@
+name: HAIRPIN COUTURE EXOGENESIS PAIRED NATIVE AND APERTURE
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - 'experiments/hairpin/couture/exogenesis_*aperture.py'
+      - 'experiments/hairpin/couture/exogenesis_*pair*.py'
+      - '.github/workflows/hairpin-exogenesis-layered.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  paired_native:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: exogenesis-native-atlas
+          run-id: 46053562438
+          github-token: ${{ github.token }}
+          path: atlas
+      - uses: actions/download-artifact@v4
+        with:
+          name: genesis-chart-qualified-endpoints
+          run-id: 46048612249
+          github-token: ${{ github.token }}
+          path: baseline
+      - run: sudo apt-get update && sudo apt-get install -y blender python3-numpy python3-scipy python3-shapely
+      - run: |
+          mkdir -p proof
+          OPENBLAS_NUM_THREADS=1 blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/exogenesis_pair_reopen.py -- --baseline baseline --atlas atlas --out proof 2>&1 | tee proof/pair.log
+          python3 -c "import json; assert json.load(open('proof/native-pair-report.json'))['actualStaticEndpointPass']"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exogenesis-native-paired-endpoint
+          path: proof/
+          if-no-files-found: warn
+  aperture:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: genesis-chart-qualified-endpoints
+          run-id: 46048612249
+          github-token: ${{ github.token }}
+          path: baseline
+      - uses: actions/download-artifact@v4
+        with:
+          name: metallurgy-numerical-trajectories
+          run-id: 46051259012
+          github-token: ${{ github.token }}
+          path: numerics
+      - uses: actions/download-artifact@v4
+        with:
+          name: exogenesis-connected-shell
+          run-id: 46053562438
+          github-token: ${{ github.token }}
+          path: prior
+      - run: python3 -c "import json; assert json.load(open('prior/actual-shell-report.json'))['fullSampledPass']"
+      - run: sudo apt-get update && sudo apt-get install -y blender python3-numpy python3-scipy python3-shapely
+      - run: |
+          mkdir -p proof
+          OPENBLAS_NUM_THREADS=1 blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/exogenesis_native_aperture.py -- --baseline baseline --numerics numerics --out proof 2>&1 | tee proof/aperture.log
+          python3 -c "import json; r=json.load(open('proof/actual-aperture-report.json')); assert r['fullSampledPass'] and r['nativeUpperEndpointMaxError']==0"
+          test -s proof/EXOGENESIS-aperture.blend
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: exogenesis-persistent-aperture
+          path: proof/
+          if-no-files-found: warn
