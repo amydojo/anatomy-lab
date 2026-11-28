@@ -1,0 +1,94 @@
+{
+  "results": [
+    {
+      "name": "ANCHOR camera-only variants produce identical physical trajectories",
+      "pass": true
+    },
+    {
+      "name": "ORBIT and CONTACT hold orientation on unoccluded flat surface",
+      "pass": true
+    },
+    {
+      "name": "SOFT follows without camera-to-physics feedback",
+      "pass": true
+    },
+    {
+      "name": "screen comparison remains finite and retains attachment",
+      "pass": true
+    },
+    {
+      "name": "edge-on screen projection preserves transported heading instead of flipping",
+      "pass": true
+    }
+  ],
+  "summary": [
+    {
+      "profile": "calm",
+      "samples": 360,
+      "ride": 0.6348848136304278,
+      "flights": 0,
+      "blocked": 0,
+      "framed": 360,
+      "angularP95": 0.848135491072725,
+      "accelP95": 5.63365220235888,
+      "peakOffset": 0,
+      "safetyCuts": 0,
+      "finalPosition": [
+        0.08944346546796761,
+        0.011,
+        -0.6092125373393039
+      ]
+    },
+    {
+      "profile": "orbit",
+      "samples": 360,
+      "ride": 0.6348848136304278,
+      "flights": 0,
+      "blocked": 0,
+      "framed": 360,
+      "angularP95": 0,
+      "accelP95": 0,
+      "peakOffset": 0,
+      "safetyCuts": 0,
+      "finalPosition": [
+        0.08944346546796761,
+        0.011,
+        -0.6092125373393039
+      ]
+    },
+    {
+      "profile": "contact",
+      "samples": 360,
+      "ride": 0.6348848136304278,
+      "flights": 0,
+      "blocked": 0,
+      "framed": 360,
+      "angularP95": 0,
+      "accelP95": 0,
+      "peakOffset": 0.029188273767436126,
+      "safetyCuts": 0,
+      "finalPosition": [
+        0.08944346546796761,
+        0.011,
+        -0.6092125373393039
+      ]
+    },
+    {
+      "profile": "soft",
+      "samples": 360,
+      "ride": 0.6348848136304278,
+      "flights": 0,
+      "blocked": 0,
+      "framed": 360,
+      "angularP95": 0.2017587585162969,
+      "accelP95": 0.7963671682130483,
+      "peakOffset": 0,
+      "safetyCuts": 0,
+      "finalPosition": [
+        0.08944346546796761,
+        0.011,
+        -0.6092125373393039
+      ]
+    }
+  ]
+}

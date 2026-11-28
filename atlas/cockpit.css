@@ -64,3 +64,5 @@
 .field-only{display:none!important}.flow-touch-enabled:has(.cockpit[data-field=true]) .field-only{display:flex!important}.flow-touch-enabled:has(.cockpit[data-field=true]) .field-hide{display:none!important}.cockpit[data-field=true] .cockpit-ring{border-color:rgba(200,230,160,calc(.28 + var(--field-detent,0)*.65));box-shadow:0 0 calc(var(--field-detent,0)*13px) #dfff3866}.cockpit[data-field=true] .flow-meter{height:2px}.cockpit[data-field=true] .flow-hint{font-size:10px;letter-spacing:.06em}
 
 .cockpit[data-calm=true] .cockpit-look{pointer-events:none}.cockpit[data-calm=true] .flow-hint{font-size:11px;letter-spacing:.025em}
+
+.cockpit[data-calm=true][data-anchor=true] .cockpit-look{pointer-events:auto}.anchor-export{margin-top:8px;min-height:38px;display:block;width:100%;color:#e2ff45;background:#151017;border:1px solid #9cae46;border-radius:7px}
