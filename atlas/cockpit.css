@@ -27,3 +27,29 @@
 
 /* MONO: larger continuous travel, dominant-hand zone, no extra pedal. */
 .mono-up,.mono-down,.mono-left,.mono-right{display:none}.cockpit[data-mono=true] .cockpit-pedal{display:none}.cockpit[data-mono=true] .cockpit-steer{--mono:clamp(128px,36vmin,260px);width:calc(var(--mono)*var(--cockpit-size,1)*1.12);height:calc(var(--mono)*var(--cockpit-size,1));left:auto;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));overflow:visible}.cockpit[data-mono=true][data-hand=left] .cockpit-steer{right:auto;left:calc(16px + env(safe-area-inset-left,0px))}.cockpit[data-mono=true] .cockpit-actions{bottom:calc(16px + env(safe-area-inset-bottom,0px));left:12px;right:auto}.cockpit[data-mono=true][data-hand=left] .cockpit-actions{left:auto;right:12px}.cockpit[data-mono=true] .cockpit-ring{width:66%;height:auto;aspect-ratio:1;top:50%}.cockpit[data-mono=true] .cockpit-label{font-size:9px;opacity:.7}.cockpit[data-mono=true] :is(.mono-up,.mono-down,.mono-left,.mono-right){display:block;position:absolute;pointer-events:none;opacity:.75}.mono-up{top:8px;left:50%;transform:translateX(-50%)}.mono-down{bottom:8px;left:50%;transform:translateX(-50%)}.mono-left{left:8px;top:50%}.mono-right{right:8px;top:50%}@media(max-width:500px){.cockpit[data-mono=true] .cockpit-steer{--mono:clamp(120px,34vmin,180px)}.cockpit[data-mono=true] .cockpit-actions{max-width:40%;flex-wrap:wrap}}
+
+/* FLOW TOUCH is an opt-in separate phone profile. Touch surface is broad, visual controls are small. */
+.flow-hint,.flow-meter,.flow-only{display:none!important}
+.cockpit[data-flow=true] .cockpit-steer{left:10px;right:10px;bottom:calc(12px + env(safe-area-inset-bottom,0px));width:auto;height:clamp(142px,32dvh,250px);border:1px solid #e2ff4538;border-radius:24px;background:linear-gradient(0deg,#10101855,transparent);opacity:var(--cockpit-opacity,.65);overflow:visible}
+.cockpit[data-flow=true][data-hand=left] .cockpit-steer{left:10px;right:10px}
+.cockpit[data-flow=true] .cockpit-ring{width:78px;height:78px;left:73%;top:62%;border-color:#dfff3855;pointer-events:none}
+.cockpit[data-flow=true][data-hand=left] .cockpit-ring{left:27%}
+.cockpit[data-flow=true]:not([data-held=true]) .cockpit-ring{opacity:.35}
+.cockpit[data-flow=true] .cockpit-ring i{width:18px;height:18px;position:absolute;top:29px;left:29px}
+.cockpit[data-flow=true] :is(.mono-up,.mono-down,.mono-left,.mono-right){display:none}
+.cockpit[data-flow=true] .cockpit-label{top:8px;left:12px;letter-spacing:.1em}
+.cockpit[data-flow=true] .flow-hint{display:block!important;position:absolute;bottom:10px;left:0;right:0;text-align:center;pointer-events:none;font-size:11px}
+.cockpit[data-flow=true] .flow-meter{display:block!important;position:absolute;bottom:30px;left:25%;right:25%;height:3px;background:#dfff3830;pointer-events:none;border-radius:3px}
+.cockpit[data-flow=true] .flow-meter i{display:block;height:100%;background:#dfff38;border-radius:3px}
+.cockpit[data-flow=true] .cockpit-actions{left:auto;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(clamp(142px,32dvh,250px) + 22px + env(safe-area-inset-bottom,0px));max-width:none}
+.cockpit[data-flow=true][data-hand=left] .cockpit-actions{right:auto;left:calc(18px + env(safe-area-inset-left,0px))}
+.cockpit[data-flow=true] .cockpit-actions button{min-width:52px;min-height:48px;font-size:12px}
+.flow-touch-enabled .flow-menu{top:calc(10px + env(safe-area-inset-top,0px));right:calc(10px + env(safe-area-inset-right,0px));max-height:75%;max-width:min(310px,86vw);padding:10px;touch-action:pan-y}
+.flow-touch-enabled .flow-menu summary{min-height:30px;display:flex;align-items:center;cursor:pointer}
+.flow-touch-enabled .flow-menu .flow-only{display:flex!important}
+.flow-touch-enabled .flow-menu .legacy-setting{display:none}
+.flow-touch-enabled .flow-menu .flow-toolbar{position:static!important;display:flex;flex-wrap:wrap;max-width:none!important;gap:6px;margin-top:10px}
+.flow-touch-enabled .flow-menu .cockpit-research{position:static;max-width:none;max-height:none;margin-top:8px}
+.flow-touch-enabled .flow-menu #marrow-sensitivity{display:block!important;position:static!important;margin-top:8px}
+.flow-touch-enabled .flow-menu[open]{background:#151017f5}
+@media(orientation:landscape){.cockpit[data-flow=true] .cockpit-steer{left:auto;right:calc(12px + env(safe-area-inset-right,0px));width:min(48vw,440px);height:clamp(110px,44dvh,210px)}.cockpit[data-flow=true][data-hand=left] .cockpit-steer{left:calc(12px + env(safe-area-inset-left,0px));right:auto}.cockpit[data-flow=true] .cockpit-actions{bottom:calc(clamp(110px,44dvh,210px) + 22px + env(safe-area-inset-bottom,0px))}}
