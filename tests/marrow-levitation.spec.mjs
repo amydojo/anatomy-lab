@@ -42,10 +42,10 @@ test('LEVITATION actual cranial blocked-contact investigation and rider-directed
   // Brake to zero, steer deliberately in place, then throttle in new direction.
   const blocked=evidence.blocked;await send('move',0,55);await send('move',44,55);
   await expect.poll(async()=> (await read()).simulation.levitation.stationaryTurns,{timeout:30000}).toBeGreaterThan(blocked.simulation.levitation.stationaryTurns+60);
-  evidence.pivot=await read();await send('move',0,55);await send('move',0,-65);
+  evidence.pivot=await read();await send('move',0,55);await send('move',0,-125);
   const beforeRecovery=await read();try{await expect.poll(async()=> (await read()).simulation.rideDistance-beforeRecovery.simulation.rideDistance,{timeout:20000}).toBeGreaterThan(.02);evidence.recovery='pivot-retreat';}catch{
    // Deliberate lift-assisted disengagement, not automatic launch.
-   await send('move',12,-65);await send('move',12,-105);await expect.poll(async()=>!!(await read()).simulation.glide,{timeout:30000}).toBe(true);await send('move',-12,-105);await send('move',-12,-50);await expect.poll(async()=> (await read()).simulation.landings,{timeout:60000}).toBeGreaterThan(blocked.simulation.landings);evidence.recovery='rider-lift';
+   await expect.poll(async()=> (await read()).cockpit.intent.push).toBeGreaterThan(.98);await send('move',12,-125);await send('move',12,-165);await expect.poll(async()=>!!(await read()).simulation.glide,{timeout:30000}).toBe(true);await send('move',-12,-165);await send('move',-12,-95);await expect.poll(async()=> (await read()).simulation.landings,{timeout:60000}).toBeGreaterThan(blocked.simulation.landings);evidence.recovery='rider-lift';
   }
   evidence.recovered=await read();expect(evidence.recovered.simulation.remounts).toBe(blocked.simulation.remounts);await page.screenshot({path:info.outputPath('lev-recovered.png')});
  }finally{await send('up').catch(()=>{});evidence.final=await read().catch(()=>null);writeFileSync(info.outputPath('levitation-blocked-source.json'),JSON.stringify(evidence,null,2));}
