@@ -1,0 +1,182 @@
+[
+  {
+    "sync": false,
+    "held": {
+      "heading": 117.30179782947774,
+      "framed": true,
+      "error": 11.735837479543852,
+      "throttle": 0.48,
+      "angular": 0.5397067448692735
+    },
+    "returned": {
+      "heading": 123.68909084398588,
+      "framed": true,
+      "error": 0.05601854986139854,
+      "throttle": 0.48,
+      "angular": 0.003213531924169128
+    },
+    "rows": [
+      {
+        "heading": 0,
+        "framed": true,
+        "error": 0,
+        "throttle": 0.48,
+        "angular": 0
+      },
+      {
+        "heading": 0,
+        "framed": true,
+        "error": 0,
+        "throttle": 0.48,
+        "angular": 0
+      },
+      {
+        "heading": 0.0003542568438081536,
+        "framed": true,
+        "error": 0.00004190454651505445,
+        "throttle": 0.48,
+        "angular": 0.0000021900144899933144
+      },
+      {
+        "heading": 25.048832087214926,
+        "framed": true,
+        "error": 10.440995240674088,
+        "throttle": 0.48,
+        "angular": 0.4658220761455315
+      },
+      {
+        "heading": 55.97073577920621,
+        "framed": true,
+        "error": 11.682816351501316,
+        "throttle": 0.48,
+        "angular": 0.5366651473479488
+      },
+      {
+        "heading": 86.89396028136582,
+        "framed": true,
+        "error": 11.733765480747106,
+        "throttle": 0.48,
+        "angular": 0.5395878811031307
+      },
+      {
+        "heading": 117.30179782947774,
+        "framed": true,
+        "error": 11.735837479543852,
+        "throttle": 0.48,
+        "angular": 0.5397067448692735
+      },
+      {
+        "heading": 117.8168308791514,
+        "framed": true,
+        "error": 11.735798556825161,
+        "throttle": 0.48,
+        "angular": 0.5397065867239648
+      },
+      {
+        "heading": 123.68769732754558,
+        "framed": true,
+        "error": 1.2945258959690356,
+        "throttle": 0.48,
+        "angular": 0.07386313945832798
+      },
+      {
+        "heading": 123.68909084398588,
+        "framed": true,
+        "error": 0.05601854986139854,
+        "throttle": 0.48,
+        "angular": 0.003213531924169128
+      }
+    ],
+    "blocked": 0
+  },
+  {
+    "sync": true,
+    "held": {
+      "heading": 30.252171582904772,
+      "framed": true,
+      "error": 0.0000320932593756805,
+      "throttle": 0.48,
+      "angular": 0.000008850838187287755
+    },
+    "returned": {
+      "heading": 2.7502380305070773,
+      "framed": true,
+      "error": 0.00004155519030242804,
+      "throttle": 0.48,
+      "angular": 0.000006690604782296317
+    },
+    "rows": [
+      {
+        "heading": 0,
+        "framed": true,
+        "error": 0,
+        "throttle": 0.48,
+        "angular": 0
+      },
+      {
+        "heading": 0,
+        "framed": true,
+        "error": 0,
+        "throttle": 0.48,
+        "angular": 0
+      },
+      {
+        "heading": 0.0003542568438081536,
+        "framed": true,
+        "error": 0.49495651534732965,
+        "throttle": 0.48,
+        "angular": 0.5183635586352484
+      },
+      {
+        "heading": 29.95028686486578,
+        "framed": true,
+        "error": 0.5114593417241915,
+        "throttle": 0.48,
+        "angular": 0.006215967682565771
+      },
+      {
+        "heading": 30.252127755423665,
+        "framed": true,
+        "error": 0.00004371787951338174,
+        "throttle": 0.48,
+        "angular": 0.000007996802249550072
+      },
+      {
+        "heading": 30.25217157748431,
+        "framed": true,
+        "error": 0.000038994189436689716,
+        "throttle": 0.48,
+        "angular": 0.000006194296387084286
+      },
+      {
+        "heading": 30.252171582904772,
+        "framed": true,
+        "error": 0.0000320932593756805,
+        "throttle": 0.48,
+        "angular": 0.000008850838187287755
+      },
+      {
+        "heading": 30.251817366620855,
+        "framed": true,
+        "error": 0.49498030022470896,
+        "throttle": 0.48,
+        "angular": 0.518358634403892
+      },
+      {
+        "heading": 2.994837926424041,
+        "framed": true,
+        "error": 0.4191265549727955,
+        "throttle": 0.48,
+        "angular": 0.005256175453796213
+      },
+      {
+        "heading": 2.7502380305070773,
+        "framed": true,
+        "error": 0.00004155519030242804,
+        "throttle": 0.48,
+        "angular": 0.000006690604782296317
+      }
+    ],
+    "blocked": 0
+  }
+]
