@@ -1,0 +1,49 @@
+name: HAIRPIN COUTURE MORPHOSIS
+on:
+  pull_request:
+    branches: ['experiment/marrow-hairpin-001']
+    paths:
+      - 'experiments/hairpin/couture/morphosis_*.py'
+      - '.github/workflows/hairpin-morphosis.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  native_branch:
+    if: github.head_ref == 'experiment/hairpin-couture-001' || github.ref_name == 'experiment/hairpin-couture-001'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: exogenesis-native-atlas
+          run-id: 46053562438
+          github-token: ${{ github.token }}
+          path: atlas
+      - uses: actions/download-artifact@v4
+        with:
+          name: vector-chromatic-candidate
+          run-id: 45946040601
+          github-token: ${{ github.token }}
+          path: source
+      - run: sudo apt-get update && sudo apt-get install -y blender python3-numpy python3-scipy python3-venv
+      - run: |
+          python3 -m venv --system-site-packages /tmp/morphosis
+          /tmp/morphosis/bin/pip install shapely==2.1.2
+      - name: Reproduce actual indexed branch and contact geometry
+        run: |
+          mkdir -p proof
+          OPENBLAS_NUM_THREADS=1 /tmp/morphosis/bin/python experiments/hairpin/couture/morphosis_branch.py atlas/native-atlas.npz proof
+      - name: Native stored poses, original overlap gate and diagnostic renders
+        run: |
+          set -o pipefail
+          blender -b -t 4 --python-exit-code 1 --python experiments/hairpin/couture/morphosis_native_branch.py -- --source source/VECTOR-005-AFTERBURN-0042-master.blend --atlas atlas --proof proof --out proof 2>&1 | tee proof/native.log
+          python3 -c "import json; assert json.load(open('proof/native-branch-report.json'))['actualEventPass']"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: morphosis-native-branch-diagnostics
+          path: proof/
+          if-no-files-found: warn
