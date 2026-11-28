@@ -1,0 +1,46 @@
+{
+  "results": [
+    {
+      "name": "ANCHOR camera-only variants produce identical physical trajectories",
+      "pass": true
+    },
+    {
+      "name": "ORBIT and CONTACT hold orientation on unoccluded flat surface",
+      "pass": true
+    },
+    {
+      "name": "SOFT follows without camera-to-physics feedback",
+      "pass": true
+    },
+    {
+      "name": "screen comparison remains finite and retains attachment",
+      "pass": true
+    },
+    {
+      "name": "edge-on screen projection preserves transported heading instead of flipping",
+      "pass": true
+    },
+    {
+      "name": "CONTACT optical retains bounded screen tracking while eliminating offset ray toggles",
+      "pass": true
+    }
+  ],
+  "data": [
+    {
+      "optical": false,
+      "rays": 569,
+      "offsetAccepted": 10,
+      "maxTargetJump": 0.032,
+      "maxScreenShift": 0,
+      "framed": 180
+    },
+    {
+      "optical": true,
+      "rays": 540,
+      "offsetAccepted": 0,
+      "maxTargetJump": 0.0016000000000000458,
+      "maxScreenShift": 0.1199999999999687,
+      "framed": 180
+    }
+  ]
+}
